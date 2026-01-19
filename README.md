@@ -1,4 +1,4 @@
-## Activity Logger
+## Orbit
 
 Originally, this project began as a "food journal" with a very simple data model. A list of text entries containing dates eventually evolved into having tags. With the power of tags, this opened up tremendous other uses like various list taking, organizing personal tasks and managing personal affairs.
 
