@@ -2,6 +2,8 @@ import { html, css, nothing, TemplateResult } from 'lit';
 import { property, customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 
 import {
   DataType,
@@ -28,6 +30,7 @@ import '@/components/entity-form/entity-form';
 import { translate } from '@/lib/Localization';
 import { repeat } from 'lit/directives/repeat.js';
 import { themed } from '@/lib/Theme';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 const holdThreshold = 500;
 
@@ -246,7 +249,7 @@ export class EntityListItem extends MobxLitElement {
       return nothing;
     }
 
-    let value: PropertyDataValue = propertyConfig.defaultValue;
+    let value: PropertyDataValue | TemplateResult = propertyConfig.defaultValue;
 
     switch (propertyConfig.dataType) {
       case DataType.DATE:
@@ -254,6 +257,11 @@ export class EntityListItem extends MobxLitElement {
         break;
       case DataType.INT:
         value = property.value as number;
+        break;
+      case DataType.LONG_TEXT:
+        value = html`${unsafeHTML(
+          DOMPurify.sanitize(marked.parse(property.value as string).toString()),
+        )}`;
         break;
       default:
         value = property.value as string;
