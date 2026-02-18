@@ -136,6 +136,9 @@ export class AppState {
   public listConfigs: ListConfig[] = [];
 
   @observable
+  public hasFetchedListConfigs: boolean = false;
+
+  @observable
   public listContextMode: boolean = false;
 
   @observable
@@ -228,6 +231,7 @@ export class AppState {
   @action
   setListConfigs(listConfigs: ListConfig[]): void {
     this.listConfigs = listConfigs;
+    this.hasFetchedListConfigs = true;
   }
 
   @action

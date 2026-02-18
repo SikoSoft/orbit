@@ -279,7 +279,7 @@ export class ListConfig extends MobxLitElement {
 
   async setup(): Promise<void> {
     const listConfigs = this.state.listConfigs;
-    if (!listConfigs.length) {
+    if (this.state.hasFetchedListConfigs && !listConfigs.length) {
       await this.addConfig();
     }
 
