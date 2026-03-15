@@ -12,6 +12,7 @@ import {
   EntityProperty,
   PropertyDataValue,
   EntityPropertyConfig,
+  ImageDataValue,
 } from 'api-spec/models/Entity';
 import { appState } from '@/state';
 import { ViewElement } from '@/lib/ViewElement';
@@ -376,6 +377,7 @@ export class EntityForm extends ViewElement {
     dataType: DataType,
     value: PropertyDataValue,
   ): boolean {
+    let imageValue: ImageDataValue;
     switch (dataType) {
       case DataType.SHORT_TEXT:
       case DataType.LONG_TEXT:
@@ -386,6 +388,9 @@ export class EntityForm extends ViewElement {
         return typeof value === 'number';
       case DataType.BOOLEAN:
         return typeof value === 'boolean';
+      case DataType.IMAGE:
+        imageValue = value as ImageDataValue;
+        return typeof value === 'object' && imageValue.src.length > 0;
       case DataType.DATE:
         return value === null || !isNaN(new Date(value as string).getTime());
       default:
