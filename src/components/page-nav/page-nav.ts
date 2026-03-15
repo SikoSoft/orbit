@@ -26,12 +26,10 @@ const views: PageViewConfig[] = [
     url: '/',
   },
   { id: PageView.LIST, label: translate('list'), url: '/entities' },
-];
-
-const debugViews: PageViewConfig[] = [
-  ...views,
   { id: PageView.ADMIN, label: translate('admin'), url: '/admin' },
 ];
+
+const debugViews: PageViewConfig[] = [...views];
 
 @themed()
 @customElement('page-nav')
