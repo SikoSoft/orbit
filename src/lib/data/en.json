@@ -175,5 +175,7 @@
   "activeThemes": "Active themes",
   "noThemesActive": "No themes are currently active.",
   "listConfigSaved": "List configuration has been saved successfully.",
-  "failedToSaveListConfig": "Failed to save list configuration. Please try again."
+  "failedToSaveListConfig": "Failed to save list configuration. Please try again.",
+  "publicLink": "Public link",
+  "publicLinkCopied": "Public link copied to clipboard."
 }

@@ -170,6 +170,14 @@ export class ListConfig extends MobxLitElement {
           }
         }
       }
+
+      .public-link {
+        margin-top: 1rem;
+        text-align: center;
+        font-size: 0.9rem;
+        color: var(--text-color);
+        word-break: break-all;
+      }
     }
   `;
   private defaultModeStyles = css`
@@ -226,6 +234,16 @@ export class ListConfig extends MobxLitElement {
 
   @query('#config-selector') configSelector!: HTMLSelectElement;
   @query('.collapsable-menus') collapsableMenus!: HTMLDivElement;
+
+  @state() get publicUrl(): string {
+    const path = [
+      import.meta.env.BASE_URL.replace(/\/$/, '').replace(/^\//, ''),
+      'list',
+      this.state.listConfigId,
+    ].join('/');
+    const url = new URL(path, window.location.origin);
+    return url.href;
+  }
 
   @state()
   get inSync(): boolean {
@@ -546,6 +564,28 @@ export class ListConfig extends MobxLitElement {
             listConfigId=${this.state.listConfigId}
             @setting-updated=${this.handleSettingUpdated}
           ></setting-form>
+
+          ${this.state.listConfig && this.state.listConfig.setting.public
+            ? html`<div class="public-link">
+                <fieldset>
+                  <legend>${translate('publicLink')}</legend>
+                  <input
+                    type="text"
+                    readonly
+                    value=${this.publicUrl}
+                    @click=${(e: MouseEvent): void => {
+                      const input = e.currentTarget as HTMLInputElement;
+                      input.select();
+                      navigator.clipboard.writeText(this.publicUrl);
+                      addToast(
+                        translate('publicLinkCopied'),
+                        NotificationType.SUCCESS,
+                      );
+                    }}
+                  />
+                </fieldset>
+              </div>`
+            : nothing}
         </ss-collapsable>
 
         <ss-collapsable
