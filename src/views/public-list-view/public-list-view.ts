@@ -34,6 +34,6 @@ export class PublicListView extends ViewElement {
         ? html`<list-config viewOnly></list-config>`
         : nothing}
 
-      <public-entity-list></public-entity-list>`;
+      <public-entity-list publicView></public-entity-list>`;
   }
 }

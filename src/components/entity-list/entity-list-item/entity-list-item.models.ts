@@ -17,6 +17,7 @@ export enum EntityListItemProp {
   SELECTED = 'selected',
   PROPERTIES = 'properties',
   DEBUG = 'debug',
+  PUBLIC_VIEW = 'publicView',
 }
 
 export interface EntityListItemProps extends PropTypes {
@@ -28,6 +29,7 @@ export interface EntityListItemProps extends PropTypes {
   [EntityListItemProp.SELECTED]: boolean;
   [EntityListItemProp.PROPERTIES]: EntityProperty[];
   [EntityListItemProp.DEBUG]: boolean;
+  [EntityListItemProp.PUBLIC_VIEW]: boolean;
 }
 
 export const entityListItemProps: PropConfigMap<EntityListItemProps> = {
@@ -86,5 +88,12 @@ export const entityListItemProps: PropConfigMap<EntityListItemProps> = {
       type: ControlType.BOOLEAN,
     },
     description: 'Whether debug mode is enabled',
+  },
+  [EntityListItemProp.PUBLIC_VIEW]: {
+    default: false,
+    control: {
+      type: ControlType.BOOLEAN,
+    },
+    description: 'Whether the entity is in public view',
   },
 };

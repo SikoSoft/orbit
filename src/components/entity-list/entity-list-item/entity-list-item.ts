@@ -133,6 +133,10 @@ export class EntityListItem extends MobxLitElement {
   [EntityListItemProp.DEBUG]: EntityListItemProps[EntityListItemProp.DEBUG] =
     entityListItemProps[EntityListItemProp.DEBUG].default;
 
+  @property({ type: Boolean })
+  [EntityListItemProp.PUBLIC_VIEW]: EntityListItemProps[EntityListItemProp.PUBLIC_VIEW] =
+    entityListItemProps[EntityListItemProp.PUBLIC_VIEW].default;
+
   @state() mode: EntityListItemMode = EntityListItemMode.PREVIEW;
   @state() pointerDown: Date = new Date();
   @state() downTimeout: number = 0;
@@ -142,6 +146,7 @@ export class EntityListItem extends MobxLitElement {
     return {
       'entity-list-item': true,
       selected: this.selected,
+      public: this.publicView,
       preview: this.mode === EntityListItemMode.PREVIEW,
       full: this.mode === EntityListItemMode.FULL,
       edit: this.mode === EntityListItemMode.EDIT,
@@ -184,6 +189,10 @@ export class EntityListItem extends MobxLitElement {
   }
 
   private handleMouseDown(e: Event): boolean {
+    if (this.publicView) {
+      return false;
+    }
+
     this.pointerDown = new Date();
     this.dispatchEvent(new PointerDownEvent({ time: this.pointerDown }));
     this.downTimeout = setTimeout(() => {
@@ -199,6 +208,10 @@ export class EntityListItem extends MobxLitElement {
   }
 
   private handleMouseUp(e: Event): boolean {
+    if (this.publicView) {
+      return false;
+    }
+
     if (!this.downActivation) {
       this.dispatchEvent(new PointerUpEvent({ time: new Date() }));
     }

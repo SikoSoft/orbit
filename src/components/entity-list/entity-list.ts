@@ -1,5 +1,5 @@
 import { css, html, nothing, PropertyValues, TemplateResult } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { PaginationType, SettingName } from 'api-spec/models/Setting';
@@ -34,7 +34,12 @@ import {
 } from './entity-list.events';
 import { storage } from '@/lib/Storage';
 import { reaction } from 'mobx';
-import { EntityListResult } from './entity-list.models';
+import {
+  EntityListProp,
+  EntityListProps,
+  entityListProps,
+  EntityListResult,
+} from './entity-list.models';
 
 @themed()
 @customElement('entity-list')
@@ -65,6 +70,10 @@ export class EntityList extends ViewElement {
       margin-top: 1rem;
     }
   `;
+
+  @property({ type: Boolean })
+  [EntityListProp.PUBLIC_VIEW]: EntityListProps[EntityListProp.PUBLIC_VIEW] =
+    entityListProps[EntityListProp.PUBLIC_VIEW].default;
 
   private scrollHandler: EventListener = () => this.handleScroll();
   @query('#lazy-loader') lazyLoader!: HTMLDivElement;
@@ -268,6 +277,7 @@ export class EntityList extends ViewElement {
               item => item.id,
               item => html`
                 <entity-list-item
+                  ?publicView=${this.publicView}
                   ?debug=${this.state.debugMode}
                   entityId=${item.id}
                   type=${item.type}
