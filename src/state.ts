@@ -156,6 +156,9 @@ export class AppState {
   @observable
   public widgetIsOpen: boolean = false;
 
+  @observable
+  public title: string = '';
+
   @action
   public setActionSuggestions(suggestions: string[]): void {
     this.actionSuggestions = suggestions;
@@ -424,6 +427,11 @@ export class AppState {
     this.listConfigs = this.listConfigs.map(config =>
       config.id === updatedConfig.id ? updatedConfig : config,
     );
+  }
+
+  @action
+  setTitle(title: string): void {
+    this.title = title;
   }
 
   constructor() {

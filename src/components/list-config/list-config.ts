@@ -398,6 +398,7 @@ export class ListConfig extends MobxLitElement {
       return;
     }
 
+    this.state.setTitle(this.state.listConfig.name);
     this.id = this.state.listConfig.id;
     this.name = this.state.listConfig.name;
     this.navigationIndex = this.state.listConfigs.findIndex(
@@ -411,6 +412,7 @@ export class ListConfig extends MobxLitElement {
     }
     storage.saveActiveListConfigId(listConfigId);
     this.state.setListConfigId(listConfigId);
+    this.state.setTitle(this.state.listConfig.name);
     this.id = this.state.listConfig.id;
     this.name = this.state.listConfig.name;
     this.dispatchEvent(new ListConfigChangedEvent({ listConfigId }));

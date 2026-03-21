@@ -122,6 +122,16 @@ export class PageContainer extends MobxLitElement {
     );
 
     reaction(
+      () => appState.title,
+      () => {
+        document.title = this.state.title;
+      },
+      {
+        fireImmediately: false,
+      },
+    );
+
+    reaction(
       () => this.state.listConfig,
       () => {
         this.setListConfigThemes(this.state.listConfig.themes);
