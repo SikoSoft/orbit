@@ -1,6 +1,6 @@
 {
-  "name": "activity-logger",
-  "description": "Activity logger built using web components",
+  "name": "@ss/orbit",
+  "description": "List collection manager front-end",
   "license": "MIT",
   "author": "Aaron Wright",
   "version": "2.0.0",
