@@ -431,7 +431,7 @@ export class AppState {
 
   @action
   setTitle(title: string): void {
-    this.title = title;
+    this.title = `${title} - Orbit`;
   }
 
   constructor() {
