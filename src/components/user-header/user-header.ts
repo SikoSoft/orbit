@@ -6,6 +6,7 @@ import '@/components/page-nav/page-nav';
 import '@/components/list-config/list-config';
 import '@/components/bulk-manager/bulk-manager';
 import '@/components/floating-widget/floating-widget';
+import '@/components/add-entity-widget/add-entity-widget';
 
 @customElement('user-header')
 export class UserHeader extends LitElement {
@@ -19,6 +20,8 @@ export class UserHeader extends LitElement {
         <bulk-manager></bulk-manager>
 
         <floating-widget></floating-widget>
+
+        <add-entity-widget></add-entity-widget>
       </template>
     </logged-in>`;
   }
