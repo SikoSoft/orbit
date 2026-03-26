@@ -41,8 +41,6 @@ export class FloatingWidget extends MobxLitElement {
       width: 90%;
       opacity: 0.6;
       transition: all 0.2s;
-      display: flex;
-      flex-direction: column;
 
       @media (hover: hover) {
         &:hover {
@@ -74,6 +72,7 @@ export class FloatingWidget extends MobxLitElement {
 
       &.top {
         top: 0;
+        display: flex;
         flex-direction: column-reverse;
         transform: translateY(-88%);
 
@@ -94,6 +93,8 @@ export class FloatingWidget extends MobxLitElement {
         .head {
           transform: scaleY(-1);
           cursor: s-resize;
+          margin: 0;
+          width: 100%;
         }
 
         .body {
@@ -213,7 +214,8 @@ export class FloatingWidget extends MobxLitElement {
     return {
       widget: true,
       open: this.state.widgetIsOpen,
-      bottom: this[FloatingWidgetProp.POSITION] === FloatingWidgetPosition.BOTTOM,
+      bottom:
+        this[FloatingWidgetProp.POSITION] === FloatingWidgetPosition.BOTTOM,
       top: this[FloatingWidgetProp.POSITION] === FloatingWidgetPosition.TOP,
     };
   }
