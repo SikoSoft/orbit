@@ -1,6 +1,6 @@
 import { css, TemplateResult } from 'lit';
 import { html } from 'lit/static-html.js';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 
@@ -15,6 +15,12 @@ import '@/components/user-pane/user-pane';
 
 import { ThemeName } from '@/models/Page';
 import { themed } from '@/lib/Theme';
+import {
+  FloatingWidgetProp,
+  floatingWidgetProps,
+  FloatingWidgetPosition,
+  FloatingWidgetProps,
+} from './floating-widget.models';
 
 @themed()
 @customElement('floating-widget')
@@ -31,18 +37,16 @@ export class FloatingWidget extends MobxLitElement {
     .widget {
       position: fixed;
       z-index: 1000;
-      bottom: 0;
       left: 5%;
       width: 90%;
       opacity: 0.6;
       transition: all 0.2s;
-      transform: translateY(88%);
+      display: flex;
+      flex-direction: column;
 
       @media (hover: hover) {
         &:hover {
           opacity: 0.9;
-          transform: translateY(86%);
-          //bottom: -4rem;
 
           .head {
             .handle {
@@ -53,10 +57,53 @@ export class FloatingWidget extends MobxLitElement {
         }
       }
 
+      &.bottom {
+        bottom: 0;
+        transform: translateY(88%);
+
+        @media (hover: hover) {
+          &:hover {
+            transform: translateY(86%);
+          }
+        }
+
+        &.open {
+          transform: translateY(0%);
+        }
+      }
+
+      &.top {
+        top: 0;
+        flex-direction: column-reverse;
+        transform: translateY(-88%);
+
+        @media (hover: hover) {
+          &:hover {
+            transform: translateY(-86%);
+          }
+        }
+
+        &.open {
+          transform: translateY(0%);
+
+          .head {
+            cursor: n-resize;
+          }
+        }
+
+        .head {
+          transform: scaleY(-1);
+          cursor: s-resize;
+        }
+
+        .body {
+          margin-top: 0;
+          margin-bottom: -2px;
+        }
+      }
+
       &.open {
         opacity: 1;
-        bottom: 0;
-        transform: translateY(0%);
 
         .head {
           cursor: s-resize;
@@ -155,6 +202,10 @@ export class FloatingWidget extends MobxLitElement {
     }
   `;
 
+  @property({ type: String })
+  [FloatingWidgetProp.POSITION]: FloatingWidgetProps[FloatingWidgetProp.POSITION] =
+    floatingWidgetProps[FloatingWidgetProp.POSITION].default;
+
   @state() mouseIn: boolean = false;
 
   @state()
@@ -162,6 +213,8 @@ export class FloatingWidget extends MobxLitElement {
     return {
       widget: true,
       open: this.state.widgetIsOpen,
+      bottom: this[FloatingWidgetProp.POSITION] === FloatingWidgetPosition.BOTTOM,
+      top: this[FloatingWidgetProp.POSITION] === FloatingWidgetPosition.TOP,
     };
   }
 

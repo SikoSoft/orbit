@@ -19,7 +19,7 @@ export class UserHeader extends LitElement {
 
         <bulk-manager></bulk-manager>
 
-        <floating-widget></floating-widget>
+        <floating-widget position="top"></floating-widget>
 
         <add-entity-widget></add-entity-widget>
       </template>
