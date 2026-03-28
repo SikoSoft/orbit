@@ -200,7 +200,7 @@ export class AddEntityWidget extends MobxLitElement {
   }
 
   render(): TemplateResult | typeof nothing {
-    if (!this.state.assistEnabled) {
+    if (!this.state.debugMode) {
       return nothing;
     }
 
