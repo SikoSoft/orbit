@@ -12,6 +12,8 @@ export class AddEntityWidget extends MobxLitElement {
   private state = appState;
 
   @state() private uploading = false;
+  @state() private hasCamera = false;
+  @state() private showMenu = false;
 
   static styles = css`
     :host {
@@ -91,26 +93,102 @@ export class AddEntityWidget extends MobxLitElement {
         stroke-dashoffset: 12;
       }
     }
+
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+    }
+
+    .menu {
+      position: absolute;
+      bottom: calc(100% + 0.75rem);
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      background-color: var(--box-background-color);
+      border: 1px solid var(--box-border-color);
+      border-radius: 0.75rem;
+      padding: 0.5rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      border: none;
+      background: none;
+      color: var(--text-color);
+      font-size: 0.875rem;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background-color 0.1s;
+
+      &:hover {
+        background-color: var(--box-border-color);
+      }
+
+      svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        stroke: var(--text-color);
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        flex-shrink: 0;
+      }
+    }
   `;
 
+  connectedCallback(): void {
+    super.connectedCallback();
+    this.detectCamera();
+  }
+
+  private async detectCamera(): Promise<void> {
+    if (
+      !navigator.mediaDevices?.enumerateDevices ||
+      navigator.maxTouchPoints < 1
+    ) {
+      return;
+    }
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    this.hasCamera = devices.some(d => d.kind === 'videoinput');
+  }
+
   private handleTriggerClick(): void {
-    const input =
-      this.renderRoot.querySelector<HTMLInputElement>('input[type="file"]');
+    if (this.hasCamera) {
+      this.showMenu = !this.showMenu;
+    } else {
+      this.openFilePicker('storage');
+    }
+  }
+
+  private openFilePicker(source: 'camera' | 'storage'): void {
+    this.showMenu = false;
+    const input = this.renderRoot.querySelector<HTMLInputElement>(
+      `input[data-source="${source}"]`,
+    );
     input?.click();
   }
 
   private async handleFileSelected(e: Event): Promise<void> {
     const input = e.target as HTMLInputElement;
     const file = input.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     const formData = new FormData();
     formData.append('file', file);
 
     this.uploading = true;
     try {
-      // TODO: replace with real endpoint once API is defined
-      // Do not set Content-Type — browser must set multipart/form-data with boundary automatically
       await api.httpRequest('assist/entity', {
         method: 'post',
         body: formData,
@@ -127,7 +205,50 @@ export class AddEntityWidget extends MobxLitElement {
     }
 
     return html`
-      <input type="file" accept="image/*" @change=${this.handleFileSelected} />
+      <input
+        type="file"
+        accept="image/*"
+        data-source="storage"
+        @change=${this.handleFileSelected}
+      />
+      <input
+        type="file"
+        accept="image/*"
+        capture="environment"
+        data-source="camera"
+        @change=${this.handleFileSelected}
+      />
+
+      ${this.showMenu
+        ? html`
+            <div class="backdrop" @click=${() => (this.showMenu = false)}></div>
+            <div class="menu">
+              <button
+                class="menu-item"
+                @click=${() => this.openFilePicker('camera')}
+              >
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                  ></path>
+                  <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+                Camera
+              </button>
+              <button
+                class="menu-item"
+                @click=${() => this.openFilePicker('storage')}
+              >
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                  ></path>
+                </svg>
+                Storage
+              </button>
+            </div>
+          `
+        : nothing}
 
       <button
         class="trigger"
