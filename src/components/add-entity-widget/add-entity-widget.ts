@@ -1,4 +1,4 @@
-import { css, html, TemplateResult } from 'lit';
+import { css, html, nothing, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 
@@ -121,7 +121,11 @@ export class AddEntityWidget extends MobxLitElement {
     }
   }
 
-  render(): TemplateResult {
+  render(): TemplateResult | typeof nothing {
+    if (!this.state.assistEnabled) {
+      return nothing;
+    }
+
     return html`
       <input type="file" accept="image/*" @change=${this.handleFileSelected} />
 

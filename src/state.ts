@@ -122,6 +122,9 @@ export class AppState {
   @observable
   public theme: ThemeName = defaultTheme;
 
+  @observable
+  public assistEnabled: boolean = false;
+
   get listConfig(): ListConfig {
     return (
       this.listConfigs.find(config => this.listConfigId === config.id) ||
@@ -432,6 +435,11 @@ export class AppState {
   @action
   setTitle(title: string): void {
     this.title = `${title} - Orbit`;
+  }
+
+  @action
+  setAssistEnabled(enabled: boolean): void {
+    this.assistEnabled = enabled;
   }
 
   constructor() {

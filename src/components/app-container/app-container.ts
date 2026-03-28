@@ -86,6 +86,8 @@ export class AppContainer extends MobxLitElement {
   private async restoreState(): Promise<void> {
     this.ready = false;
     try {
+      this.state.setAssistEnabled(import.meta.env.APP_ENABLE_ASSIST === '1');
+
       if (this.state.authToken) {
         const listConfigs = await storage.getListConfigs();
         this.state.setListConfigs(listConfigs);
