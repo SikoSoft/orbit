@@ -39,6 +39,7 @@ Orbit is a Lit + MobX activity/list management SPA backed by the `gapi` Azure Fu
 - Register with `@customElement('tag-name')`
 
 **Import order within files:**
+
 1. Third-party (`lit`, `mobx`, `@ss/ui`, etc.)
 2. Models/lib (`@/models`, `@/lib`)
 3. Events (`@/events`)
@@ -49,15 +50,15 @@ Path alias: `@/` → `src/`
 
 ## Views & Routing
 
-| Route | Component | Purpose |
-|---|---|---|
-| `/` | `entity-form-view` | Main input form |
-| `/entities` | `entity-list-view` | List with filtering/sorting |
-| `/entity/:id` | `entity-form` | Edit single entity |
-| `/admin` | `admin-dashboard-view` | Schema/config management |
-| `/login` | `login-form` | Authentication |
-| `/account` | `account-form` | User settings |
-| `/list/:id` | `public-list-view` | Public shared list |
+| Route         | Component              | Purpose                     |
+| ------------- | ---------------------- | --------------------------- |
+| `/`           | `entity-form-view`     | Main input form             |
+| `/entities`   | `entity-list-view`     | List with filtering/sorting |
+| `/entity/:id` | `entity-form`          | Edit single entity          |
+| `/admin`      | `admin-dashboard-view` | Schema/config management    |
+| `/login`      | `login-form`           | Authentication              |
+| `/account`    | `account-form`         | User settings               |
+| `/list/:id`   | `public-list-view`     | Public shared list          |
 
 ## External Packages
 
@@ -74,3 +75,8 @@ Keep `api-spec` version in sync when making API contract changes. Internal packa
 ## Prettier Config
 
 `singleQuote: true`, `arrowParens: 'avoid'`
+
+## Coding Conventions
+
+- Every statement is terminated with a semicolon
+- Use the One True Brace Style (never omit braces)
