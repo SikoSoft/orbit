@@ -25,6 +25,7 @@ export enum StorageItemKey {
   COLLAPSABLE_PANEL_STATE = 'collapsablePanelState',
   TAB_INDEX_STATE = 'tabIndexState',
   THEME = 'theme',
+  STORAGE_SOURCE = 'storageSource',
 }
 
 export type StorageOkResult<T> = {

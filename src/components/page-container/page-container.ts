@@ -2,6 +2,7 @@ import { css, html, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import '@/components/app-container/app-container';
+import '@/components/storage-source-prompt/storage-source-prompt';
 import { themes } from '@/styles/theme';
 import { MobxLitElement } from '@adobe/lit-mobx';
 import { appState } from '@/state';
@@ -163,6 +164,7 @@ export class PageContainer extends MobxLitElement {
           @pop-up-opened=${this.handlePopUpOpened}
           @pop-up-closed=${this.handlePopUpClosed}
         ></app-container>
+        <storage-source-prompt></storage-source-prompt>
       </div>
     `;
   }
