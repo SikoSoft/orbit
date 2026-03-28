@@ -221,11 +221,14 @@ export class AddEntityWidget extends MobxLitElement {
 
       ${this.showMenu
         ? html`
-            <div class="backdrop" @click=${() => (this.showMenu = false)}></div>
+            <div
+              class="backdrop"
+              @click=${(): boolean => (this.showMenu = false)}
+            ></div>
             <div class="menu">
               <button
                 class="menu-item"
-                @click=${() => this.openFilePicker('camera')}
+                @click=${(): void => this.openFilePicker('camera')}
               >
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path
@@ -237,7 +240,7 @@ export class AddEntityWidget extends MobxLitElement {
               </button>
               <button
                 class="menu-item"
-                @click=${() => this.openFilePicker('storage')}
+                @click=${(): void => this.openFilePicker('storage')}
               >
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path
@@ -254,7 +257,7 @@ export class AddEntityWidget extends MobxLitElement {
         class="trigger"
         title="Upload image"
         ?disabled=${this.uploading}
-        @click=${this.handleTriggerClick}
+        @click=${(): void => this.handleTriggerClick()}
       >
         ${this.uploading
           ? html`<svg

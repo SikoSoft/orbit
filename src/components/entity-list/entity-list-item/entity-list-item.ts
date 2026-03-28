@@ -3,7 +3,7 @@ import { property, customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 import { marked } from 'marked';
-import DOMPurify from 'dompurify';
+import { default as DOMPurify } from 'dompurify';
 
 import {
   DataType,
