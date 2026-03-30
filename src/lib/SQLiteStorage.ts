@@ -5,6 +5,7 @@ import sqlite3InitModule, {
   Sqlite3Static,
   SqlValue,
 } from '@sqlite.org/sqlite-wasm';
+import sqliteWasmUrl from '@sqlite.org/sqlite-wasm/sqlite3.wasm?url';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -27,7 +28,11 @@ import {
   ListSortCustomProperty,
 } from 'api-spec/models/List';
 import { Setting, Settings, defaultSettings } from 'api-spec/models/Setting';
-import { ExportDataContents, ExportDataType, NukedDataType } from 'api-spec/models/Data';
+import {
+  ExportDataContents,
+  ExportDataType,
+  NukedDataType,
+} from 'api-spec/models/Data';
 
 import { StorageResult, StorageSchema } from '@/models/Storage';
 import { RequestBody } from '@/components/entity-form/entity-form.models';
@@ -195,7 +200,13 @@ export class SQLiteStorage implements StorageSchema {
   private getDb(): Promise<Sqlite3Db> {
     if (!this.initPromise) {
       this.initPromise = (async () => {
-        const sqlite3: Sqlite3Static = await sqlite3InitModule();
+        type InitFn = (opts: {
+          locateFile: (filename: string) => string;
+        }) => Promise<Sqlite3Static>;
+        const sqlite3: Sqlite3Static = await (sqlite3InitModule as unknown as InitFn)({
+          locateFile: (filename: string) =>
+            filename === 'sqlite3.wasm' ? sqliteWasmUrl : filename,
+        });
         let db: Sqlite3Db;
 
         try {
@@ -646,11 +657,7 @@ export class SQLiteStorage implements StorageSchema {
       LIMIT ? OFFSET ?
     `;
 
-    const entityRows = this.execRows(db, rowSql, [
-      ...bindings,
-      perPage,
-      start,
-    ]);
+    const entityRows = this.execRows(db, rowSql, [...bindings, perPage, start]);
 
     const entities = this.loadEntityRows(db, entityRows);
 
@@ -676,10 +683,7 @@ export class SQLiteStorage implements StorageSchema {
     return this.loadEntityRows(db, rows)[0] ?? null;
   }
 
-  async updateEntity(
-    id: number,
-    payload: RequestBody,
-  ): Promise<Entity | null> {
+  async updateEntity(id: number, payload: RequestBody): Promise<Entity | null> {
     const db = await this.getDb();
 
     const now = new Date().toISOString();
@@ -715,7 +719,11 @@ export class SQLiteStorage implements StorageSchema {
     return true;
   }
 
-  private writeEntityTags(db: Sqlite3Db, entityId: number, tags: string[]): void {
+  private writeEntityTags(
+    db: Sqlite3Db,
+    entityId: number,
+    tags: string[],
+  ): void {
     for (const tag of tags) {
       db.exec({
         sql: 'INSERT OR IGNORE INTO entity_tag (entity_id, tag) VALUES (?, ?)',

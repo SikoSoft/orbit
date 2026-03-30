@@ -6,6 +6,7 @@ import {
   ListSort,
 } from 'api-spec/models/List';
 import { networkStorage } from './NetworkStorage';
+import { sqliteStorage } from './SQLiteStorage';
 import {
   defaultListContext,
   defaultListFilter,
@@ -37,7 +38,7 @@ export interface SavedListFilter {
   name: string;
 }
 
-const storageDelegates: StorageSchema[] = [networkStorage];
+const storageDelegates: StorageSchema[] = [sqliteStorage];
 
 function delegateSource(): MethodDecorator {
   return function (
@@ -57,7 +58,7 @@ function delegateSource(): MethodDecorator {
         if (!storageDelegate || !storageDelegate[methodName]) {
           continue;
         }
-        descriptor.value = storageDelegate[methodName];
+        descriptor.value = storageDelegate[methodName]!.bind(storageDelegate);
         return descriptor;
       }
     }
