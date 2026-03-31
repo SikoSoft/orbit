@@ -1,4 +1,5 @@
 import { LitElement, html, css, PropertyValues, TemplateResult } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
 import { customElement, property, state } from 'lit/decorators.js';
 import {
   BooleanDataValue,
@@ -21,6 +22,7 @@ import { addToast } from '@/lib/Util';
 import {
   PropertyConfigFormProp,
   propertyConfigFormProps,
+  propertyConfigFormRequiredProps,
   PropertyConfigFormProps,
 } from './property-config-form.models';
 
@@ -44,6 +46,7 @@ import { PropertyChangedEvent } from '../entity-form/property-field/property-fie
 import { repeat } from 'lit/directives/repeat.js';
 import { translate } from '@/lib/Localization';
 import { Revision } from 'api-spec/lib/Revision';
+import { NotificationType } from '@ss/ui/components/notification-provider.models';
 
 @customElement('property-config-form')
 export class PropertyConfigForm extends LitElement {
@@ -64,6 +67,15 @@ export class PropertyConfigForm extends LitElement {
         display: block;
         font-weight: bold;
         margin-bottom: 0.25rem;
+      }
+
+      &.invalid label {
+        color: var(--color-negative, #c0392b);
+      }
+
+      &.invalid ss-input,
+      &.invalid ss-select {
+        --input-border-color: var(--color-negative, #c0392b);
       }
     }
 
@@ -133,8 +145,8 @@ export class PropertyConfigForm extends LitElement {
   [PropertyConfigFormProp.PERFORM_DRIFT_CHECK]: PropertyConfigFormProps[PropertyConfigFormProp.PERFORM_DRIFT_CHECK] =
     propertyConfigFormProps[PropertyConfigFormProp.PERFORM_DRIFT_CHECK].default;
 
-  @state()
-  confirmationModalIsOpen = false;
+  @state() confirmationModalIsOpen = false;
+  @state() private invalidFields: PropertyConfigFormProp[] = [];
 
   connectedCallback(): void {
     super.connectedCallback();
@@ -212,6 +224,7 @@ export class PropertyConfigForm extends LitElement {
     }));
 
     this.propertyConfig = propertyConfig;
+    this.invalidFields = this.invalidFields.filter(f => f !== field);
   }
 
   @state()
@@ -295,11 +308,39 @@ export class PropertyConfigForm extends LitElement {
     return commonEntityPropertyConfig;
   }
 
-  validate(): boolean {
+  validateRequiredFields(): boolean {
+    const missing = propertyConfigFormRequiredProps.filter(field => {
+      if (!this.visibleFields.includes(field)) {
+        return false;
+      }
+      const value = this.propertyConfig[field as keyof EntityPropertyConfig];
+      return String(value ?? '').trim() === '';
+    });
+
+    this.invalidFields = missing;
+
+    for (const field of missing) {
+      addToast(
+        translate('propertyConfig.requiredFieldMissing', {
+          field: translate(`propertyConfig.field.${field}`),
+        }),
+        NotificationType.ERROR,
+      );
+    }
+
+    return missing.length === 0;
+  }
+
+  validateRevisionDrift(): boolean {
+    if (!this.performDriftCheck) {
+      return true;
+    }
+
     const revisionResult = Revision.propertyIsSafe(
       this.updatedPropertyConfig,
       this.propertyConfig,
     );
+    console.log('Revision result:', revisionResult);
     if (!revisionResult.isValid) {
       this.dispatchEvent(
         new PropertyConfigBreakingChangeDetectedEvent({
@@ -322,10 +363,22 @@ export class PropertyConfigForm extends LitElement {
     return true;
   }
 
+  validate(): boolean {
+    if (!this.validateRequiredFields()) {
+      return false;
+    }
+
+    if (!this.validateRevisionDrift()) {
+      return false;
+    }
+
+    return true;
+  }
+
   async save(): Promise<void> {
     if (this[PropertyConfigFormProp.PROPERTY_CONFIG_ID]) {
       const isValid = this.validate();
-      if (this.performDriftCheck && !isValid) {
+      if (!isValid) {
         return;
       }
 
@@ -503,7 +556,12 @@ export class PropertyConfigForm extends LitElement {
             this.visibleFields,
             field => field,
             field =>
-              html` <div class="field">
+              html` <div
+                class=${classMap({
+                  field: true,
+                  invalid: this.invalidFields.includes(field),
+                })}
+              >
                 <label for=${field}
                   >${translate(`propertyConfig.field.${field}`)}</label
                 >

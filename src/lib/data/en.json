@@ -178,6 +178,7 @@
   "failedToSaveListConfig": "Failed to save list configuration. Please try again.",
   "publicLink": "Public link",
   "publicLinkCopied": "Public link copied to clipboard.",
+  "propertyConfig.requiredFieldMissing": "'{field}' is required.",
   "storageSourcePrompt.heading": "Where should your data be stored?",
   "storageSourcePrompt.subheading": "You can change this later in your account settings.",
   "storageSourcePrompt.device": "Device",

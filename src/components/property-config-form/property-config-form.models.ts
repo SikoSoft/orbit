@@ -19,6 +19,10 @@ export enum PropertyConfigFormProp {
   PERFORM_DRIFT_CHECK = 'performDriftCheck',
 }
 
+export const propertyConfigFormRequiredProps: PropertyConfigFormProp[] = [
+  PropertyConfigFormProp.NAME,
+];
+
 export interface PropertyConfigFormProps extends PropTypes {
   [PropertyConfigFormProp.OPEN]: boolean;
   [PropertyConfigFormProp.DATA_TYPE]: string;
