@@ -4,9 +4,8 @@ import { MobxLitElement } from '@adobe/lit-mobx';
 
 import { translate } from '@/lib/Localization';
 import { themed } from '@/lib/Theme';
-import { StorageItemKey } from '@/models/Storage';
-
-export type StorageSource = 'device' | 'cloud';
+import { StorageItemKey, StorageSource } from '@/models/Storage';
+import { storage } from '@/lib/Storage';
 
 @themed()
 @customElement('storage-source-prompt')
@@ -107,11 +106,11 @@ export class StorageSourcePrompt extends MobxLitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.visible = !localStorage.getItem(StorageItemKey.STORAGE_SOURCE);
+    this.visible = !storage.getStorageSource();
   }
 
   private select(source: StorageSource): void {
-    localStorage.setItem(StorageItemKey.STORAGE_SOURCE, source);
+    storage.setStorageSource(source);
     this.visible = false;
   }
 
@@ -128,7 +127,10 @@ export class StorageSourcePrompt extends MobxLitElement {
         </div>
 
         <div class="options">
-          <button class="option" @click=${(): void => this.select('device')}>
+          <button
+            class="option"
+            @click=${(): void => this.select(StorageSource.DEVICE)}
+          >
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
               <line x1="8" y1="21" x2="16" y2="21"></line>
@@ -142,7 +144,10 @@ export class StorageSourcePrompt extends MobxLitElement {
             >
           </button>
 
-          <button class="option" @click=${(): void => this.select('cloud')}>
+          <button
+            class="option"
+            @click=${(): void => this.select(StorageSource.CLOUD)}
+          >
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
             </svg>

@@ -28,6 +28,11 @@ export enum StorageItemKey {
   STORAGE_SOURCE = 'storageSource',
 }
 
+export enum StorageSource {
+  CLOUD = 'cloud',
+  DEVICE = 'device',
+}
+
 export type StorageOkResult<T> = {
   isOk: true;
   value: T;
@@ -108,4 +113,6 @@ export interface StorageSchema {
     firstName: string,
     lastName: string,
   ): Promise<StorageResult<CreateAccountResponseBody>>;
+  setStorageSource?(source: StorageSource): void;
+  getStorageSource?(): StorageSource | null;
 }

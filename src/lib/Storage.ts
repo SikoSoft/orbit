@@ -18,7 +18,12 @@ import {
   defaultPageView,
   defaultTheme,
 } from '@/models/Page';
-import { StorageItemKey, StorageResult, StorageSchema } from '@/models/Storage';
+import {
+  StorageItemKey,
+  StorageResult,
+  StorageSchema,
+  StorageSource,
+} from '@/models/Storage';
 import { Setting } from 'api-spec/models/Setting';
 import { EntityConfig, EntityPropertyConfig } from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
@@ -466,6 +471,37 @@ export class Storage implements StorageSchema {
 
   setTabState(state: Record<string, number>): void {
     localStorage.setItem(StorageItemKey.TAB_INDEX_STATE, JSON.stringify(state));
+  }
+
+  setStorageSource(source: StorageSource): void {
+    if (!Object.values(StorageSource).includes(source)) {
+      localStorage.setItem(StorageItemKey.STORAGE_SOURCE, StorageSource.CLOUD);
+      return;
+    }
+
+    localStorage.setItem(StorageItemKey.STORAGE_SOURCE, source);
+    window.location.reload();
+  }
+
+  getStorageSource(): StorageSource | null {
+    let source: StorageSource | null = null;
+    try {
+      const storedSource = localStorage.getItem(StorageItemKey.STORAGE_SOURCE);
+      if (
+        storedSource &&
+        Object.values(StorageSource).includes(storedSource as StorageSource)
+      ) {
+        source = storedSource as StorageSource;
+      }
+    } catch (error) {
+      console.error(
+        `Encountered an error while trying to load storage source from storage: ${JSON.stringify(
+          error,
+        )}`,
+      );
+    }
+
+    return source;
   }
 
   @delegateSource()
