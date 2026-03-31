@@ -1,10 +1,11 @@
 import { css, html, nothing, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
-
+import { ListConfig } from 'api-spec/lib/ListConfig';
 import { appState } from '@/state';
 import { api } from '@/lib/Api';
 import { themed } from '@/lib/Theme';
+import { AssistResponse } from './add-entity-widget.models';
 
 @themed()
 @customElement('add-entity-widget')
@@ -189,10 +190,22 @@ export class AddEntityWidget extends MobxLitElement {
 
     this.uploading = true;
     try {
-      await api.httpRequest('assist/entity', {
+      const result = await api.httpRequest<AssistResponse>('assist/entity', {
         method: 'post',
         body: formData,
       });
+
+      if (result && result.isOk) {
+        const { entity } = result.response;
+
+        for (const listConfig of this.state.listConfigs) {
+          if (ListConfig.entitySatisfiesFilter(entity, listConfig.filter)) {
+            this.state.setListConfigId(listConfig.id);
+            break;
+          }
+        }
+        this.state.setListItems([entity, ...this.state.listItems]);
+      }
     } finally {
       this.uploading = false;
       input.value = '';
