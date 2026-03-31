@@ -4,7 +4,7 @@ import { MobxLitElement } from '@adobe/lit-mobx';
 
 import { translate } from '@/lib/Localization';
 import { themed } from '@/lib/Theme';
-import { StorageItemKey, StorageSource } from '@/models/Storage';
+import { StorageSource } from '@/models/Storage';
 import { storage } from '@/lib/Storage';
 
 @themed()

@@ -199,11 +199,13 @@ export class SQLiteStorage implements StorageSchema {
 
   private getDb(): Promise<Sqlite3Db> {
     if (!this.initPromise) {
-      this.initPromise = (async () => {
+      this.initPromise = (async (): Promise<Sqlite3Db> => {
         type InitFn = (opts: {
           locateFile: (filename: string) => string;
         }) => Promise<Sqlite3Static>;
-        const sqlite3: Sqlite3Static = await (sqlite3InitModule as unknown as InitFn)({
+        const sqlite3: Sqlite3Static = await (
+          sqlite3InitModule as unknown as InitFn
+        )({
           locateFile: (filename: string) =>
             filename === 'sqlite3.wasm' ? sqliteWasmUrl : filename,
         });
