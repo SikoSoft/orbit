@@ -103,6 +103,8 @@ export class EntityConfigList extends ViewElement {
                   @entity-config-updated=${(
                     e: EntityConfigUpdatedEvent,
                   ): void => this.handleEntityConfigUpdated(e, index)}
+                  ?aiEnabled=${config.aiEnabled}
+                  aiIdentifyPrompt=${config.aiIdentifyPrompt}
                 ></entity-config-form>
               `,
             )

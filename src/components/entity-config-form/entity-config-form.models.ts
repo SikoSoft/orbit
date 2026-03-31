@@ -18,6 +18,8 @@ export enum EntityConfigFormProp {
   DESCRIPTION = 'description',
   PROPERTIES = 'properties',
   ALLOW_PROPERTY_ORDERING = 'allowPropertyOrdering',
+  AI_ENABLED = 'aiEnabled',
+  AI_IDENTIFY_PROMPT = 'aiIdentifyPrompt',
 }
 
 export interface EntityConfigFormProps extends PropTypes {
@@ -26,6 +28,8 @@ export interface EntityConfigFormProps extends PropTypes {
   [EntityConfigFormProp.DESCRIPTION]: string;
   [EntityConfigFormProp.PROPERTIES]: EntityPropertyConfig[];
   [EntityConfigFormProp.ALLOW_PROPERTY_ORDERING]: boolean;
+  [EntityConfigFormProp.AI_ENABLED]: boolean;
+  [EntityConfigFormProp.AI_IDENTIFY_PROMPT]: string;
 }
 
 export const entityConfigFormProps: PropConfigMap<EntityConfigFormProps> = {
@@ -53,5 +57,15 @@ export const entityConfigFormProps: PropConfigMap<EntityConfigFormProps> = {
     default: false,
     control: { type: ControlType.BOOLEAN },
     description: 'Whether property ordering is allowed for this entity',
+  },
+  [EntityConfigFormProp.AI_ENABLED]: {
+    default: false,
+    control: { type: ControlType.BOOLEAN },
+    description: 'Whether AI features are enabled for this entity',
+  },
+  [EntityConfigFormProp.AI_IDENTIFY_PROMPT]: {
+    default: '',
+    control: { type: ControlType.TEXT },
+    description: 'The prompt used by AI to identify this entity',
   },
 };

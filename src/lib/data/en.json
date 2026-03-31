@@ -184,5 +184,7 @@
   "storageSourcePrompt.device": "Device",
   "storageSourcePrompt.deviceDescription": "Stored locally on this device",
   "storageSourcePrompt.cloud": "Cloud",
-  "storageSourcePrompt.cloudDescription": "Synced across all your devices"
+  "storageSourcePrompt.cloudDescription": "Synced across all your devices",
+  "aiEnabled": "AI Enabled",
+  "aiIdentifyPrompt": "AI Identify Prompt"
 }

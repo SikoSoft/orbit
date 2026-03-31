@@ -134,6 +134,14 @@ export class EntityConfigForm extends MobxLitElement {
   [EntityConfigFormProp.ALLOW_PROPERTY_ORDERING]: EntityConfigFormProps[EntityConfigFormProp.ALLOW_PROPERTY_ORDERING] =
     entityConfigFormProps[EntityConfigFormProp.ALLOW_PROPERTY_ORDERING].default;
 
+  @property({ type: Boolean })
+  [EntityConfigFormProp.AI_ENABLED]: EntityConfigFormProps[EntityConfigFormProp.AI_ENABLED] =
+    entityConfigFormProps[EntityConfigFormProp.AI_ENABLED].default;
+
+  @property({ type: String })
+  [EntityConfigFormProp.AI_IDENTIFY_PROMPT]: EntityConfigFormProps[EntityConfigFormProp.AI_IDENTIFY_PROMPT] =
+    entityConfigFormProps[EntityConfigFormProp.AI_IDENTIFY_PROMPT].default;
+
   @state()
   get hasBreakingChanges(): boolean {
     return (
@@ -151,7 +159,10 @@ export class EntityConfigForm extends MobxLitElement {
       JSON.stringify(this.entityConfig.properties) ===
         JSON.stringify(this[EntityConfigFormProp.PROPERTIES]) &&
       this.entityConfig.allowPropertyOrdering ===
-        this[EntityConfigFormProp.ALLOW_PROPERTY_ORDERING]
+        this[EntityConfigFormProp.ALLOW_PROPERTY_ORDERING] &&
+      this.entityConfig.aiEnabled === this[EntityConfigFormProp.AI_ENABLED] &&
+      this.entityConfig.aiIdentifyPrompt ===
+        this[EntityConfigFormProp.AI_IDENTIFY_PROMPT]
     );
   }
 
@@ -172,6 +183,8 @@ export class EntityConfigForm extends MobxLitElement {
       properties: this[EntityConfigFormProp.PROPERTIES],
       revisionOf: null,
       allowPropertyOrdering: this[EntityConfigFormProp.ALLOW_PROPERTY_ORDERING],
+      aiEnabled: this[EntityConfigFormProp.AI_ENABLED],
+      aiIdentifyPrompt: this[EntityConfigFormProp.AI_IDENTIFY_PROMPT],
     };
   }
 
@@ -337,6 +350,18 @@ export class EntityConfigForm extends MobxLitElement {
     });
   }
 
+  updateAIEnabled(enabled: boolean): void {
+    this.entityConfig = produce(this.entityConfig, draft => {
+      draft.aiEnabled = enabled;
+    });
+  }
+
+  updateAIIdentifyPrompt(prompt: string): void {
+    this.entityConfig = produce(this.entityConfig, draft => {
+      draft.aiIdentifyPrompt = prompt;
+    });
+  }
+
   render(): TemplateResult {
     return html`
       <ss-collapsable
@@ -380,6 +405,31 @@ export class EntityConfigForm extends MobxLitElement {
                 this.updateAllowPropertyOrdering(e.detail.on);
               }}
             ></ss-toggle>
+          </div>
+
+          <div class="field">
+            <label for="ai-enabled">${translate('aiEnabled')}</label>
+
+            <ss-toggle
+              ?on=${this[EntityConfigFormProp.AI_ENABLED]}
+              @toggle-changed=${(e: ToggleChangedEvent): void => {
+                this.updateAIEnabled(e.detail.on);
+              }}
+            ></ss-toggle>
+          </div>
+
+          <div class="field">
+            <label for="ai-identify-prompt"
+              >${translate('aiIdentifyPrompt')}</label
+            >
+
+            <ss-input
+              id="ai-identify-prompt"
+              .value=${this[EntityConfigFormProp.AI_IDENTIFY_PROMPT]}
+              @input-changed=${(e: InputChangedEvent): void => {
+                this.updateAIIdentifyPrompt(e.detail.value);
+              }}
+            ></ss-input>
           </div>
 
           <div class="revision-target"></div>
