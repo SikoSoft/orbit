@@ -38,7 +38,10 @@ export interface SavedListFilter {
   name: string;
 }
 
-const storageDelegates: StorageSchema[] = [sqliteStorage];
+let storageDelegates: StorageSchema[] = [networkStorage];
+if (localStorage.getItem(StorageItemKey.STORAGE_SOURCE) === 'device') {
+  storageDelegates = [sqliteStorage];
+}
 
 function delegateSource(): MethodDecorator {
   return function (
