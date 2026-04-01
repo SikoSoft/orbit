@@ -186,5 +186,10 @@
   "storageSourcePrompt.cloud": "Cloud",
   "storageSourcePrompt.cloudDescription": "Synced across all your devices",
   "aiEnabled": "AI Enabled",
-  "aiIdentifyPrompt": "AI Identify Prompt"
+  "aiIdentifyPrompt": "AI Identify Prompt",
+  "addEntityWidget.uploadImage": "Upload image",
+  "addEntityWidget.options": "Options",
+  "addEntityWidget.includeImage": "Include image in created item",
+  "addEntityWidget.camera": "Camera",
+  "addEntityWidget.storage": "Storage"
 }
