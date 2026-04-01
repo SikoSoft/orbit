@@ -11,6 +11,7 @@ import { ToggleChangedEvent } from '@ss/ui/components/ss-toggle.events';
 import { AssistResponse } from './add-entity-widget.models';
 import '@ss/ui/components/pop-up';
 import '@ss/ui/components/ss-toggle';
+import { storage } from '@/lib/Storage';
 
 @themed()
 @customElement('add-entity-widget')
@@ -22,7 +23,6 @@ export class AddEntityWidget extends MobxLitElement {
   @state() private showMenu = false;
   @state() private expanded = false;
   @state() private showOptions = false;
-  @state() private includeImage = false;
 
   private longPressTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -50,9 +50,10 @@ export class AddEntityWidget extends MobxLitElement {
 
     /*
      * The tray is a full circle the same size as the trigger. It starts
-     * directly behind the trigger (top: 0, z-index: 0) so it is completely
-     * hidden. On expansion it slides down 1.75rem (half its height) so the
-     * bottom half peeks out beneath the trigger.
+     * behind the trigger but invisible (opacity: 0). On expansion it slides
+     * up 1.75rem (half its height) so the top half peeks out above the
+     * trigger. The button is positioned at the top of the tray so it lands
+     * in the visible portion after the slide.
      */
     .tray {
       position: absolute;
@@ -64,17 +65,23 @@ export class AddEntityWidget extends MobxLitElement {
       background-color: var(--box-background-color);
       border: 1px solid var(--box-border-color);
       z-index: 0;
+      opacity: 0;
+      pointer-events: none;
       transform: translateY(0);
-      transition: transform 0.2s ease;
+      transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
       overflow: hidden;
       display: flex;
-      align-items: flex-end;
+      align-items: flex-start;
       justify-content: center;
-      padding-bottom: 0.3rem;
+      padding-top: 0.3rem;
     }
 
     .widget.expanded .tray {
-      transform: translateY(1.75rem);
+      transform: translateY(-1.75rem);
+      opacity: 1;
+      pointer-events: auto;
     }
 
     .trigger {
@@ -303,8 +310,9 @@ export class AddEntityWidget extends MobxLitElement {
     this.showOptions = false;
   }
 
-  private handleIncludeImageChanged(e: Event): void {
-    this.includeImage = (e as ToggleChangedEvent).detail.on;
+  private handleIncludeImageChanged(e: ToggleChangedEvent): void {
+    this.state.setAssistSaveImage(e.detail.on);
+    storage.setAssistSaveImage(e.detail.on);
   }
 
   private async handleFileSelected(e: Event): Promise<void> {
@@ -450,7 +458,7 @@ export class AddEntityWidget extends MobxLitElement {
         <div class="options-row">
           <span>${translate('addEntityWidget.includeImage')}</span>
           <ss-toggle
-            ?on=${this.includeImage}
+            ?on=${this.state.assistSaveImage}
             @toggle-changed=${this.handleIncludeImageChanged}
           ></ss-toggle>
         </div>

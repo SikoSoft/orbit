@@ -26,6 +26,7 @@ export enum StorageItemKey {
   TAB_INDEX_STATE = 'tabIndexState',
   THEME = 'theme',
   STORAGE_SOURCE = 'storageSource',
+  ASSIST_SAVE_IMAGE = 'assistSaveImage',
 }
 
 export enum StorageSource {
@@ -115,4 +116,6 @@ export interface StorageSchema {
   ): Promise<StorageResult<CreateAccountResponseBody>>;
   setStorageSource?(source: StorageSource): void;
   getStorageSource?(): StorageSource | null;
+  setAssistSaveImage?(enabled: boolean): void;
+  getAssistSaveImage?(): boolean;
 }

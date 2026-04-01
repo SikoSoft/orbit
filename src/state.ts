@@ -162,6 +162,9 @@ export class AppState {
   @observable
   public title: string = '';
 
+  @observable
+  public assistSaveImage: boolean = false;
+
   @action
   public setActionSuggestions(suggestions: string[]): void {
     this.actionSuggestions = suggestions;
@@ -440,6 +443,11 @@ export class AppState {
   @action
   setAssistEnabled(enabled: boolean): void {
     this.assistEnabled = enabled;
+  }
+
+  @action
+  setAssistSaveImage(enabled: boolean): void {
+    this.assistSaveImage = enabled;
   }
 
   constructor() {

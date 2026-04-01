@@ -504,6 +504,33 @@ export class Storage implements StorageSchema {
     return source;
   }
 
+  setAssistSaveImage(enabled: boolean): void {
+    localStorage.setItem(
+      StorageItemKey.ASSIST_SAVE_IMAGE,
+      JSON.stringify(enabled),
+    );
+  }
+
+  getAssistSaveImage(): boolean {
+    let enabled = false;
+    try {
+      const storedValue = localStorage.getItem(
+        StorageItemKey.ASSIST_SAVE_IMAGE,
+      );
+      if (storedValue) {
+        enabled = JSON.parse(storedValue);
+      }
+    } catch (error) {
+      console.error(
+        `Encountered an error while trying to load assist save image setting from storage: ${JSON.stringify(
+          error,
+        )}`,
+      );
+    }
+
+    return enabled;
+  }
+
   @delegateSource()
   async addEntityConfig(
     _entityConfig: EntityConfig,

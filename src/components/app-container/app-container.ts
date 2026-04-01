@@ -108,7 +108,7 @@ export class AppContainer extends MobxLitElement {
 
       this.state.setAdvancedMode(storage.getAdvancedMode());
       this.state.setDebugMode(storage.getDebugMode());
-
+      this.state.setAssistSaveImage(storage.getAssistSaveImage());
       this.state.setCollapsableState(storage.getCollapsablePanelState());
       this.state.setTabState(storage.getTabState());
 
