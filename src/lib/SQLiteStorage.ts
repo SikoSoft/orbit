@@ -152,6 +152,8 @@ function rowToEntityConfig(row: Record<string, unknown>): EntityConfig {
     description: row['description'] as string,
     revisionOf: (row['revision_of'] as number | null) ?? null,
     allowPropertyOrdering: row['allow_property_ordering'] === 1,
+    aiEnabled: row['ai_enabled'] === 1,
+    aiIdentifyPrompt: (row['ai_identify_prompt'] as string | null) ?? '',
     properties: [],
   };
 }
