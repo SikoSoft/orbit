@@ -327,7 +327,17 @@ export class AddEntityWidget extends MobxLitElement {
 
     this.uploading = true;
     try {
-      const result = await api.httpRequest<AssistResponse>('assist/entity', {
+      const assistUrl = new URL(
+        'assist/entity',
+        import.meta.env.APP_BASE_API_URL,
+      );
+      if (this.state.assistSaveImage) {
+        assistUrl.searchParams.set('saveImage', '1');
+      }
+
+      const url = `${assistUrl.pathname}${assistUrl.search}`;
+
+      const result = await api.httpRequest<AssistResponse>(url, {
         method: 'post',
         body: formData,
       });
