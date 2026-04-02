@@ -31,7 +31,9 @@ export class ListSort extends MobxLitElement {
   private state = appState;
 
   isCustomSort(property: ListSortProperty): property is ListSortCustomProperty {
-    return (property as ListSortCustomProperty).propertyId !== undefined;
+    return (
+      property && (property as ListSortCustomProperty).propertyId !== undefined
+    );
   }
 
   @state()
