@@ -135,6 +135,10 @@ export class PageContainer extends MobxLitElement {
     reaction(
       () => this.state.listConfig,
       () => {
+        console.log(
+          'List config changed, updating themes',
+          this.state.listConfig,
+        );
         this.setListConfigThemes(this.state.listConfig.themes);
       },
       {

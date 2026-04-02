@@ -166,7 +166,6 @@ export class AppContainer extends MobxLitElement {
   }
 
   private handleStorageSourceUpdated(e: StorageSourceUpdatedEvent): void {
-    console.log('Storage source updated', e.detail.source);
     storage.resetDelegatedData();
     window.location.reload();
   }

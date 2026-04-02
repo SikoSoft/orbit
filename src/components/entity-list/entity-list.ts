@@ -200,6 +200,12 @@ export class EntityList extends ViewElement {
   }
 
   async load(more = false): Promise<void> {
+    console.log('Loading entities', {
+      more,
+      start: this.start,
+      perPage: this.perPage,
+    });
+    console.log('listFilter', JSON.stringify(this.state.listFilter));
     this.loading = true;
 
     if (more) {
@@ -215,7 +221,7 @@ export class EntityList extends ViewElement {
       );
       this.total = entityResult.total;
     } catch (error) {
-      console.error(`Failed to get list: ${JSON.stringify(error)}`);
+      console.error('Failed to get list', error);
     } finally {
       this.ready = true;
       this.loading = false;

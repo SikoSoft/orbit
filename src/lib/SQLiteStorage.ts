@@ -141,7 +141,7 @@ export class SQLiteStorage implements StorageSchema {
     this.worker = new Worker(new URL('./sqlite.worker.ts', import.meta.url), {
       type: 'module',
     });
-    this.worker.onmessage = (e: MessageEvent) => {
+    this.worker.onmessage = (e: MessageEvent): void => {
       const { id, result, error } = e.data as {
         id: string;
         result: unknown;

@@ -317,10 +317,8 @@ export class AddEntityWidget extends MobxLitElement {
   }
 
   private goToFirstMatchingListConfig(entity: Entity): void {
-    console.log('Finding list config for new entity', entity);
     for (const listConfig of this.state.listConfigs) {
       if (ListConfig.entitySatisfiesFilter(entity, listConfig.filter)) {
-        console.log('Found matching list config, switching to it', listConfig);
         this.state.setListConfigId(listConfig.id);
         return;
       }
