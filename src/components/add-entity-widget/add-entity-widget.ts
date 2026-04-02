@@ -2,6 +2,7 @@ import { css, html, nothing, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
+import { Entity } from 'api-spec/models/Entity';
 import { ListConfig } from 'api-spec/lib/ListConfig';
 import { appState } from '@/state';
 import { api } from '@/lib/Api';
@@ -315,6 +316,17 @@ export class AddEntityWidget extends MobxLitElement {
     storage.setAssistSaveImage(e.detail.on);
   }
 
+  private goToFirstMatchingListConfig(entity: Entity): void {
+    console.log('Finding list config for new entity', entity);
+    for (const listConfig of this.state.listConfigs) {
+      if (ListConfig.entitySatisfiesFilter(entity, listConfig.filter)) {
+        console.log('Found matching list config, switching to it', listConfig);
+        this.state.setListConfigId(listConfig.id);
+        return;
+      }
+    }
+  }
+
   private async handleFileSelected(e: Event): Promise<void> {
     const input = e.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -344,14 +356,8 @@ export class AddEntityWidget extends MobxLitElement {
 
       if (result && result.isOk) {
         const { entity } = result.response;
-
-        for (const listConfig of this.state.listConfigs) {
-          if (ListConfig.entitySatisfiesFilter(entity, listConfig.filter)) {
-            this.state.setListConfigId(listConfig.id);
-            break;
-          }
-        }
-        this.state.setListItems([entity, ...this.state.listItems]);
+        this.goToFirstMatchingListConfig(entity);
+        //this.state.setListItems([entity, ...this.state.listItems]);
       }
     } finally {
       this.uploading = false;
@@ -360,7 +366,7 @@ export class AddEntityWidget extends MobxLitElement {
   }
 
   render(): TemplateResult | typeof nothing {
-    if (!this.state.debugMode) {
+    if (!this.state.debugMode || this.state.entityConfigs.length === 0) {
       return nothing;
     }
 
