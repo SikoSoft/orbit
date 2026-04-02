@@ -1,4 +1,5 @@
 import { MobxLitElement } from '@adobe/lit-mobx';
+import { reaction } from 'mobx';
 import {
   css,
   CSSResult,
@@ -276,6 +277,13 @@ export class ListConfig extends MobxLitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
+
+    reaction(
+      () => this.state.listConfigId,
+      () => {
+        this.sync();
+      },
+    );
 
     this.setup();
   }

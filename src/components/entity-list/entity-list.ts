@@ -133,10 +133,15 @@ export class EntityList extends ViewElement {
       this.sync();
     });
 
+    let initialFire = true;
     reaction(
       () => this.state.listConfig,
       () => {
         this.state.setListEntities([]);
+        if (!initialFire) {
+          this.sync(true);
+        }
+        initialFire = false;
       },
       {
         fireImmediately: true,
