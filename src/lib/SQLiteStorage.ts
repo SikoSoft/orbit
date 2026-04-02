@@ -1,12 +1,5 @@
-import sqlite3InitModule, {
-  BindableValue,
-  Database,
-  SAHPoolUtil,
-  Sqlite3Static,
-  SqlValue,
-} from '@sqlite.org/sqlite-wasm';
-import sqliteWasmUrl from '@sqlite.org/sqlite-wasm/sqlite3.wasm?url';
 import { v4 as uuidv4 } from 'uuid';
+import type { BindableValue, SqlValue } from '@sqlite.org/sqlite-wasm';
 
 import {
   DataType,
@@ -44,63 +37,6 @@ import {
 import { CreateAccountResponseBody } from '@/components/account-form/account-form.models';
 import { OperationType } from 'api-spec/models/Operation';
 import { translate } from './Localization';
-
-type Sqlite3Db = Database;
-
-const SCHEMA = `
-  CREATE TABLE IF NOT EXISTS entity_config (
-    id   INTEGER PRIMARY KEY,
-    name TEXT    NOT NULL DEFAULT '',
-    description  TEXT NOT NULL DEFAULT '',
-    revision_of  INTEGER,
-    allow_property_ordering INTEGER NOT NULL DEFAULT 0
-  );
-
-  CREATE TABLE IF NOT EXISTS entity_property_config (
-    id               INTEGER PRIMARY KEY,
-    entity_config_id INTEGER NOT NULL,
-    name             TEXT    NOT NULL DEFAULT '',
-    data_type        TEXT    NOT NULL,
-    prefix           TEXT    NOT NULL DEFAULT '',
-    suffix           TEXT    NOT NULL DEFAULT '',
-    required         INTEGER NOT NULL DEFAULT 0,
-    repeat           INTEGER NOT NULL DEFAULT 1,
-    allowed          INTEGER NOT NULL DEFAULT 1,
-    hidden           INTEGER NOT NULL DEFAULT 0,
-    default_value    TEXT    NOT NULL DEFAULT ''
-  );
-
-  CREATE TABLE IF NOT EXISTS entity (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    type       INTEGER NOT NULL,
-    created_at TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
-    updated_at TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS entity_tag (
-    entity_id INTEGER NOT NULL,
-    tag       TEXT    NOT NULL,
-    PRIMARY KEY (entity_id, tag)
-  );
-
-  CREATE TABLE IF NOT EXISTS entity_property (
-    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
-    entity_id          INTEGER NOT NULL,
-    property_config_id INTEGER NOT NULL,
-    data_type          TEXT    NOT NULL,
-    value              TEXT    NOT NULL DEFAULT '',
-    sort_order         INTEGER NOT NULL DEFAULT 0
-  );
-
-  CREATE TABLE IF NOT EXISTS list_config (
-    id      TEXT PRIMARY KEY,
-    name    TEXT NOT NULL DEFAULT '',
-    filter  TEXT NOT NULL DEFAULT '{}',
-    sort    TEXT NOT NULL DEFAULT '{}',
-    setting TEXT NOT NULL DEFAULT '{}',
-    themes  TEXT NOT NULL DEFAULT '[]'
-  );
-`;
 
 function serializePropertyValue(
   value: PropertyDataValue,
@@ -193,86 +129,72 @@ function rowToEntityProperty(row: Record<string, unknown>): EntityProperty {
 }
 
 export class SQLiteStorage implements StorageSchema {
-  private initPromise: Promise<Sqlite3Db> | null = null;
+  private worker: Worker;
+  private pending = new Map<
+    string,
+    { resolve: (v: unknown) => void; reject: (e: Error) => void }
+  >();
 
-  async init(): Promise<void> {
-    await this.getDb();
+  constructor() {
+    this.worker = new Worker(
+      new URL('./sqlite.worker.ts', import.meta.url),
+      { type: 'module' },
+    );
+    this.worker.onmessage = (e: MessageEvent) => {
+      const { id, result, error } = e.data as {
+        id: string;
+        result: unknown;
+        error?: string;
+      };
+      const p = this.pending.get(id);
+      if (!p) { return; }
+      this.pending.delete(id);
+      if (error !== undefined) {
+        p.reject(new Error(error));
+      } else {
+        p.resolve(result);
+      }
+    };
   }
 
-  private getDb(): Promise<Sqlite3Db> {
-    if (!this.initPromise) {
-      this.initPromise = (async (): Promise<Sqlite3Db> => {
-        type InitFn = (opts: {
-          locateFile: (filename: string) => string;
-        }) => Promise<Sqlite3Static>;
-        const sqlite3: Sqlite3Static = await (
-          sqlite3InitModule as unknown as InitFn
-        )({
-          locateFile: (filename: string) =>
-            filename === 'sqlite3.wasm' ? sqliteWasmUrl : filename,
-        });
-        let db: Sqlite3Db;
-
-        try {
-          const poolUtil: SAHPoolUtil = await sqlite3.installOpfsSAHPoolVfs({});
-          db = new poolUtil.OpfsSAHPoolDb('/orbit.db');
-        } catch {
-          console.warn(
-            'SQLiteStorage: OPFS unavailable, falling back to in-memory database.',
-          );
-          db = new sqlite3.oo1.DB(':memory:', 'c');
-        }
-
-        db.exec(SCHEMA);
-        return db;
-      })();
-    }
-
-    return this.initPromise;
+  private send<T>(
+    type: string,
+    sql: string,
+    bind: BindableValue[] = [],
+  ): Promise<T> {
+    const id = uuidv4();
+    return new Promise<T>((resolve, reject) => {
+      this.pending.set(id, {
+        resolve: resolve as (v: unknown) => void,
+        reject,
+      });
+      this.worker.postMessage({ id, type, sql, bind });
+    });
   }
 
   private execRows(
-    db: Sqlite3Db,
     sql: string,
     bind: BindableValue[] = [],
-  ): Record<string, SqlValue>[] {
-    const rows: Record<string, SqlValue>[] = [];
-    db.exec({
-      sql,
-      bind,
-      rowMode: 'object',
-      callback: (row: SqlValue[] | Record<string, SqlValue>) => {
-        rows.push(row as Record<string, SqlValue>);
-      },
-    });
-    return rows;
+  ): Promise<Record<string, SqlValue>[]> {
+    return this.send<Record<string, SqlValue>[]>('exec_rows', sql, bind);
   }
 
   private execValue(
-    db: Sqlite3Db,
     sql: string,
     bind: BindableValue[] = [],
-  ): SqlValue {
-    const rows: SqlValue[][] = [];
-    db.exec({
-      sql,
-      bind,
-      rowMode: 'array',
-      callback: (row: SqlValue[] | Record<string, SqlValue>) => {
-        rows.push(row as SqlValue[]);
-      },
-    });
-    return rows[0]?.[0] ?? null;
+  ): Promise<SqlValue> {
+    return this.send<SqlValue>('exec_value', sql, bind);
+  }
+
+  private run(sql: string, bind: BindableValue[] = []): Promise<void> {
+    return this.send<void>('run', sql, bind);
   }
 
   // ─── Entity Configs ───────────────────────────────────────────────────────
 
   async getEntityConfigs(): Promise<EntityConfig[]> {
-    const db = await this.getDb();
-
-    const configRows = this.execRows(db, 'SELECT * FROM entity_config');
-    const propRows = this.execRows(
-      db,
+    const configRows = await this.execRows('SELECT * FROM entity_config');
+    const propRows = await this.execRows(
       'SELECT * FROM entity_property_config ORDER BY id ASC',
     );
 
@@ -288,27 +210,25 @@ export class SQLiteStorage implements StorageSchema {
   async addEntityConfig(
     entityConfig: EntityConfig,
   ): Promise<EntityConfig | null> {
-    const db = await this.getDb();
-
-    db.exec({
-      sql: `INSERT INTO entity_config (name, description, revision_of, allow_property_ordering)
-            VALUES (?, ?, ?, ?)`,
-      bind: [
+    await this.run(
+      `INSERT INTO entity_config (name, description, revision_of, allow_property_ordering)
+       VALUES (?, ?, ?, ?)`,
+      [
         entityConfig.name,
         entityConfig.description,
         entityConfig.revisionOf ?? null,
         entityConfig.allowPropertyOrdering ? 1 : 0,
       ],
-    });
+    );
 
-    const id = this.execValue(db, 'SELECT last_insert_rowid()') as number;
+    const id = (await this.execValue('SELECT last_insert_rowid()')) as number;
 
     for (const prop of entityConfig.properties) {
-      db.exec({
-        sql: `INSERT INTO entity_property_config
-              (id, entity_config_id, name, data_type, prefix, suffix, required, repeat, allowed, hidden, default_value)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        bind: [
+      await this.run(
+        `INSERT INTO entity_property_config
+         (id, entity_config_id, name, data_type, prefix, suffix, required, repeat, allowed, hidden, default_value)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
           prop.id || null,
           id,
           prop.name,
@@ -321,7 +241,7 @@ export class SQLiteStorage implements StorageSchema {
           prop.hidden ? 1 : 0,
           serializePropertyValue(prop.defaultValue, prop.dataType),
         ],
-      });
+      );
     }
 
     const configs = await this.getEntityConfigs();
@@ -331,47 +251,44 @@ export class SQLiteStorage implements StorageSchema {
   async updateEntityConfig(
     entityConfig: EntityConfig,
   ): Promise<EntityConfig | null> {
-    const db = await this.getDb();
-
-    db.exec({
-      sql: `UPDATE entity_config
-            SET name = ?, description = ?, revision_of = ?, allow_property_ordering = ?
-            WHERE id = ?`,
-      bind: [
+    await this.run(
+      `UPDATE entity_config
+       SET name = ?, description = ?, revision_of = ?, allow_property_ordering = ?
+       WHERE id = ?`,
+      [
         entityConfig.name,
         entityConfig.description,
         entityConfig.revisionOf ?? null,
         entityConfig.allowPropertyOrdering ? 1 : 0,
         entityConfig.id,
       ],
-    });
+    );
 
     const configs = await this.getEntityConfigs();
     return configs.find(c => c.id === entityConfig.id) ?? null;
   }
 
   async deleteEntityConfig(id: number): Promise<boolean> {
-    const db = await this.getDb();
-
-    const propConfigIds = this.execRows(
-      db,
-      'SELECT id FROM entity_property_config WHERE entity_config_id = ?',
-      [id],
+    const propConfigIds = (
+      await this.execRows(
+        'SELECT id FROM entity_property_config WHERE entity_config_id = ?',
+        [id],
+      )
     ).map(r => r['id'] as number);
 
     for (const propConfigId of propConfigIds) {
-      db.exec({
-        sql: 'DELETE FROM entity_property WHERE property_config_id = ?',
-        bind: [propConfigId],
-      });
+      await this.run(
+        'DELETE FROM entity_property WHERE property_config_id = ?',
+        [propConfigId],
+      );
     }
 
-    db.exec({
-      sql: 'DELETE FROM entity_property_config WHERE entity_config_id = ?',
-      bind: [id],
-    });
-    db.exec({ sql: 'DELETE FROM entity WHERE type = ?', bind: [id] });
-    db.exec({ sql: 'DELETE FROM entity_config WHERE id = ?', bind: [id] });
+    await this.run(
+      'DELETE FROM entity_property_config WHERE entity_config_id = ?',
+      [id],
+    );
+    await this.run('DELETE FROM entity WHERE type = ?', [id]);
+    await this.run('DELETE FROM entity_config WHERE id = ?', [id]);
 
     return true;
   }
@@ -381,13 +298,11 @@ export class SQLiteStorage implements StorageSchema {
   async addPropertyConfig(
     propertyConfig: EntityPropertyConfig,
   ): Promise<EntityPropertyConfig | null> {
-    const db = await this.getDb();
-
-    db.exec({
-      sql: `INSERT INTO entity_property_config
-            (entity_config_id, name, data_type, prefix, suffix, required, repeat, allowed, hidden, default_value)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      bind: [
+    await this.run(
+      `INSERT INTO entity_property_config
+       (entity_config_id, name, data_type, prefix, suffix, required, repeat, allowed, hidden, default_value)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
         propertyConfig.entityConfigId,
         propertyConfig.name,
         propertyConfig.dataType,
@@ -402,29 +317,26 @@ export class SQLiteStorage implements StorageSchema {
           propertyConfig.dataType,
         ),
       ],
-    });
+    );
 
-    const id = this.execValue(db, 'SELECT last_insert_rowid()') as number;
-    const row = this.execRows(
-      db,
+    const id = (await this.execValue('SELECT last_insert_rowid()')) as number;
+    const rows = await this.execRows(
       'SELECT * FROM entity_property_config WHERE id = ?',
       [id],
-    )[0];
+    );
 
-    return row ? rowToEntityPropertyConfig(row) : null;
+    return rows[0] ? rowToEntityPropertyConfig(rows[0]) : null;
   }
 
   async updatePropertyConfig(
     propertyConfig: EntityPropertyConfig,
   ): Promise<EntityPropertyConfig | null> {
-    const db = await this.getDb();
-
-    db.exec({
-      sql: `UPDATE entity_property_config
-            SET name = ?, data_type = ?, prefix = ?, suffix = ?, required = ?,
-                repeat = ?, allowed = ?, hidden = ?, default_value = ?
-            WHERE id = ?`,
-      bind: [
+    await this.run(
+      `UPDATE entity_property_config
+       SET name = ?, data_type = ?, prefix = ?, suffix = ?, required = ?,
+           repeat = ?, allowed = ?, hidden = ?, default_value = ?
+       WHERE id = ?`,
+      [
         propertyConfig.name,
         propertyConfig.dataType,
         propertyConfig.prefix,
@@ -439,31 +351,24 @@ export class SQLiteStorage implements StorageSchema {
         ),
         propertyConfig.id,
       ],
-    });
+    );
 
-    const row = this.execRows(
-      db,
+    const rows = await this.execRows(
       'SELECT * FROM entity_property_config WHERE id = ?',
       [propertyConfig.id],
-    )[0];
+    );
 
-    return row ? rowToEntityPropertyConfig(row) : null;
+    return rows[0] ? rowToEntityPropertyConfig(rows[0]) : null;
   }
 
   async deletePropertyConfig(
     _entityConfigId: number,
     id: number,
   ): Promise<boolean> {
-    const db = await this.getDb();
-
-    db.exec({
-      sql: 'DELETE FROM entity_property WHERE property_config_id = ?',
-      bind: [id],
-    });
-    db.exec({
-      sql: 'DELETE FROM entity_property_config WHERE id = ?',
-      bind: [id],
-    });
+    await this.run('DELETE FROM entity_property WHERE property_config_id = ?', [
+      id,
+    ]);
+    await this.run('DELETE FROM entity_property_config WHERE id = ?', [id]);
 
     return true;
   }
@@ -472,16 +377,14 @@ export class SQLiteStorage implements StorageSchema {
     entityConfigId: number,
     propertyConfigOrder: { id: number; order: number }[],
   ): Promise<boolean> {
-    const db = await this.getDb();
-
     for (const { id, order } of propertyConfigOrder) {
-      db.exec({
-        sql: `UPDATE entity_property
-              SET sort_order = ?
-              WHERE entity_id IN (SELECT id FROM entity WHERE type = ?)
-              AND property_config_id = ?`,
-        bind: [order, entityConfigId, id],
-      });
+      await this.run(
+        `UPDATE entity_property
+         SET sort_order = ?
+         WHERE entity_id IN (SELECT id FROM entity WHERE type = ?)
+         AND property_config_id = ?`,
+        [order, entityConfigId, id],
+      );
     }
 
     return true;
@@ -489,10 +392,9 @@ export class SQLiteStorage implements StorageSchema {
 
   // ─── Entities ─────────────────────────────────────────────────────────────
 
-  private loadEntityRows(
-    db: Sqlite3Db,
+  private async loadEntityRows(
     entityRows: Record<string, unknown>[],
-  ): Entity[] {
+  ): Promise<Entity[]> {
     if (entityRows.length === 0) {
       return [];
     }
@@ -500,14 +402,12 @@ export class SQLiteStorage implements StorageSchema {
     const ids = entityRows.map(r => r['id'] as number);
     const placeholders = ids.map(() => '?').join(',');
 
-    const tagRows = this.execRows(
-      db,
+    const tagRows = await this.execRows(
       `SELECT entity_id, tag FROM entity_tag WHERE entity_id IN (${placeholders})`,
       ids,
     );
 
-    const propRows = this.execRows(
-      db,
+    const propRows = await this.execRows(
       `SELECT * FROM entity_property WHERE entity_id IN (${placeholders}) ORDER BY sort_order ASC`,
       ids,
     );
@@ -535,8 +435,6 @@ export class SQLiteStorage implements StorageSchema {
     listFilter: ListFilter,
     listSort: ListSort,
   ): Promise<StorageResult<EntityListResult>> {
-    const db = await this.getDb();
-
     const conditions: string[] = [];
     const bindings: BindableValue[] = [];
 
@@ -650,7 +548,7 @@ export class SQLiteStorage implements StorageSchema {
     }
 
     const countSql = `SELECT COUNT(DISTINCT e.id) FROM entity e ${joinClause} ${whereClause}`;
-    const total = this.execValue(db, countSql, bindings) as number;
+    const total = (await this.execValue(countSql, bindings)) as number;
 
     const rowSql = `
       SELECT DISTINCT e.id, e.type, e.created_at, e.updated_at
@@ -661,115 +559,103 @@ export class SQLiteStorage implements StorageSchema {
       LIMIT ? OFFSET ?
     `;
 
-    const entityRows = this.execRows(db, rowSql, [...bindings, perPage, start]);
+    const entityRows = await this.execRows(rowSql, [
+      ...bindings,
+      perPage,
+      start,
+    ]);
 
-    const entities = this.loadEntityRows(db, entityRows);
+    const entities = await this.loadEntityRows(entityRows);
 
     return { isOk: true, value: { entities, total } };
   }
 
   async addEntity(payload: RequestBody): Promise<Entity | null> {
-    const db = await this.getDb();
-
     const now = new Date().toISOString();
 
-    db.exec({
-      sql: `INSERT INTO entity (type, created_at, updated_at) VALUES (?, ?, ?)`,
-      bind: [payload.entityConfigId, now, now],
-    });
+    await this.run(
+      `INSERT INTO entity (type, created_at, updated_at) VALUES (?, ?, ?)`,
+      [payload.entityConfigId, now, now],
+    );
 
-    const id = this.execValue(db, 'SELECT last_insert_rowid()') as number;
+    const id = (await this.execValue('SELECT last_insert_rowid()')) as number;
 
-    this.writeEntityTags(db, id, payload.tags);
-    this.writeEntityProperties(db, id, payload.properties);
+    await this.writeEntityTags(id, payload.tags);
+    await this.writeEntityProperties(id, payload.properties);
 
-    const rows = this.execRows(db, 'SELECT * FROM entity WHERE id = ?', [id]);
-    return this.loadEntityRows(db, rows)[0] ?? null;
+    const rows = await this.execRows('SELECT * FROM entity WHERE id = ?', [id]);
+    return (await this.loadEntityRows(rows))[0] ?? null;
   }
 
   async updateEntity(id: number, payload: RequestBody): Promise<Entity | null> {
-    const db = await this.getDb();
-
     const now = new Date().toISOString();
 
-    db.exec({
-      sql: `UPDATE entity SET type = ?, updated_at = ? WHERE id = ?`,
-      bind: [payload.entityConfigId, now, id],
-    });
+    await this.run(`UPDATE entity SET type = ?, updated_at = ? WHERE id = ?`, [
+      payload.entityConfigId,
+      now,
+      id,
+    ]);
 
-    db.exec({ sql: 'DELETE FROM entity_tag WHERE entity_id = ?', bind: [id] });
-    db.exec({
-      sql: 'DELETE FROM entity_property WHERE entity_id = ?',
-      bind: [id],
-    });
+    await this.run('DELETE FROM entity_tag WHERE entity_id = ?', [id]);
+    await this.run('DELETE FROM entity_property WHERE entity_id = ?', [id]);
 
-    this.writeEntityTags(db, id, payload.tags);
-    this.writeEntityProperties(db, id, payload.properties);
+    await this.writeEntityTags(id, payload.tags);
+    await this.writeEntityProperties(id, payload.properties);
 
-    const rows = this.execRows(db, 'SELECT * FROM entity WHERE id = ?', [id]);
-    return this.loadEntityRows(db, rows)[0] ?? null;
+    const rows = await this.execRows('SELECT * FROM entity WHERE id = ?', [id]);
+    return (await this.loadEntityRows(rows))[0] ?? null;
   }
 
   async deleteEntity(id: number): Promise<boolean> {
-    const db = await this.getDb();
-
-    db.exec({ sql: 'DELETE FROM entity_tag WHERE entity_id = ?', bind: [id] });
-    db.exec({
-      sql: 'DELETE FROM entity_property WHERE entity_id = ?',
-      bind: [id],
-    });
-    db.exec({ sql: 'DELETE FROM entity WHERE id = ?', bind: [id] });
+    await this.run('DELETE FROM entity_tag WHERE entity_id = ?', [id]);
+    await this.run('DELETE FROM entity_property WHERE entity_id = ?', [id]);
+    await this.run('DELETE FROM entity WHERE id = ?', [id]);
 
     return true;
   }
 
-  private writeEntityTags(
-    db: Sqlite3Db,
+  private async writeEntityTags(
     entityId: number,
     tags: string[],
-  ): void {
+  ): Promise<void> {
     for (const tag of tags) {
-      db.exec({
-        sql: 'INSERT OR IGNORE INTO entity_tag (entity_id, tag) VALUES (?, ?)',
-        bind: [entityId, tag],
-      });
+      await this.run(
+        'INSERT OR IGNORE INTO entity_tag (entity_id, tag) VALUES (?, ?)',
+        [entityId, tag],
+      );
     }
   }
 
-  private writeEntityProperties(
-    db: Sqlite3Db,
+  private async writeEntityProperties(
     entityId: number,
     properties: EntityProperty[],
-  ): void {
+  ): Promise<void> {
     for (const prop of properties) {
-      const propConfigRows = this.execRows(
-        db,
+      const propConfigRows = await this.execRows(
         'SELECT data_type FROM entity_property_config WHERE id = ?',
         [prop.propertyConfigId],
       );
       const dataType =
         (propConfigRows[0]?.['data_type'] as DataType) ?? DataType.SHORT_TEXT;
 
-      db.exec({
-        sql: `INSERT INTO entity_property (entity_id, property_config_id, data_type, value, sort_order)
-              VALUES (?, ?, ?, ?, ?)`,
-        bind: [
+      await this.run(
+        `INSERT INTO entity_property (entity_id, property_config_id, data_type, value, sort_order)
+         VALUES (?, ?, ?, ?, ?)`,
+        [
           entityId,
           prop.propertyConfigId,
           dataType,
           serializePropertyValue(prop.value, dataType),
           prop.order,
         ],
-      });
+      );
     }
   }
 
   // ─── Tags & Suggestions ───────────────────────────────────────────────────
 
   async getTags(tag: string): Promise<string[]> {
-    const db = await this.getDb();
-    const rows = this.execRows(
-      db,
+    const rows = await this.execRows(
       `SELECT DISTINCT tag FROM entity_tag WHERE tag LIKE ? ORDER BY tag ASC LIMIT 20`,
       [`%${tag}%`],
     );
@@ -780,9 +666,7 @@ export class SQLiteStorage implements StorageSchema {
     propertyConfigId: number,
     query: string,
   ): Promise<string[]> {
-    const db = await this.getDb();
-    const rows = this.execRows(
-      db,
+    const rows = await this.execRows(
       `SELECT DISTINCT value FROM entity_property
        WHERE property_config_id = ? AND value LIKE ?
        ORDER BY value ASC LIMIT 20`,
@@ -794,19 +678,17 @@ export class SQLiteStorage implements StorageSchema {
   // ─── List Configs ─────────────────────────────────────────────────────────
 
   async getListConfigs(): Promise<ListConfig[]> {
-    const db = await this.getDb();
-    const rows = this.execRows(db, 'SELECT * FROM list_config');
+    const rows = await this.execRows('SELECT * FROM list_config');
     return rows.map(row => this.rowToListConfig(row));
   }
 
   async addListConfig(): Promise<string> {
-    const db = await this.getDb();
     const id = uuidv4();
 
-    db.exec({
-      sql: `INSERT INTO list_config (id, name, filter, sort, setting, themes)
-            VALUES (?, ?, ?, ?, ?, ?)`,
-      bind: [
+    await this.run(
+      `INSERT INTO list_config (id, name, filter, sort, setting, themes)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
         id,
         translate('configName'),
         JSON.stringify({}),
@@ -814,7 +696,7 @@ export class SQLiteStorage implements StorageSchema {
         JSON.stringify(defaultSettings),
         JSON.stringify([]),
       ],
-    });
+    );
 
     return id;
   }
@@ -822,18 +704,16 @@ export class SQLiteStorage implements StorageSchema {
   async saveListConfig(
     listConfig: ListConfig,
   ): Promise<StorageResult<ListConfig>> {
-    const db = await this.getDb();
-
-    db.exec({
-      sql: `INSERT INTO list_config (id, name, filter, sort, setting, themes)
-            VALUES (?, ?, ?, ?, ?, ?)
-            ON CONFLICT(id) DO UPDATE SET
-              name    = excluded.name,
-              filter  = excluded.filter,
-              sort    = excluded.sort,
-              setting = excluded.setting,
-              themes  = excluded.themes`,
-      bind: [
+    await this.run(
+      `INSERT INTO list_config (id, name, filter, sort, setting, themes)
+       VALUES (?, ?, ?, ?, ?, ?)
+       ON CONFLICT(id) DO UPDATE SET
+         name    = excluded.name,
+         filter  = excluded.filter,
+         sort    = excluded.sort,
+         setting = excluded.setting,
+         themes  = excluded.themes`,
+      [
         listConfig.id,
         listConfig.name,
         JSON.stringify(listConfig.filter),
@@ -841,67 +721,60 @@ export class SQLiteStorage implements StorageSchema {
         JSON.stringify(listConfig.setting),
         JSON.stringify(listConfig.themes),
       ],
-    });
+    );
 
     return { isOk: true, value: listConfig };
   }
 
   async updateListSort(listConfigId: string, sort: ListSort): Promise<void> {
-    const db = await this.getDb();
-    db.exec({
-      sql: 'UPDATE list_config SET sort = ? WHERE id = ?',
-      bind: [JSON.stringify(sort), listConfigId],
-    });
+    await this.run('UPDATE list_config SET sort = ? WHERE id = ?', [
+      JSON.stringify(sort),
+      listConfigId,
+    ]);
   }
 
   async updateListFilter(
     listConfigId: string,
     filter: ListFilter,
   ): Promise<void> {
-    const db = await this.getDb();
-    db.exec({
-      sql: 'UPDATE list_config SET filter = ? WHERE id = ?',
-      bind: [JSON.stringify(filter), listConfigId],
-    });
+    await this.run('UPDATE list_config SET filter = ? WHERE id = ?', [
+      JSON.stringify(filter),
+      listConfigId,
+    ]);
   }
 
   async updateListThemes(
     listConfigId: string,
     themes: string[],
   ): Promise<void> {
-    const db = await this.getDb();
-    db.exec({
-      sql: 'UPDATE list_config SET themes = ? WHERE id = ?',
-      bind: [JSON.stringify(themes), listConfigId],
-    });
+    await this.run('UPDATE list_config SET themes = ? WHERE id = ?', [
+      JSON.stringify(themes),
+      listConfigId,
+    ]);
   }
 
   async deleteListConfig(id: string): Promise<boolean> {
-    const db = await this.getDb();
-    db.exec({ sql: 'DELETE FROM list_config WHERE id = ?', bind: [id] });
+    await this.run('DELETE FROM list_config WHERE id = ?', [id]);
     return true;
   }
 
   async saveSetting(listConfigId: string, setting: Setting): Promise<boolean> {
-    const db = await this.getDb();
-
-    const row = this.execRows(
-      db,
+    const rows = await this.execRows(
       'SELECT setting FROM list_config WHERE id = ?',
       [listConfigId],
-    )[0];
+    );
 
-    if (!row) {
+    if (!rows[0]) {
       return false;
     }
 
-    const current: Settings = JSON.parse(row['setting'] as string);
+    const current: Settings = JSON.parse(rows[0]['setting'] as string);
     const updated: Settings = { ...current, [setting.name]: setting.value };
 
-    db.exec({
-      sql: 'UPDATE list_config SET setting = ? WHERE id = ?',
-      bind: [JSON.stringify(updated), listConfigId],
-    });
+    await this.run('UPDATE list_config SET setting = ? WHERE id = ?', [
+      JSON.stringify(updated),
+      listConfigId,
+    ]);
 
     return true;
   }
@@ -921,7 +794,6 @@ export class SQLiteStorage implements StorageSchema {
   // ─── Bulk Operations ──────────────────────────────────────────────────────
 
   async bulkOperation(payload: BulkOperationPayload): Promise<boolean> {
-    const db = await this.getDb();
     const { operation, actions } = payload;
 
     if (operation.type === OperationType.DELETE) {
@@ -933,19 +805,18 @@ export class SQLiteStorage implements StorageSchema {
 
     for (const entityId of actions) {
       if (operation.type === OperationType.REPLACE_TAGS) {
-        db.exec({
-          sql: 'DELETE FROM entity_tag WHERE entity_id = ?',
-          bind: [entityId],
-        });
-        this.writeEntityTags(db, entityId, operation.tags);
+        await this.run('DELETE FROM entity_tag WHERE entity_id = ?', [
+          entityId,
+        ]);
+        await this.writeEntityTags(entityId, operation.tags);
       } else if (operation.type === OperationType.ADD_TAGS) {
-        this.writeEntityTags(db, entityId, operation.tags);
+        await this.writeEntityTags(entityId, operation.tags);
       } else if (operation.type === OperationType.REMOVE_TAGS) {
         for (const tag of operation.tags) {
-          db.exec({
-            sql: 'DELETE FROM entity_tag WHERE entity_id = ? AND tag = ?',
-            bind: [entityId, tag],
-          });
+          await this.run(
+            'DELETE FROM entity_tag WHERE entity_id = ? AND tag = ?',
+            [entityId, tag],
+          );
         }
       }
     }
@@ -956,40 +827,35 @@ export class SQLiteStorage implements StorageSchema {
   // ─── Import / Export / Nuke ───────────────────────────────────────────────
 
   async export(entityConfigIds: number[]): Promise<Entity[]> {
-    const db = await this.getDb();
-
     const ph = entityConfigIds.map(() => '?').join(',');
-    const entityRows = this.execRows(
-      db,
+    const entityRows = await this.execRows(
       `SELECT * FROM entity WHERE type IN (${ph})`,
       entityConfigIds,
     );
 
-    return this.loadEntityRows(db, entityRows);
+    return this.loadEntityRows(entityRows);
   }
 
   async import(data: ExportDataContents): Promise<boolean> {
-    const db = await this.getDb();
-
     for (const config of data[ExportDataType.ENTITY_CONFIGS]) {
-      db.exec({
-        sql: `INSERT OR REPLACE INTO entity_config (id, name, description, revision_of, allow_property_ordering)
-              VALUES (?, ?, ?, ?, ?)`,
-        bind: [
+      await this.run(
+        `INSERT OR REPLACE INTO entity_config (id, name, description, revision_of, allow_property_ordering)
+         VALUES (?, ?, ?, ?, ?)`,
+        [
           config.id,
           config.name,
           config.description,
           config.revisionOf ?? null,
           config.allowPropertyOrdering ? 1 : 0,
         ],
-      });
+      );
 
       for (const prop of config.properties) {
-        db.exec({
-          sql: `INSERT OR REPLACE INTO entity_property_config
-                (id, entity_config_id, name, data_type, prefix, suffix, required, repeat, allowed, hidden, default_value)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          bind: [
+        await this.run(
+          `INSERT OR REPLACE INTO entity_property_config
+           (id, entity_config_id, name, data_type, prefix, suffix, required, repeat, allowed, hidden, default_value)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
             prop.id,
             config.id,
             prop.name,
@@ -1002,28 +868,24 @@ export class SQLiteStorage implements StorageSchema {
             prop.hidden ? 1 : 0,
             serializePropertyValue(prop.defaultValue, prop.dataType),
           ],
-        });
+        );
       }
     }
 
     for (const entity of data[ExportDataType.ENTITIES]) {
-      db.exec({
-        sql: `INSERT OR REPLACE INTO entity (id, type, created_at, updated_at)
-              VALUES (?, ?, ?, ?)`,
-        bind: [entity.id, entity.type, entity.createdAt, entity.updatedAt],
-      });
+      await this.run(
+        `INSERT OR REPLACE INTO entity (id, type, created_at, updated_at)
+         VALUES (?, ?, ?, ?)`,
+        [entity.id, entity.type, entity.createdAt, entity.updatedAt],
+      );
 
-      db.exec({
-        sql: 'DELETE FROM entity_tag WHERE entity_id = ?',
-        bind: [entity.id],
-      });
-      this.writeEntityTags(db, entity.id, entity.tags);
+      await this.run('DELETE FROM entity_tag WHERE entity_id = ?', [entity.id]);
+      await this.writeEntityTags(entity.id, entity.tags);
 
-      db.exec({
-        sql: 'DELETE FROM entity_property WHERE entity_id = ?',
-        bind: [entity.id],
-      });
-      this.writeEntityProperties(db, entity.id, entity.properties);
+      await this.run('DELETE FROM entity_property WHERE entity_id = ?', [
+        entity.id,
+      ]);
+      await this.writeEntityProperties(entity.id, entity.properties);
     }
 
     for (const listConfig of data[ExportDataType.LIST_CONFIGS]) {
@@ -1034,18 +896,16 @@ export class SQLiteStorage implements StorageSchema {
   }
 
   async clearData(nukedDataTypes: NukedDataType[]): Promise<void> {
-    const db = await this.getDb();
-
     for (const type of nukedDataTypes) {
       if (type === NukedDataType.ENTITIES) {
-        db.exec('DELETE FROM entity_tag');
-        db.exec('DELETE FROM entity_property');
-        db.exec('DELETE FROM entity');
+        await this.run('DELETE FROM entity_tag');
+        await this.run('DELETE FROM entity_property');
+        await this.run('DELETE FROM entity');
       } else if (type === NukedDataType.ENTITY_CONFIGS) {
-        db.exec('DELETE FROM entity_property_config');
-        db.exec('DELETE FROM entity_config');
+        await this.run('DELETE FROM entity_property_config');
+        await this.run('DELETE FROM entity_config');
       } else if (type === NukedDataType.LIST_CONFIGS) {
-        db.exec('DELETE FROM list_config');
+        await this.run('DELETE FROM list_config');
       }
     }
   }
@@ -1057,19 +917,16 @@ export class SQLiteStorage implements StorageSchema {
     start: number,
     perPage: number,
   ): Promise<StorageResult<PublicEntityListResult>> {
-    const db = await this.getDb();
-
-    const configRow = this.execRows(
-      db,
+    const configRows = await this.execRows(
       'SELECT * FROM list_config WHERE id = ?',
       [id],
-    )[0];
+    );
 
-    if (!configRow) {
+    if (!configRows[0]) {
       return { isOk: false, error: new Error('List not found') };
     }
 
-    const listConfig = this.rowToListConfig(configRow);
+    const listConfig = this.rowToListConfig(configRows[0]);
     const entityConfigs = await this.getEntityConfigs();
 
     const entitiesResult = await this.getEntities(

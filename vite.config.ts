@@ -10,5 +10,14 @@ export default defineConfig(({ command, mode }) => {
     base: env.BASE_URL || '/',
     envPrefix: 'APP_',
     plugins: [tsconfigPaths(), wasm(), topLevelAwait()],
+    optimizeDeps: {
+      exclude: ['@sqlite.org/sqlite-wasm'],
+    },
+    server: {
+      headers: {
+        'Cross-Origin-Opener-Policy': 'same-origin',
+        'Cross-Origin-Embedder-Policy': 'require-corp',
+      },
+    },
   };
 });
