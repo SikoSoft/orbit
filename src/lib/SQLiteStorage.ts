@@ -19,6 +19,8 @@ import {
   ListSortDirection,
   ListSortNativeProperty,
   ListSortCustomProperty,
+  defaultListFilter,
+  defaultListSort,
 } from 'api-spec/models/List';
 import { Setting, Settings, defaultSettings } from 'api-spec/models/Setting';
 import {
@@ -136,10 +138,9 @@ export class SQLiteStorage implements StorageSchema {
   >();
 
   constructor() {
-    this.worker = new Worker(
-      new URL('./sqlite.worker.ts', import.meta.url),
-      { type: 'module' },
-    );
+    this.worker = new Worker(new URL('./sqlite.worker.ts', import.meta.url), {
+      type: 'module',
+    });
     this.worker.onmessage = (e: MessageEvent) => {
       const { id, result, error } = e.data as {
         id: string;
@@ -147,7 +148,9 @@ export class SQLiteStorage implements StorageSchema {
         error?: string;
       };
       const p = this.pending.get(id);
-      if (!p) { return; }
+      if (!p) {
+        return;
+      }
       this.pending.delete(id);
       if (error !== undefined) {
         p.reject(new Error(error));
@@ -691,8 +694,8 @@ export class SQLiteStorage implements StorageSchema {
       [
         id,
         translate('configName'),
-        JSON.stringify({}),
-        JSON.stringify({}),
+        JSON.stringify(defaultListFilter),
+        JSON.stringify(defaultListSort),
         JSON.stringify(defaultSettings),
         JSON.stringify([]),
       ],
