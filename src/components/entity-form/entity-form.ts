@@ -110,6 +110,12 @@ export class EntityForm extends ViewElement {
         background-color: var(--background-hover-color);
       }
     }
+
+    .no-entity-configs {
+      text-align: center;
+      font-weight: bold;
+      padding: 1rem;
+    }
   `;
 
   @property({ type: Number, reflect: true })
@@ -738,7 +744,17 @@ export class EntityForm extends ViewElement {
     ></property-field>`;
   }
 
+  renderNoEntityConfig(): TemplateResult {
+    return html`
+      <div class="box no-entity-configs">${translate('noEntityConfigs')}</div>
+    `;
+  }
+
   render(): TemplateResult {
+    if (this.state.entityConfigs.length === 0) {
+      return this.renderNoEntityConfig();
+    }
+
     return html`
       <form class=${classMap(this.classes)}>
         ${!this.entityId && this.availableEntityConfigs.length > 1
