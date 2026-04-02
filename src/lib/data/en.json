@@ -191,5 +191,6 @@
   "addEntityWidget.options": "Options",
   "addEntityWidget.includeImage": "Include image in created item",
   "addEntityWidget.camera": "Camera",
-  "addEntityWidget.storage": "Storage"
+  "addEntityWidget.storage": "Storage",
+  "storageSource": "Storage source"
 }

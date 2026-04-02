@@ -14,6 +14,7 @@ import '@ss/ui/components/ss-toggle';
 import '@/components/user-pane/user-pane';
 
 import { ThemeName } from '@/models/Page';
+import { StorageSource } from '@/models/Storage';
 import { themed } from '@/lib/Theme';
 import {
   FloatingWidgetProp,
@@ -237,6 +238,10 @@ export class FloatingWidget extends MobxLitElement {
     storage.saveDebugMode(event.detail.on);
   }
 
+  private handleStorageSourceChanged(event: CustomEvent): void {
+    storage.setStorageSource(event.detail.value as StorageSource);
+  }
+
   private handleToggleOpen(): void {
     this.state.setWidgetIsOpen(!this.state.widgetIsOpen);
   }
@@ -290,6 +295,18 @@ export class FloatingWidget extends MobxLitElement {
                 value: theme,
               }))}
               selected=${this.state.theme}
+            ></ss-select>
+          </div>
+
+          <div class="option">
+            <h4>${translate('storageSource')}</h4>
+            <ss-select
+              @select-changed=${this.handleStorageSourceChanged}
+              .options=${Object.values(StorageSource).map(source => ({
+                label: translate(`storageSourcePrompt.${source}`),
+                value: source,
+              }))}
+              selected=${storage.getStorageSource() ?? StorageSource.CLOUD}
             ></ss-select>
           </div>
 
