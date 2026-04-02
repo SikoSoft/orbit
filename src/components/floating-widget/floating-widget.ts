@@ -22,6 +22,7 @@ import {
   FloatingWidgetPosition,
   FloatingWidgetProps,
 } from './floating-widget.models';
+import { StorageSourceUpdatedEvent } from '@/events/storage-source-updated';
 
 @themed()
 @customElement('floating-widget')
@@ -239,7 +240,9 @@ export class FloatingWidget extends MobxLitElement {
   }
 
   private handleStorageSourceChanged(event: CustomEvent): void {
-    storage.setStorageSource(event.detail.value as StorageSource);
+    const source = event.detail.value as StorageSource;
+    storage.setStorageSource(source);
+    this.dispatchEvent(new StorageSourceUpdatedEvent({ source }));
   }
 
   private handleToggleOpen(): void {

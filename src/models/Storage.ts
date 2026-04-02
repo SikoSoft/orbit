@@ -29,6 +29,15 @@ export enum StorageItemKey {
   ASSIST_SAVE_IMAGE = 'assistSaveImage',
 }
 
+export const delegatedStorageItemKeys: StorageItemKey[] = [
+  StorageItemKey.ACTIVE_LIST_FILTER_KEY,
+  StorageItemKey.LIST_FILTERS_KEY,
+  StorageItemKey.LIST_CONFIGS_KEY,
+  StorageItemKey.LIST_CONTEXT_MODE,
+  StorageItemKey.LIST_CONTEXT,
+  StorageItemKey.ACTIVE_LIST_CONFIG_ID,
+];
+
 export enum StorageSource {
   CLOUD = 'cloud',
   DEVICE = 'device',

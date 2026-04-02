@@ -6,6 +6,7 @@ import { translate } from '@/lib/Localization';
 import { themed } from '@/lib/Theme';
 import { StorageSource } from '@/models/Storage';
 import { storage } from '@/lib/Storage';
+import { StorageSourceUpdatedEvent } from '@/events/storage-source-updated';
 
 @themed()
 @customElement('storage-source-prompt')
@@ -111,6 +112,7 @@ export class StorageSourcePrompt extends MobxLitElement {
 
   private select(source: StorageSource): void {
     storage.setStorageSource(source);
+    this.dispatchEvent(new StorageSourceUpdatedEvent({ source }));
     this.visible = false;
   }
 

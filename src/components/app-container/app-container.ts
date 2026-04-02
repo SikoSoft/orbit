@@ -7,10 +7,17 @@ import { storage } from '@/lib/Storage';
 import { appState } from '@/state';
 import { ViewElement } from '@/lib/ViewElement';
 import { api } from '@/lib/Api';
+import { setupRouter } from '@/lib/Router';
+import { themed } from '@/lib/Theme';
+import { Router } from '@/models/Router';
+import { routes } from '@/routes';
 
 import { OperationPerformedEvent } from '@/components/bulk-manager/bulk-manager.events';
 import { ListConfigChangedEvent } from '@/components/list-config/list-config.events';
-import { setupRouter } from '@/lib/Router';
+import { CollapsableToggledEvent } from '@ss/ui/components/ss-collapsable.events';
+import { TabIndexChangedEvent } from '@ss/ui/components/tab-container.events';
+import { UserLoggedOutEvent } from '@/events/user-logged-out';
+import { StorageSourceUpdatedEvent } from '@/events/storage-source-updated';
 
 import '@/components/entity-form/entity-form';
 import '@/components/entity-list/entity-list';
@@ -19,13 +26,7 @@ import '@/components/floating-widget/floating-widget';
 import '@/components/forbidden-notice/forbidden-notice';
 import '@/components/bulk-manager/bulk-manager';
 import '@/components/list-config/list-config';
-
-import { CollapsableToggledEvent } from '@ss/ui/components/ss-collapsable.events';
-import { TabIndexChangedEvent } from '@ss/ui/components/tab-container.events';
-import { Router } from '@/models/Router';
-import { routes } from '@/routes';
-import { UserLoggedOutEvent } from '@/events/user-logged-out';
-import { themed } from '@/lib/Theme';
+import { delegatedStorageItemKeys } from '@/models/Storage';
 
 export interface ViewChangedEvent extends CustomEvent {
   detail: PageView;
@@ -164,6 +165,12 @@ export class AppContainer extends MobxLitElement {
     storage.setTabState(this.state.tabState);
   }
 
+  private handleStorageSourceUpdated(e: StorageSourceUpdatedEvent): void {
+    console.log('Storage source updated', e.detail.source);
+    storage.resetDelegatedData();
+    window.location.reload();
+  }
+
   protected firstUpdated(): void {
     if (!this.routerView) {
       return;
@@ -192,6 +199,7 @@ export class AppContainer extends MobxLitElement {
         @operation-performed=${this.handleOperationPerformed}
         @user-logged-in=${this.handleUserLoggedIn}
         @invalid-session=${this.clearSession}
+        @storage-source-updated=${this.handleStorageSourceUpdated}
       >
         ${this.ready ? this.routerView : nothing}
       </div>

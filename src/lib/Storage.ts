@@ -19,6 +19,7 @@ import {
   defaultTheme,
 } from '@/models/Page';
 import {
+  delegatedStorageItemKeys,
   StorageItemKey,
   StorageResult,
   StorageSchema,
@@ -36,6 +37,7 @@ import {
   PublicEntityListResult,
 } from '@/components/entity-list/entity-list.models';
 import { CreateAccountResponseBody } from '@/components/account-form/account-form.models';
+import { StorageSourceUpdatedEvent } from '@/events/storage-source-updated';
 
 export interface SavedListFilter {
   filter: ListFilter;
@@ -75,6 +77,13 @@ function delegateSource(): MethodDecorator {
 }
 
 export class Storage implements StorageSchema {
+  resetDelegatedData(): void {
+    console.log('Clearing delegated storage data');
+    for (const key of delegatedStorageItemKeys) {
+      localStorage.removeItem(key);
+    }
+  }
+
   async saveFilter(filter: ListFilter, name: string): Promise<void> {
     const savedFilters = this.getSavedFilters();
     const id = await this.digestMessage(JSON.stringify(filter));
@@ -480,7 +489,6 @@ export class Storage implements StorageSchema {
     }
 
     localStorage.setItem(StorageItemKey.STORAGE_SOURCE, source);
-    window.location.reload();
   }
 
   getStorageSource(): StorageSource | null {
