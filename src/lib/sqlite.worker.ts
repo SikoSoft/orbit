@@ -71,7 +71,7 @@ const ctx = self as unknown as Ctx;
 
 let db: Database;
 
-const dbReady: Promise<void> = (async () => {
+const dbReady: Promise<void> = (async (): Promise<void> => {
   type InitFn = (opts: {
     locateFile: (filename: string) => string;
   }) => Promise<Sqlite3Static>;
@@ -102,7 +102,7 @@ interface WorkerMessage {
   bind?: BindableValue[];
 }
 
-ctx.onmessage = async (e: MessageEvent<WorkerMessage>) => {
+ctx.onmessage = async (e: MessageEvent<WorkerMessage>): Promise<void> => {
   const { id, type, sql, bind } = e.data;
 
   try {

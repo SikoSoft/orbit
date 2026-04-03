@@ -340,7 +340,6 @@ export class PropertyConfigForm extends LitElement {
       this.updatedPropertyConfig,
       this.propertyConfig,
     );
-    console.log('Revision result:', revisionResult);
     if (!revisionResult.isValid) {
       this.dispatchEvent(
         new PropertyConfigBreakingChangeDetectedEvent({

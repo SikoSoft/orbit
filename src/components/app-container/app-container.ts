@@ -17,7 +17,6 @@ import { ListConfigChangedEvent } from '@/components/list-config/list-config.eve
 import { CollapsableToggledEvent } from '@ss/ui/components/ss-collapsable.events';
 import { TabIndexChangedEvent } from '@ss/ui/components/tab-container.events';
 import { UserLoggedOutEvent } from '@/events/user-logged-out';
-import { StorageSourceUpdatedEvent } from '@/events/storage-source-updated';
 
 import '@/components/entity-form/entity-form';
 import '@/components/entity-list/entity-list';
@@ -26,7 +25,6 @@ import '@/components/floating-widget/floating-widget';
 import '@/components/forbidden-notice/forbidden-notice';
 import '@/components/bulk-manager/bulk-manager';
 import '@/components/list-config/list-config';
-import { delegatedStorageItemKeys } from '@/models/Storage';
 
 export interface ViewChangedEvent extends CustomEvent {
   detail: PageView;
@@ -165,7 +163,7 @@ export class AppContainer extends MobxLitElement {
     storage.setTabState(this.state.tabState);
   }
 
-  private handleStorageSourceUpdated(e: StorageSourceUpdatedEvent): void {
+  private handleStorageSourceUpdated(): void {
     storage.resetDelegatedData();
     window.location.reload();
   }

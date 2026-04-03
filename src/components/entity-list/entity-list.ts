@@ -205,12 +205,6 @@ export class EntityList extends ViewElement {
   }
 
   async load(more = false): Promise<void> {
-    console.log('Loading entities', {
-      more,
-      start: this.start,
-      perPage: this.perPage,
-    });
-    console.log('listFilter', JSON.stringify(this.state.listFilter));
     this.loading = true;
 
     if (more) {

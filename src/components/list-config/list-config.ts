@@ -216,6 +216,7 @@ export class ListConfig extends MobxLitElement {
 
   private state = appState;
   private isSaving: boolean = false;
+  private windowClickHandler: ((e: MouseEvent) => void) | null = null;
 
   @property({ type: Boolean })
   [ListConfigProp.VIEW_ONLY]: ListConfigProps[ListConfigProp.VIEW_ONLY] =
@@ -291,7 +292,7 @@ export class ListConfig extends MobxLitElement {
   protected firstUpdated(changedProperties: PropertyValues): void {
     super.firstUpdated(changedProperties);
 
-    window.addEventListener('click', (e: MouseEvent): void => {
+    this.windowClickHandler = (e: MouseEvent): void => {
       if (e.composedPath().includes(this.collapsableMenus)) {
         this.menusInFocus = true;
       } else {
@@ -300,7 +301,17 @@ export class ListConfig extends MobxLitElement {
           this.state.setEditListConfigMode(false);
         }
       }
-    });
+    };
+
+    window.addEventListener('click', this.windowClickHandler);
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    if (this.windowClickHandler) {
+      window.removeEventListener('click', this.windowClickHandler);
+      this.windowClickHandler = null;
+    }
   }
 
   async setup(): Promise<void> {
@@ -427,11 +438,15 @@ export class ListConfig extends MobxLitElement {
   }
 
   carouselSlideChanged(e: CarouselSlideChangedEvent): void {
+    const newListConfigId =
+      this.state.listConfigs[e.detail.slideIndex]?.id;
+    if (!newListConfigId || newListConfigId === this.state.listConfigId) {
+      return;
+    }
     this.state.setEditListConfigMode(false);
     this.state.setSelectListConfigMode(false);
     this.navigationIndex = e.detail.navigationIndex;
-    const listConfigId = this.state.listConfigs[e.detail.slideIndex].id;
-    this.setListConfigId(listConfigId);
+    this.setListConfigId(newListConfigId);
   }
 
   showThemeManager(): void {

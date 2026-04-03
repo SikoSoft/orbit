@@ -37,7 +37,6 @@ import {
   PublicEntityListResult,
 } from '@/components/entity-list/entity-list.models';
 import { CreateAccountResponseBody } from '@/components/account-form/account-form.models';
-import { StorageSourceUpdatedEvent } from '@/events/storage-source-updated';
 
 export interface SavedListFilter {
   filter: ListFilter;
@@ -68,7 +67,7 @@ function delegateSource(): MethodDecorator {
         if (!storageDelegate || !storageDelegate[methodName]) {
           continue;
         }
-        descriptor.value = storageDelegate[methodName]!.bind(storageDelegate);
+        descriptor.value = storageDelegate[methodName]?.bind(storageDelegate);
         return descriptor;
       }
     }
@@ -78,7 +77,6 @@ function delegateSource(): MethodDecorator {
 
 export class Storage implements StorageSchema {
   resetDelegatedData(): void {
-    console.log('Clearing delegated storage data');
     for (const key of delegatedStorageItemKeys) {
       localStorage.removeItem(key);
     }
