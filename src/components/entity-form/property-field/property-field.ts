@@ -4,6 +4,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import '@ss/ui/components/ss-input';
 import '@ss/ui/components/confirmation-modal';
 import {
+  BooleanDataValue,
   DataType,
   DateDataValue,
   defaultEntityPropertyConfig,
@@ -24,6 +25,7 @@ import {
 import { MobxLitElement } from '@adobe/lit-mobx';
 import { appState } from '@/state';
 
+import '@/components/entity-form/boolean-field/boolean-field';
 import '@/components/entity-form/date-field/date-field';
 import '@/components/entity-form/int-field/int-field';
 import '@/components/entity-form/long-text-field/long-text-field';
@@ -164,7 +166,7 @@ export class PropertyField extends MobxLitElement {
 
   focus(): void {
     const input = this.renderRoot.querySelector(
-      'date-field, image-field, short-text-field, long-text-field, int-field',
+      'boolean-field, date-field, image-field, short-text-field, long-text-field, int-field',
     );
     if (input) {
       (input as HTMLElement).focus();
@@ -174,6 +176,15 @@ export class PropertyField extends MobxLitElement {
   renderField(): TemplateResult | typeof nothing {
     let value: PropertyDataValue;
     switch (this.propertyConfig.dataType) {
+      case DataType.BOOLEAN:
+        value = this.value as BooleanDataValue;
+        return html`<boolean-field
+          uiId=${this.uiId}
+          ?value=${value ?? this.propertyConfig.defaultValue}
+          entityConfigId=${this.propertyConfig.entityConfigId}
+          propertyConfigId=${this.propertyConfig.id}
+        ></boolean-field>`;
+
       case DataType.DATE:
         value = this.value as DateDataValue;
         return html`<date-field
