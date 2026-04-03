@@ -81,3 +81,4 @@ Keep `api-spec` version in sync when making API contract changes. Internal packa
 - Every statement is terminated with a semicolon
 - Use the One True Brace Style (never omit braces)
 - Do not hard code any messages in the UI elements. Always use translate() function with a camelCased key.
+- Every function must include a return type
