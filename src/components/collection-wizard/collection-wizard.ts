@@ -11,7 +11,7 @@ import { NotificationType } from '@ss/ui/components/notification-provider.models
 import { ExportDataContents } from 'api-spec/models/Data';
 import { DataType } from 'api-spec/models/Entity';
 import { ListConfig } from 'api-spec/models/List';
-import { defaultSettings } from 'api-spec/models/Setting';
+import { defaultSettings, SettingConfig } from 'api-spec/models/Setting';
 
 import collectionsData from '@/lib/data/wizard/collections.json';
 
@@ -103,7 +103,10 @@ export class CollectionWizard extends MobxLitElement {
       background-color: var(--box-background-color, #fafafa);
       cursor: pointer;
       text-align: center;
-      transition: border-color 0.15s, box-shadow 0.15s, opacity 0.15s;
+      transition:
+        border-color 0.15s,
+        box-shadow 0.15s,
+        opacity 0.15s;
 
       &:hover {
         border-color: var(--accent-color, #555);
@@ -185,7 +188,10 @@ export class CollectionWizard extends MobxLitElement {
       listConfigs: [
         {
           ...(listConfig as unknown as ListConfig),
-          setting: { ...defaultSettings, ...listConfig.setting },
+          setting: {
+            ...defaultSettings,
+            ...(listConfig.setting as unknown as SettingConfig),
+          },
         },
       ],
     };
@@ -195,7 +201,10 @@ export class CollectionWizard extends MobxLitElement {
       const result = await storage.import(importPayload);
 
       if (!result) {
-        addToast(translate('collectionWizard.importFailed'), NotificationType.ERROR);
+        addToast(
+          translate('collectionWizard.importFailed'),
+          NotificationType.ERROR,
+        );
         return;
       }
 
@@ -216,11 +225,17 @@ export class CollectionWizard extends MobxLitElement {
         this.state.setListConfigId(newListConfig.id);
       }
 
-      addToast(translate('collectionWizard.importSuccess'), NotificationType.SUCCESS);
+      addToast(
+        translate('collectionWizard.importSuccess'),
+        NotificationType.SUCCESS,
+      );
       navigate('/entities');
     } catch (error) {
       console.error('Collection wizard import error:', error);
-      addToast(translate('collectionWizard.importFailed'), NotificationType.ERROR);
+      addToast(
+        translate('collectionWizard.importFailed'),
+        NotificationType.ERROR,
+      );
     } finally {
       this.isLoading = false;
     }
@@ -243,7 +258,8 @@ export class CollectionWizard extends MobxLitElement {
             option => html`
               <div
                 class="card ${this.isLoading ? 'loading' : ''}"
-                @click=${(): Promise<void> => this.handleSelectCollection(option.id)}
+                @click=${(): Promise<void> =>
+                  this.handleSelectCollection(option.id)}
               >
                 <span class="icon">${option.icon}</span>
                 <span class="name">${option.name}</span>
