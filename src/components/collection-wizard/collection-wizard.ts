@@ -11,6 +11,7 @@ import { NotificationType } from '@ss/ui/components/notification-provider.models
 import { ExportDataContents } from 'api-spec/models/Data';
 import { DataType } from 'api-spec/models/Entity';
 import { ListConfig } from 'api-spec/models/List';
+import { defaultSettings } from 'api-spec/models/Setting';
 
 import collectionsData from '@/lib/data/wizard/collections.json';
 
@@ -181,7 +182,12 @@ export class CollectionWizard extends MobxLitElement {
         },
       ],
       entities: [],
-      listConfigs: [listConfig as unknown as ListConfig],
+      listConfigs: [
+        {
+          ...(listConfig as unknown as ListConfig),
+          setting: { ...defaultSettings, ...listConfig.setting },
+        },
+      ],
     };
 
     this.isLoading = true;
