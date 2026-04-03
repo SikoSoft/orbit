@@ -836,7 +836,14 @@
         "text": []
       },
       "sort": { "property": "createdAt", "direction": "desc" },
-      "setting": {},
+      "setting": {
+        "paginationType": "lazy",
+        "paginationPageSize": 10,
+        "entityNameSingular": "action",
+        "entityNamePlural": "actions",
+        "tagSuggestions": "disabled",
+        "public": false
+      },
       "themes": []
     },
     {
@@ -853,7 +860,14 @@
         "text": []
       },
       "sort": { "property": "createdAt", "direction": "desc" },
-      "setting": {},
+      "setting": {
+        "paginationType": "lazy",
+        "paginationPageSize": 10,
+        "entityNameSingular": "action",
+        "entityNamePlural": "actions",
+        "tagSuggestions": "disabled",
+        "public": false
+      },
       "themes": []
     },
     {
@@ -870,7 +884,14 @@
         "text": []
       },
       "sort": { "property": "createdAt", "direction": "desc" },
-      "setting": {},
+      "setting": {
+        "paginationType": "lazy",
+        "paginationPageSize": 10,
+        "entityNameSingular": "action",
+        "entityNamePlural": "actions",
+        "tagSuggestions": "disabled",
+        "public": false
+      },
       "themes": []
     },
     {
@@ -887,7 +908,14 @@
         "text": []
       },
       "sort": { "property": "createdAt", "direction": "desc" },
-      "setting": {},
+      "setting": {
+        "paginationType": "lazy",
+        "paginationPageSize": 10,
+        "entityNameSingular": "action",
+        "entityNamePlural": "actions",
+        "tagSuggestions": "disabled",
+        "public": false
+      },
       "themes": []
     },
     {
@@ -904,7 +932,14 @@
         "text": []
       },
       "sort": { "property": "createdAt", "direction": "desc" },
-      "setting": {},
+      "setting": {
+        "paginationType": "lazy",
+        "paginationPageSize": 10,
+        "entityNameSingular": "action",
+        "entityNamePlural": "actions",
+        "tagSuggestions": "disabled",
+        "public": false
+      },
       "themes": []
     },
     {
@@ -921,7 +956,14 @@
         "text": []
       },
       "sort": { "property": "createdAt", "direction": "desc" },
-      "setting": {},
+      "setting": {
+        "paginationType": "lazy",
+        "paginationPageSize": 10,
+        "entityNameSingular": "action",
+        "entityNamePlural": "actions",
+        "tagSuggestions": "disabled",
+        "public": false
+      },
       "themes": []
     },
     {
@@ -938,7 +980,14 @@
         "text": []
       },
       "sort": { "property": "createdAt", "direction": "desc" },
-      "setting": {},
+      "setting": {
+        "paginationType": "lazy",
+        "paginationPageSize": 10,
+        "entityNameSingular": "action",
+        "entityNamePlural": "actions",
+        "tagSuggestions": "disabled",
+        "public": false
+      },
       "themes": []
     },
     {
@@ -955,7 +1004,14 @@
         "text": []
       },
       "sort": { "property": "createdAt", "direction": "desc" },
-      "setting": {},
+      "setting": {
+        "paginationType": "lazy",
+        "paginationPageSize": 10,
+        "entityNameSingular": "action",
+        "entityNamePlural": "actions",
+        "tagSuggestions": "disabled",
+        "public": false
+      },
       "themes": []
     },
     {
@@ -972,7 +1028,14 @@
         "text": []
       },
       "sort": { "property": "createdAt", "direction": "desc" },
-      "setting": {},
+      "setting": {
+        "paginationType": "lazy",
+        "paginationPageSize": 10,
+        "entityNameSingular": "action",
+        "entityNamePlural": "actions",
+        "tagSuggestions": "disabled",
+        "public": false
+      },
       "themes": []
     },
     {
@@ -989,7 +1052,14 @@
         "text": []
       },
       "sort": { "property": "createdAt", "direction": "desc" },
-      "setting": {},
+      "setting": {
+        "paginationType": "lazy",
+        "paginationPageSize": 10,
+        "entityNameSingular": "action",
+        "entityNamePlural": "actions",
+        "tagSuggestions": "disabled",
+        "public": false
+      },
       "themes": []
     }
   ]
