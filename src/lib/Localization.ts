@@ -3,7 +3,7 @@ import {
   Language,
   LocalizationStringMap,
 } from '@/models/Localization';
-import enStrings from '@/lib/data/en.json';
+import enStrings from '@/lib/data/localization/en.json';
 
 export class Localization {
   public language: Language;
