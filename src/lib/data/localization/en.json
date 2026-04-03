@@ -192,5 +192,11 @@
   "addEntityWidget.includeImage": "Include image in created item",
   "addEntityWidget.camera": "Camera",
   "addEntityWidget.storage": "Storage",
-  "storageSource": "Storage source"
+  "storageSource": "Storage source",
+  "collectionWizard.heading": "What do you collect?",
+  "collectionWizard.subheading": "Choose a collection type to get started. We'll set everything up for you.",
+  "collectionWizard.skip": "Skip for now",
+  "collectionWizard.importSuccess": "Collection created successfully.",
+  "collectionWizard.importFailed": "Failed to create collection. Please try again.",
+  "collectionWizard.notFound": "Collection type not found."
 }

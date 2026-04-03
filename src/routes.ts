@@ -41,4 +41,10 @@ export const routes: Route[] = [
     component: 'account-form',
     action: async () => await import('@/components/account-form/account-form'),
   },
+  {
+    path: '/wizard',
+    component: 'collection-wizard',
+    action: async () =>
+      await import('@/components/collection-wizard/collection-wizard'),
+  },
 ];
