@@ -255,6 +255,34 @@
         {
           "id": 401,
           "entityConfigId": 4,
+          "name": "Title",
+          "dataType": "shortText",
+          "defaultValue": "",
+          "required": 0,
+          "repeat": 1,
+          "allowed": 1,
+          "hidden": false,
+          "prefix": "",
+          "suffix": "",
+          "userId": "placeholder-user-id"
+        },
+        {
+          "id": 402,
+          "entityConfigId": 4,
+          "name": "Label",
+          "dataType": "shortText",
+          "defaultValue": "",
+          "required": 0,
+          "repeat": 1,
+          "allowed": 1,
+          "hidden": false,
+          "prefix": "",
+          "suffix": "",
+          "userId": "placeholder-user-id"
+        },
+        {
+          "id": 403,
+          "entityConfigId": 4,
           "name": "Format",
           "dataType": "shortText",
           "defaultValue": "12\" LP",
@@ -267,7 +295,7 @@
           "userId": "placeholder-user-id"
         },
         {
-          "id": 402,
+          "id": 404,
           "entityConfigId": 4,
           "name": "Pressing Year",
           "dataType": "int",
@@ -281,7 +309,7 @@
           "userId": "placeholder-user-id"
         },
         {
-          "id": 403,
+          "id": 405,
           "entityConfigId": 4,
           "name": "Catalog Number",
           "dataType": "shortText",
@@ -295,7 +323,7 @@
           "userId": "placeholder-user-id"
         },
         {
-          "id": 404,
+          "id": 406,
           "entityConfigId": 4,
           "name": "Media Condition",
           "dataType": "shortText",
@@ -309,7 +337,7 @@
           "userId": "placeholder-user-id"
         },
         {
-          "id": 405,
+          "id": 407,
           "entityConfigId": 4,
           "name": "Color Variant",
           "dataType": "shortText",
