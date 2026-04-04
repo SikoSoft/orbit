@@ -214,13 +214,15 @@ export class SQLiteStorage implements StorageSchema {
     entityConfig: EntityConfig,
   ): Promise<EntityConfig | null> {
     await this.run(
-      `INSERT INTO entity_config (name, description, revision_of, allow_property_ordering)
-       VALUES (?, ?, ?, ?)`,
+      `INSERT INTO entity_config (name, description, revision_of, allow_property_ordering, ai_enabled, ai_identify_prompt)
+       VALUES (?, ?, ?, ?, ?, ?)`,
       [
         entityConfig.name,
         entityConfig.description,
         entityConfig.revisionOf ?? null,
         entityConfig.allowPropertyOrdering ? 1 : 0,
+        entityConfig.aiEnabled ? 1 : 0,
+        entityConfig.aiIdentifyPrompt,
       ],
     );
 
@@ -256,13 +258,15 @@ export class SQLiteStorage implements StorageSchema {
   ): Promise<EntityConfig | null> {
     await this.run(
       `UPDATE entity_config
-       SET name = ?, description = ?, revision_of = ?, allow_property_ordering = ?
+       SET name = ?, description = ?, revision_of = ?, allow_property_ordering = ?, ai_enabled = ?, ai_identify_prompt = ?
        WHERE id = ?`,
       [
         entityConfig.name,
         entityConfig.description,
         entityConfig.revisionOf ?? null,
         entityConfig.allowPropertyOrdering ? 1 : 0,
+        entityConfig.aiEnabled ? 1 : 0,
+        entityConfig.aiIdentifyPrompt,
         entityConfig.id,
       ],
     );
@@ -842,14 +846,16 @@ export class SQLiteStorage implements StorageSchema {
   async import(data: ExportDataContents): Promise<boolean> {
     for (const config of data[ExportDataType.ENTITY_CONFIGS]) {
       await this.run(
-        `INSERT OR REPLACE INTO entity_config (id, name, description, revision_of, allow_property_ordering)
-         VALUES (?, ?, ?, ?, ?)`,
+        `INSERT OR REPLACE INTO entity_config (id, name, description, revision_of, allow_property_ordering, ai_enabled, ai_identify_prompt)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
           config.id,
           config.name,
           config.description,
           config.revisionOf ?? null,
           config.allowPropertyOrdering ? 1 : 0,
+          config.aiEnabled ? 1 : 0,
+          config.aiIdentifyPrompt,
         ],
       );
 

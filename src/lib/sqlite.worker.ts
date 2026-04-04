@@ -14,7 +14,9 @@ const SCHEMA = `
     name TEXT    NOT NULL DEFAULT '',
     description  TEXT NOT NULL DEFAULT '',
     revision_of  INTEGER,
-    allow_property_ordering INTEGER NOT NULL DEFAULT 0
+    allow_property_ordering INTEGER NOT NULL DEFAULT 0,
+    ai_enabled              INTEGER NOT NULL DEFAULT 0,
+    ai_identify_prompt      TEXT    NOT NULL DEFAULT ''
   );
 
   CREATE TABLE IF NOT EXISTS entity_property_config (
@@ -93,6 +95,19 @@ const dbReady: Promise<void> = (async (): Promise<void> => {
   }
 
   db.exec(SCHEMA);
+
+  // Add columns introduced after initial schema creation; ignore errors if they already exist.
+  const migrations = [
+    `ALTER TABLE entity_config ADD COLUMN ai_enabled INTEGER NOT NULL DEFAULT 0`,
+    `ALTER TABLE entity_config ADD COLUMN ai_identify_prompt TEXT NOT NULL DEFAULT ''`,
+  ];
+  for (const migration of migrations) {
+    try {
+      db.exec(migration);
+    } catch {
+      // Column already exists — safe to ignore.
+    }
+  }
 })();
 
 interface WorkerMessage {
