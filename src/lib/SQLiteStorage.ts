@@ -960,6 +960,10 @@ export class SQLiteStorage implements StorageSchema {
     };
   }
 
+  dispose(): void {
+    this.worker.terminate();
+  }
+
   // ─── Not applicable for local storage ─────────────────────────────────────
 
   async createAccount(): Promise<StorageResult<CreateAccountResponseBody>> {
