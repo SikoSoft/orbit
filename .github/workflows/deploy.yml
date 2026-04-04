@@ -32,7 +32,8 @@ jobs:
         shell: bash
         run: |
           pushd './${{ env.PACKAGE_PATH }}'
-          npm install
+          npm ci
+          npx playwright install --with-deps chromium
           npm run test
           npm run build --if-present
           popd
