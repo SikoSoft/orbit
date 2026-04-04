@@ -28,7 +28,7 @@ import { StorageSourceUpdatedEvent } from '@/events/storage-source-updated';
 @customElement('floating-widget')
 export class FloatingWidget extends MobxLitElement {
   public state = appState;
-  private timeout: number | undefined;
+  private timeout: ReturnType<typeof setTimeout> | null = null;
   static styles = css`
     :host {
       --background-color: var(--box-background-color);
