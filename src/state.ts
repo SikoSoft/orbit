@@ -165,6 +165,9 @@ export class AppState {
   @observable
   public assistSaveImage: boolean = false;
 
+  @observable
+  public online: boolean = false;
+
   @action
   public setActionSuggestions(suggestions: string[]): void {
     this.actionSuggestions = suggestions;
@@ -448,6 +451,11 @@ export class AppState {
   @action
   setAssistSaveImage(enabled: boolean): void {
     this.assistSaveImage = enabled;
+  }
+
+  @action
+  setOnline(online: boolean): void {
+    this.online = online;
   }
 
   constructor() {
