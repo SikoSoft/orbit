@@ -28,7 +28,9 @@ import { StorageSourceUpdatedEvent } from '@/events/storage-source-updated';
 @customElement('floating-widget')
 export class FloatingWidget extends MobxLitElement {
   public state = appState;
-  private timeout: ReturnType<typeof setTimeout> | null = null;
+  private enterTimeout: ReturnType<typeof setTimeout> | null = null;
+  private leaveTimeout: ReturnType<typeof setTimeout> | null = null;
+  private openTimeout: ReturnType<typeof setTimeout> | null = null;
   static styles = css`
     :host {
       --background-color: var(--box-background-color);
@@ -76,11 +78,11 @@ export class FloatingWidget extends MobxLitElement {
         top: 0;
         display: flex;
         flex-direction: column-reverse;
-        transform: translateY(-88%);
+        transform: translateY(-93%);
 
         @media (hover: hover) {
           &:hover {
-            transform: translateY(-86%);
+            transform: translateY(-91%);
           }
         }
 
@@ -128,6 +130,7 @@ export class FloatingWidget extends MobxLitElement {
         height: var(--head-height);
         position: relative;
         overflow: hidden;
+        z-index: 2;
 
         &::before {
           z-index: 0;
@@ -139,6 +142,7 @@ export class FloatingWidget extends MobxLitElement {
           background-color: var(--background-color);
           transform: rotate(45deg);
           border-radius: 0px;
+          box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         }
 
         &.left::before {
@@ -158,6 +162,8 @@ export class FloatingWidget extends MobxLitElement {
         background-color: var(--background-color);
         flex-grow: 10;
         height: var(--head-height);
+        box-shadow: 0 -15px 15px rgba(0, 0, 0, 0.3);
+        z-index: 1;
       }
 
       .handle {
@@ -185,7 +191,7 @@ export class FloatingWidget extends MobxLitElement {
       border-right: 1px var(--border-color) solid;
       box-sizing: border-box;
       margin-top: -2px;
-
+      box-shadow: 0 -5px 5px rgba(0, 0, 0, 0.3);
       .user {
         padding: 1rem;
       }
@@ -250,20 +256,42 @@ export class FloatingWidget extends MobxLitElement {
   }
 
   private handleOpen(): void {
-    this.state.setWidgetIsOpen(true);
+    if (this.mouseIn) {
+      this.openTimeout = setTimeout(() => {
+        this.state.setWidgetIsOpen(true);
+      }, 500);
+    }
   }
 
   private handleMouseEnter(): void {
-    this.mouseIn = true;
-    if (this.timeout) {
-      clearTimeout(this.timeout);
-    }
+    this.enterTimeout = setTimeout(() => {
+      this.mouseIn = true;
+      if (this.leaveTimeout) {
+        clearTimeout(this.leaveTimeout);
+        this.leaveTimeout = null;
+      }
+
+      if (this.openTimeout) {
+        clearTimeout(this.openTimeout);
+        this.openTimeout = null;
+      }
+    }, 1);
   }
 
   private handleMouseLeave(): void {
     this.mouseIn = false;
-    this.timeout = setTimeout(() => {
+    this.leaveTimeout = setTimeout(() => {
       this.state.setWidgetIsOpen(false);
+
+      if (this.enterTimeout) {
+        clearTimeout(this.enterTimeout);
+        this.enterTimeout = null;
+      }
+
+      if (this.openTimeout) {
+        clearTimeout(this.openTimeout);
+        this.openTimeout = null;
+      }
     }, 500);
   }
 
