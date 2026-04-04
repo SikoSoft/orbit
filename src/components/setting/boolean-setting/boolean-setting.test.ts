@@ -55,9 +55,7 @@ describe('boolean-setting', () => {
     );
 
     expect(payload).to.not.be.null;
-    expect((payload as SettingUpdatedEventPayload<boolean>).name).to.equal(
-      'myFlag',
-    );
-    expect((payload as SettingUpdatedEventPayload<boolean>).value).to.be.true;
+    expect(payload!.name).to.equal('myFlag');
+    expect(payload!.value).to.be.true;
   });
 });

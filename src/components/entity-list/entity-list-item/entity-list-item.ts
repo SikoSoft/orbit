@@ -139,7 +139,7 @@ export class EntityListItem extends MobxLitElement {
 
   @state() mode: EntityListItemMode = EntityListItemMode.PREVIEW;
   @state() pointerDown: Date = new Date();
-  @state() downTimeout: number = 0;
+  @state() downTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
   @state() downActivation: boolean = false;
 
   @state() get classes(): Record<string, boolean> {

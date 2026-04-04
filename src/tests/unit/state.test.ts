@@ -150,11 +150,16 @@ describe('AppState', () => {
     it('setEntityConfigs also flattens propertyConfigs', () => {
       const entityConfig = {
         id: 1,
+        userId: 'user1',
         name: 'Test',
+        description: '',
+        revisionOf: null,
+        allowPropertyOrdering: false,
+        aiEnabled: false,
+        aiIdentifyPrompt: '',
         properties: [
           { id: 10, name: 'Prop A', type: 'text' as const, entityConfigId: 1, minCount: 0, maxCount: 1, options: [] },
         ],
-        userId: 'user1',
       };
       state.setEntityConfigs([entityConfig]);
       expect(state.propertyConfigs).toHaveLength(1);
