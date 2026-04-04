@@ -53,7 +53,6 @@ export class EntityList extends ViewElement {
     }
 
     .list-items {
-      margin-top: 1rem;
       overflow: hidden;
     }
 

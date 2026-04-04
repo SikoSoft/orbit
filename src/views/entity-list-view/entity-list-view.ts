@@ -1,4 +1,4 @@
-import { html, TemplateResult } from 'lit';
+import { css, html, TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import '@/components/entity-list/entity-list';
@@ -11,6 +11,14 @@ import { EntityList } from '@/components/entity-list/entity-list';
 
 @customElement('entity-list-view')
 export class EntityListView extends ViewElement {
+  static styles = [
+    css`
+      .view-content {
+        margin-top: 1rem;
+      }
+    `,
+  ];
+
   @query('entity-list')
   entityList: EntityList | undefined;
 
@@ -21,11 +29,13 @@ export class EntityListView extends ViewElement {
   }
   render(): TemplateResult {
     return html` <user-header></user-header>
-      <logged-out
-        ><template><login-form></login-form></template
-      ></logged-out>
-      <logged-in
-        ><template><entity-list></entity-list></template
-      ></logged-in>`;
+      <div class="view-content">
+        <logged-out
+          ><template><login-form></login-form></template
+        ></logged-out>
+        <logged-in
+          ><template><entity-list></entity-list></template
+        ></logged-in>
+      </div>`;
   }
 }
