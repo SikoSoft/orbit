@@ -33,7 +33,7 @@ jobs:
         run: |
           pushd './${{ env.PACKAGE_PATH }}'
           npm install
-          npm run test:unit
+          npm run test
           npm run build --if-present
           popd
         env:

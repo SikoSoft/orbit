@@ -1,52 +1,53 @@
-import { fixture, html, expect } from '@open-wc/testing';
+import { describe, it, expect, afterEach } from 'vitest';
 import { BooleanSetting } from '@/components/setting/boolean-setting/boolean-setting';
 import { settingUpdatedEventName } from '@/events/setting-updated';
 import type { SettingUpdatedEventPayload } from '@/events/setting-updated';
 
 import '@/components/setting/boolean-setting/boolean-setting';
 
+async function mount(props: Partial<BooleanSetting> = {}): Promise<BooleanSetting> {
+  const el = document.createElement('boolean-setting') as BooleanSetting;
+  Object.assign(el, props);
+  document.body.appendChild(el);
+  await el.updateComplete;
+  return el;
+}
+
 describe('boolean-setting', () => {
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
   it('is defined as a custom element', () => {
     const el = document.createElement('boolean-setting');
-    expect(el).to.be.instanceOf(BooleanSetting);
+    expect(el).toBeInstanceOf(BooleanSetting);
   });
 
   it('renders the wrapping container', async () => {
-    const el = await fixture<BooleanSetting>(
-      html`<boolean-setting></boolean-setting>`,
-    );
-    const container = el.shadowRoot!.querySelector('.boolean-setting');
-    expect(container).to.exist;
+    const el = await mount();
+    expect(el.shadowRoot!.querySelector('.boolean-setting')).toBeTruthy();
   });
 
   it('renders the name as label text', async () => {
-    const el = await fixture<BooleanSetting>(
-      html`<boolean-setting name="Enable Feature"></boolean-setting>`,
-    );
+    const el = await mount({ name: 'Enable Feature' });
     const label = el.shadowRoot!.querySelector('label');
-    expect(label!.textContent!.trim()).to.equal('Enable Feature');
+    expect(label!.textContent!.trim()).toBe('Enable Feature');
   });
 
   it('reflects value property onto ss-toggle', async () => {
-    const el = await fixture<BooleanSetting>(
-      html`<boolean-setting .value=${true}></boolean-setting>`,
-    );
-    const toggle = el.shadowRoot!.querySelector('ss-toggle');
-    expect(toggle!.hasAttribute('on')).to.be.true;
+    const el = await mount({ value: true });
+    expect(el.shadowRoot!.querySelector('ss-toggle')!.hasAttribute('on')).toBe(true);
   });
 
   it('dispatches setting-updated when toggle-changed fires', async () => {
-    const el = await fixture<BooleanSetting>(
-      html`<boolean-setting name="myFlag" .value=${false}></boolean-setting>`,
-    );
+    const el = await mount({ name: 'myFlag', value: false });
 
     let payload: SettingUpdatedEventPayload<boolean> | null = null;
     el.addEventListener(settingUpdatedEventName, (e: Event) => {
       payload = (e as CustomEvent<SettingUpdatedEventPayload<boolean>>).detail;
     });
 
-    const toggle = el.shadowRoot!.querySelector('ss-toggle')!;
-    toggle.dispatchEvent(
+    el.shadowRoot!.querySelector('ss-toggle')!.dispatchEvent(
       new CustomEvent('toggle-changed', {
         bubbles: true,
         composed: true,
@@ -54,8 +55,8 @@ describe('boolean-setting', () => {
       }),
     );
 
-    expect(payload).to.not.be.null;
-    expect(payload!.name).to.equal('myFlag');
-    expect(payload!.value).to.be.true;
+    expect(payload).not.toBeNull();
+    expect(payload!.name).toBe('myFlag');
+    expect(payload!.value).toBe(true);
   });
 });

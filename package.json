@@ -13,10 +13,8 @@
     "preview": "vite preview",
     "start": "vite",
     "prepare": "husky",
-    "test": "wtr",
-    "test:unit": "vitest run",
-    "test:unit:watch": "vitest",
-    "test:all": "vitest run && wtr"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@adobe/lit-mobx": "^2.2.2",
@@ -33,16 +31,12 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@open-wc/testing": "^4.0.0",
-    "@rollup/plugin-alias": "^6.0.0",
     "@types/file-saver": "^2.0.7",
     "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^7.10.0",
     "@typescript-eslint/parser": "^7.18.0",
-    "@web/dev-server-esbuild": "^1.0.5",
-    "@web/dev-server-rollup": "^0.6.4",
-    "@web/test-runner": "^0.20.2",
-    "@web/test-runner-playwright": "^0.11.1",
+    "@vitest/browser": "^4.1.2",
+    "@vitest/browser-playwright": "^4.1.2",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "~9.1.0",
     "eslint-import-resolver-typescript": "^4.4.4",
@@ -53,6 +47,7 @@
     "eslint-plugin-wc": "^3.0.1",
     "happy-dom": "^20.8.9",
     "husky": "~8.0.3",
+    "playwright": "^1.59.1",
     "typescript": "~5.2.2",
     "vite": "^6.3.6",
     "vite-plugin-top-level-await": "^1.6.0",
