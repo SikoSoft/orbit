@@ -249,6 +249,15 @@ export class AddEntityWidget extends MobxLitElement {
     }
   `;
 
+  @state()
+  get show(): boolean {
+    return (
+      this.state.debugMode &&
+      this.state.entityConfigs.length > 0 &&
+      this.state.entityConfigs.some(config => config.aiEnabled)
+    );
+  }
+
   connectedCallback(): void {
     super.connectedCallback();
     this.detectCamera();
@@ -364,7 +373,7 @@ export class AddEntityWidget extends MobxLitElement {
   }
 
   render(): TemplateResult | typeof nothing {
-    if (!this.state.debugMode || this.state.entityConfigs.length === 0) {
+    if (!this.show) {
       return nothing;
     }
 
