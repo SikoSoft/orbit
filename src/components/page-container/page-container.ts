@@ -16,6 +16,7 @@ import { reaction } from 'mobx';
 import { ThemeName, defaultTheme } from '@/models/Page';
 import { StorageItemKey } from '@/models/Storage';
 import { ThemesUpdatedEvent } from './page-container.events';
+import { translate } from '@/lib/Localization';
 
 @customElement('page-container')
 export class PageContainer extends MobxLitElement {
@@ -51,6 +52,18 @@ export class PageContainer extends MobxLitElement {
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.2s;
+    }
+
+    .offline-banner {
+      margin: 0 auto 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--box-border-color);
+      background: color-mix(in srgb, var(--box-background-color), #e67e22 12%);
+      color: var(--text-color);
+      max-width: 640px;
+      text-align: center;
+      font-weight: 600;
     }
 
     app-container {
@@ -160,6 +173,11 @@ export class PageContainer extends MobxLitElement {
     return html`
       <div class=${classMap(this.classes)}>
         <div class="overlay"></div>
+        ${!this.state.online
+          ? html`<div class="offline-banner">
+              ${translate('offlineModeBanner')}
+            </div>`
+          : null}
         <app-container
           @pop-up-opened=${this.handlePopUpOpened}
           @pop-up-closed=${this.handlePopUpClosed}

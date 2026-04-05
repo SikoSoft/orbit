@@ -17,6 +17,10 @@ import { ListConfigChangedEvent } from '@/components/list-config/list-config.eve
 import { CollapsableToggledEvent } from '@ss/ui/components/ss-collapsable.events';
 import { TabIndexChangedEvent } from '@ss/ui/components/tab-container.events';
 import { UserLoggedOutEvent } from '@/events/user-logged-out';
+import {
+  NetworkApiRequestFailedEvent,
+  networkApiRequestFailedEventName,
+} from '@/events/network-api-request-failed';
 
 import '@/components/entity-form/entity-form';
 import '@/components/entity-list/entity-list';
@@ -57,7 +61,16 @@ export class AppContainer extends MobxLitElement {
   connectedCallback(): void {
     super.connectedCallback();
 
+    this.state.setOnline(typeof navigator !== 'undefined' && navigator.onLine);
+
     this.setAuthToken(storage.getAuthToken());
+
+    window.addEventListener('online', this.handleOnline);
+    window.addEventListener('offline', this.handleOffline);
+    window.addEventListener(
+      networkApiRequestFailedEventName,
+      this.handleNetworkApiRequestFailed as EventListener,
+    );
 
     this.addEventListener('view-changed', (e: Event) => {
       this.handleViewChanged(e);
@@ -76,6 +89,31 @@ export class AppContainer extends MobxLitElement {
 
     this.restoreState();
   }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    window.removeEventListener('online', this.handleOnline);
+    window.removeEventListener('offline', this.handleOffline);
+    window.removeEventListener(
+      networkApiRequestFailedEventName,
+      this.handleNetworkApiRequestFailed as EventListener,
+    );
+  }
+
+  private handleOnline = (): void => {
+    this.state.setOnline(true);
+  };
+
+  private handleOffline = (): void => {
+    this.state.setOnline(false);
+  };
+
+  private handleNetworkApiRequestFailed = (e: Event): void => {
+    const event = e as NetworkApiRequestFailedEvent;
+    if (event.detail.type === 'offline' || event.detail.type === 'network') {
+      this.state.setOnline(false);
+    }
+  };
 
   setAuthToken(authToken: string): void {
     api.setAuthToken(authToken);

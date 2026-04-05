@@ -1,5 +1,12 @@
 import { config } from '../models/Config';
 import { ForbiddenApiRequestEvent } from '@/events/forbidden-api-request';
+import {
+  NetworkApiRequestFailedEvent,
+  type NetworkApiRequestFailedEventPayload,
+} from '@/events/network-api-request-failed';
+import { addToast } from '@/lib/Util';
+import { translate } from '@/lib/Localization';
+import { NotificationType } from '@ss/ui/components/notification-provider.models';
 
 export interface ApiResponse<ResponseBodyType> {
   status: number;
@@ -8,6 +15,15 @@ export interface ApiResponse<ResponseBodyType> {
 }
 
 export type ApiResult<ResponseBodyType> = ApiResponse<ResponseBodyType> | null;
+
+export type ApiErrorType = 'http' | 'offline' | 'network';
+
+export interface ApiErrorContext {
+  type: ApiErrorType;
+  url: string;
+  status?: number;
+  error?: unknown;
+}
 
 export const emptyResponseCodes = [202, 204];
 export const okResponseCodes = [200, 201, 202, 204];
@@ -21,13 +37,38 @@ export interface RequestConfig {
 export interface ApiConfig {
   authToken: string;
   baseUrl: string;
-  errorHandler: (url: string) => void;
+  errorHandler: (context: ApiErrorContext) => void;
 }
 
 export class Api {
   private authToken: string;
+  private lastNetworkErrorToastAt: number = 0;
+
   constructor(private config: ApiConfig) {
     this.authToken = config.authToken;
+  }
+
+  private handleError(url: URL, error: unknown): void {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return;
+    }
+
+    const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+
+    this.config.errorHandler({
+      type: isOffline ? 'offline' : 'network',
+      url: url.href,
+      error,
+    });
+  }
+
+  shouldShowNetworkErrorToast(now: number): boolean {
+    if (now - this.lastNetworkErrorToastAt <= 5000) {
+      return false;
+    }
+
+    this.lastNetworkErrorToastAt = now;
+    return true;
   }
 
   async httpRequest<ResponseType>(
@@ -56,8 +97,12 @@ export class Api {
         json = await response.json();
       }
 
-      if (response.status === 403) {
-        this.config.errorHandler(url.href);
+      if (!okResponseCodes.includes(response.status)) {
+        this.config.errorHandler({
+          type: 'http',
+          status: response.status,
+          url: url.href,
+        });
       }
 
       return {
@@ -66,6 +111,7 @@ export class Api {
         response: json as ResponseType,
       };
     } catch (error) {
+      this.handleError(url, error);
       console.error(`Api encountered an error performing request: ${error}`);
     }
 
@@ -126,7 +172,28 @@ export class Api {
 export const api = new Api({
   authToken: '',
   baseUrl: config.apiUrl,
-  errorHandler: (url: string): void => {
-    window.dispatchEvent(new ForbiddenApiRequestEvent({ url }));
+  errorHandler: ({ status, type, url }: ApiErrorContext): void => {
+    if (type === 'http' && status === 403) {
+      window.dispatchEvent(new ForbiddenApiRequestEvent({ url }));
+      return;
+    }
+
+    if (type === 'offline' || type === 'network') {
+      const payload: NetworkApiRequestFailedEventPayload = {
+        type,
+        url,
+      };
+      window.dispatchEvent(new NetworkApiRequestFailedEvent(payload));
+
+      const now = Date.now();
+      if (api.shouldShowNetworkErrorToast(now)) {
+        addToast(
+          translate(
+            type === 'offline' ? 'offlineDetected' : 'networkUnavailable',
+          ),
+          NotificationType.ERROR,
+        );
+      }
+    }
   },
 });
