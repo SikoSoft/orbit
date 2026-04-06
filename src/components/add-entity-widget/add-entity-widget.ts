@@ -13,6 +13,8 @@ import { AssistResponse } from './add-entity-widget.models';
 import '@ss/ui/components/pop-up';
 import '@ss/ui/components/ss-toggle';
 import { storage } from '@/lib/Storage';
+import '@/components/svg-icon/svg-icon';
+import { IconName } from '@/components/svg-icon/svg-icon.models';
 
 @themed()
 @customElement('add-entity-widget')
@@ -111,14 +113,10 @@ export class AddEntityWidget extends MobxLitElement {
         transform: scale(0.96);
       }
 
-      svg {
+      svg-icon {
         width: 1.5rem;
         height: 1.5rem;
-        stroke: var(--text-color);
-        fill: none;
-        stroke-width: 2;
-        stroke-linecap: round;
-        stroke-linejoin: round;
+        color: var(--text-color);
       }
 
       &[disabled] {
@@ -130,27 +128,6 @@ export class AddEntityWidget extends MobxLitElement {
           transform: none;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
-      }
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .spinner {
-      width: 1.5rem;
-      height: 1.5rem;
-      animation: spin 0.8s linear infinite;
-
-      circle {
-        fill: none;
-        stroke: var(--text-color);
-        stroke-width: 2;
-        stroke-linecap: round;
-        stroke-dasharray: 40;
-        stroke-dashoffset: 12;
       }
     }
 
@@ -193,14 +170,10 @@ export class AddEntityWidget extends MobxLitElement {
         background-color: var(--box-border-color);
       }
 
-      svg {
+      svg-icon {
         width: 1.25rem;
         height: 1.25rem;
-        stroke: var(--text-color);
-        fill: none;
-        stroke-width: 2;
-        stroke-linecap: round;
-        stroke-linejoin: round;
+        color: var(--text-color);
         flex-shrink: 0;
       }
     }
@@ -217,14 +190,10 @@ export class AddEntityWidget extends MobxLitElement {
       cursor: pointer;
       padding: 0;
 
-      svg {
+      svg-icon {
         width: 1rem;
         height: 1rem;
-        stroke: var(--text-color);
-        fill: none;
-        stroke-width: 2;
-        stroke-linecap: round;
-        stroke-linejoin: round;
+        color: var(--text-color);
       }
 
       &:hover {
@@ -406,12 +375,7 @@ export class AddEntityWidget extends MobxLitElement {
             title=${translate('addEntityWidget.options')}
             @click=${this.handleOptionsClick}
           >
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="3"></circle>
-              <path
-                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
-              ></path>
-            </svg>
+            <svg-icon name=${IconName.SETTINGS} size="16"></svg-icon>
           </button>
         </div>
 
@@ -426,23 +390,14 @@ export class AddEntityWidget extends MobxLitElement {
                   class="menu-item"
                   @click=${(): void => this.openFilePicker('camera')}
                 >
-                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
-                    ></path>
-                    <circle cx="12" cy="13" r="4"></circle>
-                  </svg>
+                  <svg-icon name=${IconName.CAMERA} size="20"></svg-icon>
                   ${translate('addEntityWidget.camera')}
                 </button>
                 <button
                   class="menu-item"
                   @click=${(): void => this.openFilePicker('storage')}
                 >
-                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
-                    ></path>
-                  </svg>
+                  <svg-icon name=${IconName.FOLDER} size="20"></svg-icon>
                   ${translate('addEntityWidget.storage')}
                 </button>
               </div>
@@ -456,18 +411,8 @@ export class AddEntityWidget extends MobxLitElement {
           @click=${(): void => this.handleTriggerClick()}
         >
           ${this.uploading
-            ? html`<svg
-                class="spinner"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle cx="12" cy="12" r="10"></circle>
-              </svg>`
-            : html`<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                <polyline points="21 15 16 10 5 21"></polyline>
-              </svg>`}
+            ? html`<svg-icon name=${IconName.SPINNER} size="24"></svg-icon>`
+            : html`<svg-icon name=${IconName.IMAGE} size="24"></svg-icon>`}
         </button>
       </div>
 

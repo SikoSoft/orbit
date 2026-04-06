@@ -3,8 +3,13 @@ import { property, customElement } from 'lit/decorators.js';
 
 import { themed } from '@/lib/Theme';
 
+import './svg/svg-camera';
 import './svg/svg-cloud';
 import './svg/svg-device';
+import './svg/svg-folder';
+import './svg/svg-image';
+import './svg/svg-settings';
+import './svg/svg-spinner';
 
 import {
   IconName,
@@ -61,10 +66,20 @@ export class SvgIcon extends LitElement {
 
   renderIcon(): TemplateResult | typeof nothing {
     switch (this[SvgIconProp.NAME]) {
+      case IconName.CAMERA:
+        return html`<svg-camera></svg-camera>`;
       case IconName.CLOUD:
         return html`<svg-cloud></svg-cloud>`;
       case IconName.DEVICE:
         return html`<svg-device></svg-device>`;
+      case IconName.FOLDER:
+        return html`<svg-folder></svg-folder>`;
+      case IconName.IMAGE:
+        return html`<svg-image></svg-image>`;
+      case IconName.SETTINGS:
+        return html`<svg-settings></svg-settings>`;
+      case IconName.SPINNER:
+        return html`<svg-spinner></svg-spinner>`;
       default:
         return nothing;
     }

@@ -2,8 +2,13 @@ import { ControlType } from '@/models/Control';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
 
 export enum IconName {
+  CAMERA = 'camera',
   CLOUD = 'cloud',
   DEVICE = 'device',
+  FOLDER = 'folder',
+  IMAGE = 'image',
+  SETTINGS = 'settings',
+  SPINNER = 'spinner',
 }
 
 export enum SvgIconProp {
