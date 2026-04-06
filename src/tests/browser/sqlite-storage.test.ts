@@ -4,7 +4,6 @@ import { SQLiteStorage } from '@/lib/SQLiteStorage';
 import {
   DataType,
   defaultEntityConfig,
-  defaultEntityPropertyConfig,
   type EntityConfig,
   type EntityPropertyConfig,
 } from 'api-spec/models/Entity';
@@ -15,6 +14,7 @@ import {
   ListSortNativeProperty,
 } from 'api-spec/models/List';
 import { OperationType } from 'api-spec/models/Operation';
+import { SettingName } from 'api-spec/models/Setting';
 import { NukedDataType, ExportDataType } from 'api-spec/models/Data';
 import type { RequestBody } from '@/components/entity-form/entity-form.models';
 
@@ -28,13 +28,11 @@ function makeProp(
   overrides: Partial<EntityPropertyConfig> = {},
 ): EntityPropertyConfig {
   return {
-    ...defaultEntityPropertyConfig,
-    entityConfigId: 0,
-    name: 'Test Prop',
-    dataType: DataType.SHORT_TEXT,
-    defaultValue: '',
+    id: 0, entityConfigId: 0, userId: '', name: 'Test Prop',
+    prefix: '', suffix: '', required: 0, repeat: 1, allowed: 1, hidden: false,
+    dataType: DataType.SHORT_TEXT, defaultValue: '',
     ...overrides,
-  };
+  } as unknown as EntityPropertyConfig;
 }
 
 function makePayload(configId: number, overrides: Partial<RequestBody> = {}): RequestBody {
@@ -422,9 +420,9 @@ describe('SQLiteStorage', () => {
 
     it('saves a setting within a list config', async () => {
       const id = await db.addListConfig();
-      await db.saveSetting(id, { name: 'compactMode', value: true });
+      await db.saveSetting(id, { name: SettingName.PUBLIC, value: true });
       const [config] = await db.getListConfigs();
-      expect((config.setting as Record<string, unknown>)['compactMode']).toBe(true);
+      expect((config.setting as Record<string, unknown>)[SettingName.PUBLIC]).toBe(true);
     });
 
     it('deletes a list config', async () => {

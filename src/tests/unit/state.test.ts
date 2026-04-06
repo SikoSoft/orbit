@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { AppState, defaultListConfig } from '@/state';
 import { ThemeName } from '@/models/Page';
 import { ListFilterType } from 'api-spec/models/List';
+import { DataType, type EntityPropertyConfig } from 'api-spec/models/Entity';
 
 describe('AppState', () => {
   let state: AppState;
@@ -158,7 +159,11 @@ describe('AppState', () => {
         aiEnabled: false,
         aiIdentifyPrompt: '',
         properties: [
-          { id: 10, name: 'Prop A', type: 'text' as const, entityConfigId: 1, minCount: 0, maxCount: 1, options: [] },
+          {
+            id: 10, entityConfigId: 1, userId: '', name: 'Prop A',
+            prefix: '', suffix: '', required: 0, repeat: 1, allowed: 1, hidden: false,
+            dataType: DataType.SHORT_TEXT, defaultValue: '',
+          } as EntityPropertyConfig,
         ],
       };
       state.setEntityConfigs([entityConfig]);
