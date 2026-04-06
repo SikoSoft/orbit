@@ -137,7 +137,7 @@ export class SQLiteStorage implements StorageSchema {
     { resolve: (v: unknown) => void; reject: (e: Error) => void }
   >();
 
-  constructor() {
+  constructor(private dbPath: string = '/orbit.db') {
     this.worker = new Worker(new URL('./sqlite.worker.ts', import.meta.url), {
       type: 'module',
     });
@@ -158,6 +158,15 @@ export class SQLiteStorage implements StorageSchema {
         p.resolve(result);
       }
     };
+
+    const initId = uuidv4();
+    new Promise<void>((resolve, reject) => {
+      this.pending.set(initId, {
+        resolve: resolve as (v: unknown) => void,
+        reject,
+      });
+    }).catch(() => {});
+    this.worker.postMessage({ id: initId, type: 'init', dbPath: this.dbPath, sql: '' });
   }
 
   private send<T>(

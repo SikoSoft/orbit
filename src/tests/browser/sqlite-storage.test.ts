@@ -52,7 +52,7 @@ describe('SQLiteStorage', () => {
   let db: SQLiteStorage;
 
   beforeEach(() => {
-    db = new SQLiteStorage();
+    db = new SQLiteStorage(':memory:');
   });
 
   afterEach(() => {

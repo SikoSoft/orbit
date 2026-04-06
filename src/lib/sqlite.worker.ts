@@ -73,7 +73,14 @@ const ctx = self as unknown as Ctx;
 
 let db: Database;
 
-const dbReady: Promise<void> = (async (): Promise<void> => {
+let resolveDbReady!: () => void;
+let rejectDbReady!: (e: Error) => void;
+const dbReady = new Promise<void>((resolve, reject) => {
+  resolveDbReady = resolve;
+  rejectDbReady = reject;
+});
+
+async function initDb(dbPath: string): Promise<void> {
   type InitFn = (opts: {
     locateFile: (filename: string) => string;
   }) => Promise<Sqlite3Static>;
@@ -83,15 +90,19 @@ const dbReady: Promise<void> = (async (): Promise<void> => {
       filename === 'sqlite3.wasm' ? sqliteWasmUrl : filename,
   });
 
-  try {
-    const poolUtil: SAHPoolUtil = await sqlite3.installOpfsSAHPoolVfs({});
-    db = new poolUtil.OpfsSAHPoolDb('/orbit.db');
-  } catch (e) {
-    console.warn(
-      'SQLiteStorage: OPFS unavailable, falling back to in-memory database.',
-      e,
-    );
+  if (dbPath === ':memory:') {
     db = new sqlite3.oo1.DB(':memory:', 'c');
+  } else {
+    try {
+      const poolUtil: SAHPoolUtil = await sqlite3.installOpfsSAHPoolVfs({});
+      db = new poolUtil.OpfsSAHPoolDb(dbPath);
+    } catch (e) {
+      console.warn(
+        'SQLiteStorage: OPFS unavailable, falling back to in-memory database.',
+        e,
+      );
+      db = new sqlite3.oo1.DB(':memory:', 'c');
+    }
   }
 
   db.exec(SCHEMA);
@@ -108,17 +119,30 @@ const dbReady: Promise<void> = (async (): Promise<void> => {
       // Column already exists — safe to ignore.
     }
   }
-})();
+}
 
 interface WorkerMessage {
   id: string;
-  type: 'exec_rows' | 'exec_value' | 'run';
+  type: 'init' | 'exec_rows' | 'exec_value' | 'run';
+  dbPath?: string;
   sql: string;
   bind?: BindableValue[];
 }
 
 ctx.onmessage = async (e: MessageEvent<WorkerMessage>): Promise<void> => {
   const { id, type, sql, bind } = e.data;
+
+  if (type === 'init') {
+    try {
+      await initDb(e.data.dbPath ?? '/orbit.db');
+      resolveDbReady();
+      ctx.postMessage({ id, result: null });
+    } catch (error) {
+      rejectDbReady(error as Error);
+      ctx.postMessage({ id, error: (error as Error).message });
+    }
+    return;
+  }
 
   try {
     await dbReady;
