@@ -34,7 +34,7 @@ Orbit is a Lit + MobX activity/list management SPA backed by the `gapi` Azure Fu
 ## Component Conventions
 
 - Components live in `src/components/<kebab-case-tag-name>/`
-- Each directory: `component-name.ts` (main), optionally `component-name.models.ts` (types) and `component-name.events.ts` (custom DOM events)
+- Each directory: `component-name.ts` (main), optionally `component-name.models.ts` (types), `component-name.test.ts` (tests) and `component-name.events.ts` (custom DOM events)
 - Extend `MobxLitElement` from `@adobe/lit-mobx` for reactive MobX integration
 - Register with `@customElement('tag-name')`
 
