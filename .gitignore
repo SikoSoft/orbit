@@ -43,3 +43,7 @@ __azurite_db_*
 *.tmp
 .cache/
 
+# Vitest browser test artifacts
+__screenshots__/
+.vitest-attachments/
+
