@@ -10,6 +10,7 @@ import '@ss/ui/components/tab-container';
 import '@ss/ui/components/tab-pane';
 import '@/components/data-manager/export-tool/export-tool';
 import '@/components/data-manager/import-tool/import-tool';
+import '@/components/data-manager/sync-tool/sync-tool';
 import '@/components/data-manager/tactical-nuke/tactical-nuke';
 import { themed } from '@/lib/Theme';
 
@@ -55,11 +56,14 @@ export class DataManager extends MobxLitElement {
           paneId="data-manager"
           index=${this.state.tabState['data-manager'] ?? 0}
         >
-          <tab-pane title=${translate('exportData')}>
+          <tab-pane title=${translate('export')}>
             <export-tool></export-tool>
           </tab-pane>
-          <tab-pane title=${translate('importData')}>
+          <tab-pane title=${translate('import')}>
             <import-tool></import-tool>
+          </tab-pane>
+          <tab-pane title=${translate('sync')}>
+            <sync-tool></sync-tool>
           </tab-pane>
           ${this.state.debugMode && this.nukeEnabled
             ? html`

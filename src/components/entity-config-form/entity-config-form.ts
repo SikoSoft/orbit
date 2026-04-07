@@ -88,6 +88,10 @@ export class EntityConfigForm extends MobxLitElement {
       font-weight: bold;
       margin-bottom: 0.5rem;
     }
+
+    ss-collapsable::part(head) {
+      font-weight: bold;
+    }
   `;
 
   @state()
