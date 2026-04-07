@@ -32,7 +32,7 @@ export class BulkManager extends MobxLitElement {
     :host {
       display: block;
       position: sticky;
-      top: 0;
+      top: 2rem;
       z-index: 20;
     }
 
