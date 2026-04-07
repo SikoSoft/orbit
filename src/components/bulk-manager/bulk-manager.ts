@@ -29,10 +29,14 @@ export class BulkManager extends MobxLitElement {
   private state = appState;
 
   static styles = css`
-    .bulk-manager {
+    :host {
+      display: block;
       position: sticky;
       top: 0;
-      left: 0;
+      z-index: 20;
+    }
+
+    .bulk-manager {
       padding: 1rem;
       box-shadow: 0 0 10px #000;
       display: none;

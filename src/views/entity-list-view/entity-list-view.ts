@@ -6,6 +6,7 @@ import '@/components/login-form/login-form';
 import '@/components/logged-in/logged-in';
 import '@/components/logged-out/logged-out';
 import '@/components/user-header/user-header';
+import '@/components/bulk-manager/bulk-manager';
 import { ViewElement } from '@/lib/ViewElement';
 import { EntityList } from '@/components/entity-list/entity-list';
 
@@ -29,6 +30,7 @@ export class EntityListView extends ViewElement {
   }
   render(): TemplateResult {
     return html` <user-header></user-header>
+      <bulk-manager></bulk-manager>
       <div class="view-content">
         <logged-out
           ><template><login-form></login-form></template

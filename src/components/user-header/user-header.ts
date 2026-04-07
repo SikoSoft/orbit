@@ -4,7 +4,6 @@ import { customElement } from 'lit/decorators.js';
 import '@/components/logged-in/logged-in';
 import '@/components/page-nav/page-nav';
 import '@/components/list-config/list-config';
-import '@/components/bulk-manager/bulk-manager';
 import '@/components/floating-widget/floating-widget';
 import '@/components/add-entity-widget/add-entity-widget';
 
@@ -16,8 +15,6 @@ export class UserHeader extends LitElement {
         <list-config></list-config>
 
         <page-nav></page-nav>
-
-        <bulk-manager></bulk-manager>
 
         <floating-widget position="top"></floating-widget>
 
