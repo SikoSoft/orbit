@@ -141,6 +141,9 @@ export class EntityListItem extends MobxLitElement {
   @state() pointerDown: Date = new Date();
   @state() downTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
   @state() downActivation: boolean = false;
+  private touchStartX: number = 0;
+  private touchStartY: number = 0;
+  private touchMoved: boolean = false;
 
   @state() get classes(): Record<string, boolean> {
     return {
@@ -224,34 +227,47 @@ export class EntityListItem extends MobxLitElement {
     return false;
   }
 
-  private handleTouchStart(e: TouchEvent): boolean {
-    return true;
+  private handleTouchStart(e: TouchEvent): void {
+    this.touchStartX = e.touches[0].clientX;
+    this.touchStartY = e.touches[0].clientY;
+    this.touchMoved = false;
     this.pointerDown = new Date();
     this.dispatchEvent(new PointerDownEvent({ time: this.pointerDown }));
     this.downTimeout = setTimeout(() => {
+      if (this.touchMoved) {
+        return;
+      }
       const time = new Date();
       if (time.getTime() - this.pointerDown.getTime() > holdThreshold) {
         this.dispatchEvent(new PointerLongPressEvent({ time }));
         this.downActivation = true;
-        return;
       }
     }, holdThreshold);
-    e.preventDefault();
-    return false;
   }
 
-  private handleTouchEnd(e: Event): boolean {
-    return true;
-    if (!this.downActivation) {
+  private handleTouchMove(e: TouchEvent): void {
+    const dx = e.touches[0].clientX - this.touchStartX;
+    const dy = e.touches[0].clientY - this.touchStartY;
+    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+      this.touchMoved = true;
+      if (this.downTimeout) {
+        clearTimeout(this.downTimeout);
+        this.downTimeout = undefined;
+      }
+    }
+  }
+
+  private handleTouchEnd(e: TouchEvent): void {
+    e.preventDefault();
+    if (!this.touchMoved && !this.downActivation) {
       this.dispatchEvent(new PointerUpEvent({ time: new Date() }));
     }
     this.downActivation = false;
+    this.touchMoved = false;
     if (this.downTimeout) {
       clearTimeout(this.downTimeout);
+      this.downTimeout = undefined;
     }
-
-    e.preventDefault();
-    return false;
   }
 
   private renderProperty(
@@ -368,6 +384,7 @@ export class EntityListItem extends MobxLitElement {
                 @mousedown=${this.handleMouseDown}
                 @mouseup=${this.handleMouseUp}
                 @touchstart=${this.handleTouchStart}
+                @touchmove=${this.handleTouchMove}
                 @touchend=${this.handleTouchEnd}
               >
                 <div class="show-full">
