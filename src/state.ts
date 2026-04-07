@@ -125,13 +125,6 @@ export class AppState {
   @observable
   public assistEnabled: boolean = false;
 
-  get listConfig(): ListConfig {
-    return (
-      this.listConfigs.find(config => this.listConfigId === config.id) ||
-      structuredClone(defaultListConfig)
-    );
-  }
-
   @observable
   public listConfigId: string = '';
 
@@ -167,6 +160,16 @@ export class AppState {
 
   @observable
   public online: boolean = false;
+
+  @observable
+  public viewIsReady: boolean = false;
+
+  get listConfig(): ListConfig {
+    return (
+      this.listConfigs.find(config => this.listConfigId === config.id) ||
+      structuredClone(defaultListConfig)
+    );
+  }
 
   @action
   public setActionSuggestions(suggestions: string[]): void {
@@ -456,6 +459,11 @@ export class AppState {
   @action
   setOnline(online: boolean): void {
     this.online = online;
+  }
+
+  @action
+  setViewReady(ready: boolean): void {
+    this.viewIsReady = ready;
   }
 
   constructor() {

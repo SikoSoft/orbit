@@ -1,4 +1,4 @@
-import { css, html, TemplateResult } from 'lit';
+import { css, html, nothing, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import '@/components/app-container/app-container';
@@ -177,7 +177,7 @@ export class PageContainer extends MobxLitElement {
           ? html`<div class="offline-banner">
               ${translate('offlineModeBanner')}
             </div>`
-          : null}
+          : nothing}
         <app-container
           @pop-up-opened=${this.handlePopUpOpened}
           @pop-up-closed=${this.handlePopUpClosed}

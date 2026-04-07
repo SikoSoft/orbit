@@ -81,6 +81,7 @@ export class AppContainer extends MobxLitElement {
     });
 
     window.addEventListener('view-ready', () => {
+      this.state.setViewReady(true);
       const { x, y } = storage.getWindowScrollPosition();
       setTimeout(() => {
         window.scrollTo(x, y);
