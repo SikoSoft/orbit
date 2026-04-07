@@ -29,7 +29,7 @@ export class PageContainer extends MobxLitElement {
       padding: 2rem;
       background-color: var(--background-color);
       min-height: 100vh;
-      overflow: hidden;
+      //overflow: hidden;
     }
 
     .page-container {
