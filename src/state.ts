@@ -164,6 +164,9 @@ export class AppState {
   @observable
   public viewIsReady: boolean = false;
 
+  @observable
+  public isNative: boolean = false;
+
   get listConfig(): ListConfig {
     return (
       this.listConfigs.find(config => this.listConfigId === config.id) ||
@@ -464,6 +467,11 @@ export class AppState {
   @action
   setViewReady(ready: boolean): void {
     this.viewIsReady = ready;
+  }
+
+  @action
+  setIsNative(isNative: boolean): void {
+    this.isNative = isNative;
   }
 
   constructor() {

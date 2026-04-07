@@ -96,6 +96,11 @@ export class PageContainer extends MobxLitElement {
     };
   }
 
+  @state()
+  get showOfflineBanner(): boolean {
+    return !this.state.online && !this.state.isNative;
+  }
+
   setTheme(theme: ThemeName): void {
     this.theme = theme;
     this.syncThemes();
@@ -173,7 +178,7 @@ export class PageContainer extends MobxLitElement {
     return html`
       <div class=${classMap(this.classes)}>
         <div class="overlay"></div>
-        ${!this.state.online
+        ${this.showOfflineBanner
           ? html`<div class="offline-banner">
               ${translate('offlineModeBanner')}
             </div>`
