@@ -78,7 +78,6 @@ export class NetworkStorage implements StorageSchema {
   }
 
   async addListConfig(): Promise<string> {
-    console.log('NetworkStorage.addListConfig');
     const result = await api.post<{ name: string }, { id: string }>(
       'listConfig',
       {

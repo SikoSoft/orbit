@@ -707,7 +707,6 @@ export class SQLiteStorage implements StorageSchema {
   }
 
   async addListConfig(): Promise<string> {
-    console.log('SQLiteStorage.addListConfig');
     const id = uuidv4();
 
     await this.run(
