@@ -25,6 +25,7 @@ import {
 import { MobxLitElement } from '@adobe/lit-mobx';
 import { appState } from '@/state';
 
+import '@ss/ui/components/ss-icon';
 import '@/components/entity-form/boolean-field/boolean-field';
 import '@/components/entity-form/date-field/date-field';
 import '@/components/entity-form/int-field/int-field';
@@ -287,13 +288,13 @@ export class PropertyField extends MobxLitElement {
                   @click=${(): void => {
                     this.requestDelete();
                   }}
-                  >${translate('delete')}</ss-button
-                >`
+                  ><ss-icon name="trash"></ss-icon
+                ></ss-button>`
               : nothing}
             ${this.canClone
               ? html` <ss-button @click=${this.clone}
-                  >${translate('clone')}</ss-button
-                >`
+                  ><ss-icon name="copy"></ss-icon
+                ></ss-button>`
               : nothing}
           </div>
         </div>
