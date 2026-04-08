@@ -137,6 +137,8 @@ export class EntityList extends ViewElement {
       () => this.state.listConfig,
       () => {
         this.state.setListEntities([]);
+        this.state.setSelectedActions([]);
+        this.state.setSelectMode(false);
         if (!initialFire) {
           this.sync(true);
         }
