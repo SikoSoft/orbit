@@ -53,6 +53,11 @@ export class PropertyField extends MobxLitElement {
         font-weight: bold;
         opacity: 0.9;
       }
+
+      .buttons {
+        display: flex;
+        gap: 0.5rem;
+      }
     }
   `;
 
