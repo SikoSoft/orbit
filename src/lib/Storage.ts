@@ -67,14 +67,11 @@ function delegateSource(): MethodDecorator {
         typeof propertyKey === 'symbol' ? propertyKey.toString() : propertyKey;
       if (delegateMethods.includes(key)) {
         const methodName = propertyKey as keyof StorageSchema;
-        if (
-          !storageDelegate ||
-          !storageDelegate[methodName] ||
-          typeof storageDelegate[methodName] !== 'function'
-        ) {
+        const method = storageDelegate[methodName];
+        if (!method || typeof method !== 'function') {
           continue;
         }
-        descriptor.value = storageDelegate[methodName]?.bind(storageDelegate);
+        descriptor.value = method.bind(storageDelegate);
         return descriptor;
       }
     }
