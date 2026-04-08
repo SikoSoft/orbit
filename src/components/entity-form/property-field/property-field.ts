@@ -122,7 +122,9 @@ export class PropertyField extends MobxLitElement {
           this.value !== undefined && this.value !== null && this.value !== 0
         );
       default:
-        return this.value !== undefined && this.value !== null;
+        return (
+          this.value !== undefined && this.value !== null && this.value !== ''
+        );
     }
   }
 
