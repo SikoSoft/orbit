@@ -108,6 +108,24 @@ export class PropertyField extends MobxLitElement {
   }
 
   @state()
+  get valueIsSet(): boolean {
+    let imageValue: ImageDataValue;
+    switch (this.propertyConfig.dataType) {
+      case DataType.IMAGE:
+        imageValue = this.value as ImageDataValue;
+        return (
+          imageValue !== undefined && imageValue !== null && !!imageValue.src
+        );
+      case DataType.INT:
+        return (
+          this.value !== undefined && this.value !== null && this.value !== 0
+        );
+      default:
+        return this.value !== undefined && this.value !== null;
+    }
+  }
+
+  @state()
   get propertyConfig(): EntityPropertyConfig {
     let propertyConfig = defaultEntityPropertyConfig;
 
@@ -173,6 +191,15 @@ export class PropertyField extends MobxLitElement {
 
   setConfirmationModalIsOpen(isOpen: boolean): void {
     this.confirmationModalIsOpen = isOpen;
+  }
+
+  requestDelete(): void {
+    if (this.valueIsSet) {
+      this.setConfirmationModalIsOpen(true);
+      return;
+    }
+
+    this.delete();
   }
 
   focus(): void {
@@ -258,7 +285,7 @@ export class PropertyField extends MobxLitElement {
             ${this.canDelete
               ? html` <ss-button
                   @click=${(): void => {
-                    this.setConfirmationModalIsOpen(true);
+                    this.requestDelete();
                   }}
                   >${translate('delete')}</ss-button
                 >`
