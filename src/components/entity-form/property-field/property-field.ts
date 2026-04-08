@@ -42,11 +42,17 @@ export class PropertyField extends MobxLitElement {
       display: block;
     }
 
-    label {
-      font-weight: bold;
+    .name-row {
       margin-bottom: 0.25rem;
       display: block;
-      opacity: 0.9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      label {
+        font-weight: bold;
+        opacity: 0.9;
+      }
     }
   `;
 
@@ -236,29 +242,30 @@ export class PropertyField extends MobxLitElement {
   render(): TemplateResult | typeof nothing {
     return html`
       <div class="property">
-        <label for=${`property-${this.propertyConfig.id}`}
-          >${this.propertyConfig.name}</label
-        >
-        ${this.renderField()}
-
-        <div
-          class="buttons"
-          data-used-instances=${this.usedInstancesOfThisProperty}
-        >
-          ${this.canDelete
-            ? html` <ss-button
-                @click=${(): void => {
-                  this.setConfirmationModalIsOpen(true);
-                }}
-                >${translate('delete')}</ss-button
-              >`
-            : nothing}
-          ${this.canClone
-            ? html` <ss-button @click=${this.clone}
-                >${translate('clone')}</ss-button
-              >`
-            : nothing}
+        <div class="name-row">
+          <label for=${`property-${this.propertyConfig.id}`}
+            >${this.propertyConfig.name}</label
+          >
+          <div
+            class="buttons"
+            data-used-instances=${this.usedInstancesOfThisProperty}
+          >
+            ${this.canDelete
+              ? html` <ss-button
+                  @click=${(): void => {
+                    this.setConfirmationModalIsOpen(true);
+                  }}
+                  >${translate('delete')}</ss-button
+                >`
+              : nothing}
+            ${this.canClone
+              ? html` <ss-button @click=${this.clone}
+                  >${translate('clone')}</ss-button
+                >`
+              : nothing}
+          </div>
         </div>
+        ${this.renderField()}
 
         <confirmation-modal
           ?open=${this.confirmationModalIsOpen}
