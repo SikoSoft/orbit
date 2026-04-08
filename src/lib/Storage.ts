@@ -44,9 +44,11 @@ export interface SavedListFilter {
   name: string;
 }
 
-let storageDelegates: StorageSchema[] = [networkStorage];
-if (localStorage.getItem(StorageItemKey.STORAGE_SOURCE) === 'device') {
-  storageDelegates = [sqliteStorage];
+const storageDelegates: StorageSchema[] = [networkStorage, sqliteStorage];
+for (let i = 0; i < storageDelegates.length; i++) {
+  storageDelegates[i].isActive =
+    storageDelegates[i].storageSource ===
+    localStorage.getItem(StorageItemKey.STORAGE_SOURCE);
 }
 
 function delegateSource(): MethodDecorator {
@@ -55,8 +57,9 @@ function delegateSource(): MethodDecorator {
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ) {
-    for (let i = 0; i < storageDelegates.length; i++) {
-      const storageDelegate = storageDelegates[i];
+    for (const storageDelegate of storageDelegates.filter(
+      delegate => delegate.isActive,
+    )) {
       const delegateMethods = Object.getOwnPropertyNames(
         Object.getPrototypeOf(storageDelegate),
       );
@@ -64,7 +67,11 @@ function delegateSource(): MethodDecorator {
         typeof propertyKey === 'symbol' ? propertyKey.toString() : propertyKey;
       if (delegateMethods.includes(key)) {
         const methodName = propertyKey as keyof StorageSchema;
-        if (!storageDelegate || !storageDelegate[methodName]) {
+        if (
+          !storageDelegate ||
+          !storageDelegate[methodName] ||
+          typeof storageDelegate[methodName] !== 'function'
+        ) {
           continue;
         }
         descriptor.value = storageDelegate[methodName]?.bind(storageDelegate);
@@ -76,6 +83,21 @@ function delegateSource(): MethodDecorator {
 }
 
 export class Storage implements StorageSchema {
+  isActive = true;
+
+  setStorageSource(source: StorageSource): void {
+    storageDelegates.forEach(delegate => {
+      delegate.isActive = delegate.storageSource === source;
+    });
+
+    if (!Object.values(StorageSource).includes(source)) {
+      localStorage.setItem(StorageItemKey.STORAGE_SOURCE, StorageSource.CLOUD);
+      return;
+    }
+
+    localStorage.setItem(StorageItemKey.STORAGE_SOURCE, source);
+  }
+
   resetDelegatedData(): void {
     for (const key of delegatedStorageItemKeys) {
       localStorage.removeItem(key);
@@ -478,15 +500,6 @@ export class Storage implements StorageSchema {
 
   setTabState(state: Record<string, number>): void {
     localStorage.setItem(StorageItemKey.TAB_INDEX_STATE, JSON.stringify(state));
-  }
-
-  setStorageSource(source: StorageSource): void {
-    if (!Object.values(StorageSource).includes(source)) {
-      localStorage.setItem(StorageItemKey.STORAGE_SOURCE, StorageSource.CLOUD);
-      return;
-    }
-
-    localStorage.setItem(StorageItemKey.STORAGE_SOURCE, source);
   }
 
   getStorageSource(): StorageSource | null {

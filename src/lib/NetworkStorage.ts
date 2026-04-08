@@ -6,7 +6,7 @@ import {
   ListSortNativeProperty,
 } from 'api-spec/models/List';
 import { api } from './Api';
-import { StorageResult, StorageSchema } from '@/models/Storage';
+import { StorageResult, StorageSchema, StorageSource } from '@/models/Storage';
 import { Setting } from 'api-spec/models/Setting';
 import { EntityConfig, EntityPropertyConfig } from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
@@ -25,6 +25,9 @@ import {
 } from '@/components/account-form/account-form.models';
 
 export class NetworkStorage implements StorageSchema {
+  isActive = true;
+  storageSource = StorageSource.CLOUD;
+
   async getListConfigs(): Promise<ListConfig[]> {
     const result = await api.get<{ listConfigs: ListConfig[] }>('listConfig');
 
@@ -75,6 +78,7 @@ export class NetworkStorage implements StorageSchema {
   }
 
   async addListConfig(): Promise<string> {
+    console.log('NetworkStorage.addListConfig');
     const result = await api.post<{ name: string }, { id: string }>(
       'listConfig',
       {

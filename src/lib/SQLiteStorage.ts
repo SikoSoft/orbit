@@ -29,7 +29,7 @@ import {
   NukedDataType,
 } from 'api-spec/models/Data';
 
-import { StorageResult, StorageSchema } from '@/models/Storage';
+import { StorageResult, StorageSchema, StorageSource } from '@/models/Storage';
 import { RequestBody } from '@/components/entity-form/entity-form.models';
 import { BulkOperationPayload } from '@/components/bulk-manager/bulk-manager.models';
 import {
@@ -131,6 +131,9 @@ function rowToEntityProperty(row: Record<string, unknown>): EntityProperty {
 }
 
 export class SQLiteStorage implements StorageSchema {
+  isActive = false;
+  storageSource = StorageSource.DEVICE;
+
   private worker: Worker;
   private pending = new Map<
     string,
@@ -166,7 +169,12 @@ export class SQLiteStorage implements StorageSchema {
         reject,
       });
     }).catch(() => {});
-    this.worker.postMessage({ id: initId, type: 'init', dbPath: this.dbPath, sql: '' });
+    this.worker.postMessage({
+      id: initId,
+      type: 'init',
+      dbPath: this.dbPath,
+      sql: '',
+    });
   }
 
   private send<T>(
@@ -699,6 +707,7 @@ export class SQLiteStorage implements StorageSchema {
   }
 
   async addListConfig(): Promise<string> {
+    console.log('SQLiteStorage.addListConfig');
     const id = uuidv4();
 
     await this.run(

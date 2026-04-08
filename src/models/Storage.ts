@@ -56,6 +56,8 @@ export type StorageErrorResult = {
 export type StorageResult<T> = StorageOkResult<T> | StorageErrorResult;
 
 export interface StorageSchema {
+  isActive: boolean;
+  storageSource?: StorageSource;
   setAuthToken?(authToken: string): void;
   getAuthToken?(): string;
   getListConfigs?(): Promise<ListConfig[]>;
