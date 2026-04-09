@@ -10,6 +10,7 @@ import './svg/svg-folder';
 import './svg/svg-image';
 import './svg/svg-settings';
 import './svg/svg-spinner';
+import './svg/svg-upload';
 
 import {
   IconName,
@@ -80,6 +81,8 @@ export class SvgIcon extends LitElement {
         return html`<svg-settings></svg-settings>`;
       case IconName.SPINNER:
         return html`<svg-spinner></svg-spinner>`;
+      case IconName.UPLOAD:
+        return html`<svg-upload></svg-upload>`;
       default:
         return nothing;
     }
