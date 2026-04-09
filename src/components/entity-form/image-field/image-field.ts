@@ -1,4 +1,4 @@
-import { html, TemplateResult } from 'lit';
+import { css, html, nothing, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import '@ss/ui/components/ss-input';
@@ -22,6 +22,31 @@ import { NotificationType } from '@ss/ui/components/notification-provider.models
 
 @customElement('image-field')
 export class ImageField extends MobxLitElement {
+  static styles = css`
+    .preview {
+      margin-bottom: 0.5rem;
+
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+    }
+
+    .url-field {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+
+      ss-input {
+        flex-grow: 1;
+      }
+
+      ss-button::part(button) {
+        cursor: pointer;
+      }
+    }
+  `;
+
   private state = appState;
 
   @property({ type: Number })
@@ -54,6 +79,9 @@ export class ImageField extends MobxLitElement {
 
   @state()
   private destImgPath: string = '';
+
+  @state()
+  popUpIsOpen: boolean = false;
 
   get uploadUrl(): string {
     return new URL(
@@ -88,6 +116,7 @@ export class ImageField extends MobxLitElement {
     this.handleValueChanged({ src: e.detail.url, alt: this.alt });
     this.src = e.detail.url;
     addToast(translate('fileUploadSuccess'), NotificationType.SUCCESS);
+    this.popUpIsOpen = false;
   }
 
   fileUploadFailed(): void {
@@ -101,29 +130,30 @@ export class ImageField extends MobxLitElement {
     }
   }
 
+  toggleUploadModal(): void {
+    this.popUpIsOpen = !this.popUpIsOpen;
+  }
+
   render(): TemplateResult {
     return html`
-      <ss-input
-        type="text"
-        value=${this.destImgPath}
-        placeholder=${translate('imageDestPath')}
-        @input-changed=${this.handleDestChanged}
-      ></ss-input>
+      ${this.src
+        ? html`<div class="preview">
+            <img src=${this.src} alt=${this.alt} />
+          </div>`
+        : nothing}
 
-      <file-upload
-        preview
-        endpointUrl=${this.uploadUrl}
-        authToken=${this.state.authToken}
-        @file-upload-success=${this.fileUploadSuccess}
-        @file-upload-failed=${this.fileUploadFailed}
-      ></file-upload>
+      <div class="url-field">
+        <ss-input
+          type="text"
+          value=${this.src}
+          placeholder=${translate('imageUrl')}
+          @input-changed=${this.handleSrcChanged}
+        ></ss-input>
 
-      <ss-input
-        type="text"
-        value=${this.src}
-        placeholder=${translate('imageUrl')}
-        @input-changed=${this.handleSrcChanged}
-      ></ss-input>
+        <ss-button @click=${this.toggleUploadModal}>
+          <svg-icon name="upload" size="16"></svg-icon>
+        </ss-button>
+      </div>
 
       <ss-input
         type="text"
@@ -131,6 +161,28 @@ export class ImageField extends MobxLitElement {
         placeholder=${translate('imageAltText')}
         @input-changed=${this.handleAltChanged}
       ></ss-input>
+
+      <pop-up
+        closeButton
+        ?open=${this.popUpIsOpen}
+        @pop-up-closed=${(): void => {
+          this.popUpIsOpen = false;
+        }}
+      >
+        <ss-input
+          type="text"
+          value=${this.destImgPath}
+          placeholder=${translate('imageDestPath')}
+          @input-changed=${this.handleDestChanged}
+        ></ss-input>
+
+        <file-upload
+          endpointUrl=${this.uploadUrl}
+          authToken=${this.state.authToken}
+          @file-upload-success=${this.fileUploadSuccess}
+          @file-upload-failed=${this.fileUploadFailed}
+        ></file-upload>
+      </pop-up>
     `;
   }
 }
