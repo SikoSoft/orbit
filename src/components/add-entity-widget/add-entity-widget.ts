@@ -319,6 +319,10 @@ export class AddEntityWidget extends MobxLitElement {
         'assist/entity',
         import.meta.env.APP_BASE_API_URL,
       );
+      assistUrl.searchParams.set(
+        'timeZone',
+        new Date().getTimezoneOffset().toString(),
+      );
       if (this.state.assistSaveImage) {
         assistUrl.searchParams.set('saveImage', '1');
       }
@@ -334,6 +338,7 @@ export class AddEntityWidget extends MobxLitElement {
         const { entity } = result.response;
         this.goToFirstMatchingListConfig(entity);
         //this.state.setListItems([entity, ...this.state.listItems]);
+        return;
       }
     } finally {
       this.uploading = false;
