@@ -73,6 +73,8 @@ export const lightStyles = [
       --unsynced-background-color: #c4c4c4;
       --primary-color: #0066ff;
       --border-color: #ccc;
+      --border-color-light: #eee;
+      --border-color-dark: #999;
       --border-radius: 0.5rem;
       --padding: 0.5rem;
       --font-size: 1rem;
@@ -128,6 +130,8 @@ export const darkStyles = [
       --unsynced-background-color: #c4c4c4;
       --primary-color: #0066ff;
       --border-color: #38635e;
+      --border-color-light: #5a857f;
+      --border-color-dark: #0a1911;
       --border-radius: 0.5rem;
       --padding: 0.5rem;
       --font-size: 1rem;

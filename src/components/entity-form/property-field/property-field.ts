@@ -61,7 +61,7 @@ export class PropertyField extends MobxLitElement {
 
         ss-button::part(button):hover {
           cursor: pointer;
-          border-color: var(--primary-color);
+          border-color: var(--border-color-dark);
         }
 
         ss-button:hover {
