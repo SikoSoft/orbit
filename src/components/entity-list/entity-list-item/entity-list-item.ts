@@ -44,6 +44,10 @@ export class EntityListItem extends MobxLitElement {
       --padding: 1rem;
     }
 
+    .debug-entity-type {
+      background-color: #fdc;
+    }
+
     .entity-list-item {
       padding: 0.5rem;
       text-align: center;
@@ -51,6 +55,7 @@ export class EntityListItem extends MobxLitElement {
 
       &.selected {
         background-color: #fdc;
+        color: #000;
       }
     }
 
@@ -387,6 +392,11 @@ export class EntityListItem extends MobxLitElement {
                 @touchmove=${this.handleTouchMove}
                 @touchend=${this.handleTouchEnd}
               >
+                ${this.state.debugMode
+                  ? html` <div class="debug-entity-type">
+                      ${this.entityConfig?.name || this.type}
+                    </div>`
+                  : nothing}
                 <div class="show-full">
                   <ss-button @click=${this.showFull}
                     >${translate('showFull')}</ss-button
