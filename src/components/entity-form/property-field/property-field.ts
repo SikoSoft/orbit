@@ -58,6 +58,41 @@ export class PropertyField extends MobxLitElement {
       .buttons {
         display: flex;
         gap: 0.5rem;
+
+        ss-button::part(button):hover {
+          cursor: pointer;
+          border-color: var(--primary-color);
+        }
+
+        ss-button:hover {
+          animation: button-shine 0.2s ease-in-out;
+
+          ss-icon {
+            animation: icon-shine 0.2s ease-in-out;
+          }
+        }
+      }
+    }
+
+    @keyframes button-shine {
+      0% {
+        filter: brightness(1);
+      }
+      50% {
+        filter: brightness(1.6) drop-shadow(0 0 3px currentColor);
+      }
+      100% {
+        filter: brightness(1);
+      }
+    }
+
+    @keyframes icon-shine {
+      0%,
+      100% {
+        filter: brightness(1);
+      }
+      50% {
+        filter: brightness(2.5) drop-shadow(0 0 3px currentColor);
       }
     }
   `;
@@ -290,12 +325,12 @@ export class PropertyField extends MobxLitElement {
                   @click=${(): void => {
                     this.requestDelete();
                   }}
-                  ><ss-icon name="trash"></ss-icon
+                  ><ss-icon name="trash" size="16"></ss-icon
                 ></ss-button>`
               : nothing}
             ${this.canClone
               ? html` <ss-button @click=${this.clone}
-                  ><ss-icon name="copy"></ss-icon
+                  ><ss-icon name="copy" size="16"></ss-icon
                 ></ss-button>`
               : nothing}
           </div>
