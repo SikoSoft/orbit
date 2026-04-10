@@ -37,6 +37,7 @@ import '@ss/ui/components/ss-select';
 import '@ss/ui/components/tag-manager';
 import '@ss/ui/components/confirmation-modal';
 import '@/components/entity-form/property-field/property-field';
+import '@/components/svg-icon/svg-icon';
 
 import {
   EntityItemCanceledEvent,
@@ -131,7 +132,9 @@ export class EntityForm extends ViewElement {
       text-align: center;
       background: #fff;
       color: #000;
-      transition: background 0.15s, color 0.15s;
+      transition:
+        background 0.15s,
+        color 0.15s;
 
       &:hover {
         background: #000;
@@ -366,7 +369,14 @@ export class EntityForm extends ViewElement {
                 : false,
           }));
 
-      this.propertyInstances = [...existingProperties, ...availableProperties];
+      if (this.entityId) {
+        this.propertyInstances = [...existingProperties];
+      } else {
+        this.propertyInstances = [
+          ...existingProperties,
+          ...availableProperties,
+        ];
+      }
       this.sortedIds = this.propertyInstances.map(prop => prop.uiId);
       this.propertiesSetup = true;
       this.initialHash = this.instancesHash = await this.getInstancesHash();
@@ -781,26 +791,7 @@ export class EntityForm extends ViewElement {
       <div class="box no-entity-configs">${translate('noEntityConfigs')}</div>
 
       <div class="wizard-banner" @click=${(): void => navigate('/wizard')}>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="48"
-          height="48"
-          viewBox="0 0 48 48"
-          fill="#000"
-          stroke="none"
-        >
-          <!-- Wand shaft -->
-          <rect
-            x="6" y="38" width="26" height="4" rx="2"
-            transform="rotate(-45 6 38)"
-          />
-          <!-- Wand tip star -->
-          <polygon points="28,4 29.5,8.5 34,8.5 30.5,11.5 32,16 28,13 24,16 25.5,11.5 22,8.5 26.5,8.5" />
-          <!-- Sparkles -->
-          <polygon points="8,6 8.8,8.5 11.5,8.5 9.3,10.1 10.1,12.5 8,11 5.9,12.5 6.7,10.1 4.5,8.5 7.2,8.5" />
-          <polygon points="38,24 38.5,25.8 40.5,25.8 38.9,27 39.5,28.8 38,27.7 36.5,28.8 37.1,27 35.5,25.8 37.5,25.8" />
-          <polygon points="42,10 42.4,11.3 43.8,11.3 42.7,12.1 43.1,13.5 42,12.7 40.9,13.5 41.3,12.1 40.2,11.3 41.6,11.3" />
-        </svg>
+        <svg-icon name="wizard" size="48"></svg-icon>
 
         <span class="wizard-banner-text"
           >${translate('getStartedWithWizard')}</span
