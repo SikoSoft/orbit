@@ -10,6 +10,7 @@ export enum IconName {
   SETTINGS = 'settings',
   SPINNER = 'spinner',
   UPLOAD = 'upload',
+  WIZARD = 'wizard',
 }
 
 export enum SvgIconProp {

@@ -11,6 +11,7 @@ import './svg/svg-image';
 import './svg/svg-settings';
 import './svg/svg-spinner';
 import './svg/svg-upload';
+import './svg/svg-wizard';
 
 import {
   IconName,
@@ -83,6 +84,8 @@ export class SvgIcon extends LitElement {
         return html`<svg-spinner></svg-spinner>`;
       case IconName.UPLOAD:
         return html`<svg-upload></svg-upload>`;
+      case IconName.WIZARD:
+        return html`<svg-wizard></svg-wizard>`;
       default:
         return nothing;
     }
