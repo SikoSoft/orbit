@@ -203,5 +203,8 @@
   "collectionWizard.skip": "Skip for now",
   "collectionWizard.importSuccess": "Collection created successfully.",
   "collectionWizard.importFailed": "Failed to create collection. Please try again.",
-  "collectionWizard.notFound": "Collection type not found."
+  "collectionWizard.notFound": "Collection type not found.",
+  "assistAddSuccess": "Item added successfully.",
+  "assistAddFailed": "Could not identify the item. Please try something else.",
+  "assistAddError": "An error occurred while adding the item. Please try again later."
 }

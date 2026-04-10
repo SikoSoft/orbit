@@ -27,6 +27,7 @@ export interface ApiErrorContext {
 
 export const emptyResponseCodes = [202, 204];
 export const okResponseCodes = [200, 201, 202, 204];
+export const serverErrorResponseCodes = [500, 502, 503, 504];
 
 export interface RequestConfig {
   method: string | undefined;

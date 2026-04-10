@@ -5,7 +5,7 @@ import { MobxLitElement } from '@adobe/lit-mobx';
 import { Entity } from 'api-spec/models/Entity';
 import { ListConfig } from 'api-spec/lib/ListConfig';
 import { appState } from '@/state';
-import { api } from '@/lib/Api';
+import { api, serverErrorResponseCodes } from '@/lib/Api';
 import { themed } from '@/lib/Theme';
 import { translate } from '@/lib/Localization';
 import { ToggleChangedEvent } from '@ss/ui/components/ss-toggle.events';
@@ -15,6 +15,8 @@ import '@ss/ui/components/ss-toggle';
 import { storage } from '@/lib/Storage';
 import '@/components/svg-icon/svg-icon';
 import { IconName } from '@/components/svg-icon/svg-icon.models';
+import { addToast } from '@/lib/Util';
+import { NotificationType } from '@ss/ui/components/notification-provider.models';
 
 @themed()
 @customElement('add-entity-widget')
@@ -334,10 +336,25 @@ export class AddEntityWidget extends MobxLitElement {
         body: formData,
       });
 
-      if (result && result.isOk) {
+      if (!result) {
+        addToast(translate('assistAddFailed'), NotificationType.ERROR);
+        return;
+      }
+
+      if (serverErrorResponseCodes.includes(result.status)) {
+        addToast(translate('assistAddError'), NotificationType.ERROR);
+        return;
+      }
+
+      if (result.status === 422) {
+        addToast(translate('assistAddFailed'), NotificationType.ERROR);
+        return;
+      }
+
+      if (result.isOk) {
         const { entity } = result.response;
         this.goToFirstMatchingListConfig(entity);
-        //this.state.setListItems([entity, ...this.state.listItems]);
+        addToast(translate('assistAddSuccess'), NotificationType.SUCCESS);
         return;
       }
     } finally {
