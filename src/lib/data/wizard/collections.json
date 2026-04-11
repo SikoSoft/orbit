@@ -18,7 +18,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 102,
@@ -32,7 +34,9 @@
           "hidden": false,
           "prefix": "#",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 103,
@@ -46,7 +50,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 104,
@@ -60,7 +66,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 105,
@@ -74,7 +82,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         }
       ],
       "revisionOf": null,
@@ -100,7 +110,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 202,
@@ -114,7 +126,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 203,
@@ -128,7 +142,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 204,
@@ -142,7 +158,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "g",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 205,
@@ -156,7 +174,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         }
       ],
       "revisionOf": null,
@@ -182,7 +202,9 @@
           "hidden": false,
           "prefix": "#",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 302,
@@ -196,7 +218,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 303,
@@ -210,7 +234,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 304,
@@ -224,7 +250,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 305,
@@ -238,7 +266,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         }
       ],
       "revisionOf": null,
@@ -264,7 +294,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 402,
@@ -278,7 +310,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 403,
@@ -292,7 +326,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 404,
@@ -306,7 +342,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 405,
@@ -320,7 +358,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 406,
@@ -334,7 +374,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 407,
@@ -348,7 +390,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         }
       ],
       "revisionOf": null,
@@ -374,7 +418,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 502,
@@ -388,7 +434,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 503,
@@ -402,7 +450,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 504,
@@ -416,7 +466,9 @@
           "hidden": false,
           "prefix": "100% Complete: ",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 505,
@@ -430,7 +482,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         }
       ],
       "revisionOf": null,
@@ -456,7 +510,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 602,
@@ -470,7 +526,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 603,
@@ -484,7 +542,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 604,
@@ -498,7 +558,9 @@
           "hidden": false,
           "prefix": "Complete In Box: ",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 605,
@@ -512,7 +574,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         }
       ],
       "revisionOf": null,
@@ -538,7 +602,9 @@
           "hidden": false,
           "prefix": "Scott #",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 702,
@@ -552,7 +618,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 703,
@@ -566,7 +634,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 704,
@@ -580,7 +650,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 705,
@@ -594,7 +666,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         }
       ],
       "revisionOf": null,
@@ -620,7 +694,9 @@
           "hidden": false,
           "prefix": "Ref: ",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 802,
@@ -634,7 +710,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 803,
@@ -648,7 +726,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "mm",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 804,
@@ -662,7 +742,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 805,
@@ -676,7 +758,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         }
       ],
       "revisionOf": null,
@@ -702,7 +786,9 @@
           "hidden": false,
           "prefix": "SKU: ",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 902,
@@ -716,7 +802,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 903,
@@ -730,7 +818,9 @@
           "hidden": false,
           "prefix": "US ",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 904,
@@ -744,7 +834,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 905,
@@ -758,7 +850,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         }
       ],
       "revisionOf": null,
@@ -784,7 +878,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 1002,
@@ -798,7 +894,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 1003,
@@ -812,7 +910,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 1004,
@@ -826,7 +926,9 @@
           "hidden": false,
           "prefix": "",
           "suffix": "",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         },
         {
           "id": 1005,
@@ -840,7 +942,9 @@
           "hidden": false,
           "prefix": "LE: ",
           "suffix": " pcs",
-          "userId": "placeholder-user-id"
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": []
         }
       ],
       "revisionOf": null,
@@ -855,15 +959,25 @@
       "userId": "placeholder-user-id",
       "name": "Trading Cards",
       "filter": {
-        "tagging": { "containsOneOf": [], "containsAllOf": [] },
+        "tagging": {
+          "containsOneOf": [],
+          "containsAllOf": []
+        },
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [1],
-        "time": { "type": "allTime" },
+        "includeTypes": [
+          1
+        ],
+        "time": {
+          "type": "allTime"
+        },
         "text": []
       },
-      "sort": { "property": "createdAt", "direction": "desc" },
+      "sort": {
+        "property": "createdAt",
+        "direction": "desc"
+      },
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
@@ -879,15 +993,25 @@
       "userId": "placeholder-user-id",
       "name": "Coins",
       "filter": {
-        "tagging": { "containsOneOf": [], "containsAllOf": [] },
+        "tagging": {
+          "containsOneOf": [],
+          "containsAllOf": []
+        },
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [2],
-        "time": { "type": "allTime" },
+        "includeTypes": [
+          2
+        ],
+        "time": {
+          "type": "allTime"
+        },
         "text": []
       },
-      "sort": { "property": "createdAt", "direction": "desc" },
+      "sort": {
+        "property": "createdAt",
+        "direction": "desc"
+      },
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
@@ -903,15 +1027,25 @@
       "userId": "placeholder-user-id",
       "name": "Comic Books",
       "filter": {
-        "tagging": { "containsOneOf": [], "containsAllOf": [] },
+        "tagging": {
+          "containsOneOf": [],
+          "containsAllOf": []
+        },
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [3],
-        "time": { "type": "allTime" },
+        "includeTypes": [
+          3
+        ],
+        "time": {
+          "type": "allTime"
+        },
         "text": []
       },
-      "sort": { "property": "createdAt", "direction": "desc" },
+      "sort": {
+        "property": "createdAt",
+        "direction": "desc"
+      },
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
@@ -927,15 +1061,25 @@
       "userId": "placeholder-user-id",
       "name": "Vinyl Records",
       "filter": {
-        "tagging": { "containsOneOf": [], "containsAllOf": [] },
+        "tagging": {
+          "containsOneOf": [],
+          "containsAllOf": []
+        },
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [4],
-        "time": { "type": "allTime" },
+        "includeTypes": [
+          4
+        ],
+        "time": {
+          "type": "allTime"
+        },
         "text": []
       },
-      "sort": { "property": "createdAt", "direction": "desc" },
+      "sort": {
+        "property": "createdAt",
+        "direction": "desc"
+      },
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
@@ -951,15 +1095,25 @@
       "userId": "placeholder-user-id",
       "name": "Action Figures",
       "filter": {
-        "tagging": { "containsOneOf": [], "containsAllOf": [] },
+        "tagging": {
+          "containsOneOf": [],
+          "containsAllOf": []
+        },
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [5],
-        "time": { "type": "allTime" },
+        "includeTypes": [
+          5
+        ],
+        "time": {
+          "type": "allTime"
+        },
         "text": []
       },
-      "sort": { "property": "createdAt", "direction": "desc" },
+      "sort": {
+        "property": "createdAt",
+        "direction": "desc"
+      },
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
@@ -975,15 +1129,25 @@
       "userId": "placeholder-user-id",
       "name": "Video Games",
       "filter": {
-        "tagging": { "containsOneOf": [], "containsAllOf": [] },
+        "tagging": {
+          "containsOneOf": [],
+          "containsAllOf": []
+        },
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [6],
-        "time": { "type": "allTime" },
+        "includeTypes": [
+          6
+        ],
+        "time": {
+          "type": "allTime"
+        },
         "text": []
       },
-      "sort": { "property": "createdAt", "direction": "desc" },
+      "sort": {
+        "property": "createdAt",
+        "direction": "desc"
+      },
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
@@ -999,15 +1163,25 @@
       "userId": "placeholder-user-id",
       "name": "Stamps",
       "filter": {
-        "tagging": { "containsOneOf": [], "containsAllOf": [] },
+        "tagging": {
+          "containsOneOf": [],
+          "containsAllOf": []
+        },
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [7],
-        "time": { "type": "allTime" },
+        "includeTypes": [
+          7
+        ],
+        "time": {
+          "type": "allTime"
+        },
         "text": []
       },
-      "sort": { "property": "createdAt", "direction": "desc" },
+      "sort": {
+        "property": "createdAt",
+        "direction": "desc"
+      },
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
@@ -1023,15 +1197,25 @@
       "userId": "placeholder-user-id",
       "name": "Watches",
       "filter": {
-        "tagging": { "containsOneOf": [], "containsAllOf": [] },
+        "tagging": {
+          "containsOneOf": [],
+          "containsAllOf": []
+        },
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [8],
-        "time": { "type": "allTime" },
+        "includeTypes": [
+          8
+        ],
+        "time": {
+          "type": "allTime"
+        },
         "text": []
       },
-      "sort": { "property": "createdAt", "direction": "desc" },
+      "sort": {
+        "property": "createdAt",
+        "direction": "desc"
+      },
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
@@ -1047,15 +1231,25 @@
       "userId": "placeholder-user-id",
       "name": "Sneakers",
       "filter": {
-        "tagging": { "containsOneOf": [], "containsAllOf": [] },
+        "tagging": {
+          "containsOneOf": [],
+          "containsAllOf": []
+        },
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [9],
-        "time": { "type": "allTime" },
+        "includeTypes": [
+          9
+        ],
+        "time": {
+          "type": "allTime"
+        },
         "text": []
       },
-      "sort": { "property": "createdAt", "direction": "desc" },
+      "sort": {
+        "property": "createdAt",
+        "direction": "desc"
+      },
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
@@ -1071,15 +1265,25 @@
       "userId": "placeholder-user-id",
       "name": "Designer Toys",
       "filter": {
-        "tagging": { "containsOneOf": [], "containsAllOf": [] },
+        "tagging": {
+          "containsOneOf": [],
+          "containsAllOf": []
+        },
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [10],
-        "time": { "type": "allTime" },
+        "includeTypes": [
+          10
+        ],
+        "time": {
+          "type": "allTime"
+        },
         "text": []
       },
-      "sort": { "property": "createdAt", "direction": "desc" },
+      "sort": {
+        "property": "createdAt",
+        "direction": "desc"
+      },
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,

@@ -181,6 +181,8 @@ export class CollectionWizard extends MobxLitElement {
             hidden: p.hidden,
             prefix: p.prefix,
             suffix: p.suffix,
+            optionsOnly: p.optionsOnly,
+            options: p.options,
           })),
         },
       ],
