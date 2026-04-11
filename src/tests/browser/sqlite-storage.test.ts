@@ -31,6 +31,7 @@ function makeProp(
     id: 0, entityConfigId: 0, userId: '', name: 'Test Prop',
     prefix: '', suffix: '', required: 0, repeat: 1, allowed: 1, hidden: false,
     dataType: DataType.SHORT_TEXT, defaultValue: '',
+    optionsOnly: false, options: [],
     ...overrides,
   } as unknown as EntityPropertyConfig;
 }
