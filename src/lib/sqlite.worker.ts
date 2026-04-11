@@ -30,7 +30,9 @@ const SCHEMA = `
     repeat           INTEGER NOT NULL DEFAULT 1,
     allowed          INTEGER NOT NULL DEFAULT 1,
     hidden           INTEGER NOT NULL DEFAULT 0,
-    default_value    TEXT    NOT NULL DEFAULT ''
+    default_value    TEXT    NOT NULL DEFAULT '',
+    options_only     INTEGER NOT NULL DEFAULT 0,
+    options          TEXT    NOT NULL DEFAULT '[]'
   );
 
   CREATE TABLE IF NOT EXISTS entity (
@@ -111,6 +113,8 @@ async function initDb(dbPath: string): Promise<void> {
   const migrations = [
     `ALTER TABLE entity_config ADD COLUMN ai_enabled INTEGER NOT NULL DEFAULT 0`,
     `ALTER TABLE entity_config ADD COLUMN ai_identify_prompt TEXT NOT NULL DEFAULT ''`,
+    `ALTER TABLE entity_property_config ADD COLUMN options_only INTEGER NOT NULL DEFAULT 0`,
+    `ALTER TABLE entity_property_config ADD COLUMN options TEXT NOT NULL DEFAULT '[]'`,
   ];
   for (const migration of migrations) {
     try {

@@ -117,6 +117,8 @@ function rowToEntityPropertyConfig(
     allowed: row['allowed'] as number,
     hidden: row['hidden'] === 1,
     defaultValue,
+    optionsOnly: row['options_only'] === 1,
+    options: JSON.parse((row['options'] as string | null) ?? '[]') as PropertyDataValue[],
   } as EntityPropertyConfig;
 }
 
@@ -248,8 +250,8 @@ export class SQLiteStorage implements StorageSchema {
     for (const prop of entityConfig.properties) {
       await this.run(
         `INSERT INTO entity_property_config
-         (id, entity_config_id, name, data_type, prefix, suffix, required, repeat, allowed, hidden, default_value)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (id, entity_config_id, name, data_type, prefix, suffix, required, repeat, allowed, hidden, default_value, options_only, options)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           prop.id || null,
           id,
@@ -262,6 +264,8 @@ export class SQLiteStorage implements StorageSchema {
           prop.allowed,
           prop.hidden ? 1 : 0,
           serializePropertyValue(prop.defaultValue, prop.dataType),
+          prop.optionsOnly ? 1 : 0,
+          JSON.stringify(prop.options),
         ],
       );
     }
@@ -324,8 +328,8 @@ export class SQLiteStorage implements StorageSchema {
   ): Promise<EntityPropertyConfig | null> {
     await this.run(
       `INSERT INTO entity_property_config
-       (entity_config_id, name, data_type, prefix, suffix, required, repeat, allowed, hidden, default_value)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (entity_config_id, name, data_type, prefix, suffix, required, repeat, allowed, hidden, default_value, options_only, options)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         propertyConfig.entityConfigId,
         propertyConfig.name,
@@ -340,6 +344,8 @@ export class SQLiteStorage implements StorageSchema {
           propertyConfig.defaultValue,
           propertyConfig.dataType,
         ),
+        propertyConfig.optionsOnly ? 1 : 0,
+        JSON.stringify(propertyConfig.options),
       ],
     );
 
@@ -358,7 +364,8 @@ export class SQLiteStorage implements StorageSchema {
     await this.run(
       `UPDATE entity_property_config
        SET name = ?, data_type = ?, prefix = ?, suffix = ?, required = ?,
-           repeat = ?, allowed = ?, hidden = ?, default_value = ?
+           repeat = ?, allowed = ?, hidden = ?, default_value = ?,
+           options_only = ?, options = ?
        WHERE id = ?`,
       [
         propertyConfig.name,
@@ -373,6 +380,8 @@ export class SQLiteStorage implements StorageSchema {
           propertyConfig.defaultValue,
           propertyConfig.dataType,
         ),
+        propertyConfig.optionsOnly ? 1 : 0,
+        JSON.stringify(propertyConfig.options),
         propertyConfig.id,
       ],
     );
@@ -879,8 +888,8 @@ export class SQLiteStorage implements StorageSchema {
       for (const prop of config.properties) {
         await this.run(
           `INSERT OR REPLACE INTO entity_property_config
-           (id, entity_config_id, name, data_type, prefix, suffix, required, repeat, allowed, hidden, default_value)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           (id, entity_config_id, name, data_type, prefix, suffix, required, repeat, allowed, hidden, default_value, options_only, options)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             prop.id,
             config.id,
@@ -893,6 +902,8 @@ export class SQLiteStorage implements StorageSchema {
             prop.allowed,
             prop.hidden ? 1 : 0,
             serializePropertyValue(prop.defaultValue, prop.dataType),
+            prop.optionsOnly ? 1 : 0,
+            JSON.stringify(prop.options),
           ],
         );
       }
