@@ -1,4 +1,11 @@
-import { LitElement, html, css, PropertyValues, TemplateResult } from 'lit';
+import {
+  LitElement,
+  html,
+  css,
+  PropertyValues,
+  TemplateResult,
+  nothing,
+} from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { customElement, property, state } from 'lit/decorators.js';
 import {
@@ -14,7 +21,7 @@ import {
   PropertyDataValue,
   ShortTextDataValue,
 } from 'api-spec/models/Entity';
-import { nothing, produce } from 'immer';
+import { produce } from 'immer';
 
 import { ControlType, SelectControl } from '@/models/Control';
 import { storage } from '@/lib/Storage';
@@ -142,6 +149,14 @@ export class PropertyConfigForm extends LitElement {
     propertyConfigFormProps[PropertyConfigFormProp.DEFAULT_VALUE].default;
 
   @property({ type: Boolean })
+  [PropertyConfigFormProp.OPTIONS_ONLY]: PropertyConfigFormProps[PropertyConfigFormProp.OPTIONS_ONLY] =
+    propertyConfigFormProps[PropertyConfigFormProp.OPTIONS_ONLY].default;
+
+  @property({ type: Array })
+  [PropertyConfigFormProp.OPTIONS]: PropertyConfigFormProps[PropertyConfigFormProp.OPTIONS] =
+    propertyConfigFormProps[PropertyConfigFormProp.OPTIONS].default;
+
+  @property({ type: Boolean })
   [PropertyConfigFormProp.PERFORM_DRIFT_CHECK]: PropertyConfigFormProps[PropertyConfigFormProp.PERFORM_DRIFT_CHECK] =
     propertyConfigFormProps[PropertyConfigFormProp.PERFORM_DRIFT_CHECK].default;
 
@@ -251,6 +266,8 @@ export class PropertyConfigForm extends LitElement {
       ] as EntityPropertyConfig['suffix'],
       dataType: DataType.BOOLEAN,
       defaultValue: false,
+      optionsOnly: this[PropertyConfigFormProp.OPTIONS_ONLY],
+      options: this[PropertyConfigFormProp.OPTIONS],
       userId: '' as EntityPropertyConfig['userId'],
     };
 
@@ -429,6 +446,28 @@ export class PropertyConfigForm extends LitElement {
     return updatedJson === currentJson;
   }
 
+  handleTagsUpdated(e: CustomEvent): void {
+    console.log('Tags updated:', e.detail.tags);
+    this.updateField(PropertyConfigFormProp.OPTIONS, e.detail.tags);
+  }
+
+  handleTagSuggestionsRequested(e: CustomEvent): void {
+    return;
+    // For demo purposes, we'll just return some static suggestions.
+    // In a real application, you might fetch suggestions from an API based on the current input.
+    const suggestions = ['Option 1', 'Option 2', 'Option 3'].filter(option =>
+      option.toLowerCase().includes(e.detail.query.toLowerCase()),
+    );
+
+    this.dispatchEvent(
+      new CustomEvent('tag-suggestions-response', {
+        detail: { suggestions },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
   renderDefaultValueField(): TemplateResult {
     switch (this.propertyConfig[PropertyConfigFormProp.DATA_TYPE]) {
       case DataType.DATE:
@@ -491,9 +530,32 @@ export class PropertyConfigForm extends LitElement {
     }
   }
 
+  renderOptionsField(): TemplateResult | typeof nothing {
+    if (
+      this.propertyConfig[PropertyConfigFormProp.DATA_TYPE] !==
+      DataType.SHORT_TEXT
+    ) {
+      return nothing;
+    }
+
+    return html`<tag-manager @tags-updated=${this.handleTagsUpdated}>
+      <div slot="tags">
+        ${repeat(
+          this.options,
+          option => option,
+          option => html`<data-item>${option}</data-item>`,
+        )}
+      </div>
+    </tag-manager>`;
+  }
+
   renderField(field: PropertyConfigFormProp): TemplateResult | typeof nothing {
     if (field === PropertyConfigFormProp.DEFAULT_VALUE) {
       return this.renderDefaultValueField();
+    }
+
+    if (field === PropertyConfigFormProp.OPTIONS) {
+      return this.renderOptionsField();
     }
 
     switch (propertyConfigFormProps[field].control.type) {

@@ -505,6 +505,8 @@ export class EntityConfigForm extends MobxLitElement {
                             allowed=${property.allowed}
                             prefix=${property.prefix}
                             suffix=${property.suffix}
+                            ?optionsOnly=${property.optionsOnly}
+                            .options=${property.options}
                             ?hidden=${property.hidden}
                             ?performDriftCheck=${this.performDriftCheck}
                             .defaultValue=${property.defaultValue}

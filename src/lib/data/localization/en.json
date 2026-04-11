@@ -42,6 +42,8 @@
   "propertyConfig.field.suffix": "Suffix",
   "propertyConfig.field.hidden": "Hidden",
   "propertyConfig.field.defaultValue": "Default Value",
+  "propertyConfig.field.optionsOnly": "Only Allowed Options",
+  "propertyConfig.field.options": "Options",
   "propertyConfig.addedSuccessfully": "Property configuration added successfully.",
   "propertyConfig.updatedSuccessfully": "Property configuration updated successfully.",
   "propertyConfig.deletedSuccessfully": "Property configuration deleted successfully.",
