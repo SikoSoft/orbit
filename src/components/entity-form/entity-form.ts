@@ -531,13 +531,14 @@ export class EntityForm extends ViewElement {
           ? await storage.updateEntity(this.entityId, payload)
           : await storage.addEntity(payload);
 
-        this.reset();
         this.loading = false;
 
         if (!result) {
           addToast(translate('entityFailedToSave'), NotificationType.ERROR);
           return;
         }
+
+        this.reset();
 
         this.dispatchEvent(
           new EntityItemUpdatedEvent({
