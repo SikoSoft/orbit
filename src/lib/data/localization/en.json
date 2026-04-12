@@ -208,5 +208,6 @@
   "collectionWizard.notFound": "Collection type not found.",
   "assistAddSuccess": "Item added successfully.",
   "assistAddFailed": "Could not identify the item. Please try something else.",
-  "assistAddError": "An error occurred while adding the item. Please try again later."
+  "assistAddError": "An error occurred while adding the item. Please try again later.",
+  "propertyValueNotAllowed": "'{value}' is not an allowed value for the '{name}' property."
 }
