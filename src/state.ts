@@ -20,6 +20,7 @@ import {
   ListSortNativeProperty,
 } from 'api-spec/models/List';
 import { defaultTheme, ThemeName } from './models/Page';
+import { StorageSource } from './models/Storage';
 
 export const defaultListFilter: ListFilter = {
   tagging: {
@@ -166,6 +167,9 @@ export class AppState {
 
   @observable
   public isNative: boolean = false;
+
+  @observable
+  public storageSource: StorageSource = StorageSource.DEVICE;
 
   get listConfig(): ListConfig {
     return (
@@ -472,6 +476,11 @@ export class AppState {
   @action
   setIsNative(isNative: boolean): void {
     this.isNative = isNative;
+  }
+
+  @action
+  setStorageSource(source: StorageSource): void {
+    this.storageSource = source;
   }
 
   constructor() {

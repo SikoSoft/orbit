@@ -248,6 +248,7 @@ export class FloatingWidget extends MobxLitElement {
   private handleStorageSourceChanged(event: CustomEvent): void {
     const source = event.detail.value as StorageSource;
     storage.setStorageSource(source);
+    this.state.setStorageSource(source);
     this.dispatchEvent(new StorageSourceUpdatedEvent({ source }));
   }
 
