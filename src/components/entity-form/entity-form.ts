@@ -4,6 +4,8 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { v4 as uuidv4 } from 'uuid';
 
+import { EntityFormTab } from './entity-form.models';
+
 import { ListFilterType } from 'api-spec/models/List';
 import { SettingName, TagSuggestions } from 'api-spec/models/Setting';
 import {
@@ -38,6 +40,7 @@ import '@ss/ui/components/tag-manager';
 import '@ss/ui/components/confirmation-modal';
 import '@/components/entity-form/property-field/property-field';
 import '@/components/svg-icon/svg-icon';
+import '@/components/access-policy/access-policy';
 
 import {
   EntityItemCanceledEvent,
@@ -151,6 +154,41 @@ export class EntityForm extends ViewElement {
         font-size: 1rem;
       }
     }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--input-border-color, #ccc);
+      margin-bottom: 1rem;
+    }
+
+    .tab {
+      padding: 0.5rem 1rem;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      color: var(--text-color, #000);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: border-color 0.15s;
+
+      &:hover {
+        border-bottom-color: var(--input-border-color, #ccc);
+      }
+
+      &.active {
+        font-weight: bold;
+        border-bottom-color: var(--text-color, #000);
+      }
+    }
+
+    .tab-panel {
+      display: none;
+
+      &.active {
+        display: block;
+      }
+    }
   `;
 
   @property({ type: Number, reflect: true })
@@ -192,6 +230,7 @@ export class EntityForm extends ViewElement {
 
   @state() propertyReferences: PropertyReference[] = [];
   @state() propertyPopUpIsOpen = false;
+  @state() activeTab: EntityFormTab = EntityFormTab.PROPERTIES;
 
   @state()
   get classes(): Record<string, boolean> {
@@ -801,13 +840,43 @@ export class EntityForm extends ViewElement {
     `;
   }
 
-  render(): TemplateResult {
-    if (this.state.entityConfigs.length === 0) {
-      return this.renderNoEntityConfig();
-    }
-
+  private renderTabs(): TemplateResult {
     return html`
-      <form class=${classMap(this.classes)}>
+      <div class="tabs">
+        <button
+          class=${classMap({
+            tab: true,
+            active: this.activeTab === EntityFormTab.PROPERTIES,
+          })}
+          @click=${(): void => {
+            this.activeTab = EntityFormTab.PROPERTIES;
+          }}
+        >
+          ${translate('entityForm.tab.properties')}
+        </button>
+        <button
+          class=${classMap({
+            tab: true,
+            active: this.activeTab === EntityFormTab.ACCESS,
+          })}
+          @click=${(): void => {
+            this.activeTab = EntityFormTab.ACCESS;
+          }}
+        >
+          ${translate('entityForm.tab.access')}
+        </button>
+      </div>
+    `;
+  }
+
+  private renderPropertiesTab(): TemplateResult {
+    return html`
+      <div
+        class=${classMap({
+          'tab-panel': true,
+          active: this.activeTab === EntityFormTab.PROPERTIES,
+        })}
+      >
         ${!this.entityId && this.availableEntityConfigs.length > 1
           ? html` <div class="type">
               <ss-select
@@ -934,6 +1003,32 @@ export class EntityForm extends ViewElement {
               `
             : nothing}
         </div>
+      </div>
+    `;
+  }
+
+  private renderAccessTab(): TemplateResult {
+    return html`
+      <div
+        class=${classMap({
+          'tab-panel': true,
+          active: this.activeTab === EntityFormTab.ACCESS,
+        })}
+      >
+        <access-policy></access-policy>
+      </div>
+    `;
+  }
+
+  render(): TemplateResult {
+    if (this.state.entityConfigs.length === 0) {
+      return this.renderNoEntityConfig();
+    }
+
+    return html`
+      <form class=${classMap(this.classes)}>
+        ${this.renderTabs()} ${this.renderPropertiesTab()}
+        ${this.renderAccessTab()}
       </form>
     `;
   }

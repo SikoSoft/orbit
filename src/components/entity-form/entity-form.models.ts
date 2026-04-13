@@ -117,3 +117,8 @@ export type SuggestionLastInput = Record<
   SuggestionInputType,
   { hadResults: boolean; value: string }
 >;
+
+export enum EntityFormTab {
+  PROPERTIES = 'properties',
+  ACCESS = 'access',
+}
