@@ -29,6 +29,7 @@ import '@/components/floating-widget/floating-widget';
 import '@/components/forbidden-notice/forbidden-notice';
 import '@/components/bulk-manager/bulk-manager';
 import '@/components/list-config/list-config';
+import { Introspection } from 'api-spec/models/Introspection';
 
 export interface ViewChangedEvent extends CustomEvent {
   detail: PageView;
@@ -186,8 +187,24 @@ export class AppContainer extends MobxLitElement {
     this.viewComponent.sync(true);
   }
 
-  private handleUserLoggedIn(): void {
+  private async handleUserLoggedIn(): Promise<void> {
     this.restoreState();
+    this.syncUserData();
+  }
+
+  private async syncUserData(): Promise<void> {
+    const introspectionResult = await api.get<{ introspection: Introspection }>(
+      'user/introspect',
+    );
+
+    if (
+      introspectionResult &&
+      introspectionResult.isOk &&
+      introspectionResult.response.introspection.isLoggedIn
+    ) {
+      const user = introspectionResult.response.introspection.user;
+      this.state.setUser(user);
+    }
   }
 
   private handleCollapsableToggled(e: CollapsableToggledEvent): void {
@@ -204,7 +221,7 @@ export class AppContainer extends MobxLitElement {
 
   private handleStorageSourceUpdated(): void {
     storage.resetDelegatedData();
-    window.location.reload();
+    //window.location.reload();
   }
 
   protected firstUpdated(): void {
@@ -217,6 +234,10 @@ export class AppContainer extends MobxLitElement {
       routes,
       import.meta.env.BASE_URL || '/',
     );
+
+    if (!this.state.user && this.state.authToken) {
+      this.syncUserData();
+    }
   }
 
   clearSession = (): void => {

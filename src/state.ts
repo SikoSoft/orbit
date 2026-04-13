@@ -21,6 +21,7 @@ import {
 } from 'api-spec/models/List';
 import { defaultTheme, ThemeName } from './models/Page';
 import { StorageSource } from './models/Storage';
+import { User } from 'api-spec/models/Identity';
 
 export const defaultListFilter: ListFilter = {
   tagging: {
@@ -170,6 +171,9 @@ export class AppState {
 
   @observable
   public storageSource: StorageSource = StorageSource.DEVICE;
+
+  @observable
+  public user: User | null = null;
 
   get listConfig(): ListConfig {
     return (
@@ -481,6 +485,11 @@ export class AppState {
   @action
   setStorageSource(source: StorageSource): void {
     this.storageSource = source;
+  }
+
+  @action
+  setUser(user: User | null): void {
+    this.user = user;
   }
 
   constructor() {

@@ -1,14 +1,4 @@
-export enum ImportResultType {
-  ZIP_IMPORTED = 'zipImported',
-  JSON_IMPORTED = 'jsonImported',
-  CONFIG_IMPORTED = 'configImported',
-  CONFIG_SKIPPED = 'configSkipped',
-  ENTITY_IMPORTED = 'entityImported',
-  ENTITY_SKIPPED = 'entitySkipped',
+export enum SyncType {
+  DEVICE_TO_CLOUD = 'deviceToCloud',
+  CLOUD_TO_DEVICE = 'cloudToDevice',
 }
-
-export interface ImportResult {}
-
-/*
-export type ImportResultLog = {}
-*/
