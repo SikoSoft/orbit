@@ -4,7 +4,6 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { v4 as uuidv4 } from 'uuid';
 
-import { EntityFormTab } from './entity-form.models';
 
 import { ListFilterType } from 'api-spec/models/List';
 import { SettingName, TagSuggestions } from 'api-spec/models/Setting';
@@ -38,6 +37,8 @@ import '@ss/ui/components/ss-input';
 import '@ss/ui/components/ss-select';
 import '@ss/ui/components/tag-manager';
 import '@ss/ui/components/confirmation-modal';
+import '@ss/ui/components/tab-container';
+import '@ss/ui/components/tab-pane';
 import '@/components/entity-form/property-field/property-field';
 import '@/components/svg-icon/svg-icon';
 import '@/components/access-policy/access-policy';
@@ -155,40 +156,6 @@ export class EntityForm extends ViewElement {
       }
     }
 
-    .tabs {
-      display: flex;
-      border-bottom: 1px solid var(--input-border-color, #ccc);
-      margin-bottom: 1rem;
-    }
-
-    .tab {
-      padding: 0.5rem 1rem;
-      border: none;
-      background: none;
-      cursor: pointer;
-      font-size: 0.95rem;
-      color: var(--text-color, #000);
-      border-bottom: 2px solid transparent;
-      margin-bottom: -1px;
-      transition: border-color 0.15s;
-
-      &:hover {
-        border-bottom-color: var(--input-border-color, #ccc);
-      }
-
-      &.active {
-        font-weight: bold;
-        border-bottom-color: var(--text-color, #000);
-      }
-    }
-
-    .tab-panel {
-      display: none;
-
-      &.active {
-        display: block;
-      }
-    }
   `;
 
   @property({ type: Number, reflect: true })
@@ -230,7 +197,6 @@ export class EntityForm extends ViewElement {
 
   @state() propertyReferences: PropertyReference[] = [];
   @state() propertyPopUpIsOpen = false;
-  @state() activeTab: EntityFormTab = EntityFormTab.PROPERTIES;
 
   @state()
   get classes(): Record<string, boolean> {
@@ -840,186 +806,6 @@ export class EntityForm extends ViewElement {
     `;
   }
 
-  private renderTabs(): TemplateResult {
-    return html`
-      <div class="tabs">
-        <button
-          class=${classMap({
-            tab: true,
-            active: this.activeTab === EntityFormTab.PROPERTIES,
-          })}
-          @click=${(): void => {
-            this.activeTab = EntityFormTab.PROPERTIES;
-          }}
-        >
-          ${translate('entityForm.tab.properties')}
-        </button>
-        <button
-          class=${classMap({
-            tab: true,
-            active: this.activeTab === EntityFormTab.ACCESS,
-          })}
-          @click=${(): void => {
-            this.activeTab = EntityFormTab.ACCESS;
-          }}
-        >
-          ${translate('entityForm.tab.access')}
-        </button>
-      </div>
-    `;
-  }
-
-  private renderPropertiesTab(): TemplateResult {
-    return html`
-      <div
-        class=${classMap({
-          'tab-panel': true,
-          active: this.activeTab === EntityFormTab.PROPERTIES,
-        })}
-      >
-        ${!this.entityId && this.availableEntityConfigs.length > 1
-          ? html` <div class="type">
-              <ss-select
-                selected=${this.type}
-                @select-changed=${this.handleTypeChanged}
-                .options=${[
-                  { label: translate('selectItemType'), value: '0' },
-                  ...this.availableEntityConfigs.map(entity => ({
-                    label: entity.name,
-                    value: entity.id,
-                  })),
-                ]}
-              ></ss-select>
-            </div>`
-          : nothing}
-
-        <div class="properties">
-          <sortable-list
-            @sort-updated=${this.sortUpdated}
-            ?disabled=${!this.entityConfig?.allowPropertyOrdering}
-          >
-            ${this.propertyInstances.length && this.entityConfig
-              ? repeat(
-                  this.propertyInstances,
-                  propertyInstance => propertyInstance.uiId,
-                  propertyInstance =>
-                    html`<sortable-item
-                      id=${propertyInstance.uiId}
-                      ?disabled=${!this.entityConfig?.allowPropertyOrdering}
-                      >${this.renderPropertyField(
-                        propertyInstance,
-                      )}</sortable-item
-                    >`,
-                )
-              : nothing}
-          </sortable-list>
-
-          <div class="buttons">
-            ${this.canAddProperty
-              ? html` <ss-button @click=${this.showAddPropertyPopUp}
-                  >${translate('addProperty')}</ss-button
-                >`
-              : nothing}
-          </div>
-
-          <pop-up
-            closeOnOutsideClick
-            closeOnEsc
-            closeButton
-            ?open=${this.propertyPopUpIsOpen}
-            @pop-up-closed=${(): void => {
-              this.propertyPopUpIsOpen = false;
-            }}
-          >
-            ${repeat(
-              this.allowedPropertiesToAdd,
-              propertyConfig => propertyConfig.id,
-              propertyConfig =>
-                html`<div class="property-option">
-                  <div
-                    @click=${(): void => {
-                      this.addProperty(propertyConfig);
-                      this.propertyPopUpIsOpen = false;
-                    }}
-                  >
-                    ${propertyConfig.name}
-                  </div>
-                </div>`,
-            )}
-          </pop-up>
-        </div>
-
-        <tag-manager
-          ?enableSuggestions=${this.tagSuggestionsEnabled}
-          value=${this.tagValue}
-          @tags-updated=${this.handleTagsUpdated}
-          @tag-suggestions-requested=${this.handleTagSuggestionsRequested}
-        >
-          <div slot="tags">
-            ${repeat(
-              this.tagsAndSuggestions,
-              tag => tag,
-              tag => html`<data-item>${tag}</data-item>`,
-            )}
-          </div>
-
-          <div slot="suggestions">
-            ${repeat(
-              this.tagSuggestions,
-              suggestion => suggestion,
-              suggestion => html`<data-item>${suggestion}</data-item>`,
-            )}
-          </div>
-        </tag-manager>
-
-        <div class="buttons">
-          <ss-button
-            class="save-button"
-            ?positive=${!this.entityId || this.hasChanged}
-            @click=${this.handleSaveClick}
-            text=${this.entityId
-              ? this.hasChanged
-                ? translate('update')
-                : translate('cancel')
-              : translate('add')}
-            ?loading=${this.loading}
-          ></ss-button>
-
-          ${this.entityId
-            ? html`
-                <ss-button
-                  negative
-                  @click=${this.handleDeleteClick}
-                  text=${translate('delete')}
-                ></ss-button>
-
-                <confirmation-modal
-                  @confirmation-accepted=${this.deleteEntity}
-                  @confirmation-declined=${(): void => {
-                    this.confirmModalShown = false;
-                  }}
-                  ?open=${this.confirmModalShown}
-                ></confirmation-modal>
-              `
-            : nothing}
-        </div>
-      </div>
-    `;
-  }
-
-  private renderAccessTab(): TemplateResult {
-    return html`
-      <div
-        class=${classMap({
-          'tab-panel': true,
-          active: this.activeTab === EntityFormTab.ACCESS,
-        })}
-      >
-        <access-policy></access-policy>
-      </div>
-    `;
-  }
-
   render(): TemplateResult {
     if (this.state.entityConfigs.length === 0) {
       return this.renderNoEntityConfig();
@@ -1027,8 +813,140 @@ export class EntityForm extends ViewElement {
 
     return html`
       <form class=${classMap(this.classes)}>
-        ${this.renderTabs()} ${this.renderPropertiesTab()}
-        ${this.renderAccessTab()}
+        <tab-container>
+          <tab-pane title=${translate('entityForm.tab.properties')}>
+            ${!this.entityId && this.availableEntityConfigs.length > 1
+              ? html` <div class="type">
+                  <ss-select
+                    selected=${this.type}
+                    @select-changed=${this.handleTypeChanged}
+                    .options=${[
+                      { label: translate('selectItemType'), value: '0' },
+                      ...this.availableEntityConfigs.map(entity => ({
+                        label: entity.name,
+                        value: entity.id,
+                      })),
+                    ]}
+                  ></ss-select>
+                </div>`
+              : nothing}
+
+            <div class="properties">
+              <sortable-list
+                @sort-updated=${this.sortUpdated}
+                ?disabled=${!this.entityConfig?.allowPropertyOrdering}
+              >
+                ${this.propertyInstances.length && this.entityConfig
+                  ? repeat(
+                      this.propertyInstances,
+                      propertyInstance => propertyInstance.uiId,
+                      propertyInstance =>
+                        html`<sortable-item
+                          id=${propertyInstance.uiId}
+                          ?disabled=${!this.entityConfig?.allowPropertyOrdering}
+                          >${this.renderPropertyField(
+                            propertyInstance,
+                          )}</sortable-item
+                        >`,
+                    )
+                  : nothing}
+              </sortable-list>
+
+              <div class="buttons">
+                ${this.canAddProperty
+                  ? html` <ss-button @click=${this.showAddPropertyPopUp}
+                      >${translate('addProperty')}</ss-button
+                    >`
+                  : nothing}
+              </div>
+
+              <pop-up
+                closeOnOutsideClick
+                closeOnEsc
+                closeButton
+                ?open=${this.propertyPopUpIsOpen}
+                @pop-up-closed=${(): void => {
+                  this.propertyPopUpIsOpen = false;
+                }}
+              >
+                ${repeat(
+                  this.allowedPropertiesToAdd,
+                  propertyConfig => propertyConfig.id,
+                  propertyConfig =>
+                    html`<div class="property-option">
+                      <div
+                        @click=${(): void => {
+                          this.addProperty(propertyConfig);
+                          this.propertyPopUpIsOpen = false;
+                        }}
+                      >
+                        ${propertyConfig.name}
+                      </div>
+                    </div>`,
+                )}
+              </pop-up>
+            </div>
+
+            <tag-manager
+              ?enableSuggestions=${this.tagSuggestionsEnabled}
+              value=${this.tagValue}
+              @tags-updated=${this.handleTagsUpdated}
+              @tag-suggestions-requested=${this.handleTagSuggestionsRequested}
+            >
+              <div slot="tags">
+                ${repeat(
+                  this.tagsAndSuggestions,
+                  tag => tag,
+                  tag => html`<data-item>${tag}</data-item>`,
+                )}
+              </div>
+
+              <div slot="suggestions">
+                ${repeat(
+                  this.tagSuggestions,
+                  suggestion => suggestion,
+                  suggestion => html`<data-item>${suggestion}</data-item>`,
+                )}
+              </div>
+            </tag-manager>
+
+            <div class="buttons">
+              <ss-button
+                class="save-button"
+                ?positive=${!this.entityId || this.hasChanged}
+                @click=${this.handleSaveClick}
+                text=${this.entityId
+                  ? this.hasChanged
+                    ? translate('update')
+                    : translate('cancel')
+                  : translate('add')}
+                ?loading=${this.loading}
+              ></ss-button>
+
+              ${this.entityId
+                ? html`
+                    <ss-button
+                      negative
+                      @click=${this.handleDeleteClick}
+                      text=${translate('delete')}
+                    ></ss-button>
+
+                    <confirmation-modal
+                      @confirmation-accepted=${this.deleteEntity}
+                      @confirmation-declined=${(): void => {
+                        this.confirmModalShown = false;
+                      }}
+                      ?open=${this.confirmModalShown}
+                    ></confirmation-modal>
+                  `
+                : nothing}
+            </div>
+          </tab-pane>
+
+          <tab-pane title=${translate('entityForm.tab.access')}>
+            <access-policy></access-policy>
+          </tab-pane>
+        </tab-container>
       </form>
     `;
   }
