@@ -16,15 +16,28 @@ import { TagSuggestionsRequestedEvent } from '@ss/ui/components/tag-input.events
 
 import '@ss/ui/components/tag-manager';
 import { storage } from '@/lib/Storage';
+import {
+  TagFiltersProp,
+  tagFiltersProps,
+  TagFiltersProps,
+} from './tag-filters.models';
 
 @customElement('tag-filters')
 export class TagFilters extends MobxLitElement {
   private minLengthForSuggestion = 1;
   private state = appState;
 
-  @property({ type: Array }) [ListFilterType.CONTAINS_ONE_OF]: string[] = [];
-  @property({ type: Array }) [ListFilterType.CONTAINS_ALL_OF]: string[] = [];
-  @property({ type: Boolean }) includeUntagged: boolean = false;
+  @property({ type: Array })
+  [TagFiltersProp.CONTAINS_ONE_OF]: TagFiltersProps[TagFiltersProp.CONTAINS_ONE_OF] =
+    tagFiltersProps[TagFiltersProp.CONTAINS_ONE_OF].default;
+
+  @property({ type: Array })
+  [TagFiltersProp.CONTAINS_ALL_OF]: TagFiltersProps[TagFiltersProp.CONTAINS_ALL_OF] =
+    tagFiltersProps[TagFiltersProp.CONTAINS_ALL_OF].default;
+
+  @property({ type: Boolean })
+  [TagFiltersProp.INCLUDE_UNTAGGED]: TagFiltersProps[TagFiltersProp.INCLUDE_UNTAGGED] =
+    tagFiltersProps[TagFiltersProp.INCLUDE_UNTAGGED].default;
 
   @state() lastInput = { value: '', hadResults: true };
   @state() tagSuggestions: string[] = [];
