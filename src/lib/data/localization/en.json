@@ -222,5 +222,7 @@
   "accessPolicy.noMembers": "No users or groups added yet.",
   "accessPolicy.removeMember": "Remove member",
   "accessPolicy.typeUser": "User",
-  "accessPolicy.typeGroup": "Group"
+  "accessPolicy.typeGroup": "Group",
+  "accessPolicyGroup.searchPlaceholder": "Search users...",
+  "accessPolicyGroup.noMembers": "No users added yet."
 }
