@@ -57,25 +57,31 @@ function delegateSource(): MethodDecorator {
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ) {
-    for (const storageDelegate of storageDelegates.filter(
-      delegate => delegate.isActive,
-    )) {
-      const delegateMethods = Object.getOwnPropertyNames(
-        Object.getPrototypeOf(storageDelegate),
-      );
+    const originalValue = descriptor.value;
+    descriptor.value = function (...args: unknown[]): unknown {
       const key =
         typeof propertyKey === 'symbol' ? propertyKey.toString() : propertyKey;
-      if (delegateMethods.includes(key)) {
-        const methodName = propertyKey as keyof StorageSchema;
-        const method = storageDelegate[methodName];
-        if (!method || typeof method !== 'function') {
-          continue;
+      for (const storageDelegate of storageDelegates.filter(
+        delegate => delegate.isActive,
+      )) {
+        const delegateMethods = Object.getOwnPropertyNames(
+          Object.getPrototypeOf(storageDelegate),
+        );
+        if (delegateMethods.includes(key)) {
+          const methodName = propertyKey as keyof StorageSchema;
+          const method = storageDelegate[methodName];
+          if (!method || typeof method !== 'function') {
+            continue;
+          }
+          return (method as (...a: unknown[]) => unknown).apply(
+            storageDelegate,
+            args,
+          );
         }
-        descriptor.value = method.bind(storageDelegate);
-        return descriptor;
       }
-    }
-    return;
+      return originalValue?.apply(this, args);
+    };
+    return descriptor;
   };
 }
 

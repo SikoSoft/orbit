@@ -188,7 +188,7 @@ export class AppContainer extends MobxLitElement {
   }
 
   private async handleUserLoggedIn(): Promise<void> {
-    this.restoreState();
+    await this.restoreState();
     this.syncUserData();
   }
 
@@ -219,9 +219,13 @@ export class AppContainer extends MobxLitElement {
     storage.setTabState(this.state.tabState);
   }
 
-  private handleStorageSourceUpdated(): void {
+  private async handleStorageSourceUpdated(): Promise<void> {
     storage.resetDelegatedData();
-    //window.location.reload();
+    await this.restoreState();
+
+    if (this.viewComponent) {
+      this.viewComponent.sync(true);
+    }
   }
 
   protected firstUpdated(): void {
