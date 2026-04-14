@@ -16,7 +16,12 @@ import {
   AccessPolicyChangedEvent,
   AccessPolicySearchChangedEvent,
 } from './access-policy.events';
-import { AccessPolicyMember } from './access-policy.models';
+import {
+  AccessPolicyMember,
+  AccessPolicyProp,
+  accessPolicyProps,
+  AccessPolicyProps,
+} from './access-policy.models';
 
 @customElement('access-policy')
 export class AccessPolicy extends MobxLitElement {
@@ -101,8 +106,13 @@ export class AccessPolicy extends MobxLitElement {
     }
   `;
 
-  @property({ type: Array }) members: AccessPolicyMember[] = [];
-  @property({ type: Array }) suggestions: AccessPolicyMember[] = [];
+  @property({ type: Array })
+  [AccessPolicyProp.MEMBERS]: AccessPolicyProps[AccessPolicyProp.MEMBERS] =
+    accessPolicyProps[AccessPolicyProp.MEMBERS].default;
+
+  @property({ type: Array })
+  [AccessPolicyProp.SUGGESTIONS]: AccessPolicyProps[AccessPolicyProp.SUGGESTIONS] =
+    accessPolicyProps[AccessPolicyProp.SUGGESTIONS].default;
 
   @state() private _members: AccessPolicyMember[] = [];
   @state() private searchText: string = '';
