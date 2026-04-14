@@ -441,7 +441,7 @@ describe('SQLiteStorage', () => {
       const e1 = await db.addEntity(makePayload(config!.id));
       const e2 = await db.addEntity(makePayload(config!.id));
       await db.bulkOperation({
-        operation: { type: OperationType.DELETE, tags: [] },
+        operation: { type: OperationType.DELETE },
         actions: [e1!.id, e2!.id],
       });
       const result = await db.getEntities(0, 10, defaultListFilter, defaultListSort);

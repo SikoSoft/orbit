@@ -3,22 +3,41 @@ import { css, html, nothing, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
+import { v4 as uuidv4 } from 'uuid';
 
 import { translate } from '@/lib/Localization';
-import { OperationType } from 'api-spec/models/Operation';
+import {
+  Operation,
+  OperationType,
+} from 'api-spec/models/Operation';
+import {
+  EntityProperty,
+  EntityPropertyConfig,
+  PropertyDataValue,
+} from 'api-spec/models/Entity';
 import { SettingName, TagSuggestions } from 'api-spec/models/Setting';
 import { addToast } from '@/lib/Util';
 import { appState } from '@/state';
-import { taggingOperations } from './bulk-manager.models';
+import {
+  BulkPropertyInstance,
+  propertyOperations,
+  taggingOperations,
+} from './bulk-manager.models';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 
 import { SelectChangedEvent } from '@ss/ui/components/ss-select.events';
 import { OperationPerformedEvent } from './bulk-manager.events';
 import { TagsUpdatedEvent } from '@ss/ui/components/tag-manager.events';
 import { TagSuggestionsRequestedEvent } from '@ss/ui/components/tag-input.events';
+import {
+  PropertyChangedEvent,
+  PropertyDeletedEvent,
+} from '@/components/entity-form/property-field/property-field.events';
 
 import '@ss/ui/components/ss-button';
 import '@ss/ui/components/tag-manager';
+import '@ss/ui/components/pop-up';
+import '@/components/entity-form/property-field/property-field';
 import { themed } from '@/lib/Theme';
 import { storage } from '@/lib/Storage';
 
@@ -52,6 +71,24 @@ export class BulkManager extends MobxLitElement {
       color: #555;
       padding: 1rem;
     }
+
+    .property-manager {
+      margin-top: 1rem;
+
+      property-field {
+        display: block;
+        margin-bottom: 1rem;
+      }
+    }
+
+    .property-option {
+      cursor: pointer;
+      padding: 0.5rem;
+
+      &:hover {
+        background-color: var(--background-hover-color);
+      }
+    }
   `;
 
   @state() operationType: OperationType = OperationType.ADD_TAGS;
@@ -60,6 +97,8 @@ export class BulkManager extends MobxLitElement {
   @state() loading: boolean = false;
   @state() lastInput = { value: '', hadResults: true };
   @state() tagSuggestions: string[] = [];
+  @state() propertyInstances: BulkPropertyInstance[] = [];
+  @state() propertyPopUpIsOpen: boolean = false;
 
   get tagSuggestionsEnabled(): boolean {
     if (!this.state.listConfig) {
@@ -78,6 +117,11 @@ export class BulkManager extends MobxLitElement {
   }
 
   @state()
+  get showPropertyManager(): boolean {
+    return propertyOperations.includes(this.operationType);
+  }
+
+  @state()
   get classes(): Record<string, boolean> {
     return {
       box: true,
@@ -86,14 +130,79 @@ export class BulkManager extends MobxLitElement {
     };
   }
 
+  @state()
+  get availablePropertyConfigs(): EntityPropertyConfig[] {
+    const selectedEntities = this.state.listItems.filter(e =>
+      this.state.selectedActions.includes(e.id),
+    );
+    const entityConfigIds = [...new Set(selectedEntities.map(e => e.type))];
+    const seen = new Set<number>();
+    const result: EntityPropertyConfig[] = [];
+
+    for (const entityConfigId of entityConfigIds) {
+      const entityConfig = this.state.entityConfigs.find(
+        c => c.id === entityConfigId,
+      );
+      if (entityConfig) {
+        for (const propConfig of entityConfig.properties) {
+          if (!seen.has(propConfig.id)) {
+            seen.add(propConfig.id);
+            result.push(propConfig);
+          }
+        }
+      }
+    }
+
+    return result;
+  }
+
   private handleTypeChanged(e: SelectChangedEvent<string>): void {
     const type = e.detail.value as OperationType;
     this.operationType = type;
+    this.propertyInstances = [];
+  }
+
+  private buildProperties(): EntityProperty[] {
+    return this.propertyInstances.map((inst, i) => ({
+      id: 0,
+      propertyConfigId: inst.propertyConfigId,
+      value: inst.value,
+      order: i,
+    }));
+  }
+
+  private buildOperation(): Operation {
+    switch (this.operationType) {
+      case OperationType.REPLACE_TAGS:
+        return { type: OperationType.REPLACE_TAGS, tags: this.tags };
+      case OperationType.ADD_TAGS:
+        return { type: OperationType.ADD_TAGS, tags: this.tags };
+      case OperationType.REMOVE_TAGS:
+        return { type: OperationType.REMOVE_TAGS, tags: this.tags };
+      case OperationType.REPLACE_PROPERTIES:
+        return {
+          type: OperationType.REPLACE_PROPERTIES,
+          properties: this.buildProperties(),
+        };
+      case OperationType.ADD_PROPERTIES:
+        return {
+          type: OperationType.ADD_PROPERTIES,
+          properties: this.buildProperties(),
+        };
+      case OperationType.REMOVE_PROPERTIES:
+        return {
+          type: OperationType.REMOVE_PROPERTIES,
+          properties: this.buildProperties(),
+        };
+      case OperationType.DELETE:
+      default:
+        return { type: OperationType.DELETE };
+    }
   }
 
   private async handlePerformOperation(): Promise<void> {
     await storage.bulkOperation({
-      operation: { tags: this.tags, type: this.operationType },
+      operation: this.buildOperation(),
       actions: this.state.selectedActions,
     });
 
@@ -147,8 +256,98 @@ export class BulkManager extends MobxLitElement {
     this.tagSuggestions = tags;
   }
 
+  private handlePropertyChanged(e: PropertyChangedEvent): void {
+    const { uiId, value } = e.detail;
+    this.propertyInstances = this.propertyInstances.map(inst =>
+      inst.uiId === uiId ? { ...inst, value: value as PropertyDataValue } : inst,
+    );
+  }
+
+  private handlePropertyDeleted(e: PropertyDeletedEvent): void {
+    const { uiId } = e.detail;
+    this.propertyInstances = this.propertyInstances.filter(
+      inst => inst.uiId !== uiId,
+    );
+  }
+
+  private addProperty(propertyConfig: EntityPropertyConfig): void {
+    this.propertyInstances = [
+      ...this.propertyInstances,
+      {
+        uiId: uuidv4(),
+        propertyConfigId: propertyConfig.id,
+        value: propertyConfig.defaultValue,
+      },
+    ];
+  }
+
   private handleSelectAll(): void {
     this.state.toggleSelectAll();
+  }
+
+  private renderPropertyManager(): TemplateResult | typeof nothing {
+    if (!this.showPropertyManager) {
+      return nothing;
+    }
+
+    return html`
+      <div class="property-manager">
+        ${repeat(
+          this.propertyInstances,
+          inst => inst.uiId,
+          inst => {
+            const propertyConfig = this.state.propertyConfigs.find(
+              pc => pc.id === inst.propertyConfigId,
+            );
+            return html`<property-field
+              .value=${inst.value}
+              uiId=${inst.uiId}
+              entityConfigId=${propertyConfig?.entityConfigId ?? 0}
+              propertyConfigId=${inst.propertyConfigId}
+              @property-changed=${this.handlePropertyChanged}
+              @property-deleted=${this.handlePropertyDeleted}
+            ></property-field>`;
+          },
+        )}
+
+        ${this.availablePropertyConfigs.length > 0
+          ? html`
+              <ss-button
+                text=${translate('addProperty')}
+                @click=${(): void => {
+                  this.propertyPopUpIsOpen = true;
+                }}
+              ></ss-button>
+
+              <pop-up
+                closeOnOutsideClick
+                closeOnEsc
+                closeButton
+                ?open=${this.propertyPopUpIsOpen}
+                @pop-up-closed=${(): void => {
+                  this.propertyPopUpIsOpen = false;
+                }}
+              >
+                ${repeat(
+                  this.availablePropertyConfigs,
+                  pc => pc.id,
+                  pc => html`
+                    <div
+                      class="property-option"
+                      @click=${(): void => {
+                        this.addProperty(pc);
+                        this.propertyPopUpIsOpen = false;
+                      }}
+                    >
+                      ${pc.name}
+                    </div>
+                  `,
+                )}
+              </pop-up>
+            `
+          : nothing}
+      </div>
+    `;
   }
 
   render(): TemplateResult {
@@ -189,6 +388,8 @@ export class BulkManager extends MobxLitElement {
               </tag-manager>
             `
           : nothing}
+
+        ${this.renderPropertyManager()}
 
         <div class="number-selected">
           ${this.state.selectedActions.length === 1
