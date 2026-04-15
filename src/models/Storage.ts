@@ -94,7 +94,7 @@ export interface StorageSchema {
     entityConfigId: number,
     propertyConfigOrder: { id: number; order: number }[],
   ): Promise<boolean>;
-  export?(entityConfigIds: number[]): Promise<Entity.Entity[]>;
+  exportEntities?(entityConfigIds: number[]): Promise<Entity.Entity[]>;
   import?(data: ExportDataContents): Promise<boolean>;
   clearData?(nukedDataTypes: NukedDataType[]): Promise<void>;
   setTheme?(theme: ThemeName): void;

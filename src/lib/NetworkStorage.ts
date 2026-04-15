@@ -251,7 +251,7 @@ export class NetworkStorage implements StorageSchema {
     return false;
   }
 
-  async export(entityConfigIds: number[]): Promise<Entity.Entity[]> {
+  async exportEntities(entityConfigIds: number[]): Promise<Entity.Entity[]> {
     const result = await api.post<
       { entityConfigIds: number[] },
       { entities: Entity.Entity[] }

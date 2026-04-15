@@ -108,7 +108,7 @@ export class ExportTool extends MobxLitElement {
   }
 
   async getEntityData(): Promise<string> {
-    const data = await storage.export(this.getEntityConfigIdsForData());
+    const data = await storage.exportEntities(this.getEntityConfigIdsForData());
     return JSON.stringify(data);
   }
 
@@ -139,7 +139,7 @@ export class ExportTool extends MobxLitElement {
           ds => ds.dataType === ExportDataType.ENTITIES,
         )
       ) {
-        dataFile.entities = await storage.export(
+        dataFile.entities = await storage.exportEntities(
           this.getEntityConfigIdsForData(),
         );
       }
