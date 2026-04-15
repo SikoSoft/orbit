@@ -3,9 +3,10 @@ import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 
-import { AccessType } from 'api-spec/models/Access';
+import { AccessPartyType, AccessPolicyParty } from 'api-spec/models/Access';
 import { translate } from '@/lib/Localization';
 import { InputType } from '@ss/ui/components/ss-input.models';
+import { storage } from '@/lib/Storage';
 
 import '@ss/ui/components/ss-input';
 import '@ss/ui/components/ss-icon';
@@ -101,13 +102,16 @@ export abstract class AccessPolicyBase extends MobxLitElement {
 
   @state() protected _members: AccessPolicyMember[] = [];
   @state() protected searchText: string = '';
+  @state() private _fetchedSuggestions: AccessPolicyMember[] = [];
 
   @query('ss-input') private searchInput!: HTMLElement & { clear: () => void };
 
   protected abstract get searchPlaceholderKey(): string;
   protected abstract get noMembersKey(): string;
-  protected abstract get allowedTypes(): AccessType[];
-  protected abstract renderTypeLabel(type: AccessType): TemplateResult | typeof nothing;
+  protected abstract get allowedTypes(): AccessPartyType[];
+  protected abstract renderTypeLabel(
+    type: AccessPartyType,
+  ): TemplateResult | typeof nothing;
   protected abstract dispatchChangedEvent(members: AccessPolicyMember[]): void;
   protected abstract dispatchSearchChangedEvent(value: string): void;
 
@@ -118,19 +122,51 @@ export abstract class AccessPolicyBase extends MobxLitElement {
   }
 
   protected get suggestionNames(): string[] {
-    return this.suggestions
-      .filter(
-        s =>
-          this.allowedTypes.includes(s.type) &&
-          !this._members.some(m => m.targetId === s.targetId && m.type === s.type),
-      )
+    const combined = [...this._fetchedSuggestions, ...this.suggestions];
+    const seen = new Set<string>();
+    return combined
+      .filter(s => {
+        const key = `${s.type}:${s.targetId}`;
+        if (
+          !this.allowedTypes.includes(s.type) ||
+          this._members.some(
+            m => m.targetId === s.targetId && m.type === s.type,
+          ) ||
+          seen.has(key)
+        ) {
+          return false;
+        }
+        seen.add(key);
+        return true;
+      })
       .map(s => s.displayName);
+  }
+
+  private partyToMember(party: AccessPolicyParty): AccessPolicyMember {
+    return {
+      targetId: party.id,
+      type: party.type,
+      displayName: party.name,
+    };
+  }
+
+  private async fetchParties(query: string): Promise<void> {
+    if (!query) {
+      this._fetchedSuggestions = [];
+      return;
+    }
+
+    const result = await storage.getParties(query);
+    if (result.isOk) {
+      this._fetchedSuggestions = result.value.map(p => this.partyToMember(p));
+    }
   }
 
   private handleSearchChanged(e: InputChangedEvent): void {
     const value = e.detail.value;
 
-    const matched = this.suggestions.find(
+    const allSuggestions = [...this._fetchedSuggestions, ...this.suggestions];
+    const matched = allSuggestions.find(
       s => s.displayName === value && this.allowedTypes.includes(s.type),
     );
     if (matched) {
@@ -140,6 +176,7 @@ export abstract class AccessPolicyBase extends MobxLitElement {
 
     this.searchText = value;
     this.dispatchSearchChangedEvent(value);
+    void this.fetchParties(value);
   }
 
   private handleSearchSubmitted(): void {
@@ -147,8 +184,10 @@ export abstract class AccessPolicyBase extends MobxLitElement {
       return;
     }
 
-    const matched = this.suggestions.find(
-      s => s.displayName === this.searchText && this.allowedTypes.includes(s.type),
+    const allSuggestions = [...this._fetchedSuggestions, ...this.suggestions];
+    const matched = allSuggestions.find(
+      s =>
+        s.displayName === this.searchText && this.allowedTypes.includes(s.type),
     );
     if (matched) {
       this.addMember(matched);
@@ -162,12 +201,14 @@ export abstract class AccessPolicyBase extends MobxLitElement {
 
     if (alreadyAdded) {
       this.searchText = '';
+      this._fetchedSuggestions = [];
       this.searchInput?.clear();
       return;
     }
 
     this._members = [...this._members, member];
     this.searchText = '';
+    this._fetchedSuggestions = [];
     this.searchInput?.clear();
     this.dispatchSearchChangedEvent('');
     this.dispatchChangedEvent(this._members);
@@ -187,6 +228,7 @@ export abstract class AccessPolicyBase extends MobxLitElement {
           <ss-input
             type=${InputType.TEXT}
             autoComplete
+            value=${this.searchText}
             placeholder=${translate(this.searchPlaceholderKey)}
             .suggestions=${this.suggestionNames}
             @input-changed=${this.handleSearchChanged}
@@ -196,7 +238,9 @@ export abstract class AccessPolicyBase extends MobxLitElement {
 
         <div class="member-list">
           ${this._members.length === 0
-            ? html`<p class="member-list-empty">${translate(this.noMembersKey)}</p>`
+            ? html`<p class="member-list-empty">
+                ${translate(this.noMembersKey)}
+              </p>`
             : nothing}
           ${repeat(
             this._members,

@@ -1,7 +1,7 @@
 import { nothing, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { AccessType } from 'api-spec/models/Access';
+import { AccessPartyType } from 'api-spec/models/Access';
 
 import { AccessPolicyBase } from '@/components/access-policy/access-policy-base';
 
@@ -34,11 +34,11 @@ export class AccessPolicyGroup extends AccessPolicyBase {
     return 'accessPolicyGroup.noMembers';
   }
 
-  protected get allowedTypes(): AccessType[] {
-    return [AccessType.USER];
+  protected get allowedTypes(): AccessPartyType[] {
+    return [AccessPartyType.USER];
   }
 
-  protected renderTypeLabel(_type: AccessType): typeof nothing {
+  protected renderTypeLabel(_type: AccessPartyType): typeof nothing {
     return nothing;
   }
 

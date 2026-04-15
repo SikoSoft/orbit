@@ -38,6 +38,7 @@ import {
 } from '@/components/entity-list/entity-list.models';
 import { CreateAccountResponseBody } from '@/components/account-form/account-form.models';
 import { OperationType } from 'api-spec/models/Operation';
+import { AccessPolicyParty } from 'api-spec/models/Access';
 import { translate } from './Localization';
 
 function serializePropertyValue(
@@ -998,6 +999,13 @@ export class SQLiteStorage implements StorageSchema {
     return {
       isOk: false,
       error: new Error('Account creation is not supported in local storage.'),
+    };
+  }
+
+  async getParties(_query: string): Promise<StorageResult<AccessPolicyParty[]>> {
+    return {
+      isOk: true,
+      value: [],
     };
   }
 }

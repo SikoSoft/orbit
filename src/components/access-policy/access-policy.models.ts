@@ -1,10 +1,10 @@
-import { AccessType } from 'api-spec/models/Access';
+import { AccessPartyType } from 'api-spec/models/Access';
 import { ControlType } from '@/models/Control';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
 
 export interface AccessPolicyMember {
   targetId: string;
-  type: AccessType;
+  type: AccessPartyType;
   displayName: string;
 }
 

@@ -1,7 +1,7 @@
 import { html, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { AccessType } from 'api-spec/models/Access';
+import { AccessPartyType } from 'api-spec/models/Access';
 import { translate } from '@/lib/Localization';
 
 import {
@@ -34,12 +34,12 @@ export class AccessPolicy extends AccessPolicyBase {
     return 'accessPolicy.noMembers';
   }
 
-  protected get allowedTypes(): AccessType[] {
-    return [AccessType.USER, AccessType.GROUP];
+  protected get allowedTypes(): AccessPartyType[] {
+    return [AccessPartyType.USER, AccessPartyType.GROUP];
   }
 
-  protected renderTypeLabel(type: AccessType): TemplateResult {
-    const key = type === AccessType.USER ? 'accessPolicy.typeUser' : 'accessPolicy.typeGroup';
+  protected renderTypeLabel(type: AccessPartyType): TemplateResult {
+    const key = type === AccessPartyType.USER ? 'accessPolicy.typeUser' : 'accessPolicy.typeGroup';
     return html`<span class="member-type">${translate(key)}</span>`;
   }
 

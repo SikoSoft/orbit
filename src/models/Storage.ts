@@ -3,6 +3,7 @@ import { ListConfig, ListSort, ListFilter } from 'api-spec/models/List';
 import { EntityConfig, EntityPropertyConfig } from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
 import { ExportDataContents, NukedDataType } from 'api-spec/models/Data';
+import { AccessPolicyParty } from 'api-spec/models/Access';
 import { ThemeName } from './Page';
 import { RequestBody } from '@/components/entity-form/entity-form.models';
 import { BulkOperationPayload } from '@/components/bulk-manager/bulk-manager.models';
@@ -129,4 +130,5 @@ export interface StorageSchema {
   getStorageSource?(): StorageSource | null;
   setAssistSaveImage?(enabled: boolean): void;
   getAssistSaveImage?(): boolean;
+  getParties?(query: string): Promise<StorageResult<AccessPolicyParty[]>>;
 }

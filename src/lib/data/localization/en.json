@@ -227,5 +227,6 @@
   "accessPolicy.typeUser": "User",
   "accessPolicy.typeGroup": "Group",
   "accessPolicyGroup.searchPlaceholder": "Search users...",
-  "accessPolicyGroup.noMembers": "No users added yet."
+  "accessPolicyGroup.noMembers": "No users added yet.",
+  "getPartiesError": "Failed to fetch users and groups."
 }

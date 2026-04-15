@@ -37,6 +37,7 @@ import {
   PublicEntityListResult,
 } from '@/components/entity-list/entity-list.models';
 import { CreateAccountResponseBody } from '@/components/account-form/account-form.models';
+import { AccessPolicyParty } from 'api-spec/models/Access';
 
 export interface SavedListFilter {
   filter: ListFilter;
@@ -727,6 +728,11 @@ export class Storage implements StorageSchema {
       isOk: false,
       error: new Error('Not implemented'),
     });
+  }
+
+  @delegateSource()
+  async getParties(_query: string): Promise<StorageResult<AccessPolicyParty[]>> {
+    return Promise.resolve({ isOk: true, value: [] });
   }
 }
 

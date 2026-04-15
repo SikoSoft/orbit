@@ -23,6 +23,7 @@ import {
   CreateAccountRequestBody,
   CreateAccountResponseBody,
 } from '@/components/account-form/account-form.models';
+import { AccessPolicyParty } from 'api-spec/models/Access';
 
 export class NetworkStorage implements StorageSchema {
   isActive = true;
@@ -465,6 +466,24 @@ export class NetworkStorage implements StorageSchema {
     return {
       isOk: false,
       error: new Error('Failed to create account'),
+    };
+  }
+
+  async getParties(query: string): Promise<StorageResult<AccessPolicyParty[]>> {
+    const result = await api.get<{ parties: AccessPolicyParty[] }>(
+      `accessPolicyParty/${encodeURIComponent(query)}`,
+    );
+
+    if (result && result.isOk) {
+      return {
+        isOk: true,
+        value: result.response.parties,
+      };
+    }
+
+    return {
+      isOk: false,
+      error: new Error(translate('getPartiesError')),
     };
   }
 }
