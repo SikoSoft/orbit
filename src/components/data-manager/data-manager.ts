@@ -3,6 +3,7 @@ import { css, html, nothing, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 
+import { Role } from 'api-spec/models/Identity';
 import { appState } from '@/state';
 
 import '@ss/ui/components/ss-collapsable';
@@ -13,7 +14,6 @@ import '@/components/data-manager/import-tool/import-tool';
 import '@/components/data-manager/sync-tool/sync-tool';
 import '@/components/data-manager/tactical-nuke/tactical-nuke';
 import { themed } from '@/lib/Theme';
-import { Role } from '@/models/Role';
 
 @themed()
 @customElement('data-manager')

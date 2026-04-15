@@ -17,6 +17,7 @@ import '@/components/svg-icon/svg-icon';
 import { IconName } from '@/components/svg-icon/svg-icon.models';
 import { addToast } from '@/lib/Util';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
+import { Role } from 'api-spec/models/Identity';
 
 @themed()
 @customElement('add-entity-widget')
@@ -225,7 +226,8 @@ export class AddEntityWidget extends MobxLitElement {
     return (
       this.state.debugMode &&
       this.state.entityConfigs.length > 0 &&
-      this.state.entityConfigs.some(config => config.aiEnabled)
+      this.state.entityConfigs.some(config => config.aiEnabled) &&
+      this.state.hasRole(Role.AI)
     );
   }
 
