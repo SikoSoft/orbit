@@ -13,6 +13,7 @@ import '@/components/data-manager/import-tool/import-tool';
 import '@/components/data-manager/sync-tool/sync-tool';
 import '@/components/data-manager/tactical-nuke/tactical-nuke';
 import { themed } from '@/lib/Theme';
+import { Role } from '@/models/Role';
 
 @themed()
 @customElement('data-manager')
@@ -40,9 +41,10 @@ export class DataManager extends MobxLitElement {
   open: boolean = this.state.collapsablePanelState['data-manager'] ?? true;
 
   get nukeEnabled(): boolean {
-    return import.meta.env.APP_ENABLE_NUKE
+    const envEnabled = import.meta.env.APP_ENABLE_NUKE
       ? parseInt(import.meta.env.APP_ENABLE_NUKE) === 1
       : false;
+    return this.state.debugMode && envEnabled && this.state.hasRole(Role.NUKE);
   }
 
   render(): TemplateResult {
@@ -65,7 +67,7 @@ export class DataManager extends MobxLitElement {
           <tab-pane title=${translate('sync')}>
             <sync-tool></sync-tool>
           </tab-pane>
-          ${this.state.debugMode && this.nukeEnabled
+          ${this.nukeEnabled
             ? html`
                 <tab-pane title=${translate('tacticalNuke')}>
                   <tactical-nuke></tactical-nuke>

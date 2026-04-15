@@ -492,6 +492,10 @@ export class AppState {
     this.user = user;
   }
 
+  hasRole(role: string): boolean {
+    return !!this.user?.roles?.includes(role);
+  }
+
   constructor() {
     makeObservable(this);
   }
