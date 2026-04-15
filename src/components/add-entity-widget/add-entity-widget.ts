@@ -224,7 +224,6 @@ export class AddEntityWidget extends MobxLitElement {
   @state()
   get show(): boolean {
     return (
-      this.state.debugMode &&
       this.state.entityConfigs.length > 0 &&
       this.state.entityConfigs.some(config => config.aiEnabled) &&
       this.state.hasRole(Role.AI)
