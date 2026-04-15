@@ -43,6 +43,17 @@ export class PropertyField extends MobxLitElement {
       display: block;
     }
 
+    .field-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.5rem;
+
+      .field {
+        flex-grow: 1;
+      }
+    }
+
     .name-row {
       margin-bottom: 0.25rem;
       display: block;
@@ -335,7 +346,16 @@ export class PropertyField extends MobxLitElement {
               : nothing}
           </div>
         </div>
-        ${this.renderField()}
+
+        <div class="field-row">
+          ${this.propertyConfig.prefix
+            ? html` <div class="prefix">${this.propertyConfig.prefix}</div>`
+            : nothing}
+          <div class="field">${this.renderField()}</div>
+          ${this.propertyConfig.suffix
+            ? html` <div class="suffix">${this.propertyConfig.suffix}</div>`
+            : nothing}
+        </div>
 
         <confirmation-modal
           ?open=${this.confirmationModalIsOpen}
