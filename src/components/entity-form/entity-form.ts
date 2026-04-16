@@ -76,7 +76,7 @@ export class EntityForm extends ViewElement {
   private minLengthForSuggestion = 1;
   private suggestionTimeout: ReturnType<typeof setTimeout> | null = null;
   private abortController: AbortController | null = null;
-  private sortedIds: string[] = [];
+  @state() private sortedIds: string[] = [];
 
   static styles = css`
     :host {
@@ -194,6 +194,7 @@ export class EntityForm extends ViewElement {
 
   @state() initialHash = '';
   @state() instancesHash = '';
+  @state() initialSortedIds: string[] = [];
 
   @state() propertyReferences: PropertyReference[] = [];
   @state() propertyPopUpIsOpen = false;
@@ -236,7 +237,8 @@ export class EntityForm extends ViewElement {
   get hasChanged(): boolean {
     return (
       this.initialHash !== this.instancesHash ||
-      JSON.stringify(this.tagsAndSuggestions) !== this.initialTags
+      JSON.stringify(this.tagsAndSuggestions) !== this.initialTags ||
+      JSON.stringify(this.sortedIds) !== JSON.stringify(this.initialSortedIds)
     );
   }
 
@@ -382,10 +384,15 @@ export class EntityForm extends ViewElement {
           ...availableProperties,
         ];
       }
-      this.sortedIds = this.propertyInstances.map(prop => prop.uiId);
+      this.setSortedIds(this.propertyInstances.map(prop => prop.uiId));
       this.propertiesSetup = true;
       this.initialHash = this.instancesHash = await this.getInstancesHash();
+      this.initialSortedIds = [...this.sortedIds];
     }
+  }
+
+  setSortedIds(sortedIds: string[]): void {
+    this.sortedIds = sortedIds;
   }
 
   private propertyAtMax(propertyId: number): boolean {
@@ -505,10 +512,6 @@ export class EntityForm extends ViewElement {
   }
 
   private async save(): Promise<void> {
-    console.log(
-      'Saving entity with properties:',
-      this.mapInstancesToProperties(),
-    );
     this.loading = true;
     const validationResult = this.validateConstraints();
 
@@ -581,6 +584,7 @@ export class EntityForm extends ViewElement {
     this.propertyInstances = [];
     this.initialHash = '';
     this.instancesHash = '';
+    this.initialSortedIds = [];
     await this.setupProperties();
 
     this.tagValue = '';
@@ -629,7 +633,6 @@ export class EntityForm extends ViewElement {
   }
 
   private handleSaveClick(_e: CustomEvent): void {
-    console.log('Save clicked');
     this.save();
   }
 
@@ -751,7 +754,7 @@ export class EntityForm extends ViewElement {
   }
 
   sortUpdated(e: SortUpdatedEvent): void {
-    this.sortedIds = e.detail.sortedIds;
+    this.setSortedIds(e.detail.sortedIds);
   }
 
   addProperty(propertyConfig: EntityPropertyConfig): void {
@@ -969,7 +972,9 @@ export class EntityForm extends ViewElement {
     const tabs = this.visibleTabs;
 
     if (tabs.length === 1) {
-      return html`<form class=${classMap(this.classes)}>${tabs[0].content()}</form>`;
+      return html`<form class=${classMap(this.classes)}>
+        ${tabs[0].content()}
+      </form>`;
     }
 
     return html`
@@ -978,7 +983,8 @@ export class EntityForm extends ViewElement {
           ${repeat(
             tabs,
             tab => tab.heading,
-            tab => html`<tab-pane title=${tab.heading}>${tab.content()}</tab-pane>`,
+            tab =>
+              html`<tab-pane title=${tab.heading}>${tab.content()}</tab-pane>`,
           )}
         </tab-container>
       </form>
