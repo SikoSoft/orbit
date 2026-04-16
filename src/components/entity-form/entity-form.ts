@@ -977,7 +977,7 @@ export class EntityForm extends ViewElement {
 
     if (tabs.length === 1) {
       return html`<form class=${classMap(this.classes)}>
-        ${tabs[0].content()}
+        ${tabs.find(tab => tab.shouldShow())?.content()}
       </form>`;
     }
 
