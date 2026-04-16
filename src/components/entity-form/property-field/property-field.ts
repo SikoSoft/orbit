@@ -333,6 +333,7 @@ export class PropertyField extends MobxLitElement {
           >
             ${this.canDelete
               ? html` <ss-button
+                  tabindex="-1"
                   @click=${(): void => {
                     this.requestDelete();
                   }}
@@ -340,7 +341,7 @@ export class PropertyField extends MobxLitElement {
                 ></ss-button>`
               : nothing}
             ${this.canClone
-              ? html` <ss-button @click=${this.clone}
+              ? html` <ss-button @click=${this.clone} tabindex="-1"
                   ><ss-icon name="copy" size="16"></ss-icon
                 ></ss-button>`
               : nothing}

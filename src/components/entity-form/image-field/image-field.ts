@@ -150,7 +150,7 @@ export class ImageField extends MobxLitElement {
           @input-changed=${this.handleSrcChanged}
         ></ss-input>
 
-        <ss-button @click=${this.toggleUploadModal}>
+        <ss-button tabindex="-1" @click=${this.toggleUploadModal}>
           <svg-icon name="upload" size="16"></svg-icon>
         </ss-button>
       </div>
