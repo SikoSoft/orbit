@@ -89,6 +89,14 @@ function delegateSource(): MethodDecorator {
 export class Storage implements StorageSchema {
   isActive = true;
 
+  clear(): void {
+    for (const key of Object.values(StorageItemKey).filter(
+      key => key !== StorageItemKey.STORAGE_SOURCE,
+    )) {
+      localStorage.removeItem(key);
+    }
+  }
+
   setStorageSource(source: StorageSource): void {
     storageDelegates.forEach(delegate => {
       delegate.isActive = delegate.storageSource === source;
@@ -731,7 +739,9 @@ export class Storage implements StorageSchema {
   }
 
   @delegateSource()
-  async getParties(_query: string): Promise<StorageResult<AccessPolicyParty[]>> {
+  async getParties(
+    _query: string,
+  ): Promise<StorageResult<AccessPolicyParty[]>> {
     return Promise.resolve({ isOk: true, value: [] });
   }
 }
