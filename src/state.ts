@@ -161,7 +161,7 @@ export class AppState {
   public assistSaveImage: boolean = false;
 
   @observable
-  public online: boolean = typeof navigator !== 'undefined' && navigator.onLine;
+  public online: boolean = true; //typeof navigator !== 'undefined' && navigator.onLine;
 
   @observable
   public viewIsReady: boolean = false;
@@ -170,7 +170,7 @@ export class AppState {
   public isNative: boolean = false;
 
   @observable
-  public storageSource: StorageSource = StorageSource.DEVICE;
+  public storageSource: StorageSource = StorageSource.CLOUD;
 
   @observable
   public user: User | null = null;

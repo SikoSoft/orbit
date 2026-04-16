@@ -61,8 +61,11 @@ export class AppContainer extends MobxLitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-
-    this.state.setOnline(typeof navigator !== 'undefined' && navigator.onLine);
+    console.log(
+      'result of nav check',
+      typeof navigator !== 'undefined' && navigator.onLine,
+    );
+    //this.state.setOnline(true); //typeof navigator !== 'undefined' && navigator.onLine);
 
     this.setAuthToken(storage.getAuthToken());
 
@@ -103,16 +106,19 @@ export class AppContainer extends MobxLitElement {
   }
 
   private handleOnline = (): void => {
+    console.log('app-container detected online');
     this.state.setOnline(true);
   };
 
   private handleOffline = (): void => {
+    console.log('app-container detected offline');
     this.state.setOnline(false);
   };
 
   private handleNetworkApiRequestFailed = (e: Event): void => {
     const event = e as NetworkApiRequestFailedEvent;
     if (event.detail.type === 'offline' || event.detail.type === 'network') {
+      console.warn('Network API request failed, setting app state to offline');
       this.state.setOnline(false);
     }
   };
@@ -244,6 +250,10 @@ export class AppContainer extends MobxLitElement {
     }
   }
 
+  private handleUserLoggedOut = (): void => {
+    storage.clear();
+  };
+
   clearSession = (): void => {
     this.dispatchEvent(new UserLoggedOutEvent({}));
     this.setAuthToken('');
@@ -259,6 +269,7 @@ export class AppContainer extends MobxLitElement {
         @list-config-changed=${this.handleListConfigChanged}
         @operation-performed=${this.handleOperationPerformed}
         @user-logged-in=${this.handleUserLoggedIn}
+        @user-logged-out=${this.handleUserLoggedOut}
         @invalid-session=${this.clearSession}
         @storage-source-updated=${this.handleStorageSourceUpdated}
       >
