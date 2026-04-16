@@ -364,17 +364,21 @@ export class EntityForm extends ViewElement {
                 existing => existing.propertyConfigId === propertyConfig.id,
               ),
           )
-          .map(propertyConfig => ({
-            propertyConfigId: propertyConfig.id,
-            instanceId: 0,
-            uiId: uuidv4(),
-            value: propertyConfig.defaultValue,
-            valueIsSet:
-              propertyConfig.dataType === DataType.DATE ||
-              propertyConfig.dataType === DataType.INT
-                ? true
-                : false,
-          }));
+          .map(propertyConfig => {
+            const value = propertyConfig.defaultValue;
+            return {
+              propertyConfigId: propertyConfig.id,
+              instanceId: 0,
+              uiId: uuidv4(),
+              value,
+              valueIsSet:
+                propertyConfig.dataType === DataType.DATE ||
+                (propertyConfig.dataType === DataType.INT &&
+                  value !== propertyConfig.defaultValue)
+                  ? true
+                  : false,
+            };
+          });
 
       if (this.entityId) {
         this.propertyInstances = [...existingProperties];
