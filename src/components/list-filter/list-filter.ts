@@ -211,35 +211,6 @@ export class ListFilter extends MobxLitElement {
     this.saveFilter();
   }
 
-  private handleSavedFilterChanged(_e: Event): void {
-    this.selectedSavedFilter = this.savedFiltersInput.value;
-    const savedFilter = this.savedFilters.find(
-      savedFilter => savedFilter.id === this.savedFiltersInput.value,
-    );
-    if (savedFilter) {
-      this[ListFilterType.CONTAINS_ONE_OF] =
-        savedFilter.filter.tagging[ListFilterType.CONTAINS_ONE_OF];
-      this[ListFilterType.CONTAINS_ALL_OF] =
-        savedFilter.filter.tagging[ListFilterType.CONTAINS_ALL_OF];
-      this.includeTypes = savedFilter.filter.includeTypes;
-      this.includeAllTagging = savedFilter.filter.includeAllTagging;
-      this.includeUntagged = savedFilter.filter.includeUntagged;
-      this.includeAll = savedFilter.filter.includeAll;
-      this.time = savedFilter.filter.time;
-      this.text = savedFilter.filter.text;
-    }
-  }
-
-  private handleDeleteSavedFilterClick(_e: Event): void {
-    if (this.savedFiltersInput.value) {
-      storage.deleteSavedFilter(this.savedFiltersInput.value);
-      this.savedFiltersInput.value = '';
-      this.savedFiltersInput.dispatchEvent(new Event('change'));
-    }
-    this.savedFilters = storage.getSavedFilters();
-    addToast(translate('filterDeleted'), NotificationType.INFO);
-  }
-
   private handleTimeChanged(e: TimeFiltersUpdatedEvent): void {
     this.time = e.detail;
   }
@@ -290,35 +261,6 @@ export class ListFilter extends MobxLitElement {
   render(): TemplateResult {
     return html`
       <div class=${classMap(this.classes)}>
-        ${this.savedFilters.length
-          ? html`
-              <div class="saved-filters">
-                <select
-                  id="saved-filters"
-                  @change=${this.handleSavedFilterChanged}
-                >
-                  <option value="">${translate('savedFilters')}</option>
-                  ${repeat(
-                    this.savedFilters,
-                    filter => filter.id,
-                    filter => html`
-                      <option value=${filter.id}>${filter.name}</option>
-                    `,
-                  )}
-                </select>
-
-                ${this.selectedSavedFilter
-                  ? html`
-                      <ss-button
-                        @click=${this.handleDeleteSavedFilterClick}
-                        text=${translate('deleteFilter')}
-                      ></ss-button>
-                    `
-                  : nothing}
-              </div>
-            `
-          : nothing}
-
         <div class="all">
           <input
             id="include-all"
