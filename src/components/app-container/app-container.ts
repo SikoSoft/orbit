@@ -30,6 +30,7 @@ import '@/components/forbidden-notice/forbidden-notice';
 import '@/components/bulk-manager/bulk-manager';
 import '@/components/list-config/list-config';
 import { Introspection } from 'api-spec/models/Introspection';
+import { StorageSource } from '@/models/Storage';
 
 export interface ViewChangedEvent extends CustomEvent {
   detail: PageView;
@@ -133,7 +134,15 @@ export class AppContainer extends MobxLitElement {
     try {
       this.state.setAssistEnabled(import.meta.env.APP_ENABLE_ASSIST === '1');
 
-      if (this.state.authToken) {
+      const storageSource = storage.getStorageSource();
+      if (storageSource) {
+        this.state.setStorageSource(storageSource);
+      }
+
+      if (
+        this.state.storageSource === StorageSource.DEVICE ||
+        this.state.authToken
+      ) {
         const listConfigs = await storage.getListConfigs();
         this.state.setListConfigs(listConfigs);
 

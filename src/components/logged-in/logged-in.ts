@@ -2,6 +2,7 @@ import { LitElement, nothing, TemplateResult } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { storage } from '@/lib/Storage';
 import { InvalidSessionEvent } from '../app-container/app-container.events';
+import { StorageSource } from '@/models/Storage';
 
 @customElement('logged-in')
 export class LoggedIn extends LitElement {
@@ -68,7 +69,8 @@ export class LoggedIn extends LitElement {
   }
 
   private updateVisibility(): void {
-    const visible = this.isLoggedIn();
+    const storageSource = storage.getStorageSource();
+    const visible = storageSource === StorageSource.DEVICE || this.isLoggedIn();
 
     if (visible && !this.stamped) {
       this.ensureStamped();

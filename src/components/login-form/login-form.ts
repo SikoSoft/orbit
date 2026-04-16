@@ -1,5 +1,5 @@
 import { MobxLitElement } from '@adobe/lit-mobx';
-import { css, html, PropertyValues, TemplateResult } from 'lit';
+import { css, html, nothing, PropertyValues, TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import { appState } from '@/state';
@@ -22,6 +22,7 @@ import { UserLoggedInEvent } from '@/events/user-logged-in';
 
 import { SSInput } from '@ss/ui/components/ss-input';
 import { themed } from '@/lib/Theme';
+import { StorageSource } from '@/models/Storage';
 
 @themed()
 @customElement('login-form')
@@ -100,7 +101,11 @@ export class LoginForm extends MobxLitElement {
     }
   }
 
-  render(): TemplateResult {
+  render(): TemplateResult | typeof nothing {
+    if (this.state.storageSource === StorageSource.DEVICE) {
+      return nothing;
+    }
+
     return html`
       <form>
         <ss-input

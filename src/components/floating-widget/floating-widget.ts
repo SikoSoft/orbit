@@ -1,4 +1,4 @@
-import { css, TemplateResult } from 'lit';
+import { css, nothing, TemplateResult } from 'lit';
 import { html } from 'lit/static-html.js';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -11,6 +11,7 @@ import { storage } from '@/lib/Storage';
 import { ToggleChangedEvent } from '@ss/ui/components/ss-toggle.events';
 
 import '@ss/ui/components/ss-toggle';
+import '@/components/logged-in/logged-in';
 import '@/components/user-pane/user-pane';
 
 import { ThemeName } from '@/models/Page';
@@ -296,6 +297,14 @@ export class FloatingWidget extends MobxLitElement {
     }, 500);
   }
 
+  @state()
+  get showLogoutButton(): boolean {
+    return (
+      storage.getStorageSource() === StorageSource.CLOUD &&
+      storage.getAuthToken() !== ''
+    );
+  }
+
   render(): TemplateResult {
     return html`
       <div
@@ -315,7 +324,8 @@ export class FloatingWidget extends MobxLitElement {
 
         <div class="body" @mouseenter=${this.handleOpen}>
           <div class="user">
-            <user-pane></user-pane>
+            ${this.showLogoutButton ? html` <user-pane></user-pane> ` : nothing}
+            </logged-in>
           </div>
 
           <div class="option">
