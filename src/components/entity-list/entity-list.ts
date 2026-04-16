@@ -81,6 +81,8 @@ export class EntityList extends ViewElement {
   @state() total: number = 0;
   @state() loading: boolean = false;
 
+  private loadGeneration: number = 0;
+
   @state()
   get perPage(): number {
     const perPage = this.state.listSetting[SettingName.PAGINATION_PAGE_SIZE];
@@ -208,12 +210,19 @@ export class EntityList extends ViewElement {
   async load(more = false): Promise<void> {
     this.loading = true;
 
+    const generation = ++this.loadGeneration;
+
     if (more) {
       this.start += this.perPage;
     }
 
     try {
       const entityResult = await this.getEntities();
+
+      if (generation !== this.loadGeneration) {
+        return;
+      }
+
       this.state.setListEntities(
         more
           ? [...this.state.listEntities, ...entityResult.entities]
@@ -221,10 +230,15 @@ export class EntityList extends ViewElement {
       );
       this.total = entityResult.total;
     } catch (error) {
+      if (generation !== this.loadGeneration) {
+        return;
+      }
       console.error('Failed to get list', error);
     } finally {
-      this.ready = true;
-      this.loading = false;
+      if (generation === this.loadGeneration) {
+        this.ready = true;
+        this.loading = false;
+      }
     }
   }
 
