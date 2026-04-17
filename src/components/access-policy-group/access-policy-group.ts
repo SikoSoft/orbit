@@ -114,7 +114,9 @@ export class AccessPolicyGroup extends AccessPolicyBase {
       : await storage.createAccessPolicyGroup(this._groupName, users);
 
     if (result.isOk) {
-      this.dispatchEvent(new AccessPolicyGroupSavedEvent({ group: result.value }));
+      this.dispatchEvent(
+        new AccessPolicyGroupSavedEvent({ group: result.value }),
+      );
     }
   }
 

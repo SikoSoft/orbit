@@ -114,12 +114,13 @@ export class AccessPolicy extends AccessPolicyBase {
     }
   }
 
-  connectedCallback(): void {
+  async connectedCallback(): Promise<void> {
     super.connectedCallback();
-    void this.loadGroups();
+    await this.loadGroups();
   }
 
   private async loadGroups(): Promise<void> {
+    console.log('Loading access policy groups from storage');
     const result = await storage.getAccessPolicyGroups();
     if (result.isOk) {
       this._groups = result.value;
@@ -127,10 +128,10 @@ export class AccessPolicy extends AccessPolicyBase {
   }
 
   private groupToMembers(group: AccessPolicyGroup): AccessPolicyMember[] {
-    return group.users.map(userId => ({
-      targetId: userId,
+    return group.users.map(member => ({
+      targetId: member.id,
       type: AccessPartyType.USER,
-      displayName: userId,
+      displayName: member.name,
     }));
   }
 

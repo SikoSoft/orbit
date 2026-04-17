@@ -22,7 +22,8 @@ export const accessPolicyGroupProps: PropConfigMap<AccessPolicyGroupProps> = {
   [AccessPolicyGroupProp.ID]: {
     default: '',
     control: { type: ControlType.HIDDEN },
-    description: 'The ID of the group being edited (empty string when creating a new group)',
+    description:
+      'The ID of the group being edited (empty string when creating a new group)',
   },
   [AccessPolicyGroupProp.NAME]: {
     default: '',
