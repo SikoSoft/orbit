@@ -9,16 +9,30 @@ export interface AccessPolicyMember {
 }
 
 export enum AccessPolicyProp {
+  NAME = 'name',
+  DESCRIPTION = 'description',
   MEMBERS = 'members',
   SUGGESTIONS = 'suggestions',
 }
 
 export interface AccessPolicyProps extends PropTypes {
+  [AccessPolicyProp.NAME]: string;
+  [AccessPolicyProp.DESCRIPTION]: string;
   [AccessPolicyProp.MEMBERS]: AccessPolicyMember[];
   [AccessPolicyProp.SUGGESTIONS]: AccessPolicyMember[];
 }
 
 export const accessPolicyProps: PropConfigMap<AccessPolicyProps> = {
+  [AccessPolicyProp.NAME]: {
+    default: '',
+    control: { type: ControlType.TEXT },
+    description: 'The name of the access policy',
+  },
+  [AccessPolicyProp.DESCRIPTION]: {
+    default: '',
+    control: { type: ControlType.TEXT },
+    description: 'The description of the access policy',
+  },
   [AccessPolicyProp.MEMBERS]: {
     default: [],
     control: { type: ControlType.HIDDEN },

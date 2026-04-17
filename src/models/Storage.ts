@@ -3,7 +3,7 @@ import { ListConfig, ListSort, ListFilter } from 'api-spec/models/List';
 import { EntityConfig, EntityPropertyConfig } from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
 import { ExportDataContents, NukedDataType } from 'api-spec/models/Data';
-import { AccessPolicyParty } from 'api-spec/models/Access';
+import { AccessPolicyGroup, AccessPolicyParty } from 'api-spec/models/Access';
 import { ThemeName } from './Page';
 import { RequestBody } from '@/components/entity-form/entity-form.models';
 import { BulkOperationPayload } from '@/components/bulk-manager/bulk-manager.models';
@@ -131,4 +131,15 @@ export interface StorageSchema {
   setAssistSaveImage?(enabled: boolean): void;
   getAssistSaveImage?(): boolean;
   getParties?(query: string): Promise<StorageResult<AccessPolicyParty[]>>;
+  getAccessPolicyGroups?(): Promise<StorageResult<AccessPolicyGroup[]>>;
+  createAccessPolicyGroup?(
+    name: string,
+    users: string[],
+  ): Promise<StorageResult<AccessPolicyGroup>>;
+  updateAccessPolicyGroup?(
+    id: string,
+    name: string,
+    users: string[],
+  ): Promise<StorageResult<AccessPolicyGroup>>;
+  deleteAccessPolicyGroup?(id: string): Promise<boolean>;
 }

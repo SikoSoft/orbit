@@ -38,7 +38,7 @@ import {
 } from '@/components/entity-list/entity-list.models';
 import { CreateAccountResponseBody } from '@/components/account-form/account-form.models';
 import { OperationType } from 'api-spec/models/Operation';
-import { AccessPolicyParty } from 'api-spec/models/Access';
+import { AccessPolicyGroup, AccessPolicyParty } from 'api-spec/models/Access';
 import { translate } from './Localization';
 
 function serializePropertyValue(
@@ -1003,10 +1003,36 @@ export class SQLiteStorage implements StorageSchema {
   }
 
   async getParties(_query: string): Promise<StorageResult<AccessPolicyParty[]>> {
+    return { isOk: true, value: [] };
+  }
+
+  async getAccessPolicyGroups(): Promise<StorageResult<AccessPolicyGroup[]>> {
+    return { isOk: true, value: [] };
+  }
+
+  async createAccessPolicyGroup(
+    _name: string,
+    _users: string[],
+  ): Promise<StorageResult<AccessPolicyGroup>> {
     return {
-      isOk: true,
-      value: [],
+      isOk: false,
+      error: new Error('Access policy groups are not supported in local storage.'),
     };
+  }
+
+  async updateAccessPolicyGroup(
+    _id: string,
+    _name: string,
+    _users: string[],
+  ): Promise<StorageResult<AccessPolicyGroup>> {
+    return {
+      isOk: false,
+      error: new Error('Access policy groups are not supported in local storage.'),
+    };
+  }
+
+  async deleteAccessPolicyGroup(_id: string): Promise<boolean> {
+    return false;
   }
 }
 

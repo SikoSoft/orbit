@@ -1,4 +1,4 @@
-import { css, html, nothing, PropertyValues, TemplateResult } from 'lit';
+import { css, CSSResultGroup, html, nothing, PropertyValues, TemplateResult } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
@@ -16,7 +16,7 @@ import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
 import { AccessPolicyMember } from './access-policy.models';
 
 export abstract class AccessPolicyBase extends MobxLitElement {
-  static styles = css`
+  static styles: CSSResultGroup = css`
     :host {
       display: block;
     }

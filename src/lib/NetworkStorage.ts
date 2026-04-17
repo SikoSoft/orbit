@@ -23,7 +23,7 @@ import {
   CreateAccountRequestBody,
   CreateAccountResponseBody,
 } from '@/components/account-form/account-form.models';
-import { AccessPolicyParty } from 'api-spec/models/Access';
+import { AccessPolicyGroup, AccessPolicyParty } from 'api-spec/models/Access';
 
 export class NetworkStorage implements StorageSchema {
   isActive = true;
@@ -485,6 +485,70 @@ export class NetworkStorage implements StorageSchema {
       isOk: false,
       error: new Error(translate('getPartiesError')),
     };
+  }
+
+  async getAccessPolicyGroups(): Promise<StorageResult<AccessPolicyGroup[]>> {
+    const result = await api.get<{ groups: AccessPolicyGroup[] }>(
+      'accessPolicyGroup',
+    );
+
+    if (result && result.isOk) {
+      return { isOk: true, value: result.response.groups };
+    }
+
+    return {
+      isOk: false,
+      error: new Error(translate('getAccessPolicyGroupsError')),
+    };
+  }
+
+  async createAccessPolicyGroup(
+    name: string,
+    users: string[],
+  ): Promise<StorageResult<AccessPolicyGroup>> {
+    const result = await api.post<
+      { name: string; users: string[] },
+      AccessPolicyGroup
+    >('accessPolicyGroup', { name, users });
+
+    if (result && result.isOk) {
+      return { isOk: true, value: result.response };
+    }
+
+    return {
+      isOk: false,
+      error: new Error(translate('createAccessPolicyGroupError')),
+    };
+  }
+
+  async updateAccessPolicyGroup(
+    id: string,
+    name: string,
+    users: string[],
+  ): Promise<StorageResult<AccessPolicyGroup>> {
+    const result = await api.put<
+      { name: string; users: string[] },
+      AccessPolicyGroup
+    >(`accessPolicyGroup/${id}`, { name, users });
+
+    if (result && result.isOk) {
+      return { isOk: true, value: result.response };
+    }
+
+    return {
+      isOk: false,
+      error: new Error(translate('updateAccessPolicyGroupError')),
+    };
+  }
+
+  async deleteAccessPolicyGroup(id: string): Promise<boolean> {
+    const result = await api.delete<null>(`accessPolicyGroup/${id}`);
+
+    if (result && result.isOk) {
+      return true;
+    }
+
+    return false;
   }
 }
 

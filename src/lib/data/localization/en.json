@@ -226,7 +226,15 @@
   "accessPolicy.removeMember": "Remove member",
   "accessPolicy.typeUser": "User",
   "accessPolicy.typeGroup": "Group",
+  "accessPolicy.namePlaceholder": "Policy name",
+  "accessPolicy.descriptionPlaceholder": "Policy description",
+  "accessPolicy.manageUserGroups": "Manage user groups",
+  "accessPolicy.addNewGroup": "Add new group",
   "accessPolicyGroup.searchPlaceholder": "Search users...",
   "accessPolicyGroup.noMembers": "No users added yet.",
-  "getPartiesError": "Failed to fetch users and groups."
+  "accessPolicyGroup.namePlaceholder": "Group name",
+  "getPartiesError": "Failed to fetch users and groups.",
+  "getAccessPolicyGroupsError": "Failed to fetch user groups.",
+  "createAccessPolicyGroupError": "Failed to create user group.",
+  "updateAccessPolicyGroupError": "Failed to update user group."
 }

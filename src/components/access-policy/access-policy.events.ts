@@ -1,5 +1,38 @@
 import { AccessPolicyMember } from './access-policy.models';
 
+export const accessPolicyNameChangedEventName = 'access-policy-name-changed';
+
+export interface AccessPolicyNameChangedPayload {
+  value: string;
+}
+
+export class AccessPolicyNameChangedEvent extends CustomEvent<AccessPolicyNameChangedPayload> {
+  constructor(detail: AccessPolicyNameChangedPayload) {
+    super(accessPolicyNameChangedEventName, {
+      detail,
+      bubbles: true,
+      composed: true,
+    });
+  }
+}
+
+export const accessPolicyDescriptionChangedEventName =
+  'access-policy-description-changed';
+
+export interface AccessPolicyDescriptionChangedPayload {
+  value: string;
+}
+
+export class AccessPolicyDescriptionChangedEvent extends CustomEvent<AccessPolicyDescriptionChangedPayload> {
+  constructor(detail: AccessPolicyDescriptionChangedPayload) {
+    super(accessPolicyDescriptionChangedEventName, {
+      detail,
+      bubbles: true,
+      composed: true,
+    });
+  }
+}
+
 export const accessPolicyChangedEventName = 'access-policy-changed';
 
 export interface AccessPolicyChangedPayload {
