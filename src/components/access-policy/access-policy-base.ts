@@ -124,6 +124,17 @@ export abstract class AccessPolicyBase extends MobxLitElement {
   protected abstract dispatchChangedEvent(members: AccessPolicyMember[]): void;
   protected abstract dispatchSearchChangedEvent(value: string): void;
 
+  @state() get inSync(): boolean {
+    const currentMembers = this.members.map(m => m.targetId).sort();
+    const originalMembers = this._members.map(m => m.targetId).sort();
+
+    return JSON.stringify(currentMembers) === JSON.stringify(originalMembers);
+  }
+
+  handleSave(): void {
+    console.info('Not implemented');
+  }
+
   protected willUpdate(changedProperties: PropertyValues): void {
     if (changedProperties.has('members')) {
       this._members = [...this.members];
@@ -270,6 +281,10 @@ export abstract class AccessPolicyBase extends MobxLitElement {
             `,
           )}
         </div>
+
+        <ss-button ?disabled=${this.inSync} positive @click=${this.handleSave}>
+          ${translate('save')}
+        </ss-button>
       </div>
     `;
   }

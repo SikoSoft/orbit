@@ -104,6 +104,34 @@ export class AccessPolicy extends AccessPolicyBase {
   @state() private _policyDescription: string = '';
   @state() private _groups: AccessPolicyGroup[] = [];
 
+  @state() get inSync(): boolean {
+    const currentMembers = this[AccessPolicyProp.MEMBERS]
+      .map(m => m.targetId)
+      .sort();
+    const originalMembers = this._groups
+      .flatMap(g => g.users)
+      .map(u => u.id)
+      .sort();
+
+    return (
+      this._policyName === this[AccessPolicyProp.NAME] &&
+      this._policyDescription === this[AccessPolicyProp.DESCRIPTION] &&
+      JSON.stringify(currentMembers) === JSON.stringify(originalMembers)
+    );
+  }
+
+  handleSave(): void {
+    const members = this._groups
+      .flatMap(g => g.users)
+      .map(member => ({
+        targetId: member.id,
+        type: AccessPartyType.USER,
+        displayName: member.name,
+      }));
+
+    this.dispatchChangedEvent(members);
+  }
+
   protected willUpdate(changedProperties: PropertyValues): void {
     super.willUpdate(changedProperties);
     if (changedProperties.has(AccessPolicyProp.NAME)) {

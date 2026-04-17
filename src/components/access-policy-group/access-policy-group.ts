@@ -106,7 +106,7 @@ export class AccessPolicyGroup extends AccessPolicyBase {
     this._groupName = e.detail.value;
   }
 
-  private async handleSave(): Promise<void> {
+  async handleSave(): Promise<void> {
     const users = this._members.map(m => m.targetId);
     const groupId = this[AccessPolicyGroupProp.ID];
 
@@ -145,15 +145,6 @@ export class AccessPolicyGroup extends AccessPolicyBase {
         ></ss-input>
 
         ${super.render()}
-
-        <ss-button
-          ?disabled=${this.inSync}
-          positive
-          class="group-save"
-          @click=${this.handleSave}
-        >
-          ${translate('save')}
-        </ss-button>
       </div>
     `;
   }
