@@ -7,6 +7,7 @@ import { InputType } from '@ss/ui/components/ss-input.models';
 import { storage } from '@/lib/Storage';
 
 import '@ss/ui/components/ss-input';
+import '@ss/ui/components/ss-button';
 
 import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
 
@@ -23,6 +24,8 @@ import {
   accessPolicyGroupProps,
   AccessPolicyGroupProps,
 } from './access-policy-group.models';
+import { addToast } from '@/lib/Util';
+import { NotificationType } from '@ss/ui/components/notification-provider.models';
 
 @customElement('access-policy-group')
 export class AccessPolicyGroup extends AccessPolicyBase {
@@ -33,21 +36,6 @@ export class AccessPolicyGroup extends AccessPolicyBase {
         display: flex;
         flex-direction: column;
         gap: 1rem;
-      }
-
-      .group-save {
-        align-self: flex-start;
-        padding: 0.4rem 1rem;
-        border: 1px solid var(--input-border-color, #ccc);
-        border-radius: 4px;
-        background: var(--input-background-color, #fff);
-        color: var(--input-text-color, #000);
-        cursor: pointer;
-        font-size: 0.9rem;
-
-        &:hover {
-          background-color: var(--input-border-color, #ccc);
-        }
       }
     `,
   ];
@@ -69,6 +57,19 @@ export class AccessPolicyGroup extends AccessPolicyBase {
     accessPolicyGroupProps[AccessPolicyGroupProp.SUGGESTIONS].default;
 
   @state() private _groupName: string = '';
+
+  @state()
+  get inSync(): boolean {
+    const currentMembers = this[AccessPolicyGroupProp.MEMBERS]
+      .map(m => m.targetId)
+      .sort();
+    const originalMembers = this._members.map(m => m.targetId).sort();
+
+    return (
+      this._groupName === this[AccessPolicyGroupProp.NAME] &&
+      JSON.stringify(currentMembers) === JSON.stringify(originalMembers)
+    );
+  }
 
   protected willUpdate(changedProperties: PropertyValues): void {
     super.willUpdate(changedProperties);
@@ -117,6 +118,19 @@ export class AccessPolicyGroup extends AccessPolicyBase {
       this.dispatchEvent(
         new AccessPolicyGroupSavedEvent({ group: result.value }),
       );
+
+      if (groupId) {
+        addToast(
+          translate('accessPolicyGroup.updateSuccess'),
+          NotificationType.SUCCESS,
+        );
+        return;
+      }
+
+      addToast(
+        translate('accessPolicyGroup.createSuccess'),
+        NotificationType.SUCCESS,
+      );
     }
   }
 
@@ -129,10 +143,17 @@ export class AccessPolicyGroup extends AccessPolicyBase {
           placeholder=${translate('accessPolicyGroup.namePlaceholder')}
           @input-changed=${this.handleGroupNameChanged}
         ></ss-input>
+
         ${super.render()}
-        <button class="group-save" @click=${this.handleSave}>
+
+        <ss-button
+          ?disabled=${this.inSync}
+          positive
+          class="group-save"
+          @click=${this.handleSave}
+        >
           ${translate('save')}
-        </button>
+        </ss-button>
       </div>
     `;
   }

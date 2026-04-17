@@ -233,6 +233,8 @@
   "accessPolicyGroup.searchPlaceholder": "Search users...",
   "accessPolicyGroup.noMembers": "No users added yet.",
   "accessPolicyGroup.namePlaceholder": "Group name",
+  "accessPolicyGroup.updateSuccess": "User group updated successfully.",
+  "accessPolicyGroup.createSuccess": "User group created successfully.",
   "getPartiesError": "Failed to fetch users and groups.",
   "getAccessPolicyGroupsError": "Failed to fetch user groups.",
   "createAccessPolicyGroupError": "Failed to create user group.",
