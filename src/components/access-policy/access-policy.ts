@@ -193,6 +193,7 @@ export class AccessPolicy extends AccessPolicyBase {
           placeholder=${translate('accessPolicy.namePlaceholder')}
           @input-changed=${this.handleNameChanged}
         ></ss-input>
+
         <ss-input
           type=${InputType.TEXT}
           value=${this._policyDescription}

@@ -1,4 +1,11 @@
-import { css, CSSResultGroup, html, nothing, PropertyValues, TemplateResult } from 'lit';
+import {
+  css,
+  CSSResultGroup,
+  html,
+  nothing,
+  PropertyValues,
+  TemplateResult,
+} from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
@@ -104,7 +111,9 @@ export abstract class AccessPolicyBase extends MobxLitElement {
   @state() protected searchText: string = '';
   @state() private _fetchedSuggestions: AccessPolicyMember[] = [];
 
-  @query('ss-input') private searchInput!: HTMLElement & { clear: () => void };
+  @query('ss-input.search-input') private searchInput!: HTMLElement & {
+    clear: () => void;
+  };
 
   protected abstract get searchPlaceholderKey(): string;
   protected abstract get noMembersKey(): string;
@@ -226,6 +235,7 @@ export abstract class AccessPolicyBase extends MobxLitElement {
       <div class="access-policy">
         <div class="search-row">
           <ss-input
+            class="search-input"
             type=${InputType.TEXT}
             autoComplete
             value=${this.searchText}
