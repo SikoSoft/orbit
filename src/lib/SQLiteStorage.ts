@@ -38,7 +38,11 @@ import {
 } from '@/components/entity-list/entity-list.models';
 import { CreateAccountResponseBody } from '@/components/account-form/account-form.models';
 import { OperationType } from 'api-spec/models/Operation';
-import { AccessPolicyGroup, AccessPolicyParty } from 'api-spec/models/Access';
+import {
+  AccessPolicy,
+  AccessPolicyGroup,
+  AccessPolicyParty,
+} from 'api-spec/models/Access';
 import { translate } from './Localization';
 
 function serializePropertyValue(
@@ -1032,6 +1036,37 @@ export class SQLiteStorage implements StorageSchema {
   }
 
   async deleteAccessPolicyGroup(_id: string): Promise<boolean> {
+    return false;
+  }
+
+  async getAccessPolicies(): Promise<StorageResult<AccessPolicy[]>> {
+    return { isOk: true, value: [] };
+  }
+
+  async createAccessPolicy(
+    _name: string,
+    _description: string,
+    _parties: AccessPolicyParty[],
+  ): Promise<StorageResult<AccessPolicy>> {
+    return {
+      isOk: false,
+      error: new Error('Access policies are not supported in local storage.'),
+    };
+  }
+
+  async updateAccessPolicy(
+    _id: number,
+    _name: string,
+    _description: string,
+    _parties: AccessPolicyParty[],
+  ): Promise<StorageResult<AccessPolicy>> {
+    return {
+      isOk: false,
+      error: new Error('Access policies are not supported in local storage.'),
+    };
+  }
+
+  async deleteAccessPolicy(_id: number): Promise<boolean> {
     return false;
   }
 }

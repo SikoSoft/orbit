@@ -238,5 +238,10 @@
   "getPartiesError": "Failed to fetch users and groups.",
   "getAccessPolicyGroupsError": "Failed to fetch user groups.",
   "createAccessPolicyGroupError": "Failed to create user group.",
-  "updateAccessPolicyGroupError": "Failed to update user group."
+  "updateAccessPolicyGroupError": "Failed to update user group.",
+  "accessPolicy.createSuccess": "Access policy created successfully.",
+  "accessPolicy.updateSuccess": "Access policy updated successfully.",
+  "getAccessPoliciesError": "Failed to fetch access policies.",
+  "createAccessPolicyError": "Failed to create access policy.",
+  "updateAccessPolicyError": "Failed to update access policy."
 }

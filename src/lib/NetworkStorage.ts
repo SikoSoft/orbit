@@ -23,7 +23,11 @@ import {
   CreateAccountRequestBody,
   CreateAccountResponseBody,
 } from '@/components/account-form/account-form.models';
-import { AccessPolicyGroup, AccessPolicyParty } from 'api-spec/models/Access';
+import {
+  AccessPolicy,
+  AccessPolicyGroup,
+  AccessPolicyParty,
+} from 'api-spec/models/Access';
 
 export class NetworkStorage implements StorageSchema {
   isActive = true;
@@ -543,6 +547,70 @@ export class NetworkStorage implements StorageSchema {
 
   async deleteAccessPolicyGroup(id: string): Promise<boolean> {
     const result = await api.delete<null>(`accessPolicyGroup/${id}`);
+
+    if (result && result.isOk) {
+      return true;
+    }
+
+    return false;
+  }
+
+  async getAccessPolicies(): Promise<StorageResult<AccessPolicy[]>> {
+    const result = await api.get<{ policies: AccessPolicy[] }>('accessPolicy');
+
+    if (result && result.isOk) {
+      return { isOk: true, value: result.response.policies };
+    }
+
+    return {
+      isOk: false,
+      error: new Error(translate('getAccessPoliciesError')),
+    };
+  }
+
+  async createAccessPolicy(
+    name: string,
+    description: string,
+    parties: AccessPolicyParty[],
+  ): Promise<StorageResult<AccessPolicy>> {
+    const result = await api.post<
+      { name: string; description: string; parties: AccessPolicyParty[] },
+      AccessPolicy
+    >('accessPolicy', { name, description, parties });
+
+    if (result && result.isOk) {
+      return { isOk: true, value: result.response };
+    }
+
+    return {
+      isOk: false,
+      error: new Error(translate('createAccessPolicyError')),
+    };
+  }
+
+  async updateAccessPolicy(
+    id: number,
+    name: string,
+    description: string,
+    parties: AccessPolicyParty[],
+  ): Promise<StorageResult<AccessPolicy>> {
+    const result = await api.put<
+      { name: string; description: string; parties: AccessPolicyParty[] },
+      AccessPolicy
+    >(`accessPolicy/${id}`, { name, description, parties });
+
+    if (result && result.isOk) {
+      return { isOk: true, value: result.response };
+    }
+
+    return {
+      isOk: false,
+      error: new Error(translate('updateAccessPolicyError')),
+    };
+  }
+
+  async deleteAccessPolicy(id: number): Promise<boolean> {
+    const result = await api.delete<null>(`accessPolicy/${id}`);
 
     if (result && result.isOk) {
       return true;

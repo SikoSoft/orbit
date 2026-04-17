@@ -9,6 +9,7 @@ export interface AccessPolicyMember {
 }
 
 export enum AccessPolicyProp {
+  ID = 'id',
   NAME = 'name',
   DESCRIPTION = 'description',
   MEMBERS = 'members',
@@ -16,6 +17,7 @@ export enum AccessPolicyProp {
 }
 
 export interface AccessPolicyProps extends PropTypes {
+  [AccessPolicyProp.ID]: string;
   [AccessPolicyProp.NAME]: string;
   [AccessPolicyProp.DESCRIPTION]: string;
   [AccessPolicyProp.MEMBERS]: AccessPolicyMember[];
@@ -23,6 +25,12 @@ export interface AccessPolicyProps extends PropTypes {
 }
 
 export const accessPolicyProps: PropConfigMap<AccessPolicyProps> = {
+  [AccessPolicyProp.ID]: {
+    default: '',
+    control: { type: ControlType.HIDDEN },
+    description:
+      'The ID of the policy being edited (empty string when creating a new policy)',
+  },
   [AccessPolicyProp.NAME]: {
     default: '',
     control: { type: ControlType.TEXT },

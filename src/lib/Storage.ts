@@ -37,7 +37,11 @@ import {
   PublicEntityListResult,
 } from '@/components/entity-list/entity-list.models';
 import { CreateAccountResponseBody } from '@/components/account-form/account-form.models';
-import { AccessPolicyGroup, AccessPolicyParty } from 'api-spec/models/Access';
+import {
+  AccessPolicy,
+  AccessPolicyGroup,
+  AccessPolicyParty,
+} from 'api-spec/models/Access';
 
 export interface SavedListFilter {
   filter: ListFilter;
@@ -769,6 +773,35 @@ export class Storage implements StorageSchema {
 
   @delegateSource()
   async deleteAccessPolicyGroup(_id: string): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
+  @delegateSource()
+  async getAccessPolicies(): Promise<StorageResult<AccessPolicy[]>> {
+    return Promise.resolve({ isOk: true, value: [] });
+  }
+
+  @delegateSource()
+  async createAccessPolicy(
+    _name: string,
+    _description: string,
+    _parties: AccessPolicyParty[],
+  ): Promise<StorageResult<AccessPolicy>> {
+    return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
+  }
+
+  @delegateSource()
+  async updateAccessPolicy(
+    _id: number,
+    _name: string,
+    _description: string,
+    _parties: AccessPolicyParty[],
+  ): Promise<StorageResult<AccessPolicy>> {
+    return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
+  }
+
+  @delegateSource()
+  async deleteAccessPolicy(_id: number): Promise<boolean> {
     return Promise.resolve(false);
   }
 }
