@@ -243,5 +243,10 @@
   "accessPolicy.updateSuccess": "Access policy updated successfully.",
   "getAccessPoliciesError": "Failed to fetch access policies.",
   "createAccessPolicyError": "Failed to create access policy.",
-  "updateAccessPolicyError": "Failed to update access policy."
+  "updateAccessPolicyError": "Failed to update access policy.",
+  "accessPolicyList.noPolicies": "No access policies found.",
+  "accessPolicyList.newPolicy": "New access policy",
+  "accessPolicyList.unnamedPolicy": "Unnamed policy",
+  "accessPolicyList.confirmDelete": "Are you sure you want to delete this access policy?",
+  "accessPolicyList.deleteSuccess": "Access policy deleted successfully."
 }

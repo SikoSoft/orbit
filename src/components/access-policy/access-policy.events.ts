@@ -64,3 +64,20 @@ export class AccessPolicySearchChangedEvent extends CustomEvent<AccessPolicySear
     });
   }
 }
+
+export const accessPolicySavedEventName = 'access-policy-saved';
+
+export interface AccessPolicySavedPayload {
+  id: string;
+  isNew: boolean;
+}
+
+export class AccessPolicySavedEvent extends CustomEvent<AccessPolicySavedPayload> {
+  constructor(detail: AccessPolicySavedPayload) {
+    super(accessPolicySavedEventName, {
+      detail,
+      bubbles: true,
+      composed: true,
+    });
+  }
+}

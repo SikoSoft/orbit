@@ -21,6 +21,7 @@ import {
   AccessPolicyDescriptionChangedEvent,
   AccessPolicyNameChangedEvent,
   AccessPolicySearchChangedEvent,
+  AccessPolicySavedEvent,
 } from './access-policy.events';
 import {
   AccessPolicyProp,
@@ -157,6 +158,13 @@ export class AccessPolicy extends AccessPolicyBase {
           policyId ? 'accessPolicy.updateSuccess' : 'accessPolicy.createSuccess',
         ),
         NotificationType.SUCCESS,
+      );
+
+      this.dispatchEvent(
+        new AccessPolicySavedEvent({
+          id: this[AccessPolicyProp.ID],
+          isNew: !policyId,
+        }),
       );
     }
   }
