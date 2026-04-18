@@ -457,6 +457,7 @@ export class SQLiteStorage implements StorageSchema {
         type: row['type'] as number,
         createdAt: row['created_at'] as string,
         updatedAt: row['updated_at'] as string,
+        accessPolicyId: 0,
         tags: tagRows
           .filter(t => t['entity_id'] === id)
           .map(t => t['tag'] as string),

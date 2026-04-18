@@ -3,7 +3,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 
-import { AccessPolicy, AccessPartyType, AccessRule } from 'api-spec/models/Access';
+import { AccessPolicy, AccessParty, AccessPartyType } from 'api-spec/models/Access';
 import { translate } from '@/lib/Localization';
 import { storage } from '@/lib/Storage';
 import { addToast } from '@/lib/Util';
@@ -85,7 +85,7 @@ export class AccessPolicyList extends MobxLitElement {
     }
   }
 
-  private ruleToMember(rule: AccessRule): AccessPolicyMember {
+  private ruleToMember(rule: AccessParty): AccessPolicyMember {
     return {
       targetId: rule.partyId,
       type: rule.type as AccessPartyType,
@@ -104,7 +104,7 @@ export class AccessPolicyList extends MobxLitElement {
             .id=${String(policy.id)}
             .name=${policy.name}
             .description=${policy.description}
-            .members=${policy.accessRules.map(r => this.ruleToMember(r))}
+            .members=${policy.parties.map(r => this.ruleToMember(r))}
             @access-policy-saved=${this.handlePolicySaved}
           ></access-policy>
 
