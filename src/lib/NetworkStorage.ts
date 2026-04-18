@@ -618,6 +618,22 @@ export class NetworkStorage implements StorageSchema {
 
     return false;
   }
+
+  async saveEntityAccessPolicy(
+    entityId: number,
+    accessPolicyId: number,
+  ): Promise<boolean> {
+    const result = await api.put<{ accessPolicyId: number }, null>(
+      `entityAccessPolicy/${entityId}`,
+      { accessPolicyId },
+    );
+
+    if (result && result.isOk) {
+      return true;
+    }
+
+    return false;
+  }
 }
 
 export const networkStorage = new NetworkStorage();

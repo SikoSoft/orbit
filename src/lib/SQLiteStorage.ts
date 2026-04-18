@@ -1069,6 +1069,13 @@ export class SQLiteStorage implements StorageSchema {
   async deleteAccessPolicy(_id: number): Promise<boolean> {
     return false;
   }
+
+  async saveEntityAccessList(
+    _entityId: number,
+    _accessListId: number,
+  ): Promise<boolean> {
+    return false;
+  }
 }
 
 export const sqliteStorage = new SQLiteStorage();

@@ -42,7 +42,7 @@ import '@ss/ui/components/tab-container';
 import '@ss/ui/components/tab-pane';
 import '@/components/entity-form/property-field/property-field';
 import '@/components/svg-icon/svg-icon';
-import '@/components/access-policy/access-policy';
+import '@/components/entity-access-policy/entity-access-policy';
 
 import {
   EntityItemCanceledEvent,
@@ -177,6 +177,10 @@ export class EntityForm extends ViewElement {
   @property({ type: Array })
   [EntityFormProp.PROPERTIES]: EntityFormProps[EntityFormProp.PROPERTIES] =
     entityFormProps[EntityFormProp.PROPERTIES].default;
+
+  @property({ type: Number })
+  [EntityFormProp.ACCESS_POLICY_ID]: EntityFormProps[EntityFormProp.ACCESS_POLICY_ID] =
+    entityFormProps[EntityFormProp.ACCESS_POLICY_ID].default;
 
   @state() initialTags: string = '';
   @state() confirmModalShown: boolean = false;
@@ -827,7 +831,11 @@ export class EntityForm extends ViewElement {
       },
       {
         heading: translate('entityForm.tab.access'),
-        content: () => html`<access-policy></access-policy>`,
+        content: () =>
+          html`<entity-access-policy
+            entityId=${this.entityId}
+            accessPolicyId=${this.accessPolicyId}
+          ></entity-access-policy>`,
         shouldShow: () => this.state.hasRole(Role.ACCESS),
       },
     ];

@@ -32,6 +32,7 @@ export enum EntityFormProp {
   TAGS = 'tags',
   TAG_VALUE = 'tagValue',
   PROPERTIES = 'properties',
+  ACCESS_POLICY_ID = 'accessPolicyId',
 }
 
 export interface EntityFormProps extends PropTypes {
@@ -42,6 +43,7 @@ export interface EntityFormProps extends PropTypes {
   [EntityFormProp.TAGS]: string[];
   [EntityFormProp.TAG_VALUE]: string;
   [EntityFormProp.PROPERTIES]: EntityProperty[];
+  [EntityFormProp.ACCESS_POLICY_ID]: number;
 }
 
 export const entityFormProps: PropConfigMap<EntityFormProps> = {
@@ -94,6 +96,13 @@ export const entityFormProps: PropConfigMap<EntityFormProps> = {
     },
     description: 'The properties of the entity',
   },
+  [EntityFormProp.ACCESS_POLICY_ID]: {
+    default: 0,
+    control: {
+      type: ControlType.NUMBER,
+    },
+    description: 'The ID of the access policy',
+  },
 };
 
 export interface TabEntry {
@@ -124,4 +133,3 @@ export type SuggestionLastInput = Record<
   SuggestionInputType,
   { hadResults: boolean; value: string }
 >;
-

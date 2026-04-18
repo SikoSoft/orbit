@@ -759,7 +759,10 @@ export class Storage implements StorageSchema {
     _name: string,
     _users: string[],
   ): Promise<StorageResult<AccessPolicyGroup>> {
-    return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
+    return Promise.resolve({
+      isOk: false,
+      error: new Error('Not implemented'),
+    });
   }
 
   @delegateSource()
@@ -768,7 +771,10 @@ export class Storage implements StorageSchema {
     _name: string,
     _users: string[],
   ): Promise<StorageResult<AccessPolicyGroup>> {
-    return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
+    return Promise.resolve({
+      isOk: false,
+      error: new Error('Not implemented'),
+    });
   }
 
   @delegateSource()
@@ -787,7 +793,10 @@ export class Storage implements StorageSchema {
     _description: string,
     _parties: AccessPolicyParty[],
   ): Promise<StorageResult<AccessPolicy>> {
-    return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
+    return Promise.resolve({
+      isOk: false,
+      error: new Error('Not implemented'),
+    });
   }
 
   @delegateSource()
@@ -797,11 +806,22 @@ export class Storage implements StorageSchema {
     _description: string,
     _parties: AccessPolicyParty[],
   ): Promise<StorageResult<AccessPolicy>> {
-    return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
+    return Promise.resolve({
+      isOk: false,
+      error: new Error('Not implemented'),
+    });
   }
 
   @delegateSource()
   async deleteAccessPolicy(_id: number): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
+  @delegateSource()
+  async saveEntityAccessPolicy(
+    _entityId: number,
+    _accessPolicyId: number,
+  ): Promise<boolean> {
     return Promise.resolve(false);
   }
 }

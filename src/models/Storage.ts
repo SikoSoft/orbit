@@ -159,4 +159,5 @@ export interface StorageSchema {
     parties: AccessPolicyParty[],
   ): Promise<StorageResult<AccessPolicy>>;
   deleteAccessPolicy?(id: number): Promise<boolean>;
+  saveEntityAccessList?(entityId: number, accessListId: number): Promise<boolean>;
 }
