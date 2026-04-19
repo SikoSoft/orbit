@@ -42,7 +42,7 @@ import '@ss/ui/components/tab-container';
 import '@ss/ui/components/tab-pane';
 import '@/components/entity-form/property-field/property-field';
 import '@/components/svg-icon/svg-icon';
-import '@/components/entity-access-policy/entity-access-policy';
+import '@/components/access-policy-assignment/access-policy-assignment';
 
 import {
   EntityItemCanceledEvent,
@@ -836,11 +836,12 @@ export class EntityForm extends ViewElement {
       {
         heading: translate('entityForm.tab.access'),
         content: () =>
-          html`<entity-access-policy
+          html`<access-policy-assignment
+            context="entity"
             entityId=${this.entityId}
             viewAccessPolicyId=${this.viewAccessPolicyId}
             editAccessPolicyId=${this.editAccessPolicyId}
-          ></entity-access-policy>`,
+          ></access-policy-assignment>`,
         shouldShow: () => this.state.hasRole(Role.ACCESS),
       },
     ];

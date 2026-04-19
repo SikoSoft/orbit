@@ -1078,6 +1078,14 @@ export class SQLiteStorage implements StorageSchema {
   ): Promise<boolean> {
     return false;
   }
+
+  async saveListConfigAccessPolicy(
+    _listConfigId: string,
+    _viewAccessPolicyId: number,
+    _editAccessPolicyId: number,
+  ): Promise<boolean> {
+    return false;
+  }
 }
 
 export const sqliteStorage = new SQLiteStorage();

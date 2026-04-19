@@ -11,20 +11,21 @@ import { themed } from '@/lib/Theme';
 
 import '@ss/ui/components/ss-select';
 import '@ss/ui/components/ss-button';
+import '@/components/access-policy-list/access-policy-list';
 
 import { SelectChangedEvent } from '@ss/ui/components/ss-select.events';
 
 import {
-  EntityAccessPolicyProp,
-  entityAccessPolicyProps,
-  EntityAccessPolicyProps,
-} from './entity-access-policy.models';
+  AccessPolicyAssignmentProp,
+  accessPolicyAssignmentProps,
+  AccessPolicyAssignmentProps,
+} from './access-policy-assignment.models';
 
 @themed()
-@customElement('entity-access-policy')
-export class EntityAccessPolicy extends MobxLitElement {
+@customElement('access-policy-assignment')
+export class AccessPolicyAssignment extends MobxLitElement {
   static styles = css`
-    .entity-access-policy {
+    .access-policy-assignment {
       display: flex;
       flex-direction: column;
       gap: 1rem;
@@ -47,28 +48,47 @@ export class EntityAccessPolicy extends MobxLitElement {
     }
   `;
 
-  @property({ type: Number })
-  [EntityAccessPolicyProp.ENTITY_ID]: EntityAccessPolicyProps[EntityAccessPolicyProp.ENTITY_ID] =
-    entityAccessPolicyProps[EntityAccessPolicyProp.ENTITY_ID].default;
+  @property({ type: String })
+  [AccessPolicyAssignmentProp.CONTEXT]: AccessPolicyAssignmentProps[AccessPolicyAssignmentProp.CONTEXT] =
+    accessPolicyAssignmentProps[AccessPolicyAssignmentProp.CONTEXT].default;
 
   @property({ type: Number })
-  [EntityAccessPolicyProp.VIEW_ACCESS_POLICY_ID]: EntityAccessPolicyProps[EntityAccessPolicyProp.VIEW_ACCESS_POLICY_ID] =
-    entityAccessPolicyProps[EntityAccessPolicyProp.VIEW_ACCESS_POLICY_ID].default;
+  [AccessPolicyAssignmentProp.ENTITY_ID]: AccessPolicyAssignmentProps[AccessPolicyAssignmentProp.ENTITY_ID] =
+    accessPolicyAssignmentProps[AccessPolicyAssignmentProp.ENTITY_ID].default;
+
+  @property({ type: String })
+  [AccessPolicyAssignmentProp.LIST_CONFIG_ID]: AccessPolicyAssignmentProps[AccessPolicyAssignmentProp.LIST_CONFIG_ID] =
+    accessPolicyAssignmentProps[AccessPolicyAssignmentProp.LIST_CONFIG_ID]
+      .default;
 
   @property({ type: Number })
-  [EntityAccessPolicyProp.EDIT_ACCESS_POLICY_ID]: EntityAccessPolicyProps[EntityAccessPolicyProp.EDIT_ACCESS_POLICY_ID] =
-    entityAccessPolicyProps[EntityAccessPolicyProp.EDIT_ACCESS_POLICY_ID].default;
+  [AccessPolicyAssignmentProp.VIEW_ACCESS_POLICY_ID]: AccessPolicyAssignmentProps[AccessPolicyAssignmentProp.VIEW_ACCESS_POLICY_ID] =
+    accessPolicyAssignmentProps[
+      AccessPolicyAssignmentProp.VIEW_ACCESS_POLICY_ID
+    ].default;
+
+  @property({ type: Number })
+  [AccessPolicyAssignmentProp.EDIT_ACCESS_POLICY_ID]: AccessPolicyAssignmentProps[AccessPolicyAssignmentProp.EDIT_ACCESS_POLICY_ID] =
+    accessPolicyAssignmentProps[
+      AccessPolicyAssignmentProp.EDIT_ACCESS_POLICY_ID
+    ].default;
 
   @state() private _policies: AccessPolicy[] = [];
   @state() private _selectedViewId: number = 0;
   @state() private _selectedEditId: number = 0;
 
   protected willUpdate(changedProperties: PropertyValues): void {
-    if (changedProperties.has(EntityAccessPolicyProp.VIEW_ACCESS_POLICY_ID)) {
-      this._selectedViewId = this[EntityAccessPolicyProp.VIEW_ACCESS_POLICY_ID];
+    if (
+      changedProperties.has(AccessPolicyAssignmentProp.VIEW_ACCESS_POLICY_ID)
+    ) {
+      this._selectedViewId =
+        this[AccessPolicyAssignmentProp.VIEW_ACCESS_POLICY_ID];
     }
-    if (changedProperties.has(EntityAccessPolicyProp.EDIT_ACCESS_POLICY_ID)) {
-      this._selectedEditId = this[EntityAccessPolicyProp.EDIT_ACCESS_POLICY_ID];
+    if (
+      changedProperties.has(AccessPolicyAssignmentProp.EDIT_ACCESS_POLICY_ID)
+    ) {
+      this._selectedEditId =
+        this[AccessPolicyAssignmentProp.EDIT_ACCESS_POLICY_ID];
     }
   }
 
@@ -87,15 +107,16 @@ export class EntityAccessPolicy extends MobxLitElement {
   private get inSync(): boolean {
     return (
       this._selectedViewId ===
-        this[EntityAccessPolicyProp.VIEW_ACCESS_POLICY_ID] &&
-      this._selectedEditId === this[EntityAccessPolicyProp.EDIT_ACCESS_POLICY_ID]
+        this[AccessPolicyAssignmentProp.VIEW_ACCESS_POLICY_ID] &&
+      this._selectedEditId ===
+        this[AccessPolicyAssignmentProp.EDIT_ACCESS_POLICY_ID]
     );
   }
 
   private get selectOptions(): { value: string; label: string }[] {
     const noneOption = {
       value: '0',
-      label: translate('entityAccessPolicy.none'),
+      label: translate('accessPolicyAssignment.none'),
     };
     const policyOptions = this._policies.map(p => ({
       value: String(p.id),
@@ -113,23 +134,37 @@ export class EntityAccessPolicy extends MobxLitElement {
   }
 
   private async handleSave(): Promise<void> {
-    const entityId = this[EntityAccessPolicyProp.ENTITY_ID];
-    const success = await storage.saveEntityAccessPolicy(
-      entityId,
-      this._selectedViewId,
-      this._selectedEditId,
-    );
+    const context = this[AccessPolicyAssignmentProp.CONTEXT];
+    let success: boolean;
+
+    if (context === 'listConfig') {
+      const listConfigId = this[AccessPolicyAssignmentProp.LIST_CONFIG_ID];
+      success = await storage.saveListConfigAccessPolicy(
+        listConfigId,
+        this._selectedViewId,
+        this._selectedEditId,
+      );
+    } else {
+      const entityId = this[AccessPolicyAssignmentProp.ENTITY_ID];
+      success = await storage.saveEntityAccessPolicy(
+        entityId,
+        this._selectedViewId,
+        this._selectedEditId,
+      );
+    }
 
     if (success) {
-      this[EntityAccessPolicyProp.VIEW_ACCESS_POLICY_ID] = this._selectedViewId;
-      this[EntityAccessPolicyProp.EDIT_ACCESS_POLICY_ID] = this._selectedEditId;
+      this[AccessPolicyAssignmentProp.VIEW_ACCESS_POLICY_ID] =
+        this._selectedViewId;
+      this[AccessPolicyAssignmentProp.EDIT_ACCESS_POLICY_ID] =
+        this._selectedEditId;
       addToast(
-        translate('entityAccessPolicy.saveSuccess'),
+        translate('accessPolicyAssignment.saveSuccess'),
         NotificationType.SUCCESS,
       );
     } else {
       addToast(
-        translate('entityAccessPolicy.saveError'),
+        translate('accessPolicyAssignment.saveError'),
         NotificationType.ERROR,
       );
     }
@@ -137,10 +172,10 @@ export class EntityAccessPolicy extends MobxLitElement {
 
   render(): TemplateResult {
     return html`
-      <div class="entity-access-policy">
+      <div class="access-policy-assignment">
         <div class="field">
           <span class="field-label"
-            >${translate('entityAccessPolicy.viewLabel')}</span
+            >${translate('accessPolicyAssignment.viewLabel')}</span
           >
           <ss-select
             selected=${String(this._selectedViewId)}
@@ -151,7 +186,7 @@ export class EntityAccessPolicy extends MobxLitElement {
 
         <div class="field">
           <span class="field-label"
-            >${translate('entityAccessPolicy.editLabel')}</span
+            >${translate('accessPolicyAssignment.editLabel')}</span
           >
           <ss-select
             selected=${String(this._selectedEditId)}
@@ -169,6 +204,8 @@ export class EntityAccessPolicy extends MobxLitElement {
             ${translate('save')}
           </ss-button>
         </div>
+
+        <access-policy-list></access-policy-list>
       </div>
     `;
   }

@@ -28,6 +28,7 @@ import '@/components/setting/setting-form/setting-form';
 import '@/components/list-filter/list-filter';
 import '@/components/list-sort/list-sort';
 import '@/components/theme-manager/theme-manager';
+import '@/components/access-policy-assignment/access-policy-assignment';
 
 import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
 import { ListConfigChangedEvent } from './list-config.events';
@@ -233,6 +234,7 @@ export class ListConfig extends MobxLitElement {
   @state() sortIsOpen: boolean = false;
   @state() nameInFocus: boolean = false;
   @state() menusInFocus: boolean = false;
+  @state() accessIsOpen: boolean = false;
 
   @query('#config-selector') configSelector!: HTMLSelectElement;
   @query('.collapsable-menus') collapsableMenus!: HTMLDivElement;
@@ -438,8 +440,7 @@ export class ListConfig extends MobxLitElement {
   }
 
   carouselSlideChanged(e: CarouselSlideChangedEvent): void {
-    const newListConfigId =
-      this.state.listConfigs[e.detail.slideIndex]?.id;
+    const newListConfigId = this.state.listConfigs[e.detail.slideIndex]?.id;
     if (!newListConfigId || newListConfigId === this.state.listConfigId) {
       return;
     }
@@ -471,6 +472,14 @@ export class ListConfig extends MobxLitElement {
 
   private handleSettingUpdated(_e: CustomEvent): void {
     this.dispatchEvent(new EntityListLoadEvent());
+  }
+
+  private handleAccessPolicyUpdated(_e: CustomEvent): void {
+    this.dispatchEvent(new EntityListLoadEvent());
+  }
+
+  private toggleAccess(): void {
+    this.accessIsOpen = !this.accessIsOpen;
   }
 
   private toggleSetting(): void {
@@ -580,6 +589,20 @@ export class ListConfig extends MobxLitElement {
       </div>
 
       <div class="collapsable-menus">
+        <ss-collapsable
+          title=${translate('access')}
+          ?open=${this.accessIsOpen}
+          @toggled=${this.toggleAccess}
+        >
+          <div class="filter-body">
+            <access-policy-assignment
+              context="listConfig"
+              listConfigId=${this.state.listConfigId}
+              @access-policy-updated=${this.handleAccessPolicyUpdated}
+            ></access-policy-assignment>
+          </div>
+        </ss-collapsable>
+
         <ss-collapsable
           title=${translate('settings')}
           ?open=${this.settingIsOpen}

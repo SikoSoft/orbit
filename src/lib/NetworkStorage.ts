@@ -635,6 +635,26 @@ export class NetworkStorage implements StorageSchema {
 
     return false;
   }
+
+  async saveListConfigAccessPolicy(
+    listConfigId: string,
+    viewAccessPolicyId: number,
+    editAccessPolicyId: number,
+  ): Promise<boolean> {
+    const result = await api.put<
+      { viewAccessPolicyId: number; editAccessPolicyId: number },
+      null
+    >(`listConfigAccessPolicy/${listConfigId}`, {
+      viewAccessPolicyId,
+      editAccessPolicyId,
+    });
+
+    if (result && result.isOk) {
+      return true;
+    }
+
+    return false;
+  }
 }
 
 export const networkStorage = new NetworkStorage();
