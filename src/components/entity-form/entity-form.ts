@@ -179,8 +179,12 @@ export class EntityForm extends ViewElement {
     entityFormProps[EntityFormProp.PROPERTIES].default;
 
   @property({ type: Number })
-  [EntityFormProp.ACCESS_POLICY_ID]: EntityFormProps[EntityFormProp.ACCESS_POLICY_ID] =
-    entityFormProps[EntityFormProp.ACCESS_POLICY_ID].default;
+  [EntityFormProp.VIEW_ACCESS_POLICY_ID]: EntityFormProps[EntityFormProp.VIEW_ACCESS_POLICY_ID] =
+    entityFormProps[EntityFormProp.VIEW_ACCESS_POLICY_ID].default;
+
+  @property({ type: Number })
+  [EntityFormProp.EDIT_ACCESS_POLICY_ID]: EntityFormProps[EntityFormProp.EDIT_ACCESS_POLICY_ID] =
+    entityFormProps[EntityFormProp.EDIT_ACCESS_POLICY_ID].default;
 
   @state() initialTags: string = '';
   @state() confirmModalShown: boolean = false;
@@ -834,7 +838,8 @@ export class EntityForm extends ViewElement {
         content: () =>
           html`<entity-access-policy
             entityId=${this.entityId}
-            accessPolicyId=${this.accessPolicyId}
+            viewAccessPolicyId=${this.viewAccessPolicyId}
+            editAccessPolicyId=${this.editAccessPolicyId}
           ></entity-access-policy>`,
         shouldShow: () => this.state.hasRole(Role.ACCESS),
       },

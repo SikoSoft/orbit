@@ -32,7 +32,8 @@ export enum EntityFormProp {
   TAGS = 'tags',
   TAG_VALUE = 'tagValue',
   PROPERTIES = 'properties',
-  ACCESS_POLICY_ID = 'accessPolicyId',
+  VIEW_ACCESS_POLICY_ID = 'viewAccessPolicyId',
+  EDIT_ACCESS_POLICY_ID = 'editAccessPolicyId',
 }
 
 export interface EntityFormProps extends PropTypes {
@@ -43,7 +44,8 @@ export interface EntityFormProps extends PropTypes {
   [EntityFormProp.TAGS]: string[];
   [EntityFormProp.TAG_VALUE]: string;
   [EntityFormProp.PROPERTIES]: EntityProperty[];
-  [EntityFormProp.ACCESS_POLICY_ID]: number;
+  [EntityFormProp.VIEW_ACCESS_POLICY_ID]: number;
+  [EntityFormProp.EDIT_ACCESS_POLICY_ID]: number;
 }
 
 export const entityFormProps: PropConfigMap<EntityFormProps> = {
@@ -96,12 +98,19 @@ export const entityFormProps: PropConfigMap<EntityFormProps> = {
     },
     description: 'The properties of the entity',
   },
-  [EntityFormProp.ACCESS_POLICY_ID]: {
+  [EntityFormProp.VIEW_ACCESS_POLICY_ID]: {
     default: 0,
     control: {
       type: ControlType.NUMBER,
     },
-    description: 'The ID of the access policy',
+    description: 'The ID of the view access policy',
+  },
+  [EntityFormProp.EDIT_ACCESS_POLICY_ID]: {
+    default: 0,
+    control: {
+      type: ControlType.NUMBER,
+    },
+    description: 'The ID of the edit access policy',
   },
 };
 

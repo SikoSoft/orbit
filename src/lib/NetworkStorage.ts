@@ -621,12 +621,13 @@ export class NetworkStorage implements StorageSchema {
 
   async saveEntityAccessPolicy(
     entityId: number,
-    accessPolicyId: number,
+    viewAccessPolicyId: number,
+    editAccessPolicyId: number,
   ): Promise<boolean> {
-    const result = await api.put<{ accessPolicyId: number }, null>(
-      `entityAccessPolicy/${entityId}`,
-      { accessPolicyId },
-    );
+    const result = await api.put<
+      { viewAccessPolicyId: number; editAccessPolicyId: number },
+      null
+    >(`entityAccessPolicy/${entityId}`, { viewAccessPolicyId, editAccessPolicyId });
 
     if (result && result.isOk) {
       return true;

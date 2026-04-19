@@ -306,7 +306,8 @@ export class EntityList extends ViewElement {
                   .tags=${item.tags}
                   ?selected=${this.state.selectedActions.includes(item.id)}
                   .properties=${item.properties}
-                  accessPolicyId=${item.accessPolicyId}
+                  viewAccessPolicyId=${item.viewAccessPolicyId}
+                  editAccessPolicyId=${item.editAccessPolicyId}
                   @pointer-long-press=${this.handlePointerLongPress}
                   @pointer-up=${this.handlePointerUp}
                   @entity-item-deleted=${this.handleItemDeleted}

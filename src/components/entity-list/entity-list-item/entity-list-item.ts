@@ -143,8 +143,12 @@ export class EntityListItem extends MobxLitElement {
     entityListItemProps[EntityListItemProp.PUBLIC_VIEW].default;
 
   @property({ type: Number })
-  [EntityListItemProp.ACCESS_POLICY_ID]: EntityListItemProps[EntityListItemProp.ACCESS_POLICY_ID] =
-    entityListItemProps[EntityListItemProp.ACCESS_POLICY_ID].default;
+  [EntityListItemProp.VIEW_ACCESS_POLICY_ID]: EntityListItemProps[EntityListItemProp.VIEW_ACCESS_POLICY_ID] =
+    entityListItemProps[EntityListItemProp.VIEW_ACCESS_POLICY_ID].default;
+
+  @property({ type: Number })
+  [EntityListItemProp.EDIT_ACCESS_POLICY_ID]: EntityListItemProps[EntityListItemProp.EDIT_ACCESS_POLICY_ID] =
+    entityListItemProps[EntityListItemProp.EDIT_ACCESS_POLICY_ID].default;
 
   @state() mode: EntityListItemMode = EntityListItemMode.PREVIEW;
   @state() pointerDown: Date = new Date();
@@ -383,7 +387,8 @@ export class EntityListItem extends MobxLitElement {
                   this.mode = EntityListItemMode.PREVIEW;
                 }}
                 entityId=${this.entityId}
-                accessPolicyId=${this.accessPolicyId}
+                viewAccessPolicyId=${this.viewAccessPolicyId}
+                editAccessPolicyId=${this.editAccessPolicyId}
                 type=${this.type}
                 .tags=${this.tags}
                 .properties=${this.properties}

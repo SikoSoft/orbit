@@ -52,15 +52,23 @@ export class EntityAccessPolicy extends MobxLitElement {
     entityAccessPolicyProps[EntityAccessPolicyProp.ENTITY_ID].default;
 
   @property({ type: Number })
-  [EntityAccessPolicyProp.ACCESS_POLICY_ID]: EntityAccessPolicyProps[EntityAccessPolicyProp.ACCESS_POLICY_ID] =
-    entityAccessPolicyProps[EntityAccessPolicyProp.ACCESS_POLICY_ID].default;
+  [EntityAccessPolicyProp.VIEW_ACCESS_POLICY_ID]: EntityAccessPolicyProps[EntityAccessPolicyProp.VIEW_ACCESS_POLICY_ID] =
+    entityAccessPolicyProps[EntityAccessPolicyProp.VIEW_ACCESS_POLICY_ID].default;
+
+  @property({ type: Number })
+  [EntityAccessPolicyProp.EDIT_ACCESS_POLICY_ID]: EntityAccessPolicyProps[EntityAccessPolicyProp.EDIT_ACCESS_POLICY_ID] =
+    entityAccessPolicyProps[EntityAccessPolicyProp.EDIT_ACCESS_POLICY_ID].default;
 
   @state() private _policies: AccessPolicy[] = [];
-  @state() private _selectedId: number = 0;
+  @state() private _selectedViewId: number = 0;
+  @state() private _selectedEditId: number = 0;
 
   protected willUpdate(changedProperties: PropertyValues): void {
-    if (changedProperties.has(EntityAccessPolicyProp.ACCESS_POLICY_ID)) {
-      this._selectedId = this[EntityAccessPolicyProp.ACCESS_POLICY_ID];
+    if (changedProperties.has(EntityAccessPolicyProp.VIEW_ACCESS_POLICY_ID)) {
+      this._selectedViewId = this[EntityAccessPolicyProp.VIEW_ACCESS_POLICY_ID];
+    }
+    if (changedProperties.has(EntityAccessPolicyProp.EDIT_ACCESS_POLICY_ID)) {
+      this._selectedEditId = this[EntityAccessPolicyProp.EDIT_ACCESS_POLICY_ID];
     }
   }
 
@@ -77,7 +85,11 @@ export class EntityAccessPolicy extends MobxLitElement {
   }
 
   private get inSync(): boolean {
-    return this._selectedId === this[EntityAccessPolicyProp.ACCESS_POLICY_ID];
+    return (
+      this._selectedViewId ===
+        this[EntityAccessPolicyProp.VIEW_ACCESS_POLICY_ID] &&
+      this._selectedEditId === this[EntityAccessPolicyProp.EDIT_ACCESS_POLICY_ID]
+    );
   }
 
   private get selectOptions(): { value: string; label: string }[] {
@@ -92,19 +104,25 @@ export class EntityAccessPolicy extends MobxLitElement {
     return [noneOption, ...policyOptions];
   }
 
-  private handleSelectChanged(e: SelectChangedEvent<string>): void {
-    this._selectedId = parseInt(e.detail.value, 10);
+  private handleViewSelectChanged(e: SelectChangedEvent<string>): void {
+    this._selectedViewId = parseInt(e.detail.value, 10);
+  }
+
+  private handleEditSelectChanged(e: SelectChangedEvent<string>): void {
+    this._selectedEditId = parseInt(e.detail.value, 10);
   }
 
   private async handleSave(): Promise<void> {
     const entityId = this[EntityAccessPolicyProp.ENTITY_ID];
     const success = await storage.saveEntityAccessPolicy(
       entityId,
-      this._selectedId,
+      this._selectedViewId,
+      this._selectedEditId,
     );
 
     if (success) {
-      this[EntityAccessPolicyProp.ACCESS_POLICY_ID] = this._selectedId;
+      this[EntityAccessPolicyProp.VIEW_ACCESS_POLICY_ID] = this._selectedViewId;
+      this[EntityAccessPolicyProp.EDIT_ACCESS_POLICY_ID] = this._selectedEditId;
       addToast(
         translate('entityAccessPolicy.saveSuccess'),
         NotificationType.SUCCESS,
@@ -122,12 +140,23 @@ export class EntityAccessPolicy extends MobxLitElement {
       <div class="entity-access-policy">
         <div class="field">
           <span class="field-label"
-            >${translate('entityAccessPolicy.label')}</span
+            >${translate('entityAccessPolicy.viewLabel')}</span
           >
           <ss-select
-            selected=${String(this._selectedId)}
+            selected=${String(this._selectedViewId)}
             .options=${this.selectOptions}
-            @select-changed=${this.handleSelectChanged}
+            @select-changed=${this.handleViewSelectChanged}
+          ></ss-select>
+        </div>
+
+        <div class="field">
+          <span class="field-label"
+            >${translate('entityAccessPolicy.editLabel')}</span
+          >
+          <ss-select
+            selected=${String(this._selectedEditId)}
+            .options=${this.selectOptions}
+            @select-changed=${this.handleEditSelectChanged}
           ></ss-select>
         </div>
 

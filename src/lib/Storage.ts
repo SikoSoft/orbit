@@ -820,7 +820,8 @@ export class Storage implements StorageSchema {
   @delegateSource()
   async saveEntityAccessPolicy(
     _entityId: number,
-    _accessPolicyId: number,
+    _viewAccessPolicyId: number,
+    _editAccessPolicyId: number,
   ): Promise<boolean> {
     return Promise.resolve(false);
   }

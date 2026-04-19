@@ -18,7 +18,8 @@ export enum EntityListItemProp {
   PROPERTIES = 'properties',
   DEBUG = 'debug',
   PUBLIC_VIEW = 'publicView',
-  ACCESS_POLICY_ID = 'accessPolicyId',
+  VIEW_ACCESS_POLICY_ID = 'viewAccessPolicyId',
+  EDIT_ACCESS_POLICY_ID = 'editAccessPolicyId',
 }
 
 export interface EntityListItemProps extends PropTypes {
@@ -31,7 +32,8 @@ export interface EntityListItemProps extends PropTypes {
   [EntityListItemProp.PROPERTIES]: EntityProperty[];
   [EntityListItemProp.DEBUG]: boolean;
   [EntityListItemProp.PUBLIC_VIEW]: boolean;
-  [EntityListItemProp.ACCESS_POLICY_ID]: number;
+  [EntityListItemProp.VIEW_ACCESS_POLICY_ID]: number;
+  [EntityListItemProp.EDIT_ACCESS_POLICY_ID]: number;
 }
 
 export const entityListItemProps: PropConfigMap<EntityListItemProps> = {
@@ -98,11 +100,18 @@ export const entityListItemProps: PropConfigMap<EntityListItemProps> = {
     },
     description: 'Whether the entity is in public view',
   },
-  [EntityListItemProp.ACCESS_POLICY_ID]: {
+  [EntityListItemProp.VIEW_ACCESS_POLICY_ID]: {
     default: 0,
     control: {
       type: ControlType.NUMBER,
     },
-    description: 'The ID of the access policy',
+    description: 'The ID of the view access policy',
+  },
+  [EntityListItemProp.EDIT_ACCESS_POLICY_ID]: {
+    default: 0,
+    control: {
+      type: ControlType.NUMBER,
+    },
+    description: 'The ID of the edit access policy',
   },
 };

@@ -249,7 +249,8 @@
   "accessPolicyList.unnamedPolicy": "Unnamed policy",
   "accessPolicyList.confirmDelete": "Are you sure you want to delete this access policy?",
   "accessPolicyList.deleteSuccess": "Access policy deleted successfully.",
-  "entityAccessPolicy.label": "Access policy",
+  "entityAccessPolicy.viewLabel": "View access policy",
+  "entityAccessPolicy.editLabel": "Edit access policy",
   "entityAccessPolicy.none": "None",
   "entityAccessPolicy.saveSuccess": "Access policy saved successfully.",
   "entityAccessPolicy.saveError": "Failed to save access policy."
