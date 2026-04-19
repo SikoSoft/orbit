@@ -123,7 +123,9 @@ function rowToEntityPropertyConfig(
     hidden: row['hidden'] === 1,
     defaultValue,
     optionsOnly: row['options_only'] === 1,
-    options: JSON.parse((row['options'] as string | null) ?? '[]') as PropertyDataValue[],
+    options: JSON.parse(
+      (row['options'] as string | null) ?? '[]',
+    ) as PropertyDataValue[],
   } as EntityPropertyConfig;
 }
 
@@ -828,6 +830,8 @@ export class SQLiteStorage implements StorageSchema {
       sort: JSON.parse(row['sort'] as string) as ListSort,
       setting: JSON.parse(row['setting'] as string) as Settings,
       themes: JSON.parse(row['themes'] as string) as string[],
+      viewAccessPolicyId: 0,
+      editAccessPolicyId: 0,
     };
   }
 
@@ -1008,7 +1012,9 @@ export class SQLiteStorage implements StorageSchema {
     };
   }
 
-  async getParties(_query: string): Promise<StorageResult<AccessPolicyParty[]>> {
+  async getParties(
+    _query: string,
+  ): Promise<StorageResult<AccessPolicyParty[]>> {
     return { isOk: true, value: [] };
   }
 
@@ -1022,7 +1028,9 @@ export class SQLiteStorage implements StorageSchema {
   ): Promise<StorageResult<AccessPolicyGroup>> {
     return {
       isOk: false,
-      error: new Error('Access policy groups are not supported in local storage.'),
+      error: new Error(
+        'Access policy groups are not supported in local storage.',
+      ),
     };
   }
 
@@ -1033,7 +1041,9 @@ export class SQLiteStorage implements StorageSchema {
   ): Promise<StorageResult<AccessPolicyGroup>> {
     return {
       isOk: false,
-      error: new Error('Access policy groups are not supported in local storage.'),
+      error: new Error(
+        'Access policy groups are not supported in local storage.',
+      ),
     };
   }
 
