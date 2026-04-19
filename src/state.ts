@@ -55,6 +55,8 @@ export const defaultListConfig: ListConfig = {
   sort: structuredClone(defaultListSort),
   setting: structuredClone(defaultSettings),
   themes: [],
+  viewAccessPolicyId: 0,
+  editAccessPolicyId: 0,
 };
 
 export class AppState {
