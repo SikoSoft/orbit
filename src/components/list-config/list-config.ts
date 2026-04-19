@@ -376,6 +376,8 @@ export class ListConfig extends MobxLitElement {
       sort: this.state.listSort,
       setting: this.state.listSetting,
       themes: this.state.listConfig.themes,
+      viewAccessPolicyId: this.state.listConfig.viewAccessPolicyId,
+      editAccessPolicyId: this.state.listConfig.editAccessPolicyId,
     });
 
     if (!result.isOk) {
@@ -599,6 +601,8 @@ export class ListConfig extends MobxLitElement {
               context="listConfig"
               listConfigId=${this.state.listConfigId}
               @access-policy-updated=${this.handleAccessPolicyUpdated}
+              viewAccessPolicyId=${this.state.listConfig.viewAccessPolicyId}
+              editAccessPolicyId=${this.state.listConfig.editAccessPolicyId}
             ></access-policy-assignment>
           </div>
         </ss-collapsable>

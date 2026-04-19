@@ -253,5 +253,6 @@
   "accessPolicyAssignment.editLabel": "Edit access policy",
   "accessPolicyAssignment.none": "None",
   "accessPolicyAssignment.saveSuccess": "Access policy saved successfully.",
-  "accessPolicyAssignment.saveError": "Failed to save access policy."
+  "accessPolicyAssignment.saveError": "Failed to save access policy.",
+  "access": "Access"
 }
