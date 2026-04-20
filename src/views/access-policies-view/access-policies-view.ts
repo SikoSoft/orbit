@@ -1,6 +1,7 @@
 import { css, html, TemplateResult } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
+import '@/components/access-policy-group-list/access-policy-group-list';
 import '@/components/access-policy-list/access-policy-list';
 import '@/components/login-form/login-form';
 import '@/components/logged-in/logged-in';
@@ -25,7 +26,9 @@ export class AccessPoliciesView extends ViewElement {
           ><template><login-form></login-form></template
         ></logged-out>
         <logged-in
-          ><template><access-policy-list></access-policy-list></template
+          ><template
+            ><access-policy-list></access-policy-list>
+            <access-policy-group-list></access-policy-group-list></template
         ></logged-in>
       </div>`;
   }
