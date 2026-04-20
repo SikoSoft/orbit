@@ -77,11 +77,11 @@ export class AccessPolicy extends AccessPolicyBase {
   }
 
   async handleSave(): Promise<void> {
-    const parties: AccessPolicyParty[] = this._members.map(m => ({
-      id: m.targetId,
-      type: m.type,
-      name: m.displayName,
-    }));
+    const parties: AccessPolicyParty[] = this._members.map(m =>
+      m.type === AccessPartyType.GROUP
+        ? { id: m.targetId, type: m.type, name: m.displayName, users: [] }
+        : { id: m.targetId, type: m.type, name: m.displayName },
+    );
 
     const policyId = this[AccessPolicyProp.ID];
     const result = policyId

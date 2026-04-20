@@ -284,7 +284,7 @@ export class ListConfig extends MobxLitElement {
       'list-config': true,
       'config-mode': this.state.selectListConfigMode,
       'edit-mode': this.state.editListConfigMode,
-      'view-only': this[ListConfigProp.VIEW_ONLY],
+      'view-only': this.canConfigure === false,
     };
   }
 
@@ -348,7 +348,7 @@ export class ListConfig extends MobxLitElement {
   }
 
   enableEditMode(): void {
-    if (this[ListConfigProp.VIEW_ONLY]) {
+    if (!this.canConfigure) {
       return;
     }
 
