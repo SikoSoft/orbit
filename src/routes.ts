@@ -47,4 +47,10 @@ export const routes: Route[] = [
     action: async () =>
       await import('@/components/collection-wizard/collection-wizard'),
   },
+  {
+    path: '/access',
+    component: 'access-policies-view',
+    action: async () =>
+      await import('@/views/access-policies-view/access-policies-view'),
+  },
 ];
