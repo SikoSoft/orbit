@@ -50,6 +50,8 @@ import {
   listConfigProps,
   ListConfigProps,
 } from './list-config.models';
+import { ifDefined } from 'lit/directives/if-defined.js';
+import { Access } from '@/lib/Access';
 
 @themed()
 @customElement('list-config')
@@ -239,6 +241,25 @@ export class ListConfig extends MobxLitElement {
   @query('#config-selector') configSelector!: HTMLSelectElement;
   @query('.collapsable-menus') collapsableMenus!: HTMLDivElement;
 
+  @state()
+  get canConfigure(): boolean {
+    if (this[ListConfigProp.VIEW_ONLY]) {
+      return false;
+    }
+
+    if (
+      this.state.listConfig.userId !== this.state.user?.id &&
+      Access.userHasAccess(
+        this.state.listConfig.editAccessPolicy,
+        this.state.user,
+      )
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+
   @state() get publicUrl(): string {
     const path = [
       import.meta.env.BASE_URL.replace(/\/$/, '').replace(/^\//, ''),
@@ -376,8 +397,8 @@ export class ListConfig extends MobxLitElement {
       sort: this.state.listSort,
       setting: this.state.listSetting,
       themes: this.state.listConfig.themes,
-      viewAccessPolicyId: this.state.listConfig.viewAccessPolicyId,
-      editAccessPolicyId: this.state.listConfig.editAccessPolicyId,
+      viewAccessPolicy: null,
+      editAccessPolicy: null,
     });
 
     if (!result.isOk) {
@@ -601,8 +622,12 @@ export class ListConfig extends MobxLitElement {
               context="listConfig"
               listConfigId=${this.state.listConfigId}
               @access-policy-updated=${this.handleAccessPolicyUpdated}
-              viewAccessPolicyId=${this.state.listConfig.viewAccessPolicyId}
-              editAccessPolicyId=${this.state.listConfig.editAccessPolicyId}
+              viewAccessPolicyId=${ifDefined(
+                this.state.listConfig.viewAccessPolicy?.id,
+              )}
+              editAccessPolicyId=${ifDefined(
+                this.state.listConfig.editAccessPolicy?.id,
+              )}
             ></access-policy-assignment>
           </div>
         </ss-collapsable>

@@ -830,8 +830,8 @@ export class SQLiteStorage implements StorageSchema {
       sort: JSON.parse(row['sort'] as string) as ListSort,
       setting: JSON.parse(row['setting'] as string) as Settings,
       themes: JSON.parse(row['themes'] as string) as string[],
-      viewAccessPolicyId: 0,
-      editAccessPolicyId: 0,
+      viewAccessPolicy: null,
+      editAccessPolicy: null,
     };
   }
 
