@@ -834,6 +834,15 @@ export class Storage implements StorageSchema {
   ): Promise<boolean> {
     return Promise.resolve(false);
   }
+
+  @delegateSource()
+  async saveEntityConfigAccessPolicy(
+    _entityConfigId: number,
+    _viewAccessPolicyId: number,
+    _editAccessPolicyId: number,
+  ): Promise<boolean> {
+    return Promise.resolve(false);
+  }
 }
 
 export const storage = new Storage();

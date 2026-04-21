@@ -20,6 +20,8 @@ export enum EntityConfigFormProp {
   ALLOW_PROPERTY_ORDERING = 'allowPropertyOrdering',
   AI_ENABLED = 'aiEnabled',
   AI_IDENTIFY_PROMPT = 'aiIdentifyPrompt',
+  VIEW_ACCESS_POLICY_ID = 'viewAccessPolicyId',
+  EDIT_ACCESS_POLICY_ID = 'editAccessPolicyId',
 }
 
 export interface EntityConfigFormProps extends PropTypes {
@@ -30,6 +32,8 @@ export interface EntityConfigFormProps extends PropTypes {
   [EntityConfigFormProp.ALLOW_PROPERTY_ORDERING]: boolean;
   [EntityConfigFormProp.AI_ENABLED]: boolean;
   [EntityConfigFormProp.AI_IDENTIFY_PROMPT]: string;
+  [EntityConfigFormProp.VIEW_ACCESS_POLICY_ID]: number;
+  [EntityConfigFormProp.EDIT_ACCESS_POLICY_ID]: number;
 }
 
 export const entityConfigFormProps: PropConfigMap<EntityConfigFormProps> = {
@@ -67,5 +71,15 @@ export const entityConfigFormProps: PropConfigMap<EntityConfigFormProps> = {
     default: '',
     control: { type: ControlType.TEXT },
     description: 'The prompt used by AI to identify this entity',
+  },
+  [EntityConfigFormProp.VIEW_ACCESS_POLICY_ID]: {
+    default: 0,
+    control: { type: ControlType.NUMBER },
+    description: 'The ID of the view access policy currently assigned',
+  },
+  [EntityConfigFormProp.EDIT_ACCESS_POLICY_ID]: {
+    default: 0,
+    control: { type: ControlType.NUMBER },
+    description: 'The ID of the edit access policy currently assigned',
   },
 };

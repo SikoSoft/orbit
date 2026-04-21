@@ -165,4 +165,9 @@ export interface StorageSchema {
     viewAccessPolicyId: number,
     editAccessPolicyId: number,
   ): Promise<boolean>;
+  saveEntityConfigAccessPolicy?(
+    entityConfigId: number,
+    viewAccessPolicyId: number,
+    editAccessPolicyId: number,
+  ): Promise<boolean>;
 }

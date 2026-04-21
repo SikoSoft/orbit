@@ -144,6 +144,13 @@ export class AccessPolicyAssignment extends MobxLitElement {
         this._selectedViewId,
         this._selectedEditId,
       );
+    } else if (context === 'entityConfig') {
+      const entityConfigId = this[AccessPolicyAssignmentProp.ENTITY_ID];
+      success = await storage.saveEntityConfigAccessPolicy(
+        entityConfigId,
+        this._selectedViewId,
+        this._selectedEditId,
+      );
     } else {
       const entityId = this[AccessPolicyAssignmentProp.ENTITY_ID];
       success = await storage.saveEntityAccessPolicy(

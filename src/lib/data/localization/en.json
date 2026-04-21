@@ -256,5 +256,7 @@
   "accessPolicyAssignment.saveError": "Failed to save access policy.",
   "accessPolicyGroupList.addNew": "Add new group",
   "access": "Access",
-  "failedToDeleteListConfig": "Failed to delete list configuration."
+  "failedToDeleteListConfig": "Failed to delete list configuration.",
+  "entityConfigForm.tab.config": "Config",
+  "entityConfigForm.tab.access": "Access"
 }

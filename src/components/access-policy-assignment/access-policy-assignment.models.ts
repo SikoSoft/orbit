@@ -1,7 +1,10 @@
 import { ControlType } from '@/models/Control';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
 
-export type AccessPolicyAssignmentContext = 'entity' | 'listConfig';
+export type AccessPolicyAssignmentContext =
+  | 'entity'
+  | 'entityConfig'
+  | 'listConfig';
 
 export enum AccessPolicyAssignmentProp {
   CONTEXT = 'context',

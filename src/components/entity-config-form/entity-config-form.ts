@@ -9,6 +9,7 @@ import {
   EntityConfig,
   EntityPropertyConfig,
 } from 'api-spec/models/Entity';
+import { Role } from 'api-spec/models/Identity';
 import { addToast } from '@/lib/Util';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 import {
@@ -18,6 +19,7 @@ import {
   PropertyConfigInstance,
   PropertyConfigProblemMap,
 } from './entity-config-form.models';
+import { TabEntry } from '@/components/entity-form/entity-form.models';
 import { storage } from '@/lib/Storage';
 
 import {
@@ -33,6 +35,9 @@ import '@ss/ui/components/confirmation-modal';
 import '@ss/ui/components/sortable-list';
 import '@ss/ui/components/sortable-item';
 import '@ss/ui/components/ss-toggle';
+import '@ss/ui/components/tab-container';
+import '@ss/ui/components/tab-pane';
+import '@/components/access-policy-assignment/access-policy-assignment';
 import { MobxLitElement } from '@adobe/lit-mobx';
 import { appState } from '@/state';
 import { SortUpdatedEvent } from '@ss/ui/components/sortable-list.events';
@@ -145,6 +150,14 @@ export class EntityConfigForm extends MobxLitElement {
   @property({ type: String })
   [EntityConfigFormProp.AI_IDENTIFY_PROMPT]: EntityConfigFormProps[EntityConfigFormProp.AI_IDENTIFY_PROMPT] =
     entityConfigFormProps[EntityConfigFormProp.AI_IDENTIFY_PROMPT].default;
+
+  @property({ type: Number })
+  [EntityConfigFormProp.VIEW_ACCESS_POLICY_ID]: EntityConfigFormProps[EntityConfigFormProp.VIEW_ACCESS_POLICY_ID] =
+    entityConfigFormProps[EntityConfigFormProp.VIEW_ACCESS_POLICY_ID].default;
+
+  @property({ type: Number })
+  [EntityConfigFormProp.EDIT_ACCESS_POLICY_ID]: EntityConfigFormProps[EntityConfigFormProp.EDIT_ACCESS_POLICY_ID] =
+    entityConfigFormProps[EntityConfigFormProp.EDIT_ACCESS_POLICY_ID].default;
 
   @state()
   get hasBreakingChanges(): boolean {
@@ -366,182 +379,228 @@ export class EntityConfigForm extends MobxLitElement {
     });
   }
 
+  get tabRegistry(): TabEntry[] {
+    return [
+      {
+        heading: translate('entityConfigForm.tab.config'),
+        content: () => this.renderConfigTab(),
+        shouldShow: () => true,
+      },
+      {
+        heading: translate('entityConfigForm.tab.access'),
+        content: () =>
+          html`<access-policy-assignment
+            context="entityConfig"
+            entityId=${this[EntityConfigFormProp.ENTITY_CONFIG_ID]}
+            viewAccessPolicyId=${this[EntityConfigFormProp.VIEW_ACCESS_POLICY_ID]}
+            editAccessPolicyId=${this[EntityConfigFormProp.EDIT_ACCESS_POLICY_ID]}
+          ></access-policy-assignment>`,
+        shouldShow: () => this.state.hasRole(Role.ACCESS),
+      },
+    ];
+  }
+
+  get visibleTabs(): TabEntry[] {
+    return this.tabRegistry.filter(tab => tab.shouldShow());
+  }
+
+  renderConfigTab(): TemplateResult {
+    return html`
+      <div class="entity-config-form">
+        <div class="field">
+          <label for="entity-name">${translate('entityName')}</label>
+
+          <ss-input
+            id="entity-name"
+            .value=${this.entityConfig.name}
+            @input-changed=${(e: InputChangedEvent): void =>
+              this.updateName(e.detail.value)}
+          ></ss-input>
+        </div>
+
+        <div class="field">
+          <label for="entity-description"
+            >${translate('entityDescription')}</label
+          >
+
+          <ss-input
+            id="entity-description"
+            .value=${this.entityConfig.description}
+            @input-changed=${(e: InputChangedEvent): void =>
+              this.updateDescription(e.detail.value)}
+          ></ss-input>
+        </div>
+
+        <div class="field">
+          <label for="allow-property-ordering"
+            >${translate('allowPropertyOrdering')}</label
+          >
+
+          <ss-toggle
+            ?on=${this[EntityConfigFormProp.ALLOW_PROPERTY_ORDERING]}
+            @toggle-changed=${(e: ToggleChangedEvent): void => {
+              this.updateAllowPropertyOrdering(e.detail.on);
+            }}
+          ></ss-toggle>
+        </div>
+
+        <div class="field">
+          <label for="ai-enabled">${translate('aiEnabled')}</label>
+
+          <ss-toggle
+            ?on=${this[EntityConfigFormProp.AI_ENABLED]}
+            @toggle-changed=${(e: ToggleChangedEvent): void => {
+              this.updateAIEnabled(e.detail.on);
+            }}
+          ></ss-toggle>
+        </div>
+
+        <div class="field">
+          <label for="ai-identify-prompt"
+            >${translate('aiIdentifyPrompt')}</label
+          >
+
+          <ss-input
+            id="ai-identify-prompt"
+            .value=${this[EntityConfigFormProp.AI_IDENTIFY_PROMPT]}
+            @input-changed=${(e: InputChangedEvent): void => {
+              this.updateAIIdentifyPrompt(e.detail.value);
+            }}
+          ></ss-input>
+        </div>
+
+        <div class="revision-target"></div>
+
+        ${this.hasBreakingChanges
+          ? html` <div class="revision-info">
+              <div class="warning">${translate('breakingChangeWarning')}</div>
+
+              <input
+                type="checkbox"
+                id="new-revision"
+                ?checked=${this.saveNewRevision}
+                @click=${(): void => {
+                  this.saveNewRevision = !this.saveNewRevision;
+                }}
+              />
+
+              <label for="new-revision"
+                >${translate('createNewRevision')}</label
+              >
+            </div>`
+          : nothing}
+
+        <div class="buttons">
+          <ss-button
+            positive
+            ?disabled=${!this.isSaveEnabled}
+            @click=${this.save}
+            >${translate(
+              this.saveNewRevision
+                ? 'createNewRevision'
+                : this.entityConfig.id
+                  ? 'update'
+                  : 'create',
+            )}</ss-button
+          >
+
+          <ss-button
+            negative
+            @click=${(): void => {
+              this.confirmationModalIsOpen = true;
+            }}
+            >${translate('delete')}</ss-button
+          >
+        </div>
+
+        ${this.entityConfig.id
+          ? html`
+              <div class="properties">
+                <ss-button @click=${this.addPropertyToTop}
+                  >${translate('addProperty')}</ss-button
+                >
+
+                <sortable-list @sort-updated=${this.sortUpdated}>
+                  ${repeat(
+                    this.entityConfig.properties,
+                    property => property.id,
+                    (property, index) => html`
+                      <sortable-item id=${property.id}>
+                        <property-config-form
+                          ?open=${this.isPanelOpen(property.id)}
+                          entityConfigId=${this.entityConfig.id}
+                          propertConfigId=${property.id}
+                          dataType=${property.dataType}
+                          propertyConfigId=${property.id}
+                          name=${property.name}
+                          required=${property.required}
+                          repeat=${property.repeat}
+                          allowed=${property.allowed}
+                          prefix=${property.prefix}
+                          suffix=${property.suffix}
+                          ?optionsOnly=${property.optionsOnly}
+                          .options=${property.options}
+                          ?hidden=${property.hidden}
+                          ?performDriftCheck=${this.performDriftCheck}
+                          .defaultValue=${property.defaultValue}
+                          @property-config-updated=${(
+                            e: PropertyConfigUpdatedEvent,
+                          ): void => this.updateProperty(index, e.detail)}
+                          @property-config-added=${(
+                            e: PropertyConfigAddedEvent,
+                          ): void => this.updateProperty(index, e.detail)}
+                          @property-config-deleted=${(): void => {
+                            this.deleteProperty(index);
+                          }}
+                          @property-config-breaking-change-detected=${(
+                            e: PropertyConfigBreakingChangeDetectedEvent,
+                          ): void => {
+                            this.breakingChangeDetected(index, e);
+                          }}
+                          @property-config-breaking-changes-resolved=${(): void => {
+                            this.breakingChangesResolved(index);
+                          }}
+                        ></property-config-form>
+                      </sortable-item>
+                    `,
+                  )}
+                </sortable-list>
+
+                ${this.entityConfig.properties.length > 0
+                  ? html` <ss-button @click=${this.addPropertyToBottom}
+                      >${translate('addProperty')}</ss-button
+                    >`
+                  : nothing}
+              </div>
+            `
+          : nothing}
+      </div>
+    `;
+  }
+
   render(): TemplateResult {
+    const tabs = this.visibleTabs;
+
     return html`
       <ss-collapsable
         title=${this.entityConfig.name || translate('entityConfiguration')}
         ?open=${this.open}
         panelId=${`entityConfigForm-${this.entityConfig.id}`}
       >
-        <div class="entity-config-form">
-          <div class="field">
-            <label for="entity-name">${translate('entityName')}</label>
-
-            <ss-input
-              id="entity-name"
-              .value=${this.entityConfig.name}
-              @input-changed=${(e: InputChangedEvent): void =>
-                this.updateName(e.detail.value)}
-            ></ss-input>
-          </div>
-
-          <div class="field">
-            <label for="entity-description"
-              >${translate('entityDescription')}</label
-            >
-
-            <ss-input
-              id="entity-description"
-              .value=${this.entityConfig.description}
-              @input-changed=${(e: InputChangedEvent): void =>
-                this.updateDescription(e.detail.value)}
-            ></ss-input>
-          </div>
-
-          <div class="field">
-            <label for="allow-property-ordering"
-              >${translate('allowPropertyOrdering')}</label
-            >
-
-            <ss-toggle
-              ?on=${this[EntityConfigFormProp.ALLOW_PROPERTY_ORDERING]}
-              @toggle-changed=${(e: ToggleChangedEvent): void => {
-                this.updateAllowPropertyOrdering(e.detail.on);
-              }}
-            ></ss-toggle>
-          </div>
-
-          <div class="field">
-            <label for="ai-enabled">${translate('aiEnabled')}</label>
-
-            <ss-toggle
-              ?on=${this[EntityConfigFormProp.AI_ENABLED]}
-              @toggle-changed=${(e: ToggleChangedEvent): void => {
-                this.updateAIEnabled(e.detail.on);
-              }}
-            ></ss-toggle>
-          </div>
-
-          <div class="field">
-            <label for="ai-identify-prompt"
-              >${translate('aiIdentifyPrompt')}</label
-            >
-
-            <ss-input
-              id="ai-identify-prompt"
-              .value=${this[EntityConfigFormProp.AI_IDENTIFY_PROMPT]}
-              @input-changed=${(e: InputChangedEvent): void => {
-                this.updateAIIdentifyPrompt(e.detail.value);
-              }}
-            ></ss-input>
-          </div>
-
-          <div class="revision-target"></div>
-
-          ${this.hasBreakingChanges
-            ? html` <div class="revision-info">
-                <div class="warning">${translate('breakingChangeWarning')}</div>
-
-                <input
-                  type="checkbox"
-                  id="new-revision"
-                  ?checked=${this.saveNewRevision}
-                  @click=${(): void => {
-                    this.saveNewRevision = !this.saveNewRevision;
-                  }}
-                />
-
-                <label for="new-revision"
-                  >${translate('createNewRevision')}</label
-                >
-              </div>`
-            : nothing}
-
-          <div class="buttons">
-            <ss-button
-              positive
-              ?disabled=${!this.isSaveEnabled}
-              @click=${this.save}
-              >${translate(
-                this.saveNewRevision
-                  ? 'createNewRevision'
-                  : this.entityConfig.id
-                    ? 'update'
-                    : 'create',
-              )}</ss-button
-            >
-
-            <ss-button
-              negative
-              @click=${(): void => {
-                this.confirmationModalIsOpen = true;
-              }}
-              >${translate('delete')}</ss-button
-            >
-          </div>
-
-          ${this.entityConfig.id
-            ? html`
-                <div class="properties">
-                  <ss-button @click=${this.addPropertyToTop}
-                    >${translate('addProperty')}</ss-button
-                  >
-
-                  <sortable-list @sort-updated=${this.sortUpdated}>
-                    ${repeat(
-                      this.entityConfig.properties,
-                      property => property.id,
-                      (property, index) => html`
-                        <sortable-item id=${property.id}>
-                          <property-config-form
-                            ?open=${this.isPanelOpen(property.id)}
-                            entityConfigId=${this.entityConfig.id}
-                            propertConfigId=${property.id}
-                            dataType=${property.dataType}
-                            propertyConfigId=${property.id}
-                            name=${property.name}
-                            required=${property.required}
-                            repeat=${property.repeat}
-                            allowed=${property.allowed}
-                            prefix=${property.prefix}
-                            suffix=${property.suffix}
-                            ?optionsOnly=${property.optionsOnly}
-                            .options=${property.options}
-                            ?hidden=${property.hidden}
-                            ?performDriftCheck=${this.performDriftCheck}
-                            .defaultValue=${property.defaultValue}
-                            @property-config-updated=${(
-                              e: PropertyConfigUpdatedEvent,
-                            ): void => this.updateProperty(index, e.detail)}
-                            @property-config-added=${(
-                              e: PropertyConfigAddedEvent,
-                            ): void => this.updateProperty(index, e.detail)}
-                            @property-config-deleted=${(): void => {
-                              this.deleteProperty(index);
-                            }}
-                            @property-config-breaking-change-detected=${(
-                              e: PropertyConfigBreakingChangeDetectedEvent,
-                            ): void => {
-                              this.breakingChangeDetected(index, e);
-                            }}
-                            @property-config-breaking-changes-resolved=${(): void => {
-                              this.breakingChangesResolved(index);
-                            }}
-                          ></property-config-form>
-                        </sortable-item>
-                      `,
-                    )}
-                  </sortable-list>
-
-                  ${this.entityConfig.properties.length > 0
-                    ? html` <ss-button @click=${this.addPropertyToBottom}
-                        >${translate('addProperty')}</ss-button
-                      >`
-                    : nothing}
-                </div>
-              `
-            : nothing}
-        </div>
+        ${tabs.length === 1
+          ? tabs[0].content()
+          : html`
+              <tab-container>
+                ${repeat(
+                  tabs,
+                  tab => tab.heading,
+                  tab =>
+                    html`<tab-pane title=${tab.heading}
+                      >${tab.content()}</tab-pane
+                    >`,
+                )}
+              </tab-container>
+            `}
       </ss-collapsable>
 
       <confirmation-modal
