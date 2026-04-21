@@ -50,9 +50,10 @@ export interface SavedListFilter {
   name: string;
 }
 
-// Set to false to bypass offline cache and use NetworkStorage directly.
 const OFFLINE_CACHE_ENABLED = true;
-const cloudDelegate = OFFLINE_CACHE_ENABLED ? offlineCacheStorage : networkStorage;
+const cloudDelegate = OFFLINE_CACHE_ENABLED
+  ? offlineCacheStorage
+  : networkStorage;
 const storageDelegates: StorageSchema[] = [cloudDelegate, sqliteStorage];
 for (let i = 0; i < storageDelegates.length; i++) {
   storageDelegates[i].isActive =
@@ -786,9 +787,32 @@ export class Storage implements StorageSchema {
     return Promise.resolve(false);
   }
 
-  @delegateSource()
+  private _accessPoliciesCache: Promise<StorageResult<AccessPolicy[]>> | null =
+    null;
+
+  invalidateAccessPoliciesCache(): void {
+    this._accessPoliciesCache = null;
+  }
+
   async getAccessPolicies(): Promise<StorageResult<AccessPolicy[]>> {
-    return Promise.resolve({ isOk: true, value: [] });
+    if (!this._accessPoliciesCache) {
+      this._accessPoliciesCache = this._fetchAccessPolicies();
+    }
+    return this._accessPoliciesCache;
+  }
+
+  private async _fetchAccessPolicies(): Promise<StorageResult<AccessPolicy[]>> {
+    let result: StorageResult<AccessPolicy[]> = { isOk: true, value: [] };
+    for (const delegate of storageDelegates.filter(d => d.isActive)) {
+      if (typeof delegate.getAccessPolicies === 'function') {
+        result = await delegate.getAccessPolicies();
+        break;
+      }
+    }
+    if (!result.isOk) {
+      this._accessPoliciesCache = null;
+    }
+    return result;
   }
 
   @delegateSource()
