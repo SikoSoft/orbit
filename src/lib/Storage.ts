@@ -6,6 +6,7 @@ import {
   ListSort,
 } from 'api-spec/models/List';
 import { networkStorage } from './NetworkStorage';
+import { offlineCacheStorage } from './OfflineCacheStorage';
 import { sqliteStorage } from './SQLiteStorage';
 import {
   defaultListContext,
@@ -49,7 +50,10 @@ export interface SavedListFilter {
   name: string;
 }
 
-const storageDelegates: StorageSchema[] = [networkStorage, sqliteStorage];
+// Set to false to bypass offline cache and use NetworkStorage directly.
+const OFFLINE_CACHE_ENABLED = true;
+const cloudDelegate = OFFLINE_CACHE_ENABLED ? offlineCacheStorage : networkStorage;
+const storageDelegates: StorageSchema[] = [cloudDelegate, sqliteStorage];
 for (let i = 0; i < storageDelegates.length; i++) {
   storageDelegates[i].isActive =
     storageDelegates[i].storageSource ===

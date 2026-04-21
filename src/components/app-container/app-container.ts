@@ -72,6 +72,7 @@ export class AppContainer extends MobxLitElement {
 
     window.addEventListener('online', this.handleOnline);
     window.addEventListener('offline', this.handleOffline);
+    window.addEventListener('offline-sync-complete', this.handleOfflineSyncComplete);
     window.addEventListener(
       networkApiRequestFailedEventName,
       this.handleNetworkApiRequestFailed as EventListener,
@@ -100,6 +101,7 @@ export class AppContainer extends MobxLitElement {
     super.disconnectedCallback();
     window.removeEventListener('online', this.handleOnline);
     window.removeEventListener('offline', this.handleOffline);
+    window.removeEventListener('offline-sync-complete', this.handleOfflineSyncComplete);
     window.removeEventListener(
       networkApiRequestFailedEventName,
       this.handleNetworkApiRequestFailed as EventListener,
@@ -109,6 +111,12 @@ export class AppContainer extends MobxLitElement {
   private handleOnline = (): void => {
     console.log('app-container detected online');
     this.state.setOnline(true);
+  };
+
+  private handleOfflineSyncComplete = (): void => {
+    void this.restoreState().then(() => {
+      this.viewComponent?.sync(true);
+    });
   };
 
   private handleOffline = (): void => {

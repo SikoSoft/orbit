@@ -65,6 +65,21 @@ const SCHEMA = `
     setting TEXT NOT NULL DEFAULT '{}',
     themes  TEXT NOT NULL DEFAULT '[]'
   );
+
+  CREATE TABLE IF NOT EXISTS pending_sync (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    operation  TEXT    NOT NULL,
+    payload    TEXT    NOT NULL,
+    local_id   TEXT,
+    table_name TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS temp_id_map (
+    local_id   TEXT NOT NULL,
+    table_name TEXT NOT NULL,
+    server_id  TEXT NOT NULL,
+    PRIMARY KEY (local_id, table_name)
+  );
 `;
 
 type Ctx = {

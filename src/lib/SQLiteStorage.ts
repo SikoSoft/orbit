@@ -45,7 +45,7 @@ import {
 } from 'api-spec/models/Access';
 import { translate } from './Localization';
 
-function serializePropertyValue(
+export function serializePropertyValue(
   value: PropertyDataValue,
   dataType: DataType,
 ): string {
@@ -143,8 +143,8 @@ export class SQLiteStorage implements StorageSchema {
   isActive = false;
   storageSource = StorageSource.DEVICE;
 
-  private worker: Worker;
-  private pending = new Map<
+  protected worker: Worker;
+  protected pending = new Map<
     string,
     { resolve: (v: unknown) => void; reject: (e: Error) => void }
   >();
@@ -186,7 +186,7 @@ export class SQLiteStorage implements StorageSchema {
     });
   }
 
-  private send<T>(
+  protected send<T>(
     type: string,
     sql: string,
     bind: BindableValue[] = [],
@@ -201,21 +201,21 @@ export class SQLiteStorage implements StorageSchema {
     });
   }
 
-  private execRows(
+  protected execRows(
     sql: string,
     bind: BindableValue[] = [],
   ): Promise<Record<string, SqlValue>[]> {
     return this.send<Record<string, SqlValue>[]>('exec_rows', sql, bind);
   }
 
-  private execValue(
+  protected execValue(
     sql: string,
     bind: BindableValue[] = [],
   ): Promise<SqlValue> {
     return this.send<SqlValue>('exec_value', sql, bind);
   }
 
-  private run(sql: string, bind: BindableValue[] = []): Promise<void> {
+  protected run(sql: string, bind: BindableValue[] = []): Promise<void> {
     return this.send<void>('run', sql, bind);
   }
 
@@ -432,7 +432,7 @@ export class SQLiteStorage implements StorageSchema {
 
   // ─── Entities ─────────────────────────────────────────────────────────────
 
-  private async loadEntityRows(
+  protected async loadEntityRows(
     entityRows: Record<string, unknown>[],
   ): Promise<Entity[]> {
     if (entityRows.length === 0) {
@@ -656,7 +656,7 @@ export class SQLiteStorage implements StorageSchema {
     return true;
   }
 
-  private async writeEntityTags(
+  protected async writeEntityTags(
     entityId: number,
     tags: string[],
   ): Promise<void> {
@@ -668,7 +668,7 @@ export class SQLiteStorage implements StorageSchema {
     }
   }
 
-  private async writeEntityProperties(
+  protected async writeEntityProperties(
     entityId: number,
     properties: EntityProperty[],
   ): Promise<void> {
