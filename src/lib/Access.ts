@@ -4,19 +4,18 @@ import { User } from 'api-spec/models/Identity';
 export class Access {
   static userHasAccess(
     accessPolicy: AccessPolicy | null,
-    user: User | null,
+    userId: string,
   ): boolean {
-    if (!accessPolicy || !user) {
+    if (!accessPolicy || !userId) {
       return false;
     }
 
     return accessPolicy.parties.some(party => {
-      if (party.type === AccessPartyType.USER && party.id === user.id) {
+      if (party.type === AccessPartyType.USER && party.id === userId) {
         return true;
       }
       if (party.type === AccessPartyType.GROUP) {
-        //
-        return party.users.some(u => u.id === user.id);
+        return party.users.some(u => u.id === userId);
       }
       return false;
     });

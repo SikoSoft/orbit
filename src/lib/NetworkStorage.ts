@@ -99,7 +99,7 @@ export class NetworkStorage implements StorageSchema {
   async deleteListConfig(id: string): Promise<boolean> {
     const result = await api.delete<null>(`listConfig/${id}`);
 
-    if (result) {
+    if (result && result.isOk) {
       return true;
     }
 
@@ -627,7 +627,10 @@ export class NetworkStorage implements StorageSchema {
     const result = await api.put<
       { viewAccessPolicyId: number; editAccessPolicyId: number },
       null
-    >(`entityAccessPolicy/${entityId}`, { viewAccessPolicyId, editAccessPolicyId });
+    >(`entityAccessPolicy/${entityId}`, {
+      viewAccessPolicyId,
+      editAccessPolicyId,
+    });
 
     if (result && result.isOk) {
       return true;

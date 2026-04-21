@@ -242,22 +242,38 @@ export class ListConfig extends MobxLitElement {
   @query('.collapsable-menus') collapsableMenus!: HTMLDivElement;
 
   @state()
-  get canConfigure(): boolean {
-    if (this[ListConfigProp.VIEW_ONLY]) {
+  get canEdit(): boolean {
+    if (this[ListConfigProp.VIEW_ONLY] || !this.state.user?.id) {
       return false;
     }
 
+    const isOwner = this.state.listConfig.userId === this.state.user.id;
+
     if (
-      this.state.listConfig.userId !== this.state.user?.id &&
-      Access.userHasAccess(
+      !isOwner &&
+      !Access.userHasAccess(
         this.state.listConfig.editAccessPolicy,
-        this.state.user,
+        this.state.user.id,
       )
     ) {
       return false;
     }
 
     return true;
+  }
+
+  @state()
+  get canDelete(): boolean {
+    if (this[ListConfigProp.VIEW_ONLY] || !this.state.user?.id) {
+      return false;
+    }
+    const isOwner = this.state.listConfig.userId === this.state.user.id;
+
+    if (isOwner) {
+      return true;
+    }
+
+    return false;
   }
 
   @state() get publicUrl(): string {
@@ -284,7 +300,9 @@ export class ListConfig extends MobxLitElement {
       'list-config': true,
       'config-mode': this.state.selectListConfigMode,
       'edit-mode': this.state.editListConfigMode,
-      'view-only': this.canConfigure === false,
+      'view-only': this.canEdit === false,
+      'can-edit': this.canEdit,
+      'can-delete': this.canDelete,
     };
   }
 
@@ -348,7 +366,7 @@ export class ListConfig extends MobxLitElement {
   }
 
   enableEditMode(): void {
-    if (!this.canConfigure) {
+    if (!this.canEdit) {
       return;
     }
 
@@ -418,7 +436,12 @@ export class ListConfig extends MobxLitElement {
   }
 
   async deleteConfig(): Promise<void> {
-    await storage.deleteListConfig(this.id);
+    const result = await storage.deleteListConfig(this.id);
+    if (!result) {
+      addToast(translate('failedToDeleteListConfig'), NotificationType.ERROR);
+      return;
+    }
+
     addToast(translate('configDeleted'), NotificationType.INFO);
     const listConfigs = await storage.getListConfigs();
     if (listConfigs.length) {
@@ -592,13 +615,17 @@ export class ListConfig extends MobxLitElement {
                           ></ss-icon>
                         </button>
 
-                        <button @click=${this.showConfigDeleteConfirm}>
-                          <ss-icon
-                            name="trash"
-                            color="var(--input-text-color)"
-                            size="16"
-                          ></ss-icon>
-                        </button>
+                        ${this.canDelete
+                          ? html`
+                              <button @click=${this.showConfigDeleteConfirm}>
+                                <ss-icon
+                                  name="trash"
+                                  color="var(--input-text-color)"
+                                  size="16"
+                                ></ss-icon>
+                              </button>
+                            `
+                          : nothing}
                       </div>
                     </div>
                   </div>`,
