@@ -639,25 +639,27 @@ export class ListConfig extends MobxLitElement {
       </div>
 
       <div class="collapsable-menus">
-        <ss-collapsable
-          title=${translate('access')}
-          ?open=${this.accessIsOpen}
-          @toggled=${this.toggleAccess}
-        >
-          <div class="filter-body">
-            <access-policy-assignment
-              context="listConfig"
-              listConfigId=${this.state.listConfigId}
-              @access-policy-updated=${this.handleAccessPolicyUpdated}
-              viewAccessPolicyId=${ifDefined(
-                this.state.listConfig.viewAccessPolicy?.id,
-              )}
-              editAccessPolicyId=${ifDefined(
-                this.state.listConfig.editAccessPolicy?.id,
-              )}
-            ></access-policy-assignment>
-          </div>
-        </ss-collapsable>
+        ${this.canDelete
+          ? html` <ss-collapsable
+              title=${translate('access')}
+              ?open=${this.accessIsOpen}
+              @toggled=${this.toggleAccess}
+            >
+              <div class="filter-body">
+                <access-policy-assignment
+                  context="listConfig"
+                  listConfigId=${this.state.listConfigId}
+                  @access-policy-updated=${this.handleAccessPolicyUpdated}
+                  viewAccessPolicyId=${ifDefined(
+                    this.state.listConfig.viewAccessPolicy?.id,
+                  )}
+                  editAccessPolicyId=${ifDefined(
+                    this.state.listConfig.editAccessPolicy?.id,
+                  )}
+                ></access-policy-assignment>
+              </div>
+            </ss-collapsable>`
+          : nothing}
 
         <ss-collapsable
           title=${translate('settings')}
