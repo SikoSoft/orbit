@@ -51,6 +51,7 @@ import {
 } from './entity-form.events';
 import { TagsUpdatedEvent } from '@ss/ui/components/tag-manager.events';
 import { TagSuggestionsRequestedEvent } from '@ss/ui/components/tag-input.events';
+import { TabIndexChangedEvent } from '@ss/ui/components/tab-container.events';
 import { SelectChangedEvent } from '@ss/ui/components/ss-select.events';
 
 import {
@@ -206,6 +207,7 @@ export class EntityForm extends ViewElement {
 
   @state() propertyReferences: PropertyReference[] = [];
   @state() propertyPopUpIsOpen = false;
+  @state() activeTabIndex: number = 0;
 
   @state()
   get classes(): Record<string, boolean> {
@@ -997,12 +999,20 @@ export class EntityForm extends ViewElement {
 
     return html`
       <form class=${classMap(this.classes)}>
-        <tab-container>
+        <tab-container
+          @tab-index-changed=${(e: TabIndexChangedEvent): void => {
+            this.activeTabIndex = e.detail.index;
+          }}
+        >
           ${repeat(
             tabs,
             tab => tab.heading,
-            tab =>
-              html`<tab-pane title=${tab.heading}>${tab.content()}</tab-pane>`,
+            (tab, index) =>
+              html`<tab-pane title=${tab.heading}
+                >${index === this.activeTabIndex
+                  ? tab.content()
+                  : nothing}</tab-pane
+              >`,
           )}
         </tab-container>
       </form>

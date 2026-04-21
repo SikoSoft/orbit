@@ -98,6 +98,7 @@ export class AccessPolicy extends AccessPolicyBase {
         );
 
     if (result.isOk) {
+      storage.invalidateAccessPoliciesCache();
       this[AccessPolicyProp.NAME] = this._policyName;
       this[AccessPolicyProp.DESCRIPTION] = this._policyDescription;
       this[AccessPolicyProp.MEMBERS] = [...this._members];

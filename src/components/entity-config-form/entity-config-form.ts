@@ -28,6 +28,7 @@ import {
   PropertyConfigUpdatedEvent,
 } from '@/components/property-config-form/property-config-form.events';
 import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
+import { TabIndexChangedEvent } from '@ss/ui/components/tab-container.events';
 
 import '@/components/property-config-form/property-config-form';
 import '@ss/ui/components/ss-collapsable';
@@ -119,6 +120,9 @@ export class EntityConfigForm extends MobxLitElement {
 
   @state()
   saveNewRevision: boolean = false;
+
+  @state()
+  activeTabIndex: number = 0;
 
   @property({ type: Boolean, reflect: true })
   open: boolean = false;
@@ -590,13 +594,19 @@ export class EntityConfigForm extends MobxLitElement {
         ${tabs.length === 1
           ? tabs[0].content()
           : html`
-              <tab-container>
+              <tab-container
+                @tab-index-changed=${(e: TabIndexChangedEvent): void => {
+                  this.activeTabIndex = e.detail.index;
+                }}
+              >
                 ${repeat(
                   tabs,
                   tab => tab.heading,
-                  tab =>
+                  (tab, index) =>
                     html`<tab-pane title=${tab.heading}
-                      >${tab.content()}</tab-pane
+                      >${index === this.activeTabIndex
+                        ? tab.content()
+                        : nothing}</tab-pane
                     >`,
                 )}
               </tab-container>

@@ -69,6 +69,7 @@ export class AccessPolicyList extends MobxLitElement {
   private async handleDelete(id: number): Promise<void> {
     const success = await storage.deleteAccessPolicy(id);
     if (success) {
+      storage.invalidateAccessPoliciesCache();
       this._policies = this._policies.filter(p => p.id !== id);
       this._deletingId = null;
       addToast(
