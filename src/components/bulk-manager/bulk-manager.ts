@@ -6,10 +6,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { v4 as uuidv4 } from 'uuid';
 
 import { translate } from '@/lib/Localization';
-import {
-  Operation,
-  OperationType,
-} from 'api-spec/models/Operation';
+import { Operation, OperationType } from 'api-spec/models/Operation';
 import {
   EntityProperty,
   EntityPropertyConfig,
@@ -126,16 +123,17 @@ export class BulkManager extends MobxLitElement {
     return {
       box: true,
       'bulk-manager': true,
-      shown: this.state.selectedActions.length > 0,
+      shown: this.state.selectedEntities.length > 0,
     };
   }
 
   @state()
   get availablePropertyConfigs(): EntityPropertyConfig[] {
-    const selectedEntities = this.state.listItems.filter(e =>
-      this.state.selectedActions.includes(e.id),
+    const selectedEntities = this.state.listEntities.filter(e =>
+      this.state.selectedEntities.includes(e.id),
     );
     const entityConfigIds = [...new Set(selectedEntities.map(e => e.type))];
+    console.log('Selected entity config IDs:', entityConfigIds);
     const seen = new Set<number>();
     const result: EntityPropertyConfig[] = [];
 
@@ -203,10 +201,10 @@ export class BulkManager extends MobxLitElement {
   private async handlePerformOperation(): Promise<void> {
     await storage.bulkOperation({
       operation: this.buildOperation(),
-      actions: this.state.selectedActions,
+      entities: this.state.selectedEntities,
     });
 
-    this.state.setSelectedActions([]);
+    this.state.setSelectedEntities([]);
     this.state.setSelectMode(false);
     addToast(
       translate('operationPerformedSuccessfully'),
@@ -216,7 +214,7 @@ export class BulkManager extends MobxLitElement {
     this.dispatchEvent(
       new OperationPerformedEvent({
         type: this.operationType,
-        actions: this.state.selectedActions,
+        entities: this.state.selectedEntities,
       }),
     );
   }
@@ -259,7 +257,9 @@ export class BulkManager extends MobxLitElement {
   private handlePropertyChanged(e: PropertyChangedEvent): void {
     const { uiId, value } = e.detail;
     this.propertyInstances = this.propertyInstances.map(inst =>
-      inst.uiId === uiId ? { ...inst, value: value as PropertyDataValue } : inst,
+      inst.uiId === uiId
+        ? { ...inst, value: value as PropertyDataValue }
+        : inst,
     );
   }
 
@@ -287,8 +287,14 @@ export class BulkManager extends MobxLitElement {
 
   private renderPropertyManager(): TemplateResult | typeof nothing {
     if (!this.showPropertyManager) {
+      console.log('Not showing property manager');
       return nothing;
     }
+
+    console.log(
+      'Showing property manager with instances:',
+      this.propertyInstances,
+    );
 
     return html`
       <div class="property-manager">
@@ -309,7 +315,6 @@ export class BulkManager extends MobxLitElement {
             ></property-field>`;
           },
         )}
-
         ${this.availablePropertyConfigs.length > 0
           ? html`
               <ss-button
@@ -388,14 +393,13 @@ export class BulkManager extends MobxLitElement {
               </tag-manager>
             `
           : nothing}
-
         ${this.renderPropertyManager()}
 
         <div class="number-selected">
-          ${this.state.selectedActions.length === 1
+          ${this.state.selectedEntities.length === 1
             ? translate('1ItemSelected')
             : translate('xItemsSelected', {
-                count: this.state.selectedActions.length,
+                count: this.state.selectedEntities.length,
               })}
         </div>
 

@@ -139,7 +139,7 @@ export class EntityList extends ViewElement {
       () => this.state.listConfig,
       () => {
         this.state.setListEntities([]);
-        this.state.setSelectedActions([]);
+        this.state.setSelectedEntities([]);
         this.state.setSelectMode(false);
         if (!initialFire) {
           this.sync(true);
@@ -264,7 +264,7 @@ export class EntityList extends ViewElement {
 
   private handlePointerLongPress(e: PointerLongPressEvent): void {
     const listItem = e.target as EntityListItem;
-    this.state.toggleActionSelection(listItem.entityId);
+    this.state.toggleEntitySelection(listItem.entityId);
   }
 
   private handlePointerUp(e: PointerUpEvent): void {
@@ -273,7 +273,7 @@ export class EntityList extends ViewElement {
       listItem.setMode(EntityListItemMode.EDIT);
       return;
     }
-    this.state.toggleActionSelection(listItem.entityId);
+    this.state.toggleEntitySelection(listItem.entityId);
   }
 
   render(): TemplateResult {
@@ -304,7 +304,7 @@ export class EntityList extends ViewElement {
                   createdAt=${item.createdAt}
                   updatedAt=${item.updatedAt}
                   .tags=${item.tags}
-                  ?selected=${this.state.selectedActions.includes(item.id)}
+                  ?selected=${this.state.selectedEntities.includes(item.id)}
                   .properties=${item.properties}
                   viewAccessPolicyId=${item.viewAccessPolicyId}
                   editAccessPolicyId=${item.editAccessPolicyId}

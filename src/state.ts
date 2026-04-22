@@ -67,16 +67,7 @@ export class AppState {
   public propertyConfigs: EntityPropertyConfig[] = [];
 
   @observable
-  public listItems: Entity[] = [];
-
-  @observable
   public listEntities: Entity[] = [];
-
-  @observable
-  public contextListItems: Record<number, Entity[]> = [];
-
-  @observable
-  public contextListEntities: Record<number, Entity[]> = {};
 
   @observable
   public actionSuggestions: string[] = [];
@@ -112,7 +103,7 @@ export class AppState {
   public selectListConfigMode: boolean = false;
 
   @observable
-  public selectedActions: number[] = [];
+  public selectedEntities: number[] = [];
 
   @observable
   public forbidden: boolean = false;
@@ -301,55 +292,40 @@ export class AppState {
   }
 
   @action
-  setSelectedActions(actionIds: number[]): void {
-    this.selectedActions = actionIds;
+  setSelectedEntities(entityIds: number[]): void {
+    this.selectedEntities = entityIds;
   }
 
   @action
-  addActionToSelection(actionId: number): void {
-    this.selectedActions = [
-      ...this.selectedActions.filter(id => id !== actionId),
-      actionId,
+  addEntityToSelection(entityId: number): void {
+    this.selectedEntities = [
+      ...this.selectedEntities.filter(id => id !== entityId),
+      entityId,
     ];
     this.selectMode = true;
   }
 
   @action
-  removeActionFromSelection(actionId: number): void {
-    this.selectedActions = [
-      ...this.selectedActions.filter(id => id !== actionId),
+  removeEntityFromSelection(entityId: number): void {
+    this.selectedEntities = [
+      ...this.selectedEntities.filter(id => id !== entityId),
     ];
-    this.selectMode = this.selectedActions.length > 0;
+    this.selectMode = this.selectedEntities.length > 0;
   }
 
   @action
-  toggleActionSelection(actionId: number): void {
-    this.selectedActions.includes(actionId)
-      ? this.removeActionFromSelection(actionId)
-      : this.addActionToSelection(actionId);
-  }
-
-  @action
-  setListItems(items: Entity[]): void {
-    this.listItems = items;
-  }
-
-  @action
-  setContextListItems(items: Record<number, Entity[]>): void {
-    this.contextListItems = items;
+  toggleEntitySelection(entityId: number): void {
+    this.selectedEntities.includes(entityId)
+      ? this.removeEntityFromSelection(entityId)
+      : this.addEntityToSelection(entityId);
   }
 
   @action
   toggleSelectAll(): void {
-    this.selectedActions = this.listItems.reduce(
-      (a, b) => (this.selectedActions.includes(b.id) ? [...a] : [...a, b.id]),
+    this.selectedEntities = this.listEntities.reduce(
+      (a, b) => (this.selectedEntities.includes(b.id) ? [...a] : [...a, b.id]),
       [] as number[],
     );
-  }
-
-  @action
-  selectAll(): void {
-    this.selectedActions = this.listItems.map(item => item.id);
   }
 
   @action
@@ -388,11 +364,6 @@ export class AppState {
   @action
   setListEntities(entities: Entity[]): void {
     this.listEntities = entities;
-  }
-
-  @action
-  setContextListEntities(entities: Record<number, Entity[]>): void {
-    this.contextListEntities = entities;
   }
 
   @action

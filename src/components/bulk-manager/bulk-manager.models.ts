@@ -3,7 +3,7 @@ import { PropertyDataValue } from 'api-spec/models/Entity';
 
 export interface BulkOperationPayload {
   operation: Operation;
-  actions: number[];
+  entities: number[];
 }
 
 export interface BulkPropertyInstance {

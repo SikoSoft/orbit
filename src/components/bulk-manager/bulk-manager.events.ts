@@ -4,7 +4,7 @@ export const operationPerformedEventName = 'operation-performed';
 
 export interface OperationPerformedEventPayload {
   type: OperationType;
-  actions: number[];
+  entities: number[];
 }
 
 export class OperationPerformedEvent extends CustomEvent<OperationPerformedEventPayload> {

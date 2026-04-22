@@ -16,8 +16,8 @@ describe('AppState', () => {
       expect(state.loading).toBe(false);
     });
 
-    it('starts with empty listItems', () => {
-      expect(state.listItems).toEqual([]);
+    it('starts with empty listEntities', () => {
+      expect(state.listEntities).toEqual([]);
     });
 
     it('starts with empty authToken', () => {
@@ -68,47 +68,47 @@ describe('AppState', () => {
     });
   });
 
-  describe('action selection', () => {
-    it('addActionToSelection adds the id and enables selectMode', () => {
-      state.addActionToSelection(1);
-      expect(state.selectedActions).toContain(1);
+  describe('entity selection', () => {
+    it('addEntityToSelection adds the id and enables selectMode', () => {
+      state.addEntityToSelection(1);
+      expect(state.selectedEntities).toContain(1);
       expect(state.selectMode).toBe(true);
     });
 
-    it('addActionToSelection deduplicates', () => {
-      state.addActionToSelection(1);
-      state.addActionToSelection(1);
-      expect(state.selectedActions.filter(id => id === 1)).toHaveLength(1);
+    it('addEntityToSelection deduplicates', () => {
+      state.addEntityToSelection(1);
+      state.addEntityToSelection(1);
+      expect(state.selectedEntities.filter(id => id === 1)).toHaveLength(1);
     });
 
-    it('removeActionFromSelection removes the id', () => {
-      state.addActionToSelection(1);
-      state.removeActionFromSelection(1);
-      expect(state.selectedActions).not.toContain(1);
+    it('removeEntityFromSelection removes the id', () => {
+      state.addEntityToSelection(1);
+      state.removeEntityFromSelection(1);
+      expect(state.selectedEntities).not.toContain(1);
     });
 
-    it('removeActionFromSelection disables selectMode when list becomes empty', () => {
-      state.addActionToSelection(1);
-      state.removeActionFromSelection(1);
+    it('removeEntityFromSelection disables selectMode when list becomes empty', () => {
+      state.addEntityToSelection(1);
+      state.removeEntityFromSelection(1);
       expect(state.selectMode).toBe(false);
     });
 
-    it('removeActionFromSelection keeps selectMode true when others remain', () => {
-      state.addActionToSelection(1);
-      state.addActionToSelection(2);
-      state.removeActionFromSelection(1);
+    it('removeEntityFromSelection keeps selectMode true when others remain', () => {
+      state.addEntityToSelection(1);
+      state.addEntityToSelection(2);
+      state.removeEntityFromSelection(1);
       expect(state.selectMode).toBe(true);
     });
 
-    it('toggleActionSelection adds when not present', () => {
-      state.toggleActionSelection(5);
-      expect(state.selectedActions).toContain(5);
+    it('toggleEntitySelection adds when not present', () => {
+      state.toggleEntitySelection(5);
+      expect(state.selectedEntities).toContain(5);
     });
 
-    it('toggleActionSelection removes when already selected', () => {
-      state.addActionToSelection(5);
-      state.toggleActionSelection(5);
-      expect(state.selectedActions).not.toContain(5);
+    it('toggleEntitySelection removes when already selected', () => {
+      state.addEntityToSelection(5);
+      state.toggleEntitySelection(5);
+      expect(state.selectedEntities).not.toContain(5);
     });
   });
 
@@ -140,10 +140,14 @@ describe('AppState', () => {
 
   describe('list filter tagging', () => {
     it('setListFilterTagging updates the tagging type', () => {
-      state.setListFilterTagging(ListFilterType.CONTAINS_ALL_OF, ['foo', 'bar']);
-      expect(
-        state.listFilter.tagging[ListFilterType.CONTAINS_ALL_OF],
-      ).toEqual(['foo', 'bar']);
+      state.setListFilterTagging(ListFilterType.CONTAINS_ALL_OF, [
+        'foo',
+        'bar',
+      ]);
+      expect(state.listFilter.tagging[ListFilterType.CONTAINS_ALL_OF]).toEqual([
+        'foo',
+        'bar',
+      ]);
     });
   });
 
@@ -163,9 +167,18 @@ describe('AppState', () => {
         editAccessPolicy: null,
         properties: [
           {
-            id: 10, entityConfigId: 1, userId: '', name: 'Prop A',
-            prefix: '', suffix: '', required: 0, repeat: 1, allowed: 1, hidden: false,
-            dataType: DataType.SHORT_TEXT, defaultValue: '',
+            id: 10,
+            entityConfigId: 1,
+            userId: '',
+            name: 'Prop A',
+            prefix: '',
+            suffix: '',
+            required: 0,
+            repeat: 1,
+            allowed: 1,
+            hidden: false,
+            dataType: DataType.SHORT_TEXT,
+            defaultValue: '',
           } as EntityPropertyConfig,
         ],
       };
