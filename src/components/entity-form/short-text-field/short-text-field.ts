@@ -135,21 +135,26 @@ export class ShortTextField extends MobxLitElement {
   }
 
   async getPropertySuggestions(): Promise<string[]> {
+    const propertyOptions = (
+      [...this.propertyConfig.options] as string[]
+    ).filter(option =>
+      option.toLowerCase().startsWith(this._value.toLowerCase()),
+    );
+
     if (this.propertyConfig.optionsOnly) {
-      return ([...this.propertyConfig.options] as string[]).filter(option =>
-        option.toLowerCase().startsWith(this._value.toLowerCase()),
-      );
+      return propertyOptions;
     }
 
-    let suggestions: string[] = [];
+    let suggestions: string[] = [...propertyOptions];
     const result = await storage.getPropertySuggestions(
       this[ShortTextFieldProp.PROPERTY_CONFIG_ID],
       this._value,
     );
     if (result) {
-      suggestions = result;
+      suggestions = [...suggestions, ...result];
     }
-    return suggestions;
+
+    return suggestions.sort((a, b) => a.localeCompare(b));
   }
 
   handleInputSubmitted(_: InputSubmittedEvent): void {
