@@ -158,6 +158,9 @@ describe('AppState', () => {
         allowPropertyOrdering: false,
         aiEnabled: false,
         aiIdentifyPrompt: '',
+        public: false,
+        viewAccessPolicy: null,
+        editAccessPolicy: null,
         properties: [
           {
             id: 10, entityConfigId: 1, userId: '', name: 'Prop A',

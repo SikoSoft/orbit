@@ -97,6 +97,9 @@ function rowToEntityConfig(row: Record<string, unknown>): EntityConfig {
     allowPropertyOrdering: row['allow_property_ordering'] === 1,
     aiEnabled: row['ai_enabled'] === 1,
     aiIdentifyPrompt: (row['ai_identify_prompt'] as string | null) ?? '',
+    public: row['public'] === 1,
+    viewAccessPolicy: null,
+    editAccessPolicy: null,
     properties: [],
   };
 }
@@ -240,8 +243,8 @@ export class SQLiteStorage implements StorageSchema {
     entityConfig: EntityConfig,
   ): Promise<EntityConfig | null> {
     await this.run(
-      `INSERT INTO entity_config (name, description, revision_of, allow_property_ordering, ai_enabled, ai_identify_prompt)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO entity_config (name, description, revision_of, allow_property_ordering, ai_enabled, ai_identify_prompt, public)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         entityConfig.name,
         entityConfig.description,
@@ -249,6 +252,7 @@ export class SQLiteStorage implements StorageSchema {
         entityConfig.allowPropertyOrdering ? 1 : 0,
         entityConfig.aiEnabled ? 1 : 0,
         entityConfig.aiIdentifyPrompt,
+        entityConfig.public ? 1 : 0,
       ],
     );
 
@@ -286,7 +290,7 @@ export class SQLiteStorage implements StorageSchema {
   ): Promise<EntityConfig | null> {
     await this.run(
       `UPDATE entity_config
-       SET name = ?, description = ?, revision_of = ?, allow_property_ordering = ?, ai_enabled = ?, ai_identify_prompt = ?
+       SET name = ?, description = ?, revision_of = ?, allow_property_ordering = ?, ai_enabled = ?, ai_identify_prompt = ?, public = ?
        WHERE id = ?`,
       [
         entityConfig.name,
@@ -295,6 +299,7 @@ export class SQLiteStorage implements StorageSchema {
         entityConfig.allowPropertyOrdering ? 1 : 0,
         entityConfig.aiEnabled ? 1 : 0,
         entityConfig.aiIdentifyPrompt,
+        entityConfig.public ? 1 : 0,
         entityConfig.id,
       ],
     );
@@ -907,8 +912,8 @@ export class SQLiteStorage implements StorageSchema {
   async import(data: ExportDataContents): Promise<boolean> {
     for (const config of data[ExportDataType.ENTITY_CONFIGS]) {
       await this.run(
-        `INSERT OR REPLACE INTO entity_config (id, name, description, revision_of, allow_property_ordering, ai_enabled, ai_identify_prompt)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT OR REPLACE INTO entity_config (id, name, description, revision_of, allow_property_ordering, ai_enabled, ai_identify_prompt, public)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           config.id,
           config.name,
@@ -917,6 +922,7 @@ export class SQLiteStorage implements StorageSchema {
           config.allowPropertyOrdering ? 1 : 0,
           config.aiEnabled ? 1 : 0,
           config.aiIdentifyPrompt,
+          config.public ? 1 : 0,
         ],
       );
 

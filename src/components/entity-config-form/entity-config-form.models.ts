@@ -23,6 +23,7 @@ export enum EntityConfigFormProp {
   AI_IDENTIFY_PROMPT = 'aiIdentifyPrompt',
   VIEW_ACCESS_POLICY = 'viewAccessPolicy',
   EDIT_ACCESS_POLICY = 'editAccessPolicy',
+  PUBLIC = 'public',
 }
 
 export interface EntityConfigFormProps extends PropTypes {
@@ -35,6 +36,7 @@ export interface EntityConfigFormProps extends PropTypes {
   [EntityConfigFormProp.AI_IDENTIFY_PROMPT]: string;
   [EntityConfigFormProp.VIEW_ACCESS_POLICY]: AccessPolicy | null;
   [EntityConfigFormProp.EDIT_ACCESS_POLICY]: AccessPolicy | null;
+  [EntityConfigFormProp.PUBLIC]: boolean;
 }
 
 export const entityConfigFormProps: PropConfigMap<EntityConfigFormProps> = {
@@ -82,5 +84,10 @@ export const entityConfigFormProps: PropConfigMap<EntityConfigFormProps> = {
     default: null,
     control: { type: ControlType.HIDDEN },
     description: 'The edit access policy currently assigned',
+  },
+  [EntityConfigFormProp.PUBLIC]: {
+    default: false,
+    control: { type: ControlType.BOOLEAN },
+    description: 'Whether this configuration is publicly accessible',
   },
 };

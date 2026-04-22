@@ -170,6 +170,9 @@ export class CollectionWizard extends MobxLitElement {
           allowPropertyOrdering: entityConfig.allowPropertyOrdering,
           aiEnabled: entityConfig.aiEnabled,
           aiIdentifyPrompt: entityConfig.aiIdentifyPrompt,
+          public: entityConfig.public ?? false,
+          viewAccessPolicy: null,
+          editAccessPolicy: null,
           properties: entityConfig.properties.map(p => ({
             id: p.id,
             name: p.name,

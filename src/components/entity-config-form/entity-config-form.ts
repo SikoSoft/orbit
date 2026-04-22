@@ -164,6 +164,10 @@ export class EntityConfigForm extends MobxLitElement {
   [EntityConfigFormProp.EDIT_ACCESS_POLICY]: EntityConfigFormProps[EntityConfigFormProp.EDIT_ACCESS_POLICY] =
     entityConfigFormProps[EntityConfigFormProp.EDIT_ACCESS_POLICY].default;
 
+  @property({ type: Boolean })
+  [EntityConfigFormProp.PUBLIC]: EntityConfigFormProps[EntityConfigFormProp.PUBLIC] =
+    entityConfigFormProps[EntityConfigFormProp.PUBLIC].default;
+
   @state()
   get hasBreakingChanges(): boolean {
     return (
@@ -184,7 +188,8 @@ export class EntityConfigForm extends MobxLitElement {
         this[EntityConfigFormProp.ALLOW_PROPERTY_ORDERING] &&
       this.entityConfig.aiEnabled === this[EntityConfigFormProp.AI_ENABLED] &&
       this.entityConfig.aiIdentifyPrompt ===
-        this[EntityConfigFormProp.AI_IDENTIFY_PROMPT]
+        this[EntityConfigFormProp.AI_IDENTIFY_PROMPT] &&
+      this.entityConfig.public === this[EntityConfigFormProp.PUBLIC]
     );
   }
 
@@ -209,6 +214,7 @@ export class EntityConfigForm extends MobxLitElement {
       aiIdentifyPrompt: this[EntityConfigFormProp.AI_IDENTIFY_PROMPT],
       viewAccessPolicy: this[EntityConfigFormProp.VIEW_ACCESS_POLICY],
       editAccessPolicy: this[EntityConfigFormProp.EDIT_ACCESS_POLICY],
+      public: this[EntityConfigFormProp.PUBLIC],
     };
   }
 
@@ -386,6 +392,12 @@ export class EntityConfigForm extends MobxLitElement {
     });
   }
 
+  updatePublic(isPublic: boolean): void {
+    this.entityConfig = produce(this.entityConfig, draft => {
+      draft.public = isPublic;
+    });
+  }
+
   get tabRegistry(): TabEntry[] {
     return [
       {
@@ -483,6 +495,19 @@ export class EntityConfigForm extends MobxLitElement {
               this.updateAIIdentifyPrompt(e.detail.value);
             }}
           ></ss-input>
+        </div>
+
+        <div class="field">
+          <label for="entity-config-public"
+            >${translate('entityConfigPublic')}</label
+          >
+
+          <ss-toggle
+            ?on=${this.entityConfig.public}
+            @toggle-changed=${(e: ToggleChangedEvent): void => {
+              this.updatePublic(e.detail.on);
+            }}
+          ></ss-toggle>
         </div>
 
         <div class="revision-target"></div>
