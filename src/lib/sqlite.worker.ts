@@ -111,7 +111,8 @@ async function initDb(dbPath: string): Promise<void> {
     db = new sqlite3.oo1.DB(':memory:', 'c');
   } else {
     try {
-      const poolUtil: SAHPoolUtil = await sqlite3.installOpfsSAHPoolVfs({});
+      const poolName = `opfs-sahpool-${dbPath.replace(/[^a-zA-Z0-9]/g, '-')}`;
+      const poolUtil: SAHPoolUtil = await sqlite3.installOpfsSAHPoolVfs({ name: poolName });
       db = new poolUtil.OpfsSAHPoolDb(dbPath);
     } catch (e) {
       console.warn(
