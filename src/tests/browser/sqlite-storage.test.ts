@@ -538,7 +538,7 @@ describe('SQLiteStorage', () => {
     it('exports entities for given config ids', async () => {
       const config = await db.addEntityConfig(makeConfig());
       await db.addEntity(makePayload(config!.id));
-      const entities = await db.export([config!.id]);
+      const entities = await db.exportEntities([config!.id]);
       expect(entities).toHaveLength(1);
     });
 
@@ -547,7 +547,7 @@ describe('SQLiteStorage', () => {
         makeConfig({ name: 'Imported Config', properties: [makeProp({ name: 'Field' })] }),
       );
       await db.addEntity(makePayload(sourceConfig!.id, { tags: ['imported'] }));
-      const entities = await db.export([sourceConfig!.id]);
+      const entities = await db.exportEntities([sourceConfig!.id]);
       const configs = await db.getEntityConfigs();
 
       await db.clearData([NukedDataType.ENTITIES, NukedDataType.ENTITY_CONFIGS]);

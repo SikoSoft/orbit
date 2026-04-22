@@ -100,6 +100,7 @@ export interface StorageSchema {
     propertyConfigOrder: { id: number; order: number }[],
   ): Promise<boolean>;
   exportEntities?(entityConfigIds: number[]): Promise<Entity.Entity[]>;
+  export?(): Promise<ExportDataContents>;
   import?(data: ExportDataContents): Promise<boolean>;
   clearData?(nukedDataTypes: NukedDataType[]): Promise<void>;
   setTheme?(theme: ThemeName): void;
@@ -159,7 +160,10 @@ export interface StorageSchema {
     parties: AccessPolicyParty[],
   ): Promise<StorageResult<AccessPolicy>>;
   deleteAccessPolicy?(id: number): Promise<boolean>;
-  saveEntityAccessList?(entityId: number, accessListId: number): Promise<boolean>;
+  saveEntityAccessList?(
+    entityId: number,
+    accessListId: number,
+  ): Promise<boolean>;
   saveListConfigAccessPolicy?(
     listConfigId: string,
     viewAccessPolicyId: number,

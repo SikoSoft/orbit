@@ -880,6 +880,30 @@ export class SQLiteStorage implements StorageSchema {
     return this.loadEntityRows(entityRows);
   }
 
+  async export(): Promise<ExportDataContents> {
+    try {
+      const entityConfigs = await this.getEntityConfigs();
+      const entityRows = await this.execRows('SELECT * FROM entity');
+      const entities = await this.loadEntityRows(entityRows);
+      const listConfigs = await this.getListConfigs();
+      return {
+        meta: { version: '1', date: new Date().toISOString() },
+        [ExportDataType.ENTITY_CONFIGS]: entityConfigs.map(
+          ({ userId: _, properties, ...rest }) => ({
+            ...rest,
+            properties: properties.map(({ userId: __, ...propRest }) => propRest),
+          }),
+        ),
+        [ExportDataType.ENTITIES]: entities,
+        [ExportDataType.LIST_CONFIGS]: listConfigs,
+      };
+    } catch (error) {
+      throw new Error(
+        `Device export failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
   async import(data: ExportDataContents): Promise<boolean> {
     for (const config of data[ExportDataType.ENTITY_CONFIGS]) {
       await this.run(

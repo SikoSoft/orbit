@@ -5,9 +5,14 @@ import { translate } from '@/lib/Localization';
 import { SyncType } from './sync-tool.models';
 import { MobxLitElement } from '@adobe/lit-mobx';
 import { appState } from '@/state';
+import { storage } from '@/lib/Storage';
 
 import '@ss/ui/components/confirmation-modal';
 import { StorageSource } from '@/models/Storage';
+import {
+  CloudToDeviceSyncFailedEvent,
+  DeviceToCloudSyncFailedEvent,
+} from './sync-tool.events';
 
 @customElement('sync-tool')
 export class SyncTool extends MobxLitElement {
@@ -36,12 +41,31 @@ export class SyncTool extends MobxLitElement {
       : SyncType.CLOUD_TO_DEVICE;
   }
 
+  private async syncCloudToDevice(): Promise<void> {
+    await storage.syncCloudToDevice();
+  }
+
+  private async syncDeviceToCloud(): Promise<void> {
+    await storage.syncDeviceToCloud();
+  }
+
   private async handleSyncData(): Promise<void> {
     this.isLoading = true;
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-    } catch (error) {
-      console.error('Error syncing data:', error);
+      switch (this.syncType) {
+        case SyncType.CLOUD_TO_DEVICE:
+          await this.syncCloudToDevice();
+          break;
+        case SyncType.DEVICE_TO_CLOUD:
+          await this.syncDeviceToCloud();
+          break;
+      }
+    } catch {
+      const event =
+        this.syncType === SyncType.CLOUD_TO_DEVICE
+          ? new CloudToDeviceSyncFailedEvent()
+          : new DeviceToCloudSyncFailedEvent();
+      this.dispatchEvent(event);
     } finally {
       this.isLoading = false;
     }

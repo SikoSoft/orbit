@@ -631,6 +631,30 @@ export class Storage implements StorageSchema {
     return Promise.resolve([]);
   }
 
+  async syncDeviceToCloud(): Promise<void> {
+    try {
+      const data = await sqliteStorage.export();
+      const success = await networkStorage.import(data);
+      if (!success) {
+        throw new Error('Cloud import failed');
+      }
+    } catch (error) {
+      throw error instanceof Error ? error : new Error(String(error));
+    }
+  }
+
+  async syncCloudToDevice(): Promise<void> {
+    try {
+      const data = await networkStorage.export();
+      const success = await sqliteStorage.import(data);
+      if (!success) {
+        throw new Error('Device import failed');
+      }
+    } catch (error) {
+      throw error instanceof Error ? error : new Error(String(error));
+    }
+  }
+
   @delegateSource()
   async clearData(_nukedDataTypes: NukedDataType[]): Promise<void> {
     return Promise.resolve();

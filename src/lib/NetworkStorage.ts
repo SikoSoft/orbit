@@ -268,6 +268,14 @@ export class NetworkStorage implements StorageSchema {
     return [];
   }
 
+  async export(): Promise<ExportDataContents> {
+    const result = await api.get<ExportDataContents>('data/export');
+    if (result && result.isOk) {
+      return result.response;
+    }
+    throw new Error('Cloud export failed');
+  }
+
   async clearData(nukedDataTypes: NukedDataType[]): Promise<void> {
     for (const type of nukedDataTypes) {
       const result = await api.delete(`data/${type}`);
