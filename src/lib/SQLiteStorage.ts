@@ -843,16 +843,16 @@ export class SQLiteStorage implements StorageSchema {
   // ─── Bulk Operations ──────────────────────────────────────────────────────
 
   async bulkOperation(payload: BulkOperationPayload): Promise<boolean> {
-    const { operation, actions } = payload;
+    const { operation, entities } = payload;
 
     if (operation.type === OperationType.DELETE) {
-      for (const id of actions) {
+      for (const id of entities) {
         await this.deleteEntity(id);
       }
       return true;
     }
 
-    for (const entityId of actions) {
+    for (const entityId of entities) {
       if (operation.type === OperationType.REPLACE_TAGS) {
         await this.run('DELETE FROM entity_tag WHERE entity_id = ?', [
           entityId,
@@ -896,7 +896,9 @@ export class SQLiteStorage implements StorageSchema {
         [ExportDataType.ENTITY_CONFIGS]: entityConfigs.map(
           ({ userId: _, properties, ...rest }) => ({
             ...rest,
-            properties: properties.map(({ userId: __, ...propRest }) => propRest),
+            properties: properties.map(
+              ({ userId: __, ...propRest }) => propRest,
+            ),
           }),
         ),
         [ExportDataType.ENTITIES]: entities,

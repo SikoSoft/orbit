@@ -28,15 +28,28 @@ function makeProp(
   overrides: Partial<EntityPropertyConfig> = {},
 ): EntityPropertyConfig {
   return {
-    id: 0, entityConfigId: 0, userId: '', name: 'Test Prop',
-    prefix: '', suffix: '', required: 0, repeat: 1, allowed: 1, hidden: false,
-    dataType: DataType.SHORT_TEXT, defaultValue: '',
-    optionsOnly: false, options: [],
+    id: 0,
+    entityConfigId: 0,
+    userId: '',
+    name: 'Test Prop',
+    prefix: '',
+    suffix: '',
+    required: 0,
+    repeat: 1,
+    allowed: 1,
+    hidden: false,
+    dataType: DataType.SHORT_TEXT,
+    defaultValue: '',
+    optionsOnly: false,
+    options: [],
     ...overrides,
   } as unknown as EntityPropertyConfig;
 }
 
-function makePayload(configId: number, overrides: Partial<RequestBody> = {}): RequestBody {
+function makePayload(
+  configId: number,
+  overrides: Partial<RequestBody> = {},
+): RequestBody {
   return {
     entityConfigId: configId,
     timeZone: 0,
@@ -77,7 +90,10 @@ describe('SQLiteStorage', () => {
 
     it('persists aiEnabled and aiIdentifyPrompt', async () => {
       const result = await db.addEntityConfig(
-        makeConfig({ aiEnabled: true, aiIdentifyPrompt: 'Identify the subject' }),
+        makeConfig({
+          aiEnabled: true,
+          aiIdentifyPrompt: 'Identify the subject',
+        }),
       );
       expect(result!.aiEnabled).toBe(true);
       expect(result!.aiIdentifyPrompt).toBe('Identify the subject');
@@ -142,7 +158,12 @@ describe('SQLiteStorage', () => {
       const configs = await db.getEntityConfigs();
       expect(configs).toHaveLength(0);
 
-      const { value } = await db.getEntities(0, 100, defaultListFilter, defaultListSort) as { isOk: true; value: { entities: unknown[]; total: number } };
+      const { value } = (await db.getEntities(
+        0,
+        100,
+        defaultListFilter,
+        defaultListSort,
+      )) as { isOk: true; value: { entities: unknown[]; total: number } };
       expect(value.total).toBe(0);
     });
 
@@ -191,7 +212,10 @@ describe('SQLiteStorage', () => {
       const prop = await db.addPropertyConfig(
         makeProp({ entityConfigId: config!.id }),
       );
-      const updated = await db.updatePropertyConfig({ ...prop!, name: 'Updated' });
+      const updated = await db.updatePropertyConfig({
+        ...prop!,
+        name: 'Updated',
+      });
       expect(updated!.name).toBe('Updated');
     });
 
@@ -219,7 +243,11 @@ describe('SQLiteStorage', () => {
                   ? null
                   : '';
         const prop = await db.addPropertyConfig(
-          makeProp({ entityConfigId: config!.id, dataType, defaultValue } as EntityPropertyConfig),
+          makeProp({
+            entityConfigId: config!.id,
+            dataType,
+            defaultValue,
+          } as EntityPropertyConfig),
         );
         expect(prop!.dataType).toBe(dataType);
       }
@@ -232,7 +260,12 @@ describe('SQLiteStorage', () => {
     it('adds an entity and retrieves it', async () => {
       const config = await db.addEntityConfig(makeConfig());
       await db.addEntity(makePayload(config!.id));
-      const result = await db.getEntities(0, 10, defaultListFilter, defaultListSort);
+      const result = await db.getEntities(
+        0,
+        10,
+        defaultListFilter,
+        defaultListSort,
+      );
       expect(result.isOk).toBe(true);
       if (result.isOk) {
         expect(result.value.total).toBe(1);
@@ -243,7 +276,12 @@ describe('SQLiteStorage', () => {
     it('stores and retrieves tags on an entity', async () => {
       const config = await db.addEntityConfig(makeConfig());
       await db.addEntity(makePayload(config!.id, { tags: ['alpha', 'beta'] }));
-      const result = await db.getEntities(0, 10, defaultListFilter, defaultListSort);
+      const result = await db.getEntities(
+        0,
+        10,
+        defaultListFilter,
+        defaultListSort,
+      );
       if (result.isOk) {
         expect(result.value.entities[0].tags).toEqual(
           expect.arrayContaining(['alpha', 'beta']),
@@ -258,7 +296,9 @@ describe('SQLiteStorage', () => {
       const propConfigId = config!.properties[0].id;
       const entity = await db.addEntity(
         makePayload(config!.id, {
-          properties: [{ id: 0, propertyConfigId: propConfigId, value: 'hello', order: 0 }],
+          properties: [
+            { id: 0, propertyConfigId: propConfigId, value: 'hello', order: 0 },
+          ],
         }),
       );
       expect(entity!.properties).toHaveLength(1);
@@ -267,7 +307,9 @@ describe('SQLiteStorage', () => {
 
     it('updates an entity', async () => {
       const config = await db.addEntityConfig(makeConfig());
-      const entity = await db.addEntity(makePayload(config!.id, { tags: ['old'] }));
+      const entity = await db.addEntity(
+        makePayload(config!.id, { tags: ['old'] }),
+      );
       const updated = await db.updateEntity(
         entity!.id,
         makePayload(config!.id, { tags: ['new'] }),
@@ -279,7 +321,12 @@ describe('SQLiteStorage', () => {
       const config = await db.addEntityConfig(makeConfig());
       const entity = await db.addEntity(makePayload(config!.id));
       await db.deleteEntity(entity!.id);
-      const result = await db.getEntities(0, 10, defaultListFilter, defaultListSort);
+      const result = await db.getEntities(
+        0,
+        10,
+        defaultListFilter,
+        defaultListSort,
+      );
       if (result.isOk) {
         expect(result.value.total).toBe(0);
       }
@@ -290,8 +337,18 @@ describe('SQLiteStorage', () => {
       for (let i = 0; i < 5; i++) {
         await db.addEntity(makePayload(config!.id));
       }
-      const page1 = await db.getEntities(0, 3, defaultListFilter, defaultListSort);
-      const page2 = await db.getEntities(3, 3, defaultListFilter, defaultListSort);
+      const page1 = await db.getEntities(
+        0,
+        3,
+        defaultListFilter,
+        defaultListSort,
+      );
+      const page2 = await db.getEntities(
+        3,
+        3,
+        defaultListFilter,
+        defaultListSort,
+      );
       if (page1.isOk && page2.isOk) {
         expect(page1.value.entities).toHaveLength(3);
         expect(page1.value.total).toBe(5);
@@ -319,11 +376,16 @@ describe('SQLiteStorage', () => {
       await db.addEntity(makePayload(configA!.id));
       await db.addEntity(makePayload(configB!.id));
 
-      const result = await db.getEntities(0, 10, {
-        ...defaultListFilter,
-        includeAll: false,
-        includeTypes: [configA!.id],
-      }, defaultListSort);
+      const result = await db.getEntities(
+        0,
+        10,
+        {
+          ...defaultListFilter,
+          includeAll: false,
+          includeTypes: [configA!.id],
+        },
+        defaultListSort,
+      );
       if (result.isOk) {
         expect(result.value.total).toBe(1);
         expect(result.value.entities[0].type).toBe(configA!.id);
@@ -354,7 +416,14 @@ describe('SQLiteStorage', () => {
       const propConfigId = config!.properties[0].id;
       await db.addEntity(
         makePayload(config!.id, {
-          properties: [{ id: 0, propertyConfigId: propConfigId, value: 'Acme Corp', order: 0 }],
+          properties: [
+            {
+              id: 0,
+              propertyConfigId: propConfigId,
+              value: 'Acme Corp',
+              order: 0,
+            },
+          ],
         }),
       );
       const suggestions = await db.getPropertySuggestions(propConfigId, 'Acme');
@@ -398,7 +467,10 @@ describe('SQLiteStorage', () => {
 
     it('updates list sort', async () => {
       const id = await db.addListConfig();
-      const newSort = { property: ListSortNativeProperty.UPDATED_AT, direction: ListSortDirection.ASC };
+      const newSort = {
+        property: ListSortNativeProperty.UPDATED_AT,
+        direction: ListSortDirection.ASC,
+      };
       await db.updateListSort(id, newSort);
       const [config] = await db.getListConfigs();
       expect(config.sort).toEqual(newSort);
@@ -423,7 +495,9 @@ describe('SQLiteStorage', () => {
       const id = await db.addListConfig();
       await db.saveSetting(id, { name: SettingName.PUBLIC, value: true });
       const [config] = await db.getListConfigs();
-      expect((config.setting as Record<string, unknown>)[SettingName.PUBLIC]).toBe(true);
+      expect(
+        (config.setting as Record<string, unknown>)[SettingName.PUBLIC],
+      ).toBe(true);
     });
 
     it('deletes a list config', async () => {
@@ -442,9 +516,14 @@ describe('SQLiteStorage', () => {
       const e2 = await db.addEntity(makePayload(config!.id));
       await db.bulkOperation({
         operation: { type: OperationType.DELETE },
-        actions: [e1!.id, e2!.id],
+        entities: [e1!.id, e2!.id],
       });
-      const result = await db.getEntities(0, 10, defaultListFilter, defaultListSort);
+      const result = await db.getEntities(
+        0,
+        10,
+        defaultListFilter,
+        defaultListSort,
+      );
       if (result.isOk) {
         expect(result.value.total).toBe(0);
       }
@@ -456,22 +535,36 @@ describe('SQLiteStorage', () => {
       const e2 = await db.addEntity(makePayload(config!.id));
       await db.bulkOperation({
         operation: { type: OperationType.ADD_TAGS, tags: ['bulk-tag'] },
-        actions: [e1!.id, e2!.id],
+        entities: [e1!.id, e2!.id],
       });
-      const result = await db.getEntities(0, 10, defaultListFilter, defaultListSort);
+      const result = await db.getEntities(
+        0,
+        10,
+        defaultListFilter,
+        defaultListSort,
+      );
       if (result.isOk) {
-        expect(result.value.entities.every(e => e.tags.includes('bulk-tag'))).toBe(true);
+        expect(
+          result.value.entities.every(e => e.tags.includes('bulk-tag')),
+        ).toBe(true);
       }
     });
 
     it('removes tags from entities', async () => {
       const config = await db.addEntityConfig(makeConfig());
-      const entity = await db.addEntity(makePayload(config!.id, { tags: ['keep', 'remove-me'] }));
+      const entity = await db.addEntity(
+        makePayload(config!.id, { tags: ['keep', 'remove-me'] }),
+      );
       await db.bulkOperation({
         operation: { type: OperationType.REMOVE_TAGS, tags: ['remove-me'] },
-        actions: [entity!.id],
+        entities: [entity!.id],
       });
-      const result = await db.getEntities(0, 10, defaultListFilter, defaultListSort);
+      const result = await db.getEntities(
+        0,
+        10,
+        defaultListFilter,
+        defaultListSort,
+      );
       if (result.isOk) {
         expect(result.value.entities[0].tags).toContain('keep');
         expect(result.value.entities[0].tags).not.toContain('remove-me');
@@ -480,12 +573,19 @@ describe('SQLiteStorage', () => {
 
     it('replaces all tags on entities', async () => {
       const config = await db.addEntityConfig(makeConfig());
-      const entity = await db.addEntity(makePayload(config!.id, { tags: ['old-a', 'old-b'] }));
+      const entity = await db.addEntity(
+        makePayload(config!.id, { tags: ['old-a', 'old-b'] }),
+      );
       await db.bulkOperation({
         operation: { type: OperationType.REPLACE_TAGS, tags: ['new-tag'] },
-        actions: [entity!.id],
+        entities: [entity!.id],
       });
-      const result = await db.getEntities(0, 10, defaultListFilter, defaultListSort);
+      const result = await db.getEntities(
+        0,
+        10,
+        defaultListFilter,
+        defaultListSort,
+      );
       if (result.isOk) {
         expect(result.value.entities[0].tags).toEqual(['new-tag']);
       }
@@ -499,7 +599,12 @@ describe('SQLiteStorage', () => {
       const config = await db.addEntityConfig(makeConfig());
       await db.addEntity(makePayload(config!.id));
       await db.clearData([NukedDataType.ENTITIES]);
-      const result = await db.getEntities(0, 10, defaultListFilter, defaultListSort);
+      const result = await db.getEntities(
+        0,
+        10,
+        defaultListFilter,
+        defaultListSort,
+      );
       if (result.isOk) {
         expect(result.value.total).toBe(0);
       }
@@ -523,7 +628,12 @@ describe('SQLiteStorage', () => {
       await db.addEntity(makePayload(config!.id));
       await db.addListConfig();
       await db.clearData([NukedDataType.ENTITIES, NukedDataType.LIST_CONFIGS]);
-      const result = await db.getEntities(0, 10, defaultListFilter, defaultListSort);
+      const result = await db.getEntities(
+        0,
+        10,
+        defaultListFilter,
+        defaultListSort,
+      );
       if (result.isOk) {
         expect(result.value.total).toBe(0);
       }
@@ -544,13 +654,19 @@ describe('SQLiteStorage', () => {
 
     it('imports entity configs and entities into a fresh db', async () => {
       const sourceConfig = await db.addEntityConfig(
-        makeConfig({ name: 'Imported Config', properties: [makeProp({ name: 'Field' })] }),
+        makeConfig({
+          name: 'Imported Config',
+          properties: [makeProp({ name: 'Field' })],
+        }),
       );
       await db.addEntity(makePayload(sourceConfig!.id, { tags: ['imported'] }));
       const entities = await db.exportEntities([sourceConfig!.id]);
       const configs = await db.getEntityConfigs();
 
-      await db.clearData([NukedDataType.ENTITIES, NukedDataType.ENTITY_CONFIGS]);
+      await db.clearData([
+        NukedDataType.ENTITIES,
+        NukedDataType.ENTITY_CONFIGS,
+      ]);
 
       await db.import({
         meta: { version: '1', date: new Date().toISOString() },
@@ -563,7 +679,12 @@ describe('SQLiteStorage', () => {
       expect(importedConfigs).toHaveLength(1);
       expect(importedConfigs[0].name).toBe('Imported Config');
 
-      const result = await db.getEntities(0, 10, defaultListFilter, defaultListSort);
+      const result = await db.getEntities(
+        0,
+        10,
+        defaultListFilter,
+        defaultListSort,
+      );
       if (result.isOk) {
         expect(result.value.total).toBe(1);
         expect(result.value.entities[0].tags).toContain('imported');

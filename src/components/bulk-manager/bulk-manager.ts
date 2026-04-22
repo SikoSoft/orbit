@@ -133,7 +133,6 @@ export class BulkManager extends MobxLitElement {
       this.state.selectedEntities.includes(e.id),
     );
     const entityConfigIds = [...new Set(selectedEntities.map(e => e.type))];
-    console.log('Selected entity config IDs:', entityConfigIds);
     const seen = new Set<number>();
     const result: EntityPropertyConfig[] = [];
 

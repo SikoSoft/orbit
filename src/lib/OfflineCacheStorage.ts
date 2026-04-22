@@ -545,7 +545,7 @@ export class OfflineCacheStorage implements StorageSchema {
   }
 
   async bulkOperation(payload: BulkOperationPayload): Promise<boolean> {
-    if (this.isOnline && payload.actions.every(id => id > 0)) {
+    if (this.isOnline && payload.entities.every(id => id > 0)) {
       const result = await networkStorage.bulkOperation(payload);
       if (result) {
         await this.db.bulkOperation(payload);
@@ -991,11 +991,11 @@ export class OfflineCacheStorage implements StorageSchema {
       case 'bulkOperation': {
         const bulkPayload = args[0] as BulkOperationPayload;
         const resolvedActions = await Promise.all(
-          bulkPayload.actions.map(id => this.db.resolveIntId(id, 'entity')),
+          bulkPayload.entities.map(id => this.db.resolveIntId(id, 'entity')),
         );
         await networkStorage.bulkOperation({
           ...bulkPayload,
-          actions: resolvedActions,
+          entities: resolvedActions,
         });
         break;
       }
