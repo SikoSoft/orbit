@@ -675,7 +675,7 @@ export class NetworkStorage implements StorageSchema {
     const result = await api.put<
       { viewAccessPolicyId: number; editAccessPolicyId: number },
       null
-    >(`entityConfigAccessPolicy`, {
+    >(`entityConfigAccessPolicy/${entityConfigId}`, {
       viewAccessPolicyId,
       editAccessPolicyId,
     });
