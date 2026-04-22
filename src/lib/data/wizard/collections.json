@@ -517,7 +517,7 @@
         {
           "id": 602,
           "entityConfigId": 6,
-          "name": "Platform",
+          "name": "Series",
           "dataType": "shortText",
           "defaultValue": "",
           "required": 0,
@@ -533,6 +533,37 @@
         {
           "id": 603,
           "entityConfigId": 6,
+          "name": "Platform",
+          "dataType": "shortText",
+          "defaultValue": "",
+          "required": 0,
+          "repeat": 1,
+          "allowed": 1,
+          "hidden": false,
+          "prefix": "",
+          "suffix": "",
+          "userId": "placeholder-user-id",
+          "optionsOnly": false,
+          "options": [
+            "NES",
+            "SNES",
+            "Genesis",
+            "PlayStation",
+            "Playstation 2",
+            "Playstation 3",
+            "Playstation 4",
+            "Playstation 5",
+            "Xbox",
+            "Xbox 360",
+            "Xbox One",
+            "Xbox Series X",
+            "Switch",
+            "Switch 2"
+          ]
+        },
+        {
+          "id": 604,
+          "entityConfigId": 6,
           "name": "Region",
           "dataType": "shortText",
           "defaultValue": "",
@@ -547,7 +578,7 @@
           "options": []
         },
         {
-          "id": 604,
+          "id": 605,
           "entityConfigId": 6,
           "name": "Release Year",
           "dataType": "int",
@@ -563,7 +594,7 @@
           "options": []
         },
         {
-          "id": 605,
+          "id": 606,
           "entityConfigId": 6,
           "name": "Factory Sealed",
           "dataType": "boolean",
@@ -966,9 +997,7 @@
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [
-          1
-        ],
+        "includeTypes": [1],
         "time": {
           "type": "allTime"
         },
@@ -1000,9 +1029,7 @@
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [
-          2
-        ],
+        "includeTypes": [2],
         "time": {
           "type": "allTime"
         },
@@ -1034,9 +1061,7 @@
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [
-          3
-        ],
+        "includeTypes": [3],
         "time": {
           "type": "allTime"
         },
@@ -1068,9 +1093,7 @@
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [
-          4
-        ],
+        "includeTypes": [4],
         "time": {
           "type": "allTime"
         },
@@ -1102,9 +1125,7 @@
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [
-          5
-        ],
+        "includeTypes": [5],
         "time": {
           "type": "allTime"
         },
@@ -1136,9 +1157,7 @@
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [
-          6
-        ],
+        "includeTypes": [6],
         "time": {
           "type": "allTime"
         },
@@ -1170,9 +1189,7 @@
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [
-          7
-        ],
+        "includeTypes": [7],
         "time": {
           "type": "allTime"
         },
@@ -1204,9 +1221,7 @@
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [
-          8
-        ],
+        "includeTypes": [8],
         "time": {
           "type": "allTime"
         },
@@ -1238,9 +1253,7 @@
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [
-          9
-        ],
+        "includeTypes": [9],
         "time": {
           "type": "allTime"
         },
@@ -1272,9 +1285,7 @@
         "includeUntagged": true,
         "includeAll": false,
         "includeAllTagging": true,
-        "includeTypes": [
-          10
-        ],
+        "includeTypes": [10],
         "time": {
           "type": "allTime"
         },
