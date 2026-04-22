@@ -83,3 +83,7 @@ Keep `api-spec` version in sync when making API contract changes. Internal packa
 - Do not hard code any messages in the UI elements. Always use translate() function with a camelCased key.
 - Every function must include a return type
 - SVG icons should never be inserted inline. Create new component for icon if it doesn't exist in `components/svg-icon/svg`
+
+## Extra rules
+
+- Keep all edits, reads and and shell commands confined to this projects root directory or its subdirectories. Do not traverse into directories outside of this projects root
