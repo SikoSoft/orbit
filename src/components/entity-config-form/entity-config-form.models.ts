@@ -2,6 +2,7 @@ import { ControlType } from '@/models/Control';
 import { EntityPropertyConfig } from 'api-spec/models/Entity';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
 import { RevisionProblems } from 'api-spec/models/Revision';
+import { AccessPolicy } from 'api-spec/models/Access';
 
 export interface PropertyConfigInstance {
   propertyConfigId: number;
@@ -20,8 +21,8 @@ export enum EntityConfigFormProp {
   ALLOW_PROPERTY_ORDERING = 'allowPropertyOrdering',
   AI_ENABLED = 'aiEnabled',
   AI_IDENTIFY_PROMPT = 'aiIdentifyPrompt',
-  VIEW_ACCESS_POLICY_ID = 'viewAccessPolicyId',
-  EDIT_ACCESS_POLICY_ID = 'editAccessPolicyId',
+  VIEW_ACCESS_POLICY = 'viewAccessPolicy',
+  EDIT_ACCESS_POLICY = 'editAccessPolicy',
 }
 
 export interface EntityConfigFormProps extends PropTypes {
@@ -32,8 +33,8 @@ export interface EntityConfigFormProps extends PropTypes {
   [EntityConfigFormProp.ALLOW_PROPERTY_ORDERING]: boolean;
   [EntityConfigFormProp.AI_ENABLED]: boolean;
   [EntityConfigFormProp.AI_IDENTIFY_PROMPT]: string;
-  [EntityConfigFormProp.VIEW_ACCESS_POLICY_ID]: number;
-  [EntityConfigFormProp.EDIT_ACCESS_POLICY_ID]: number;
+  [EntityConfigFormProp.VIEW_ACCESS_POLICY]: AccessPolicy | null;
+  [EntityConfigFormProp.EDIT_ACCESS_POLICY]: AccessPolicy | null;
 }
 
 export const entityConfigFormProps: PropConfigMap<EntityConfigFormProps> = {
@@ -72,14 +73,14 @@ export const entityConfigFormProps: PropConfigMap<EntityConfigFormProps> = {
     control: { type: ControlType.TEXT },
     description: 'The prompt used by AI to identify this entity',
   },
-  [EntityConfigFormProp.VIEW_ACCESS_POLICY_ID]: {
-    default: 0,
-    control: { type: ControlType.NUMBER },
-    description: 'The ID of the view access policy currently assigned',
+  [EntityConfigFormProp.VIEW_ACCESS_POLICY]: {
+    default: null,
+    control: { type: ControlType.HIDDEN },
+    description: 'The view access policy currently assigned',
   },
-  [EntityConfigFormProp.EDIT_ACCESS_POLICY_ID]: {
-    default: 0,
-    control: { type: ControlType.NUMBER },
-    description: 'The ID of the edit access policy currently assigned',
+  [EntityConfigFormProp.EDIT_ACCESS_POLICY]: {
+    default: null,
+    control: { type: ControlType.HIDDEN },
+    description: 'The edit access policy currently assigned',
   },
 };

@@ -105,6 +105,8 @@ export class EntityConfigList extends ViewElement {
                   ): void => this.handleEntityConfigUpdated(e, index)}
                   ?aiEnabled=${config.aiEnabled}
                   aiIdentifyPrompt=${config.aiIdentifyPrompt}
+                  .viewAccessPolicy=${config.viewAccessPolicy}
+                  .editAccessPolicy=${config.editAccessPolicy}
                 ></entity-config-form>
               `,
             )

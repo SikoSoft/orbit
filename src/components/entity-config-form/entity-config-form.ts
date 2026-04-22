@@ -50,6 +50,7 @@ import {
 import { Entity } from 'api-spec/models';
 import { ToggleChangedEvent } from '@ss/ui/components/ss-toggle.events';
 import { themed } from '@/lib/Theme';
+import { ifDefined } from 'lit/directives/if-defined.js';
 
 @themed()
 @customElement('entity-config-form')
@@ -155,13 +156,13 @@ export class EntityConfigForm extends MobxLitElement {
   [EntityConfigFormProp.AI_IDENTIFY_PROMPT]: EntityConfigFormProps[EntityConfigFormProp.AI_IDENTIFY_PROMPT] =
     entityConfigFormProps[EntityConfigFormProp.AI_IDENTIFY_PROMPT].default;
 
-  @property({ type: Number })
-  [EntityConfigFormProp.VIEW_ACCESS_POLICY_ID]: EntityConfigFormProps[EntityConfigFormProp.VIEW_ACCESS_POLICY_ID] =
-    entityConfigFormProps[EntityConfigFormProp.VIEW_ACCESS_POLICY_ID].default;
+  @property({ type: Object })
+  [EntityConfigFormProp.VIEW_ACCESS_POLICY]: EntityConfigFormProps[EntityConfigFormProp.VIEW_ACCESS_POLICY] =
+    entityConfigFormProps[EntityConfigFormProp.VIEW_ACCESS_POLICY].default;
 
-  @property({ type: Number })
-  [EntityConfigFormProp.EDIT_ACCESS_POLICY_ID]: EntityConfigFormProps[EntityConfigFormProp.EDIT_ACCESS_POLICY_ID] =
-    entityConfigFormProps[EntityConfigFormProp.EDIT_ACCESS_POLICY_ID].default;
+  @property({ type: Object })
+  [EntityConfigFormProp.EDIT_ACCESS_POLICY]: EntityConfigFormProps[EntityConfigFormProp.EDIT_ACCESS_POLICY] =
+    entityConfigFormProps[EntityConfigFormProp.EDIT_ACCESS_POLICY].default;
 
   @state()
   get hasBreakingChanges(): boolean {
@@ -206,6 +207,8 @@ export class EntityConfigForm extends MobxLitElement {
       allowPropertyOrdering: this[EntityConfigFormProp.ALLOW_PROPERTY_ORDERING],
       aiEnabled: this[EntityConfigFormProp.AI_ENABLED],
       aiIdentifyPrompt: this[EntityConfigFormProp.AI_IDENTIFY_PROMPT],
+      viewAccessPolicy: this[EntityConfigFormProp.VIEW_ACCESS_POLICY],
+      editAccessPolicy: this[EntityConfigFormProp.EDIT_ACCESS_POLICY],
     };
   }
 
@@ -401,8 +404,12 @@ export class EntityConfigForm extends MobxLitElement {
           html`<access-policy-assignment
             context="entityConfig"
             entityId=${this[EntityConfigFormProp.ENTITY_CONFIG_ID]}
-            viewAccessPolicyId=${this[EntityConfigFormProp.VIEW_ACCESS_POLICY_ID]}
-            editAccessPolicyId=${this[EntityConfigFormProp.EDIT_ACCESS_POLICY_ID]}
+            viewAccessPolicyId=${ifDefined(
+              this[EntityConfigFormProp.VIEW_ACCESS_POLICY]?.id,
+            )}
+            editAccessPolicyId=${ifDefined(
+              this[EntityConfigFormProp.EDIT_ACCESS_POLICY]?.id,
+            )}
           ></access-policy-assignment>`,
         shouldShow: () => this.state.hasRole(Role.ACCESS),
       },
@@ -521,7 +528,6 @@ export class EntityConfigForm extends MobxLitElement {
             >${translate('delete')}</ss-button
           >
         </div>
-
       </div>
     `;
   }
