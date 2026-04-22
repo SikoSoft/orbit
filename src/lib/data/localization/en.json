@@ -133,6 +133,14 @@
   "incorrectUsernameAndPasswordCombination": "Incorrect username and password combination.",
   "username": "Username",
   "password": "Password",
+  "confirmPassword": "Confirm Password",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "usernameRequired": "Username is required.",
+  "passwordRequired": "Password is required.",
+  "passwordsMustMatch": "Passwords must match.",
+  "firstNameRequired": "First name is required.",
+  "lastNameRequired": "Last name is required.",
   "login": "Login",
   "logout": "Logout",
   "v1Classic": "v1 (classic)",
@@ -258,5 +266,6 @@
   "access": "Access",
   "failedToDeleteListConfig": "Failed to delete list configuration.",
   "entityConfigForm.tab.config": "Config",
-  "entityConfigForm.tab.access": "Access"
+  "entityConfigForm.tab.access": "Access",
+  "signUp": "Sign Up"
 }
