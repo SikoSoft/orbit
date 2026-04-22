@@ -4,6 +4,7 @@ import { toJS } from 'mobx';
 
 import { translate } from '@/lib/Localization';
 import { storage } from '@/lib/Storage';
+import { Access } from '@/lib/Access';
 import { appState } from '@/state';
 
 import '@ss/ui/components/ss-button';
@@ -51,7 +52,9 @@ export class EntityConfigList extends ViewElement {
   }
 
   addEntityConfig(): void {
-    const entityConfig = produce(defaultEntityConfig, draft => draft);
+    const entityConfig = produce(defaultEntityConfig, draft => {
+      draft.userId = this.state.user?.id ?? '';
+    });
 
     this.state.setEntityConfigs([...this.state.entityConfigs, entityConfig]);
   }
@@ -85,11 +88,20 @@ export class EntityConfigList extends ViewElement {
   }
 
   render(): TemplateResult {
+    const editableConfigs = this.state.entityConfigs.filter(
+      config =>
+        (!config.editAccessPolicy && config.userId === this.state.user?.id) ||
+        Access.userHasAccess(
+          config.editAccessPolicy,
+          this.state.user?.id ?? '',
+        ),
+    );
+
     return html`
       <div class="admin-dashboard box">
-        ${this.state.entityConfigs.length > 0
+        ${editableConfigs.length > 0
           ? repeat(
-              this.state.entityConfigs,
+              editableConfigs,
               config => config.id,
               (config, index) => html`
                 <entity-config-form
