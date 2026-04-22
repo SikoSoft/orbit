@@ -870,7 +870,7 @@ export class SQLiteStorage implements StorageSchema {
 
   // ─── Import / Export / Nuke ───────────────────────────────────────────────
 
-  async export(entityConfigIds: number[]): Promise<Entity[]> {
+  async exportEntities(entityConfigIds: number[]): Promise<Entity[]> {
     const ph = entityConfigIds.map(() => '?').join(',');
     const entityRows = await this.execRows(
       `SELECT * FROM entity WHERE type IN (${ph})`,

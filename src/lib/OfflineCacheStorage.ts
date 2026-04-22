@@ -1,14 +1,15 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { SqlValue } from '@sqlite.org/sqlite-wasm';
 
-import {
-  EntityConfig,
-  EntityPropertyConfig,
-} from 'api-spec/models/Entity';
+import { EntityConfig, EntityPropertyConfig } from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
 import { ListConfig, ListFilter, ListSort } from 'api-spec/models/List';
 import { Setting } from 'api-spec/models/Setting';
-import { ExportDataContents, ExportDataType, NukedDataType } from 'api-spec/models/Data';
+import {
+  ExportDataContents,
+  ExportDataType,
+  NukedDataType,
+} from 'api-spec/models/Data';
 import {
   AccessPolicy,
   AccessPolicyGroup,
@@ -31,7 +32,11 @@ function emptyMeta(): { version: string; date: string } {
   return { version: '', date: new Date().toISOString() };
 }
 
-type CacheTable = 'entity' | 'entity_config' | 'entity_property_config' | 'list_config';
+type CacheTable =
+  | 'entity'
+  | 'entity_config'
+  | 'entity_property_config'
+  | 'list_config';
 
 interface PendingSyncRow {
   id: number;
@@ -62,7 +67,9 @@ class CacheSQLiteStorage extends SQLiteStorage {
   }
 
   async pendingOps(): Promise<PendingSyncRow[]> {
-    const rows = await this.execRows('SELECT * FROM pending_sync ORDER BY id ASC');
+    const rows = await this.execRows(
+      'SELECT * FROM pending_sync ORDER BY id ASC',
+    );
     return rows as unknown as PendingSyncRow[];
   }
 
@@ -186,7 +193,10 @@ class CacheSQLiteStorage extends SQLiteStorage {
         propertyConfig.repeat,
         propertyConfig.allowed,
         propertyConfig.hidden ? 1 : 0,
-        serializePropertyValue(propertyConfig.defaultValue, propertyConfig.dataType),
+        serializePropertyValue(
+          propertyConfig.defaultValue,
+          propertyConfig.dataType,
+        ),
         propertyConfig.optionsOnly ? 1 : 0,
         JSON.stringify(propertyConfig.options),
       ],
@@ -210,11 +220,14 @@ class CacheSQLiteStorage extends SQLiteStorage {
   }
 
   async patchEntityId(localId: number, serverId: number): Promise<void> {
-    await this.run('UPDATE entity SET id = ? WHERE id = ?', [serverId, localId]);
-    await this.run(
-      'UPDATE entity_tag SET entity_id = ? WHERE entity_id = ?',
-      [serverId, localId],
-    );
+    await this.run('UPDATE entity SET id = ? WHERE id = ?', [
+      serverId,
+      localId,
+    ]);
+    await this.run('UPDATE entity_tag SET entity_id = ? WHERE entity_id = ?', [
+      serverId,
+      localId,
+    ]);
     await this.run(
       'UPDATE entity_property SET entity_id = ? WHERE entity_id = ?',
       [serverId, localId],
@@ -222,25 +235,28 @@ class CacheSQLiteStorage extends SQLiteStorage {
   }
 
   async patchEntityConfigId(localId: number, serverId: number): Promise<void> {
-    await this.run(
-      'UPDATE entity_config SET id = ? WHERE id = ?',
-      [serverId, localId],
-    );
+    await this.run('UPDATE entity_config SET id = ? WHERE id = ?', [
+      serverId,
+      localId,
+    ]);
     await this.run(
       'UPDATE entity_property_config SET entity_config_id = ? WHERE entity_config_id = ?',
       [serverId, localId],
     );
-    await this.run(
-      'UPDATE entity SET type = ? WHERE type = ?',
-      [serverId, localId],
-    );
+    await this.run('UPDATE entity SET type = ? WHERE type = ?', [
+      serverId,
+      localId,
+    ]);
   }
 
-  async patchPropertyConfigId(localId: number, serverId: number): Promise<void> {
-    await this.run(
-      'UPDATE entity_property_config SET id = ? WHERE id = ?',
-      [serverId, localId],
-    );
+  async patchPropertyConfigId(
+    localId: number,
+    serverId: number,
+  ): Promise<void> {
+    await this.run('UPDATE entity_property_config SET id = ? WHERE id = ?', [
+      serverId,
+      localId,
+    ]);
     await this.run(
       'UPDATE entity_property SET property_config_id = ? WHERE property_config_id = ?',
       [serverId, localId],
@@ -248,16 +264,16 @@ class CacheSQLiteStorage extends SQLiteStorage {
   }
 
   async patchListConfigId(localId: string, serverId: string): Promise<void> {
-    await this.run(
-      'UPDATE list_config SET id = ? WHERE id = ?',
-      [serverId, localId],
-    );
+    await this.run('UPDATE list_config SET id = ? WHERE id = ?', [
+      serverId,
+      localId,
+    ]);
   }
 
   async hasPendingOps(): Promise<boolean> {
-    const val = await this.execValue(
+    const val = (await this.execValue(
       'SELECT COUNT(*) FROM pending_sync',
-    ) as SqlValue;
+    )) as SqlValue;
     return (val as number) > 0;
   }
 }
@@ -302,7 +318,9 @@ export class OfflineCacheStorage implements StorageSchema {
     return this.db.getEntityConfigs();
   }
 
-  async addEntityConfig(entityConfig: EntityConfig): Promise<EntityConfig | null> {
+  async addEntityConfig(
+    entityConfig: EntityConfig,
+  ): Promise<EntityConfig | null> {
     if (this.isOnline) {
       const result = await networkStorage.addEntityConfig(entityConfig);
       if (result) {
@@ -317,12 +335,22 @@ export class OfflineCacheStorage implements StorageSchema {
     }
 
     const tempId = await this.db.nextTempId('entity_config');
-    const cached = await this.db.insertEntityConfigOffline(entityConfig, tempId);
-    await this.db.enqueue('addEntityConfig', [entityConfig], String(tempId), 'entity_config');
+    const cached = await this.db.insertEntityConfigOffline(
+      entityConfig,
+      tempId,
+    );
+    await this.db.enqueue(
+      'addEntityConfig',
+      [entityConfig],
+      String(tempId),
+      'entity_config',
+    );
     return cached;
   }
 
-  async updateEntityConfig(entityConfig: EntityConfig): Promise<EntityConfig | null> {
+  async updateEntityConfig(
+    entityConfig: EntityConfig,
+  ): Promise<EntityConfig | null> {
     await this.db.updateEntityConfig(entityConfig);
 
     if (this.isOnline && entityConfig.id > 0) {
@@ -374,15 +402,28 @@ export class OfflineCacheStorage implements StorageSchema {
   ): Promise<EntityPropertyConfig | null> {
     await this.db.updatePropertyConfig(propertyConfig);
 
-    if (this.isOnline && propertyConfig.id > 0 && propertyConfig.entityConfigId > 0) {
-      return networkStorage.updatePropertyConfig(propertyConfig, performDriftCheck);
+    if (
+      this.isOnline &&
+      propertyConfig.id > 0 &&
+      propertyConfig.entityConfigId > 0
+    ) {
+      return networkStorage.updatePropertyConfig(
+        propertyConfig,
+        performDriftCheck,
+      );
     }
 
-    await this.db.enqueue('updatePropertyConfig', [propertyConfig, performDriftCheck]);
+    await this.db.enqueue('updatePropertyConfig', [
+      propertyConfig,
+      performDriftCheck,
+    ]);
     return propertyConfig;
   }
 
-  async deletePropertyConfig(entityConfigId: number, id: number): Promise<boolean> {
+  async deletePropertyConfig(
+    entityConfigId: number,
+    id: number,
+  ): Promise<boolean> {
     await this.db.deletePropertyConfig(entityConfigId, id);
 
     if (this.isOnline && id > 0 && entityConfigId > 0) {
@@ -400,10 +441,16 @@ export class OfflineCacheStorage implements StorageSchema {
     await this.db.setEntityPropertyOrder(entityConfigId, propertyConfigOrder);
 
     if (this.isOnline && entityConfigId > 0) {
-      return networkStorage.setEntityPropertyOrder(entityConfigId, propertyConfigOrder);
+      return networkStorage.setEntityPropertyOrder(
+        entityConfigId,
+        propertyConfigOrder,
+      );
     }
 
-    await this.db.enqueue('setEntityPropertyOrder', [entityConfigId, propertyConfigOrder]);
+    await this.db.enqueue('setEntityPropertyOrder', [
+      entityConfigId,
+      propertyConfigOrder,
+    ]);
     return true;
   }
 
@@ -416,7 +463,12 @@ export class OfflineCacheStorage implements StorageSchema {
     listSort: ListSort,
   ): Promise<StorageResult<EntityListResult>> {
     if (this.isOnline) {
-      const result = await networkStorage.getEntities(start, perPage, listFilter, listSort);
+      const result = await networkStorage.getEntities(
+        start,
+        perPage,
+        listFilter,
+        listSort,
+      );
       if (result.isOk) {
         return result;
       }
@@ -439,7 +491,10 @@ export class OfflineCacheStorage implements StorageSchema {
     return cached;
   }
 
-  async updateEntity(id: number, payload: RequestBody): Promise<Entity.Entity | null> {
+  async updateEntity(
+    id: number,
+    payload: RequestBody,
+  ): Promise<Entity.Entity | null> {
     await this.db.updateEntity(id, payload);
 
     if (this.isOnline && id > 0) {
@@ -478,7 +533,10 @@ export class OfflineCacheStorage implements StorageSchema {
   ): Promise<string[]> {
     if (this.isOnline) {
       try {
-        return await networkStorage.getPropertySuggestions(propertyConfigId, query);
+        return await networkStorage.getPropertySuggestions(
+          propertyConfigId,
+          query,
+        );
       } catch {
         // fall through
       }
@@ -538,7 +596,9 @@ export class OfflineCacheStorage implements StorageSchema {
     return localId;
   }
 
-  async saveListConfig(listConfig: ListConfig): Promise<StorageResult<ListConfig>> {
+  async saveListConfig(
+    listConfig: ListConfig,
+  ): Promise<StorageResult<ListConfig>> {
     await this.db.saveListConfig(listConfig);
 
     if (this.isOnline && !this.isTempId(listConfig.id)) {
@@ -560,7 +620,10 @@ export class OfflineCacheStorage implements StorageSchema {
     await this.db.enqueue('updateListSort', [listConfigId, sort]);
   }
 
-  async updateListFilter(listConfigId: string, filter: ListFilter): Promise<void> {
+  async updateListFilter(
+    listConfigId: string,
+    filter: ListFilter,
+  ): Promise<void> {
     await this.db.updateListFilter(listConfigId, filter);
 
     if (this.isOnline && !this.isTempId(listConfigId)) {
@@ -571,7 +634,10 @@ export class OfflineCacheStorage implements StorageSchema {
     await this.db.enqueue('updateListFilter', [listConfigId, filter]);
   }
 
-  async updateListThemes(listConfigId: string, themes: string[]): Promise<void> {
+  async updateListThemes(
+    listConfigId: string,
+    themes: string[],
+  ): Promise<void> {
     await this.db.updateListThemes(listConfigId, themes);
 
     if (this.isOnline && !this.isTempId(listConfigId)) {
@@ -606,7 +672,7 @@ export class OfflineCacheStorage implements StorageSchema {
 
   // ─── Import / Export / Clear ─────────────────────────────────────────────────
 
-  async export(entityConfigIds: number[]): Promise<Entity.Entity[]> {
+  async exportEntities(entityConfigIds: number[]): Promise<Entity.Entity[]> {
     if (this.isOnline) {
       try {
         return await networkStorage.exportEntities(entityConfigIds);
@@ -614,7 +680,7 @@ export class OfflineCacheStorage implements StorageSchema {
         // fall through
       }
     }
-    return this.db.export(entityConfigIds);
+    return this.db.exportEntities(entityConfigIds);
   }
 
   async import(data: ExportDataContents): Promise<boolean> {
@@ -652,7 +718,12 @@ export class OfflineCacheStorage implements StorageSchema {
     firstName: string,
     lastName: string,
   ): Promise<StorageResult<CreateAccountResponseBody>> {
-    return networkStorage.createAccount(username, password, firstName, lastName);
+    return networkStorage.createAccount(
+      username,
+      password,
+      firstName,
+      lastName,
+    );
   }
 
   async getParties(query: string): Promise<StorageResult<AccessPolicyParty[]>> {
@@ -712,7 +783,11 @@ export class OfflineCacheStorage implements StorageSchema {
     viewAccessPolicyId: number,
     editAccessPolicyId: number,
   ): Promise<boolean> {
-    return networkStorage.saveEntityAccessPolicy(entityId, viewAccessPolicyId, editAccessPolicyId);
+    return networkStorage.saveEntityAccessPolicy(
+      entityId,
+      viewAccessPolicyId,
+      editAccessPolicyId,
+    );
   }
 
   async saveListConfigAccessPolicy(
@@ -798,13 +873,19 @@ export class OfflineCacheStorage implements StorageSchema {
 
       case 'updateEntityConfig': {
         const config = args[0] as EntityConfig;
-        const resolvedId = await this.db.resolveIntId(config.id, 'entity_config');
+        const resolvedId = await this.db.resolveIntId(
+          config.id,
+          'entity_config',
+        );
         await networkStorage.updateEntityConfig({ ...config, id: resolvedId });
         break;
       }
 
       case 'deleteEntityConfig': {
-        const id = await this.db.resolveIntId(args[0] as number, 'entity_config');
+        const id = await this.db.resolveIntId(
+          args[0] as number,
+          'entity_config',
+        );
         if (id > 0) {
           await networkStorage.deleteEntityConfig(id);
         }
@@ -835,7 +916,10 @@ export class OfflineCacheStorage implements StorageSchema {
       case 'updatePropertyConfig': {
         const config = args[0] as EntityPropertyConfig;
         const performDriftCheck = args[1] as boolean;
-        const resolvedId = await this.db.resolveIntId(config.id, 'entity_property_config');
+        const resolvedId = await this.db.resolveIntId(
+          config.id,
+          'entity_property_config',
+        );
         const resolvedEntityConfigId = await this.db.resolveIntId(
           config.entityConfigId,
           'entity_config',
@@ -852,7 +936,10 @@ export class OfflineCacheStorage implements StorageSchema {
           args[0] as number,
           'entity_config',
         );
-        const id = await this.db.resolveIntId(args[1] as number, 'entity_property_config');
+        const id = await this.db.resolveIntId(
+          args[1] as number,
+          'entity_property_config',
+        );
         if (id > 0 && entityConfigId > 0) {
           await networkStorage.deletePropertyConfig(entityConfigId, id);
         }
@@ -906,7 +993,10 @@ export class OfflineCacheStorage implements StorageSchema {
         const resolvedActions = await Promise.all(
           bulkPayload.actions.map(id => this.db.resolveIntId(id, 'entity')),
         );
-        await networkStorage.bulkOperation({ ...bulkPayload, actions: resolvedActions });
+        await networkStorage.bulkOperation({
+          ...bulkPayload,
+          actions: resolvedActions,
+        });
         break;
       }
 
@@ -924,37 +1014,61 @@ export class OfflineCacheStorage implements StorageSchema {
 
       case 'saveListConfig': {
         const listConfig = args[0] as ListConfig;
-        const resolvedId = await this.db.resolveStrId(listConfig.id, 'list_config');
+        const resolvedId = await this.db.resolveStrId(
+          listConfig.id,
+          'list_config',
+        );
         await networkStorage.saveListConfig({ ...listConfig, id: resolvedId });
         break;
       }
 
       case 'updateListSort': {
-        const listConfigId = await this.db.resolveStrId(args[0] as string, 'list_config');
+        const listConfigId = await this.db.resolveStrId(
+          args[0] as string,
+          'list_config',
+        );
         await networkStorage.updateListSort(listConfigId, args[1] as ListSort);
         break;
       }
 
       case 'updateListFilter': {
-        const listConfigId = await this.db.resolveStrId(args[0] as string, 'list_config');
-        await networkStorage.updateListFilter(listConfigId, args[1] as ListFilter);
+        const listConfigId = await this.db.resolveStrId(
+          args[0] as string,
+          'list_config',
+        );
+        await networkStorage.updateListFilter(
+          listConfigId,
+          args[1] as ListFilter,
+        );
         break;
       }
 
       case 'updateListThemes': {
-        const listConfigId = await this.db.resolveStrId(args[0] as string, 'list_config');
-        await networkStorage.updateListThemes(listConfigId, args[1] as string[]);
+        const listConfigId = await this.db.resolveStrId(
+          args[0] as string,
+          'list_config',
+        );
+        await networkStorage.updateListThemes(
+          listConfigId,
+          args[1] as string[],
+        );
         break;
       }
 
       case 'deleteListConfig': {
-        const listConfigId = await this.db.resolveStrId(args[0] as string, 'list_config');
+        const listConfigId = await this.db.resolveStrId(
+          args[0] as string,
+          'list_config',
+        );
         await networkStorage.deleteListConfig(listConfigId);
         break;
       }
 
       case 'saveSetting': {
-        const listConfigId = await this.db.resolveStrId(args[0] as string, 'list_config');
+        const listConfigId = await this.db.resolveStrId(
+          args[0] as string,
+          'list_config',
+        );
         await networkStorage.saveSetting(listConfigId, args[1] as Setting);
         break;
       }
