@@ -391,6 +391,11 @@ export class EntityConfigForm extends MobxLitElement {
         shouldShow: () => true,
       },
       {
+        heading: translate('entityConfigForm.tab.properties'),
+        content: () => this.renderPropertiesTab(),
+        shouldShow: () => true,
+      },
+      {
         heading: translate('entityConfigForm.tab.access'),
         content: () =>
           html`<access-policy-assignment
@@ -517,66 +522,67 @@ export class EntityConfigForm extends MobxLitElement {
           >
         </div>
 
-        ${this.entityConfig.id
-          ? html`
-              <div class="properties">
-                <ss-button @click=${this.addPropertyToTop}
-                  >${translate('addProperty')}</ss-button
-                >
+      </div>
+    `;
+  }
 
-                <sortable-list @sort-updated=${this.sortUpdated}>
-                  ${repeat(
-                    this.entityConfig.properties,
-                    property => property.id,
-                    (property, index) => html`
-                      <sortable-item id=${property.id}>
-                        <property-config-form
-                          ?open=${this.isPanelOpen(property.id)}
-                          entityConfigId=${this.entityConfig.id}
-                          propertConfigId=${property.id}
-                          dataType=${property.dataType}
-                          propertyConfigId=${property.id}
-                          name=${property.name}
-                          required=${property.required}
-                          repeat=${property.repeat}
-                          allowed=${property.allowed}
-                          prefix=${property.prefix}
-                          suffix=${property.suffix}
-                          ?optionsOnly=${property.optionsOnly}
-                          .options=${property.options}
-                          ?hidden=${property.hidden}
-                          ?performDriftCheck=${this.performDriftCheck}
-                          .defaultValue=${property.defaultValue}
-                          @property-config-updated=${(
-                            e: PropertyConfigUpdatedEvent,
-                          ): void => this.updateProperty(index, e.detail)}
-                          @property-config-added=${(
-                            e: PropertyConfigAddedEvent,
-                          ): void => this.updateProperty(index, e.detail)}
-                          @property-config-deleted=${(): void => {
-                            this.deleteProperty(index);
-                          }}
-                          @property-config-breaking-change-detected=${(
-                            e: PropertyConfigBreakingChangeDetectedEvent,
-                          ): void => {
-                            this.breakingChangeDetected(index, e);
-                          }}
-                          @property-config-breaking-changes-resolved=${(): void => {
-                            this.breakingChangesResolved(index);
-                          }}
-                        ></property-config-form>
-                      </sortable-item>
-                    `,
-                  )}
-                </sortable-list>
+  renderPropertiesTab(): TemplateResult {
+    return html`
+      <div class="properties">
+        <ss-button @click=${this.addPropertyToTop}
+          >${translate('addProperty')}</ss-button
+        >
 
-                ${this.entityConfig.properties.length > 0
-                  ? html` <ss-button @click=${this.addPropertyToBottom}
-                      >${translate('addProperty')}</ss-button
-                    >`
-                  : nothing}
-              </div>
-            `
+        <sortable-list @sort-updated=${this.sortUpdated}>
+          ${repeat(
+            this.entityConfig.properties,
+            property => property.id,
+            (property, index) => html`
+              <sortable-item id=${property.id}>
+                <property-config-form
+                  ?open=${this.isPanelOpen(property.id)}
+                  entityConfigId=${this.entityConfig.id}
+                  propertConfigId=${property.id}
+                  dataType=${property.dataType}
+                  propertyConfigId=${property.id}
+                  name=${property.name}
+                  required=${property.required}
+                  repeat=${property.repeat}
+                  allowed=${property.allowed}
+                  prefix=${property.prefix}
+                  suffix=${property.suffix}
+                  ?optionsOnly=${property.optionsOnly}
+                  .options=${property.options}
+                  ?hidden=${property.hidden}
+                  ?performDriftCheck=${this.performDriftCheck}
+                  .defaultValue=${property.defaultValue}
+                  @property-config-updated=${(
+                    e: PropertyConfigUpdatedEvent,
+                  ): void => this.updateProperty(index, e.detail)}
+                  @property-config-added=${(
+                    e: PropertyConfigAddedEvent,
+                  ): void => this.updateProperty(index, e.detail)}
+                  @property-config-deleted=${(): void => {
+                    this.deleteProperty(index);
+                  }}
+                  @property-config-breaking-change-detected=${(
+                    e: PropertyConfigBreakingChangeDetectedEvent,
+                  ): void => {
+                    this.breakingChangeDetected(index, e);
+                  }}
+                  @property-config-breaking-changes-resolved=${(): void => {
+                    this.breakingChangesResolved(index);
+                  }}
+                ></property-config-form>
+              </sortable-item>
+            `,
+          )}
+        </sortable-list>
+
+        ${this.entityConfig.properties.length > 0
+          ? html` <ss-button @click=${this.addPropertyToBottom}
+              >${translate('addProperty')}</ss-button
+            >`
           : nothing}
       </div>
     `;

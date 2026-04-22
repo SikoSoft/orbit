@@ -266,6 +266,7 @@
   "access": "Access",
   "failedToDeleteListConfig": "Failed to delete list configuration.",
   "entityConfigForm.tab.config": "Config",
+  "entityConfigForm.tab.properties": "Properties",
   "entityConfigForm.tab.access": "Access",
   "signUp": "Sign Up"
 }
