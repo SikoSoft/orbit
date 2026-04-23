@@ -2,6 +2,7 @@ import { css, html, nothing, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
+import JSZip from 'jszip';
 import { Entity } from 'api-spec/models/Entity';
 import { ListConfig } from 'api-spec/lib/ListConfig';
 import { appState } from '@/state';
@@ -25,6 +26,8 @@ export class AddEntityWidget extends MobxLitElement {
   private state = appState;
 
   @state() private uploading = false;
+  @state() private zipProgress: { current: number; total: number } | null =
+    null;
   @state() private hasCamera = false;
   @state() private showMenu = false;
   @state() private expanded = false;
@@ -131,6 +134,16 @@ export class AddEntityWidget extends MobxLitElement {
           transform: none;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
+      }
+
+      .zip-progress {
+        position: absolute;
+        bottom: 0.2rem;
+        right: 0.25rem;
+        font-size: 0.5rem;
+        line-height: 1;
+        color: var(--text-color);
+        pointer-events: none;
       }
     }
 
@@ -306,6 +319,40 @@ export class AddEntityWidget extends MobxLitElement {
     }
   }
 
+  private buildAssistUrl(): string {
+    const assistUrl = new URL(
+      'assist/entity',
+      import.meta.env.APP_BASE_API_URL,
+    );
+    assistUrl.searchParams.set(
+      'timeZone',
+      new Date().getTimezoneOffset().toString(),
+    );
+    if (this.state.assistSaveImage) {
+      assistUrl.searchParams.set('saveImage', '1');
+    }
+    return `${assistUrl.pathname}${assistUrl.search}`;
+  }
+
+  private async submitImageToApi(file: File): Promise<boolean> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const result = await api.httpRequest<AssistResponse>(this.buildAssistUrl(), {
+      method: 'post',
+      body: formData,
+    });
+    if (
+      !result ||
+      serverErrorResponseCodes.includes(result.status) ||
+      result.status === 422 ||
+      !result.isOk
+    ) {
+      return false;
+    }
+    this.goToFirstMatchingListConfig(result.response.entity);
+    return true;
+  }
+
   private async handleFileSelected(e: Event): Promise<void> {
     const input = e.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -313,54 +360,78 @@ export class AddEntityWidget extends MobxLitElement {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
+    if (file.name.toLowerCase().endsWith('.zip') || file.type === 'application/zip') {
+      await this.handleZipFile(file);
+    } else {
+      await this.handleImageFile(file);
+    }
 
+    input.value = '';
+  }
+
+  private async handleImageFile(file: File): Promise<void> {
     this.uploading = true;
     try {
-      const assistUrl = new URL(
-        'assist/entity',
-        import.meta.env.APP_BASE_API_URL,
-      );
-      assistUrl.searchParams.set(
-        'timeZone',
-        new Date().getTimezoneOffset().toString(),
-      );
-      if (this.state.assistSaveImage) {
-        assistUrl.searchParams.set('saveImage', '1');
-      }
-
-      const url = `${assistUrl.pathname}${assistUrl.search}`;
-
-      const result = await api.httpRequest<AssistResponse>(url, {
-        method: 'post',
-        body: formData,
-      });
-
-      if (!result) {
-        addToast(translate('assistAddFailed'), NotificationType.ERROR);
-        return;
-      }
-
-      if (serverErrorResponseCodes.includes(result.status)) {
-        addToast(translate('assistAddError'), NotificationType.ERROR);
-        return;
-      }
-
-      if (result.status === 422) {
-        addToast(translate('assistAddFailed'), NotificationType.ERROR);
-        return;
-      }
-
-      if (result.isOk) {
-        const { entity } = result.response;
-        this.goToFirstMatchingListConfig(entity);
+      const success = await this.submitImageToApi(file);
+      if (success) {
         addToast(translate('assistAddSuccess'), NotificationType.SUCCESS);
-        return;
+      } else {
+        addToast(translate('assistAddFailed'), NotificationType.ERROR);
       }
     } finally {
       this.uploading = false;
-      input.value = '';
+    }
+  }
+
+  private async handleZipFile(file: File): Promise<void> {
+    this.uploading = true;
+    try {
+      const zip = await JSZip.loadAsync(file);
+      const imageEntries = Object.values(zip.files).filter(
+        entry =>
+          !entry.dir && /\.(jpe?g|png|gif|webp|bmp|heic?|tiff?)$/i.test(entry.name),
+      );
+
+      if (imageEntries.length === 0) {
+        addToast(translate('assistAddZipNoImages'), NotificationType.ERROR);
+        return;
+      }
+
+      let added = 0;
+      let failed = 0;
+      this.zipProgress = { current: 0, total: imageEntries.length };
+
+      for (const entry of imageEntries) {
+        const blob = await entry.async('blob');
+        const filename = entry.name.split('/').pop() ?? entry.name;
+        const imageFile = new File([blob], filename, { type: blob.type });
+        const success = await this.submitImageToApi(imageFile);
+        if (success) {
+          added++;
+        } else {
+          failed++;
+        }
+        this.zipProgress = { current: added + failed, total: imageEntries.length };
+      }
+
+      if (added === 0) {
+        addToast(translate('assistAddZipAllFailed'), NotificationType.ERROR);
+      } else if (failed > 0) {
+        addToast(
+          translate('assistAddZipPartial', { added, failed }),
+          NotificationType.WARNING,
+        );
+      } else {
+        addToast(
+          translate('assistAddZipSuccess', { added }),
+          NotificationType.SUCCESS,
+        );
+      }
+    } catch {
+      addToast(translate('assistAddError'), NotificationType.ERROR);
+    } finally {
+      this.uploading = false;
+      this.zipProgress = null;
     }
   }
 
@@ -372,7 +443,7 @@ export class AddEntityWidget extends MobxLitElement {
     return html`
       <input
         type="file"
-        accept="image/*"
+        accept="image/*,.zip"
         data-source="storage"
         @change=${this.handleFileSelected}
       />
@@ -434,7 +505,14 @@ export class AddEntityWidget extends MobxLitElement {
           @click=${(): void => this.handleTriggerClick()}
         >
           ${this.uploading
-            ? html`<svg-icon name=${IconName.SPINNER} size="24"></svg-icon>`
+            ? html`
+                <svg-icon name=${IconName.SPINNER} size="24"></svg-icon>
+                ${this.zipProgress
+                  ? html`<span class="zip-progress"
+                      >${this.zipProgress.current}/${this.zipProgress.total}</span
+                    >`
+                  : nothing}
+              `
             : html`<svg-icon name=${IconName.IMAGE} size="24"></svg-icon>`}
         </button>
       </div>
