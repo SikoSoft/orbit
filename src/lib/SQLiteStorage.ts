@@ -503,25 +503,24 @@ export class SQLiteStorage implements StorageSchema {
         bindings.push(time.start, time.end);
       }
 
-      // Text filters
-      for (const textCtx of listFilter.text) {
-        const { type, subStr } = textCtx;
-        let pattern: string;
-        if (type === 'contains') {
-          pattern = `%${subStr}%`;
-        } else if (type === 'startsWith') {
-          pattern = `${subStr}%`;
-        } else if (type === 'endsWith') {
-          pattern = `%${subStr}`;
-        } else {
-          pattern = subStr;
+      // Property filters
+      for (const propertyFilter of listFilter.properties) {
+        const propConfigRows = await this.execRows(
+          'SELECT data_type FROM entity_property_config WHERE id = ?',
+          [propertyFilter.propertyId],
+        );
+        if (propConfigRows.length === 0) {
+          continue;
         }
-        const op = type === 'equals' ? '=' : 'LIKE';
-        conditions.push(`
-          (EXISTS (SELECT 1 FROM entity_tag et WHERE et.entity_id = e.id AND et.tag ${op} ?)
-          OR EXISTS (SELECT 1 FROM entity_property ep WHERE ep.entity_id = e.id AND ep.value ${op} ?))
-        `);
-        bindings.push(pattern, pattern);
+        const dataType = propConfigRows[0]['data_type'] as DataType;
+        const serializedValue = serializePropertyValue(
+          propertyFilter.value,
+          dataType,
+        );
+        conditions.push(
+          `EXISTS (SELECT 1 FROM entity_property ep WHERE ep.entity_id = e.id AND ep.property_config_id = ? AND ep.value = ?)`,
+        );
+        bindings.push(propertyFilter.propertyId, serializedValue);
       }
 
       // Tag filters

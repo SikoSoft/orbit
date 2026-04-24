@@ -370,6 +370,42 @@ describe('SQLiteStorage', () => {
       }
     });
 
+    it('filters by property value', async () => {
+      const config = await db.addEntityConfig(
+        makeConfig({ properties: [makeProp({ name: 'Color' })] }),
+      );
+      const propConfigId = config!.properties[0].id;
+      await db.addEntity(
+        makePayload(config!.id, {
+          properties: [
+            { id: 0, propertyConfigId: propConfigId, value: 'red', order: 0 },
+          ],
+        }),
+      );
+      await db.addEntity(
+        makePayload(config!.id, {
+          properties: [
+            { id: 0, propertyConfigId: propConfigId, value: 'blue', order: 0 },
+          ],
+        }),
+      );
+
+      const result = await db.getEntities(
+        0,
+        10,
+        {
+          ...defaultListFilter,
+          includeAll: false,
+          properties: [{ propertyId: propConfigId, value: 'red' }],
+        },
+        defaultListSort,
+      );
+      if (result.isOk) {
+        expect(result.value.total).toBe(1);
+        expect(result.value.entities[0].properties[0].value).toBe('red');
+      }
+    });
+
     it('filters by type', async () => {
       const configA = await db.addEntityConfig(makeConfig({ name: 'A' }));
       const configB = await db.addEntityConfig(makeConfig({ name: 'B' }));
