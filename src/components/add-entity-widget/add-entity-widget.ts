@@ -34,6 +34,7 @@ export class AddEntityWidget extends MobxLitElement {
   @state() private showOptions = false;
 
   private longPressTimer: ReturnType<typeof setTimeout> | null = null;
+  private assistServerWarmedUp = false;
 
   static styles = css`
     :host {
@@ -280,7 +281,16 @@ export class AddEntityWidget extends MobxLitElement {
     }
   }
 
+  private warmUpAssistServer(): void {
+    if (this.assistServerWarmedUp) {
+      return;
+    }
+    this.assistServerWarmedUp = true;
+    api.get('assist/health');
+  }
+
   private handleTriggerClick(): void {
+    this.warmUpAssistServer();
     if (this.hasCamera) {
       this.showMenu = !this.showMenu;
     } else {
