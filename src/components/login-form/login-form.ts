@@ -3,11 +3,7 @@ import { css, html, nothing, PropertyValues, TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import { appState } from '@/state';
-import { api } from '@/lib/Api';
-import { LoginRequestBody, LoginResponseBody } from '@/models/Identity';
-import { storage } from '@/lib/Storage';
-import { addToast } from '@/lib/Util';
-import { NotificationType } from '@ss/ui/components/notification-provider.models';
+import { performLogin } from '@/lib/Auth';
 import { translate } from '@/lib/Localization';
 
 import '@ss/ui/components/ss-button';
@@ -68,37 +64,15 @@ export class LoginForm extends MobxLitElement {
 
   private async login(): Promise<void> {
     this.loading = true;
+    const success = await performLogin(this.username, this.password);
 
-    try {
-      const result = await api.post<LoginRequestBody, LoginResponseBody>(
-        'login',
-        { username: this.username, password: this.password },
-      );
-
-      if (result && result.status !== 401) {
-        storage.setAuthToken(result.response.authToken);
-        api.setAuthToken(result.response.authToken);
-        this.state.setAuthToken(result.response.authToken);
-        this.state.setForbidden(false);
-        addToast(translate('youAreNowLoggedIn'), NotificationType.SUCCESS);
-        this.dispatchEvent(new UserLoggedInEvent({}));
-        this.username = '';
-        this.password = '';
-        return;
-      }
-
-      addToast(
-        translate('incorrectUsernameAndPasswordCombination'),
-        NotificationType.ERROR,
-      );
-    } catch (error) {
-      addToast(
-        translate('anErrorOccurredWhileLoggingIn'),
-        NotificationType.ERROR,
-      );
-    } finally {
-      this.loading = false;
+    if (success) {
+      this.dispatchEvent(new UserLoggedInEvent({}));
+      this.username = '';
+      this.password = '';
     }
+
+    this.loading = false;
   }
 
   render(): TemplateResult | typeof nothing {

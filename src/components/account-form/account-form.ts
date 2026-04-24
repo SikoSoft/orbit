@@ -3,6 +3,9 @@ import { customElement, state } from 'lit/decorators.js';
 import { translate } from '@/lib/Localization';
 import { addToast } from '@/lib/Util';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
+import { performLogin } from '@/lib/Auth';
+import { navigate } from '@/lib/Router';
+import { UserLoggedInEvent } from '@/events/user-logged-in';
 
 import {
   AccountFormField,
@@ -203,7 +206,14 @@ export class AccountForm extends LitElement {
 
     if (result.isOk) {
       this.dispatchEvent(new AccountCreatedEvent({ id: result.value.id }));
+      const { username, password } = this;
       this.reset();
+      const loggedIn = await performLogin(username, password);
+
+      if (loggedIn) {
+        this.dispatchEvent(new UserLoggedInEvent({}));
+        navigate('/');
+      }
     }
 
     this.loading = false;
