@@ -32,11 +32,68 @@
       html {
         overflow-x: hidden;
       }
+
+      #initial-loader {
+        position: fixed;
+        inset: 0;
+        background-color: var(--loader-bg, #ededed);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.3s;
+      }
+
+      #initial-loader .spinner {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 3px solid var(--loader-spin-fade, rgba(0, 0, 0, 0.133));
+        border-top-color: var(--loader-spin, #000);
+        animation: initial-spin 0.8s linear infinite;
+      }
+
+      @keyframes initial-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
     </style>
+    <script>
+      (function () {
+        var themeColors = {
+          light: { bg: '#ededed', spin: '#000', spinFade: 'rgba(0,0,0,0.133)' },
+          dark: {
+            bg: '#12221a',
+            spin: '#cff5f4',
+            spinFade: 'rgba(207,245,244,0.133)',
+          },
+          todo: { bg: '#ffffff', spin: '#000', spinFade: 'rgba(0,0,0,0.133)' },
+          xmas: {
+            bg: '#bb0000',
+            spin: '#fff',
+            spinFade: 'rgba(255,255,255,0.267)',
+          },
+          craftacular: {
+            bg: '#3d5a1e',
+            spin: '#5aff2a',
+            spinFade: 'rgba(90,255,42,0.2)',
+          },
+        };
+        var theme = localStorage.getItem('theme') || 'light';
+        var colors = themeColors[theme] || themeColors.light;
+        var root = document.documentElement;
+        root.style.backgroundColor = colors.bg;
+        root.style.setProperty('--loader-bg', colors.bg);
+        root.style.setProperty('--loader-spin', colors.spin);
+        root.style.setProperty('--loader-spin-fade', colors.spinFade);
+      })();
+    </script>
     <title>Orbit</title>
   </head>
 
   <body>
+    <div id="initial-loader"><div class="spinner"></div></div>
     <page-container></page-container>
 
     <script

@@ -126,6 +126,14 @@ export class PageContainer extends MobxLitElement {
     return defaultTheme;
   }
 
+  firstUpdated(): void {
+    const loader = document.getElementById('initial-loader');
+    if (loader) {
+      loader.style.opacity = '0';
+      loader.addEventListener('transitionend', () => loader.remove(), { once: true });
+    }
+  }
+
   connectedCallback(): void {
     super.connectedCallback();
     this.setTheme(this.getThemeFromStorage());
