@@ -10,6 +10,7 @@ import {
   ListFilterTimeType,
   TimeContext,
   TextContext,
+  FilterProperty,
 } from 'api-spec/models/List';
 import { translate } from '@/lib/Localization';
 
@@ -21,6 +22,7 @@ import { SettingName, TagSuggestions } from 'api-spec/models/Setting';
 
 import { TimeFiltersUpdatedEvent } from '@/components/list-filter/time-filters/time-filters.events';
 import { TextFiltersUpdatedEvent } from '@/components/list-filter/text-filters/text-filters.events';
+import { FilterPropertiesUpdatedEvent } from '@/components/list-filter/filter-properties/filter-properties.events';
 import { ListFilterUpdatedEvent } from './list-filter.events';
 import { TagsUpdatedEvent } from '@ss/ui/components/tag-manager.events';
 import { TagSuggestionsRequestedEvent } from '@ss/ui/components/tag-input.events';
@@ -30,6 +32,7 @@ import '@ss/ui/components/ss-select';
 import '@ss/ui/components/tag-manager';
 import '@/components/list-filter/time-filters/time-filters';
 import '@/components/list-filter/text-filters/text-filters';
+import '@/components/list-filter/filter-properties/filter-properties';
 
 import { SelectChangedEvent } from '@ss/ui/components/ss-select.events';
 import { themed } from '@/lib/Theme';
@@ -79,6 +82,7 @@ export class ListFilter extends MobxLitElement {
   @state() includeAllTagging: boolean = false;
   @state() time: TimeContext = { type: ListFilterTimeType.ALL_TIME };
   @state() text: TextContext[] = [];
+  @state() properties: FilterProperty[] = [];
 
   @state() savedFilters: SavedListFilter[] = [];
   @state() saveMode: boolean = false;
@@ -135,7 +139,7 @@ export class ListFilter extends MobxLitElement {
         containsAllOf: this.containsAllOf,
       },
       time: this.time,
-      text: this.text,
+      properties: this.properties,
     };
   }
 
@@ -157,8 +161,8 @@ export class ListFilter extends MobxLitElement {
     if (this.state.listFilter.time) {
       this.time = this.state.listFilter.time;
     }
-    if (this.state.listFilter.text) {
-      this.text = this.state.listFilter.text;
+    if (this.state.listFilter.properties) {
+      this.properties = this.state.listFilter.properties;
     }
   }
 
@@ -176,47 +180,18 @@ export class ListFilter extends MobxLitElement {
 
   private handleUpdateClick(_e: CustomEvent): void {
     this.state.setListFilter(this.filter);
-
     storage.saveActiveFilter(this.state.listFilter);
 
     this.dispatchEvent(new ListFilterUpdatedEvent({}));
     addToast(translate('filterUpdated'), NotificationType.INFO);
   }
 
-  private async saveFilter(): Promise<void> {
-    if (!this.saveMode) {
-      this.saveMode = true;
-      this.filterNameInput.focus();
-      return;
-    }
-
-    await storage.saveFilter(this.filter, this.filterName);
-    this.savedFilters = storage.getSavedFilters();
-
-    this.filterNameInput.clear();
-    this.saveMode = false;
-
-    addToast(translate('filterSaved'), NotificationType.SUCCESS);
-  }
-
-  private async handleSaveClick(_e: CustomEvent): Promise<void> {
-    await this.saveFilter();
-  }
-
-  private handleFilterNameChanged(e: CustomEvent): void {
-    this.filterName = e.detail.value;
-  }
-
-  private handleFilterNameSubmitted(_e: CustomEvent): void {
-    this.saveFilter();
-  }
-
   private handleTimeChanged(e: TimeFiltersUpdatedEvent): void {
     this.time = e.detail;
   }
 
-  private handleTextChanged(e: TextFiltersUpdatedEvent): void {
-    this.text = e.detail.filters;
+  private handlePropertiesChanged(e: FilterPropertiesUpdatedEvent): void {
+    this.properties = e.detail.filters;
   }
 
   private updateTags(type: ListFilterType, tags: string[]): void {
@@ -288,11 +263,13 @@ export class ListFilter extends MobxLitElement {
             </div>
           </fieldset>
 
-          <text-filters
-            .filters=${this.text}
-            @text-filters-updated=${(e: TextFiltersUpdatedEvent): void =>
-              this.handleTextChanged(e)}
-          ></text-filters>
+          <filter-properties
+            .includeTypes=${this.includeTypes}
+            .filters=${this.properties}
+            @filter-properties-updated=${(
+              e: FilterPropertiesUpdatedEvent,
+            ): void => this.handlePropertiesChanged(e)}
+          ></filter-properties>
 
           <fieldset class=${classMap(this.taggingClasses)}>
             <legend>${translate('tagging')}</legend>
@@ -381,21 +358,6 @@ export class ListFilter extends MobxLitElement {
           @click=${this.handleUpdateClick}
           text=${translate('useFilter')}
         ></ss-button>
-
-        <div class="save">
-          <ss-input
-            @input-changed=${this.handleFilterNameChanged}
-            @input-submitted=${this.handleFilterNameSubmitted}
-            id="filter-name"
-            placeholder=${translate('filterName')}
-          ></ss-input>
-
-          <ss-button
-            @click=${this.handleSaveClick}
-            text=${translate('saveFilter')}
-            ?disabled=${!this.saveButtonIsEnabled}
-          ></ss-button>
-        </div>
       </div>
     `;
   }

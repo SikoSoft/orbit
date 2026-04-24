@@ -33,7 +33,7 @@ export const defaultListFilter: ListFilter = {
   includeAll: true,
   includeAllTagging: true,
   time: { type: ListFilterTimeType.ALL_TIME },
-  text: [],
+  properties: [],
 };
 
 export const defaultListSort: ListSort = {

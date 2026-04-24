@@ -273,5 +273,8 @@
   "entityConfigForm.tab.config": "Config",
   "entityConfigForm.tab.properties": "Properties",
   "entityConfigForm.tab.access": "Access",
-  "signUp": "Sign Up"
+  "signUp": "Sign Up",
+  "propertyFilters": "Property Filters",
+  "addPropertyFilter": "Add Property Filter",
+  "selectProperty": "Select property"
 }
