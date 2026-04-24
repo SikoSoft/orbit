@@ -1,5 +1,5 @@
 import { Theme, ThemeName } from '@/models/Page';
-import { css } from 'lit';
+import { css, unsafeCSS } from 'lit';
 
 export const themes: Record<ThemeName, Theme> = {
   [ThemeName.LIGHT]: {
@@ -20,6 +20,11 @@ export const themes: Record<ThemeName, Theme> = {
   [ThemeName.XMAS]: {
     name: ThemeName.XMAS,
     backgroundColor: css`#bb0000`,
+    sheet: new CSSStyleSheet(),
+  },
+  [ThemeName.CRAFTACULAR]: {
+    name: ThemeName.CRAFTACULAR,
+    backgroundColor: css`#3d5a1e`,
     sheet: new CSSStyleSheet(),
   },
 };
@@ -254,3 +259,106 @@ export const xmasStyles = [
 ];
 
 themes[ThemeName.XMAS].sheet.replaceSync(xmasStyles.join('\n'));
+
+export const craftacularStyles = [
+  commonStyles,
+  darkStyles,
+  css`
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+    :host {
+      --negative-color: #c00;
+      --negative-background-color: #3b0000;
+      --positive-color: #5f0;
+      --positive-background-color: #1a3300;
+      --unsynced-color: #999;
+      --unsynced-background-color: #333;
+      --primary-color: #5aff2a;
+      --border-color: #4a7c2f;
+      --border-color-light: #6aad3f;
+      --border-color-dark: #1a3a0a;
+      --border-radius: 0;
+      --padding: 0.5rem;
+      --font-size: 0.75rem;
+      --text-color: #e8ffe0;
+      --background-color: ${themes[ThemeName.CRAFTACULAR].backgroundColor};
+      --background-hover-color: #2e4a16;
+      --box-background-color: #1e3a0e;
+      --box-border-color: #5a9c30;
+      --box-text-color: #e8ffe0;
+      --overlay-color-top: rgba(0, 0, 0, 0.4);
+      --overlay-color-bottom: rgba(0, 0, 0, 0.85);
+
+      --tabs-border-color: #4a7c2f;
+      --tabs-header-bg-color: #243d10;
+      --tabs-header-hover-bg-color: #3a6020;
+      --tabs-active-header-bg-color: #4a7c2f;
+
+      --input-background-color: #121f06;
+      --input-border-color: #4a7c2f;
+      --input-text-color: #e8ffe0;
+      --input-suggestion-background-color: #1a3308;
+      --input-suggestion-text-color: #8db87a;
+      --input-suggestion-selected-background-color: #3a6020;
+      --input-suggestion-selected-text-color: #e8ffe0;
+
+      --loader-color1: #5aff2a;
+      --loader-color2: #5aff2a33;
+
+      --toggle-outer-background-color1: #2a5010;
+      --toggle-outer-background-color2: #1a3008;
+      --toggle-inner-background-color1: #4a7c2f;
+      --toggle-inner-background-color2: #5a9c3a;
+      --toggle-ball-background-color1: #3a6020;
+      --toggle-ball-background-color2: #2a4a10;
+      --toggle-ball-border-color: #1a2a08;
+
+      font-family: 'Press Start 2P', monospace;
+      image-rendering: pixelated;
+    }
+
+    :host {
+      //background-image: url('${unsafeCSS(
+        import.meta.env.BASE_URL,
+      )}grass.png');
+      background-repeat: repeat;
+      background-size: 64px 64px;
+    }
+
+    .box {
+      border-radius: 0;
+      border-width: 3px;
+      border-style: solid;
+      border-color: #8bc34a #33691e #33691e #8bc34a;
+      image-rendering: pixelated;
+    }
+
+    fieldset {
+      border-radius: 0;
+      border-width: 3px;
+      border-style: solid;
+      border-color: #8bc34a #33691e #33691e #8bc34a;
+    }
+
+    input[type='text'],
+    input[type='date'],
+    input[type='datetime-local'],
+    select,
+    button {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.6rem;
+      border-radius: 0;
+      border-width: 3px;
+      border-style: solid;
+      border-color: #8bc34a #33691e #33691e #8bc34a;
+      background-color: #1e3a0e;
+      color: #e8ffe0;
+    }
+
+    button:active {
+      border-color: #33691e #8bc34a #8bc34a #33691e;
+    }
+  `,
+];
+
+themes[ThemeName.CRAFTACULAR].sheet.replaceSync(craftacularStyles.join('\n'));
