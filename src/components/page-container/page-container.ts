@@ -130,7 +130,7 @@ export class PageContainer extends MobxLitElement {
     const loader = document.getElementById('initial-loader');
     if (loader) {
       loader.style.opacity = '0';
-      loader.addEventListener('transitionend', () => loader.remove(), { once: true });
+      setTimeout(() => loader.remove(), 300);
     }
   }
 
