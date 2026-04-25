@@ -46,6 +46,7 @@ import '@/components/access-policy-assignment/access-policy-assignment';
 
 import {
   EntityItemCanceledEvent,
+  EntityItemCreatedEvent,
   EntityItemDeletedEvent,
   EntityItemUpdatedEvent,
 } from './entity-form.events';
@@ -553,6 +554,7 @@ export class EntityForm extends ViewElement {
           propertyReferences: this.propertyReferences,
         };
 
+        const isNew = !this.entityId;
         const result = this.entityId
           ? await storage.updateEntity(this.entityId, payload)
           : await storage.addEntity(payload);
@@ -562,6 +564,33 @@ export class EntityForm extends ViewElement {
         if (!result) {
           addToast(translate('entityFailedToSave'), NotificationType.ERROR);
           return;
+        }
+
+        if (isNew) {
+          const viewAccessPolicyId =
+            this.viewAccessPolicyId ||
+            this.state.listConfig.viewAccessPolicy?.id ||
+            0;
+          const editAccessPolicyId =
+            this.editAccessPolicyId ||
+            this.state.listConfig.editAccessPolicy?.id ||
+            0;
+
+          if (viewAccessPolicyId || editAccessPolicyId) {
+            await storage.saveEntityAccessPolicy(
+              result.id,
+              viewAccessPolicyId,
+              editAccessPolicyId,
+            );
+          }
+
+          this.dispatchEvent(
+            new EntityItemCreatedEvent({
+              id: result.id,
+              viewAccessPolicyId,
+              editAccessPolicyId,
+            }),
+          );
         }
 
         this.reset();

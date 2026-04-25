@@ -34,6 +34,24 @@ export class EntityItemDeletedEvent extends CustomEvent<EntityItemDeletedEventPa
   }
 }
 
+export const entityItemCreatedEventName = 'entity-item-created';
+
+export interface EntityItemCreatedEventPayload {
+  id: number;
+  viewAccessPolicyId: number;
+  editAccessPolicyId: number;
+}
+
+export class EntityItemCreatedEvent extends CustomEvent<EntityItemCreatedEventPayload> {
+  constructor(payload: EntityItemCreatedEventPayload) {
+    super(entityItemCreatedEventName, {
+      bubbles: true,
+      composed: true,
+      detail: payload,
+    });
+  }
+}
+
 export const entityItemCanceledEventName = 'entity-item-canceled';
 
 export interface EntityItemCanceledEventPayload {
