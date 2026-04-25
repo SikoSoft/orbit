@@ -841,8 +841,12 @@ export class EntityForm extends ViewElement {
           html`<access-policy-assignment
             context="entity"
             entityId=${this.entityId}
-            viewAccessPolicyId=${this.viewAccessPolicyId}
-            editAccessPolicyId=${this.editAccessPolicyId}
+            viewAccessPolicyId=${this.viewAccessPolicyId ||
+            this.state.listConfig.viewAccessPolicy?.id ||
+            0}
+            editAccessPolicyId=${this.editAccessPolicyId ||
+            this.state.listConfig.editAccessPolicy?.id ||
+            0}
           ></access-policy-assignment>`,
         shouldShow: () => this.state.hasRole(Role.ACCESS),
       },
