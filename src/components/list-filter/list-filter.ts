@@ -3,6 +3,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
+import { reaction } from 'mobx';
 
 import {
   ListFilterType,
@@ -145,6 +146,14 @@ export class ListFilter extends MobxLitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
+
+    reaction(
+      () => this.state.listConfigId,
+      () => {
+        this.sync();
+      },
+    );
+
     this.sync();
     this.savedFilters = storage.getSavedFilters();
   }
