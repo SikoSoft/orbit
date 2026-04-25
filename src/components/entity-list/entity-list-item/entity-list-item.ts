@@ -352,7 +352,7 @@ export class EntityListItem extends MobxLitElement {
     const value = property.value as ImageDataValue;
 
     return html` <span class="property image"
-      ><img src=${value.src} alt=${value.alt}
+      ><img src=${value.src} alt=${value.alt} crossorigin="anonymous"
     /></span>`;
   }
 
