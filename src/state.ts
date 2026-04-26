@@ -151,7 +151,7 @@ export class AppState {
   public title: string = '';
 
   @observable
-  public assistSaveImage: boolean = false;
+  public assistSaveImage: boolean = true;
 
   @observable
   public online: boolean = true; //typeof navigator !== 'undefined' && navigator.onLine;

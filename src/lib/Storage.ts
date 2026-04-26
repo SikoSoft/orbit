@@ -552,7 +552,7 @@ export class Storage implements StorageSchema {
   }
 
   getAssistSaveImage(): boolean {
-    let enabled = false;
+    let enabled = true;
     try {
       const storedValue = localStorage.getItem(
         StorageItemKey.ASSIST_SAVE_IMAGE,
