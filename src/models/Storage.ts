@@ -130,6 +130,7 @@ export interface StorageSchema {
     password: string,
     firstName: string,
     lastName: string,
+    ott: string,
   ): Promise<StorageResult<CreateAccountResponseBody>>;
   setStorageSource?(source: StorageSource): void;
   getStorageSource?(): StorageSource | null;

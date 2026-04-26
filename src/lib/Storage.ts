@@ -764,6 +764,7 @@ export class Storage implements StorageSchema {
     _password: string,
     _firstName: string,
     _lastName: string,
+    _ott: string,
   ): Promise<StorageResult<CreateAccountResponseBody>> {
     return Promise.resolve({
       isOk: false,

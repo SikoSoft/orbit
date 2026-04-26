@@ -96,10 +96,17 @@ export class AccountForm extends LitElement {
   @state() passwordRepeat: string = '';
   @state() firstName: string = '';
   @state() lastName: string = '';
+  @state() ott: string = '';
   @state() loading: boolean = false;
   @state() validationFailures: ValidationRule[] = [];
 
   private touchedFields = new Set<AccountFormFieldName>();
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    this.ott = new URLSearchParams(window.location.search).get('ott') ?? '';
+    console.log('OTT:', this.ott);
+  }
 
   private get validationErrors(): ValidationRule[] {
     const failures: ValidationRule[] = [];
@@ -197,11 +204,13 @@ export class AccountForm extends LitElement {
 
     this.validationFailures = [];
     this.loading = true;
+    console.log('Creating account with OTT:', this.ott);
     const result = await storage.createAccount(
       this.username,
       this.password,
       this.firstName,
       this.lastName,
+      this.ott,
     );
 
     if (result.isOk) {

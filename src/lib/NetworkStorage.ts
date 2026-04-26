@@ -457,7 +457,9 @@ export class NetworkStorage implements StorageSchema {
     password: string,
     firstName: string,
     lastName: string,
+    ott: string,
   ): Promise<StorageResult<CreateAccountResponseBody>> {
+    console.log('Creating account with OTT:', ott);
     const result = await api.post<
       CreateAccountRequestBody,
       CreateAccountResponseBody
@@ -466,6 +468,7 @@ export class NetworkStorage implements StorageSchema {
       password,
       firstName,
       lastName,
+      ott,
     });
 
     if (result && result.isOk) {

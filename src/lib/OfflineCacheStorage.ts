@@ -717,12 +717,14 @@ export class OfflineCacheStorage implements StorageSchema {
     password: string,
     firstName: string,
     lastName: string,
+    ott: string,
   ): Promise<StorageResult<CreateAccountResponseBody>> {
     return networkStorage.createAccount(
       username,
       password,
       firstName,
       lastName,
+      ott,
     );
   }
 

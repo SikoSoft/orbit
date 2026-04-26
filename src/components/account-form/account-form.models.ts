@@ -34,6 +34,7 @@ export interface CreateAccountRequestBody {
   password: string;
   firstName: string;
   lastName: string;
+  ott: string;
 }
 
 export interface CreateAccountResponseBody {
