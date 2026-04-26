@@ -19,6 +19,7 @@ import { IconName } from '@/components/svg-icon/svg-icon.models';
 import { addToast } from '@/lib/Util';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 import { Role } from 'api-spec/models/Identity';
+import { AssistEntityAddedEvent } from './add-entity-widget.events';
 
 @themed()
 @customElement('add-entity-widget')
@@ -347,10 +348,13 @@ export class AddEntityWidget extends MobxLitElement {
   private async submitImageToApi(file: File): Promise<boolean> {
     const formData = new FormData();
     formData.append('file', file);
-    const result = await api.httpRequest<AssistResponse>(this.buildAssistUrl(), {
-      method: 'post',
-      body: formData,
-    });
+    const result = await api.httpRequest<AssistResponse>(
+      this.buildAssistUrl(),
+      {
+        method: 'post',
+        body: formData,
+      },
+    );
     if (
       !result ||
       serverErrorResponseCodes.includes(result.status) ||
@@ -360,6 +364,7 @@ export class AddEntityWidget extends MobxLitElement {
       return false;
     }
     this.goToFirstMatchingListConfig(result.response.entity);
+    this.dispatchEvent(new AssistEntityAddedEvent({}));
     return true;
   }
 
@@ -370,7 +375,10 @@ export class AddEntityWidget extends MobxLitElement {
       return;
     }
 
-    if (file.name.toLowerCase().endsWith('.zip') || file.type === 'application/zip') {
+    if (
+      file.name.toLowerCase().endsWith('.zip') ||
+      file.type === 'application/zip'
+    ) {
       await this.handleZipFile(file);
     } else {
       await this.handleImageFile(file);
@@ -399,7 +407,8 @@ export class AddEntityWidget extends MobxLitElement {
       const zip = await JSZip.loadAsync(file);
       const imageEntries = Object.values(zip.files).filter(
         entry =>
-          !entry.dir && /\.(jpe?g|png|gif|webp|bmp|heic?|tiff?)$/i.test(entry.name),
+          !entry.dir &&
+          /\.(jpe?g|png|gif|webp|bmp|heic?|tiff?)$/i.test(entry.name),
       );
 
       if (imageEntries.length === 0) {
@@ -421,7 +430,10 @@ export class AddEntityWidget extends MobxLitElement {
         } else {
           failed++;
         }
-        this.zipProgress = { current: added + failed, total: imageEntries.length };
+        this.zipProgress = {
+          current: added + failed,
+          total: imageEntries.length,
+        };
       }
 
       if (added === 0) {
@@ -519,7 +531,8 @@ export class AddEntityWidget extends MobxLitElement {
                 <svg-icon name=${IconName.SPINNER} size="24"></svg-icon>
                 ${this.zipProgress
                   ? html`<span class="zip-progress"
-                      >${this.zipProgress.current}/${this.zipProgress.total}</span
+                      >${this.zipProgress.current}/${this.zipProgress
+                        .total}</span
                     >`
                   : nothing}
               `

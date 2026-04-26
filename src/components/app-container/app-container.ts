@@ -31,6 +31,7 @@ import '@/components/bulk-manager/bulk-manager';
 import '@/components/list-config/list-config';
 import { Introspection } from 'api-spec/models/Introspection';
 import { StorageSource } from '@/models/Storage';
+import { AssistEntityAddedEvent } from '../add-entity-widget/add-entity-widget.events';
 
 export interface ViewChangedEvent extends CustomEvent {
   detail: PageView;
@@ -72,7 +73,10 @@ export class AppContainer extends MobxLitElement {
 
     window.addEventListener('online', this.handleOnline);
     window.addEventListener('offline', this.handleOffline);
-    window.addEventListener('offline-sync-complete', this.handleOfflineSyncComplete);
+    window.addEventListener(
+      'offline-sync-complete',
+      this.handleOfflineSyncComplete,
+    );
     window.addEventListener(
       networkApiRequestFailedEventName,
       this.handleNetworkApiRequestFailed as EventListener,
@@ -101,7 +105,10 @@ export class AppContainer extends MobxLitElement {
     super.disconnectedCallback();
     window.removeEventListener('online', this.handleOnline);
     window.removeEventListener('offline', this.handleOffline);
-    window.removeEventListener('offline-sync-complete', this.handleOfflineSyncComplete);
+    window.removeEventListener(
+      'offline-sync-complete',
+      this.handleOfflineSyncComplete,
+    );
     window.removeEventListener(
       networkApiRequestFailedEventName,
       this.handleNetworkApiRequestFailed as EventListener,
@@ -210,6 +217,14 @@ export class AppContainer extends MobxLitElement {
     this.viewComponent.sync(true);
   }
 
+  private handleAssistEntityAdded(_e: AssistEntityAddedEvent): void {
+    if (!this.viewComponent) {
+      return;
+    }
+
+    this.viewComponent.sync(true);
+  }
+
   private async handleUserLoggedIn(): Promise<void> {
     await this.restoreState();
     this.syncUserData();
@@ -289,6 +304,7 @@ export class AppContainer extends MobxLitElement {
         @user-logged-out=${this.handleUserLoggedOut}
         @invalid-session=${this.clearSession}
         @storage-source-updated=${this.handleStorageSourceUpdated}
+        @assist-entity-added=${this.handleOperationPerformed}
       >
         ${this.ready ? this.routerView : nothing}
       </div>
