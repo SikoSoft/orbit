@@ -1,10 +1,9 @@
 import { defineConfig } from 'vitest/config';
 import { playwright } from '@vitest/browser-playwright';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-  resolve: {
-    tsconfigPaths: true,
-  },
+  plugins: [tsconfigPaths({ projects: ['./tsconfig.eslint.json'] })],
   optimizeDeps: {
     include: [
       'api-spec/models/Entity',
