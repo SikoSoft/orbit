@@ -47,3 +47,6 @@ __azurite_db_*
 __screenshots__/
 .vitest-attachments/
 
+.nvmrc
+
+
