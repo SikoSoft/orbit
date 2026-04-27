@@ -132,7 +132,7 @@ export abstract class AccessPolicyBase extends MobxLitElement {
   }
 
   handleSave(): void {
-    console.info('Not implemented');
+    // not implemented here; saving logic implemented in subclasses since it may differ based on context
   }
 
   protected willUpdate(changedProperties: PropertyValues): void {

@@ -105,7 +105,6 @@ export class AccountForm extends LitElement {
   connectedCallback(): void {
     super.connectedCallback();
     this.ott = new URLSearchParams(window.location.search).get('ott') ?? '';
-    console.log('OTT:', this.ott);
   }
 
   private get validationErrors(): ValidationRule[] {
@@ -204,7 +203,6 @@ export class AccountForm extends LitElement {
 
     this.validationFailures = [];
     this.loading = true;
-    console.log('Creating account with OTT:', this.ott);
     const result = await storage.createAccount(
       this.username,
       this.password,

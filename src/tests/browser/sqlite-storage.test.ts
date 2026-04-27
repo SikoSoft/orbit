@@ -489,7 +489,7 @@ describe('SQLiteStorage', () => {
     });
 
     it('saves (upserts) a list config', async () => {
-      const id = await db.addListConfig();
+      await db.addListConfig();
       const [original] = await db.getListConfigs();
       const result = await db.saveListConfig({ ...original, name: 'My List' });
       expect(result.isOk).toBe(true);

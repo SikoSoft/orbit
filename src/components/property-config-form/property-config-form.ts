@@ -447,7 +447,6 @@ export class PropertyConfigForm extends LitElement {
   }
 
   handleTagsUpdated(e: CustomEvent): void {
-    console.log('Tags updated:', e.detail.tags);
     this.updateField(PropertyConfigFormProp.OPTIONS, e.detail.tags);
   }
 

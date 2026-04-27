@@ -286,14 +286,8 @@ export class BulkManager extends MobxLitElement {
 
   private renderPropertyManager(): TemplateResult | typeof nothing {
     if (!this.showPropertyManager) {
-      console.log('Not showing property manager');
       return nothing;
     }
-
-    console.log(
-      'Showing property manager with instances:',
-      this.propertyInstances,
-    );
 
     return html`
       <div class="property-manager">

@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import type { SqlValue } from '@sqlite.org/sqlite-wasm';
 
 import { EntityConfig, EntityPropertyConfig } from 'api-spec/models/Entity';
@@ -818,7 +817,7 @@ export class OfflineCacheStorage implements StorageSchema {
 
   // ─── Offline Sync ─────────────────────────────────────────────────────────────
 
-  private isTempId(id: string): boolean {
+  private isTempId(_id: string): boolean {
     // List config IDs are UUIDs assigned either locally or by the server.
     // A local UUID is "temp" if it still has an entry waiting in pending_sync.
     // We detect this cheaply by checking if it has a mapping (it would have been

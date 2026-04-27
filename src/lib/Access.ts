@@ -1,5 +1,4 @@
 import { AccessPartyType, AccessPolicy } from 'api-spec/models/Access';
-import { User } from 'api-spec/models/Identity';
 
 export class Access {
   static userHasAccess(

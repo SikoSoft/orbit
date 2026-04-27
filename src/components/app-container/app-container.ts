@@ -63,11 +63,6 @@ export class AppContainer extends MobxLitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    console.log(
-      'result of nav check',
-      typeof navigator !== 'undefined' && navigator.onLine,
-    );
-    //this.state.setOnline(true); //typeof navigator !== 'undefined' && navigator.onLine);
 
     this.setAuthToken(storage.getAuthToken());
 
@@ -116,7 +111,6 @@ export class AppContainer extends MobxLitElement {
   }
 
   private handleOnline = (): void => {
-    console.log('app-container detected online');
     this.state.setOnline(true);
   };
 
@@ -127,7 +121,6 @@ export class AppContainer extends MobxLitElement {
   };
 
   private handleOffline = (): void => {
-    console.log('app-container detected offline');
     this.state.setOnline(false);
   };
 

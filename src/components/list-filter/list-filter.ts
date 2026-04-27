@@ -1,4 +1,4 @@
-import { html, css, nothing, TemplateResult } from 'lit';
+import { html, css, TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -22,7 +22,6 @@ import { NotificationType } from '@ss/ui/components/notification-provider.models
 import { SettingName, TagSuggestions } from 'api-spec/models/Setting';
 
 import { TimeFiltersUpdatedEvent } from '@/components/list-filter/time-filters/time-filters.events';
-import { TextFiltersUpdatedEvent } from '@/components/list-filter/text-filters/text-filters.events';
 import { FilterPropertiesUpdatedEvent } from '@/components/list-filter/filter-properties/filter-properties.events';
 import { ListFilterUpdatedEvent } from './list-filter.events';
 import { TagsUpdatedEvent } from '@ss/ui/components/tag-manager.events';
