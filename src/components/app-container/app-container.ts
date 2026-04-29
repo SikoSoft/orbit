@@ -1,4 +1,4 @@
-import { html, nothing, TemplateResult } from 'lit';
+import { css, html, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 
@@ -21,6 +21,8 @@ import {
   NetworkApiRequestFailedEvent,
   networkApiRequestFailedEventName,
 } from '@/events/network-api-request-failed';
+import { AppReadyEvent } from '@/components/app-container/app-container.events';
+import { translate } from '@/lib/Localization';
 
 import '@/components/entity-form/entity-form';
 import '@/components/entity-list/entity-list';
@@ -29,6 +31,7 @@ import '@/components/floating-widget/floating-widget';
 import '@/components/forbidden-notice/forbidden-notice';
 import '@/components/bulk-manager/bulk-manager';
 import '@/components/list-config/list-config';
+import '@/components/svg-icon/svg/svg-spinner';
 import { Introspection } from 'api-spec/models/Introspection';
 import { StorageSource } from '@/models/Storage';
 import { AssistEntityAddedEvent } from '../add-entity-widget/add-entity-widget.events';
@@ -40,6 +43,20 @@ export interface ViewChangedEvent extends CustomEvent {
 @themed()
 @customElement('app-container')
 export class AppContainer extends MobxLitElement {
+  static styles = css`
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 4rem 0;
+    }
+
+    svg-spinner {
+      width: 36px;
+      height: 36px;
+      color: var(--text-color, #333);
+    }
+  `;
   public state = appState;
   private appRouter?: Router;
   private routerView: HTMLDivElement | null = null;
@@ -137,7 +154,17 @@ export class AppContainer extends MobxLitElement {
     this.state.setAuthToken(authToken);
   }
 
+  protected updated(
+    changedProperties: Map<string | symbol, unknown>,
+  ): void {
+    if (changedProperties.has('ready') && this.ready) {
+      console.log('[orbit] app-container: ready, dispatching app-ready');
+      this.dispatchEvent(new AppReadyEvent({}));
+    }
+  }
+
   private async restoreState(): Promise<void> {
+    console.time('[orbit] restoreState');
     this.ready = false;
     try {
       this.state.setAssistEnabled(import.meta.env.APP_ENABLE_ASSIST === '1');
@@ -147,14 +174,21 @@ export class AppContainer extends MobxLitElement {
         this.state.setStorageSource(storageSource);
       }
 
+      console.log('[orbit] restoreState: storageSource=%s authToken=%s', storageSource, !!this.state.authToken);
+
       if (
         this.state.storageSource === StorageSource.DEVICE ||
         this.state.authToken
       ) {
-        const listConfigs = await storage.getListConfigs();
-        this.state.setListConfigs(listConfigs);
+        console.time('[orbit] restoreState:fetchConfigs');
+        const [listConfigs, entityConfigs] = await Promise.all([
+          storage.getListConfigs(),
+          storage.getEntityConfigs(),
+        ]);
+        console.timeEnd('[orbit] restoreState:fetchConfigs');
+        console.log('[orbit] restoreState: got %d listConfigs, %d entityConfigs', listConfigs.length, entityConfigs.length);
 
-        const entityConfigs = await storage.getEntityConfigs();
+        this.state.setListConfigs(listConfigs);
         this.state.setEntityConfigs(entityConfigs);
 
         const listConfigId = storage.getActiveListConfigId();
@@ -182,9 +216,10 @@ export class AppContainer extends MobxLitElement {
         this.view = view;
       }
     } catch (error) {
-      console.error('something went wrong during restore state', error);
+      console.error('[orbit] restoreState: error', error);
     } finally {
       this.ready = true;
+      console.timeEnd('[orbit] restoreState');
     }
   }
 
@@ -299,7 +334,9 @@ export class AppContainer extends MobxLitElement {
         @storage-source-updated=${this.handleStorageSourceUpdated}
         @assist-entity-added=${this.handleOperationPerformed}
       >
-        ${this.ready ? this.routerView : nothing}
+        ${this.ready
+          ? this.routerView
+          : html`<div class="loading" aria-label=${translate('initializing')}><svg-spinner></svg-spinner></div>`}
       </div>
     `;
   }

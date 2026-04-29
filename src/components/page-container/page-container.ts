@@ -126,12 +126,17 @@ export class PageContainer extends MobxLitElement {
     return defaultTheme;
   }
 
-  firstUpdated(): void {
+  private dismissInitialLoader(): void {
     const loader = document.getElementById('initial-loader');
     if (loader) {
+      console.log('[orbit] page-container: dismissing initial loader');
       loader.style.opacity = '0';
       setTimeout(() => loader.remove(), 300);
     }
+  }
+
+  private handleAppReady(): void {
+    this.dismissInitialLoader();
   }
 
   connectedCallback(): void {
@@ -194,6 +199,7 @@ export class PageContainer extends MobxLitElement {
         <app-container
           @pop-up-opened=${this.handlePopUpOpened}
           @pop-up-closed=${this.handlePopUpClosed}
+          @app-ready=${this.handleAppReady}
         ></app-container>
         <storage-source-prompt></storage-source-prompt>
       </div>

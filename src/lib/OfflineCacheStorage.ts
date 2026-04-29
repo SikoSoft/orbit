@@ -304,8 +304,10 @@ export class OfflineCacheStorage implements StorageSchema {
   // ─── Entity Configs ─────────────────────────────────────────────────────────
 
   async getEntityConfigs(): Promise<EntityConfig[]> {
+    console.time('[orbit] getEntityConfigs');
     if (this.isOnline) {
       try {
+        console.log('[orbit] getEntityConfigs: fetching from network');
         const configs = await networkStorage.getEntityConfigs();
         await this.db.import({
           meta: emptyMeta(),
@@ -313,12 +315,19 @@ export class OfflineCacheStorage implements StorageSchema {
           [ExportDataType.ENTITIES]: [],
           [ExportDataType.LIST_CONFIGS]: [],
         });
+        console.log('[orbit] getEntityConfigs: network returned %d configs', configs.length);
+        console.timeEnd('[orbit] getEntityConfigs');
         return configs;
-      } catch {
-        // fall through to cache
+      } catch (err) {
+        console.warn('[orbit] getEntityConfigs: network failed, falling back to cache', err);
       }
+    } else {
+      console.log('[orbit] getEntityConfigs: offline, reading from cache');
     }
-    return this.db.getEntityConfigs();
+    const configs = await this.db.getEntityConfigs();
+    console.log('[orbit] getEntityConfigs: cache returned %d configs', configs.length);
+    console.timeEnd('[orbit] getEntityConfigs');
+    return configs;
   }
 
   async addEntityConfig(
@@ -564,8 +573,10 @@ export class OfflineCacheStorage implements StorageSchema {
   // ─── List Configs ────────────────────────────────────────────────────────────
 
   async getListConfigs(): Promise<ListConfig[]> {
+    console.time('[orbit] getListConfigs');
     if (this.isOnline) {
       try {
+        console.log('[orbit] getListConfigs: fetching from network');
         const configs = await networkStorage.getListConfigs();
         await this.db.import({
           meta: emptyMeta(),
@@ -573,12 +584,19 @@ export class OfflineCacheStorage implements StorageSchema {
           [ExportDataType.ENTITIES]: [],
           [ExportDataType.LIST_CONFIGS]: configs,
         });
+        console.log('[orbit] getListConfigs: network returned %d configs', configs.length);
+        console.timeEnd('[orbit] getListConfigs');
         return configs;
-      } catch {
-        // fall through to cache
+      } catch (err) {
+        console.warn('[orbit] getListConfigs: network failed, falling back to cache', err);
       }
+    } else {
+      console.log('[orbit] getListConfigs: offline, reading from cache');
     }
-    return this.db.getListConfigs();
+    const configs = await this.db.getListConfigs();
+    console.log('[orbit] getListConfigs: cache returned %d configs', configs.length);
+    console.timeEnd('[orbit] getListConfigs');
+    return configs;
   }
 
   async addListConfig(): Promise<string> {

@@ -1,3 +1,17 @@
+export const appReadyEventName = 'app-ready';
+
+export type AppReadyPayload = Record<string, never>;
+
+export class AppReadyEvent extends CustomEvent<AppReadyPayload> {
+  constructor(detail: AppReadyPayload) {
+    super(appReadyEventName, {
+      detail,
+      bubbles: true,
+      composed: true,
+    });
+  }
+}
+
 export const viewReadyEventName = 'view-ready';
 
 export type ViewReadyPayload = Record<string, never>;
