@@ -283,6 +283,8 @@
   "updatePassword": "Update Password",
   "passwordUpdated": "Password updated successfully.",
   "passwordUpdateFailed": "Failed to update password. Please try again.",
+  "currentPassword": "Current Password",
+  "currentPasswordRequired": "Current password is required.",
   "newPassword": "New Password",
   "confirmNewPassword": "Confirm New Password"
 }

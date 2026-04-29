@@ -49,4 +49,5 @@ export interface UpdateAccountRequestBody {
 
 export interface UpdatePasswordRequestBody {
   password: string;
+  currentPassword: string;
 }

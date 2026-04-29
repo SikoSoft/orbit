@@ -87,6 +87,7 @@ export class PasswordForm extends LitElement {
     }
   `;
 
+  @state() currentPassword: string = '';
   @state() password: string = '';
   @state() passwordRepeat: string = '';
   @state() loading: boolean = false;
@@ -96,6 +97,10 @@ export class PasswordForm extends LitElement {
 
   private get validationErrors(): PasswordValidationRule[] {
     const failures: PasswordValidationRule[] = [];
+
+    if (!this.currentPassword.length) {
+      failures.push(PasswordValidationRule.CURRENT_PASSWORD_REQUIRED);
+    }
 
     if (!this.password.length) {
       failures.push(PasswordValidationRule.PASSWORD_REQUIRED);
@@ -139,6 +144,7 @@ export class PasswordForm extends LitElement {
   }
 
   private reset(): void {
+    this.currentPassword = '';
     this.password = '';
     this.passwordRepeat = '';
     this.validationFailures = [];
@@ -179,7 +185,10 @@ export class PasswordForm extends LitElement {
     this.validationFailures = [];
     this.loading = true;
 
-    const result = await storage.updatePassword({ password: this.password });
+    const result = await storage.updatePassword({
+      password: this.password,
+      currentPassword: this.currentPassword,
+    });
 
     if (result.isOk) {
       addToast(translate('passwordUpdated'), NotificationType.SUCCESS);
@@ -225,6 +234,7 @@ export class PasswordForm extends LitElement {
 
         <form class="form">
           <div class="field-group">
+            ${this.renderField(PasswordFormField.CURRENT_PASSWORD, 'currentPassword')}
             ${this.renderField(PasswordFormField.PASSWORD, 'newPassword')}
             ${this.renderField(PasswordFormField.PASSWORD_REPEAT, 'confirmNewPassword')}
           </div>
