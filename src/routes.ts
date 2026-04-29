@@ -53,4 +53,10 @@ export const routes: Route[] = [
     action: async () =>
       await import('@/views/access-policies-view/access-policies-view'),
   },
+  {
+    path: '/password',
+    component: 'reset-password-view',
+    action: async () =>
+      await import('@/views/reset-password-view/reset-password-view'),
+  },
 ];

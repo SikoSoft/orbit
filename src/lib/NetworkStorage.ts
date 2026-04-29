@@ -501,10 +501,7 @@ export class NetworkStorage implements StorageSchema {
   async updatePassword(
     body: UpdatePasswordRequestBody,
   ): Promise<StorageResult<void>> {
-    const result = await api.post<UpdatePasswordRequestBody, void>(
-      'user',
-      body,
-    );
+    const result = await api.put<UpdatePasswordRequestBody, void>('user', body);
 
     if (result && result.isOk) {
       return { isOk: true, value: undefined };
