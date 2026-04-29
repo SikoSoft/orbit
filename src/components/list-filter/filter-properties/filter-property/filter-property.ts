@@ -11,7 +11,7 @@ import {
   IntDataValue,
   PropertyDataValue,
 } from 'api-spec/models/Entity';
-import { FilterProperty } from 'api-spec/models/List';
+import { FilterProperty, TextType } from 'api-spec/models/List';
 import { translate } from '@/lib/Localization';
 import { appState } from '@/state';
 
@@ -76,6 +76,10 @@ export class FilterPropertyElement extends MobxLitElement {
   [FilterPropertyProp.INCLUDE_TYPES]: FilterPropertyProps[FilterPropertyProp.INCLUDE_TYPES] =
     filterPropertyProps[FilterPropertyProp.INCLUDE_TYPES].default;
 
+  @property({ type: String })
+  [FilterPropertyProp.OPERATION]: FilterPropertyProps[FilterPropertyProp.OPERATION] =
+    filterPropertyProps[FilterPropertyProp.OPERATION].default;
+
   @state()
   get uiId(): string {
     return `filter-property-${this.index}`;
@@ -118,6 +122,14 @@ export class FilterPropertyElement extends MobxLitElement {
       }
     }
     return null;
+  }
+
+  @state()
+  get operationOptions(): { label: string; value: string }[] {
+    return Object.values(TextType).map(value => ({
+      label: translate(`textType.${value}`),
+      value,
+    }));
   }
 
   @state()
@@ -164,6 +176,7 @@ export class FilterPropertyElement extends MobxLitElement {
     const filter: FilterProperty = {
       propertyId: propertyConfigId,
       value: defaultValue,
+      operation: this.operation,
     };
 
     this.dispatchEvent(
@@ -175,6 +188,19 @@ export class FilterPropertyElement extends MobxLitElement {
     const filter: FilterProperty = {
       propertyId: this.propertyConfigId,
       value: e.detail.value,
+      operation: this.operation,
+    };
+
+    this.dispatchEvent(
+      new FilterPropertyUpdatedEvent({ index: this.index, filter }),
+    );
+  }
+
+  private handleOperationChanged(e: SelectChangedEvent<string>): void {
+    const filter: FilterProperty = {
+      propertyId: this.propertyConfigId,
+      value: this.value ?? '',
+      operation: e.detail.value as TextType,
     };
 
     this.dispatchEvent(
@@ -266,6 +292,14 @@ export class FilterPropertyElement extends MobxLitElement {
             ]}
             @select-changed=${(e: SelectChangedEvent<string>): void => {
               this.handlePropertyTypeChanged(e);
+            }}
+          ></ss-select>
+
+          <ss-select
+            selected=${this.operation}
+            .options=${this.operationOptions}
+            @select-changed=${(e: SelectChangedEvent<string>): void => {
+              this.handleOperationChanged(e);
             }}
           ></ss-select>
 

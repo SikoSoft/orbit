@@ -1,12 +1,14 @@
 import { ControlType } from '@/models/Control';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
 import { PropertyDataValue } from 'api-spec/models/Entity';
+import { TextType } from 'api-spec/models/List';
 
 export enum FilterPropertyProp {
   PROPERTY_CONFIG_ID = 'propertyConfigId',
   VALUE = 'value',
   INDEX = 'index',
   INCLUDE_TYPES = 'includeTypes',
+  OPERATION = 'operation',
 }
 
 export interface FilterPropertyProps extends PropTypes {
@@ -14,6 +16,7 @@ export interface FilterPropertyProps extends PropTypes {
   [FilterPropertyProp.VALUE]: PropertyDataValue | null;
   [FilterPropertyProp.INDEX]: number;
   [FilterPropertyProp.INCLUDE_TYPES]: number[];
+  [FilterPropertyProp.OPERATION]: TextType;
 }
 
 export const filterPropertyProps: PropConfigMap<FilterPropertyProps> = {
@@ -36,5 +39,10 @@ export const filterPropertyProps: PropConfigMap<FilterPropertyProps> = {
     default: [],
     control: { type: ControlType.HIDDEN },
     description: 'The list of property types that can be filtered on',
+  },
+  [FilterPropertyProp.OPERATION]: {
+    default: TextType.EQUALS,
+    control: { type: ControlType.SELECT, options: Object.values(TextType) },
+    description: 'The comparison operation for this property filter',
   },
 };

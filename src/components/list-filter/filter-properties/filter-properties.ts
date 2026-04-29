@@ -2,7 +2,7 @@ import { css, html, LitElement, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { FilterProperty } from 'api-spec/models/List';
+import { FilterProperty, TextType } from 'api-spec/models/List';
 import { translate } from '@/lib/Localization';
 
 import {
@@ -59,7 +59,7 @@ export class FilterProperties extends LitElement {
   private handleAddFilter(): void {
     const filters: FilterProperty[] = [
       ...this.filters,
-      { propertyId: 0, value: '' },
+      { propertyId: 0, value: '', operation: TextType.EQUALS },
     ];
     this.dispatchEvent(new FilterPropertiesUpdatedEvent({ filters }));
   }
@@ -79,6 +79,7 @@ export class FilterProperties extends LitElement {
                 index=${index}
                 propertyConfigId=${filter.propertyId}
                 .value=${filter.value}
+                operation=${filter.operation ?? TextType.EQUALS}
                 @filter-property-updated=${(
                   e: FilterPropertyUpdatedEvent,
                 ): void => {

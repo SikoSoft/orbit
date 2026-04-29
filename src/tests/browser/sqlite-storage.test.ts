@@ -12,6 +12,7 @@ import {
   defaultListSort,
   ListSortDirection,
   ListSortNativeProperty,
+  TextType,
 } from 'api-spec/models/List';
 import { OperationType } from 'api-spec/models/Operation';
 import { SettingName } from 'api-spec/models/Setting';
@@ -396,7 +397,7 @@ describe('SQLiteStorage', () => {
         {
           ...defaultListFilter,
           includeAll: false,
-          properties: [{ propertyId: propConfigId, value: 'red' }],
+          properties: [{ propertyId: propConfigId, value: 'red', operation: TextType.EQUALS }],
         },
         defaultListSort,
       );
