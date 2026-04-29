@@ -22,6 +22,8 @@ import {
 import {
   CreateAccountRequestBody,
   CreateAccountResponseBody,
+  UpdateAccountRequestBody,
+  UpdatePasswordRequestBody,
 } from '@/components/account-form/account-form.models';
 import {
   AccessPolicy,
@@ -481,6 +483,34 @@ export class NetworkStorage implements StorageSchema {
       isOk: false,
       error: new Error('Failed to create account'),
     };
+  }
+
+  async updateAccount(
+    body: UpdateAccountRequestBody,
+  ): Promise<StorageResult<void>> {
+    console.log('updateAccount!!');
+    const result = await api.put<UpdateAccountRequestBody, void>('user', body);
+
+    if (result && result.isOk) {
+      return { isOk: true, value: undefined };
+    }
+
+    return { isOk: false, error: new Error('Failed to update account') };
+  }
+
+  async updatePassword(
+    body: UpdatePasswordRequestBody,
+  ): Promise<StorageResult<void>> {
+    const result = await api.post<UpdatePasswordRequestBody, void>(
+      'user',
+      body,
+    );
+
+    if (result && result.isOk) {
+      return { isOk: true, value: undefined };
+    }
+
+    return { isOk: false, error: new Error('Failed to update password') };
   }
 
   async getParties(query: string): Promise<StorageResult<AccessPolicyParty[]>> {

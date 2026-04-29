@@ -276,5 +276,13 @@
   "signUp": "Sign Up",
   "propertyFilters": "Property Filters",
   "addPropertyFilter": "Add Property Filter",
-  "selectProperty": "Select property"
+  "selectProperty": "Select property",
+  "updateAccount": "Update Account",
+  "accountUpdated": "Account updated successfully.",
+  "accountUpdateFailed": "Failed to update account. Please try again.",
+  "updatePassword": "Update Password",
+  "passwordUpdated": "Password updated successfully.",
+  "passwordUpdateFailed": "Failed to update password. Please try again.",
+  "newPassword": "New Password",
+  "confirmNewPassword": "Confirm New Password"
 }

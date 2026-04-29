@@ -22,7 +22,11 @@ import {
   EntityListResult,
   PublicEntityListResult,
 } from '@/components/entity-list/entity-list.models';
-import { CreateAccountResponseBody } from '@/components/account-form/account-form.models';
+import {
+  CreateAccountResponseBody,
+  UpdateAccountRequestBody,
+  UpdatePasswordRequestBody,
+} from '@/components/account-form/account-form.models';
 
 import { SQLiteStorage, serializePropertyValue } from './SQLiteStorage';
 import { networkStorage } from './NetworkStorage';
@@ -725,6 +729,18 @@ export class OfflineCacheStorage implements StorageSchema {
       lastName,
       ott,
     );
+  }
+
+  async updateAccount(
+    body: UpdateAccountRequestBody,
+  ): Promise<StorageResult<void>> {
+    return networkStorage.updateAccount(body);
+  }
+
+  async updatePassword(
+    body: UpdatePasswordRequestBody,
+  ): Promise<StorageResult<void>> {
+    return networkStorage.updatePassword(body);
   }
 
   async getParties(query: string): Promise<StorageResult<AccessPolicyParty[]>> {

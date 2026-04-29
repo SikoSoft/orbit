@@ -61,12 +61,14 @@ export class SettingForm extends MobxLitElement {
           .options=${setting.control.options}
           @setting-updated=${this.handleSettingUpdated}
         ></select-setting>`;
+      /*
       case ControlType.TEXT:
         return html`<text-setting
           name=${setting.name}
           value=${this.state.listConfig.setting[setting.name]}
           @setting-updated=${this.handleSettingUpdated}
         ></text-setting>`;
+        */
     }
   }
 

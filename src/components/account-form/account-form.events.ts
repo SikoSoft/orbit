@@ -13,3 +13,21 @@ export class AccountCreatedEvent extends CustomEvent<AccountCreatedEventPayload>
     });
   }
 }
+
+export const accountUpdatedEventName = 'account-updated';
+
+export interface AccountUpdatedEventPayload {
+  firstName: string;
+  lastName: string;
+  username: string;
+}
+
+export class AccountUpdatedEvent extends CustomEvent<AccountUpdatedEventPayload> {
+  constructor(payload: AccountUpdatedEventPayload) {
+    super(accountUpdatedEventName, {
+      bubbles: true,
+      composed: true,
+      detail: payload,
+    });
+  }
+}

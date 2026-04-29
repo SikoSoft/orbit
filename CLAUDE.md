@@ -84,6 +84,16 @@ Keep `api-spec` version in sync when making API contract changes. Internal packa
 - Every function must include a return type
 - SVG icons should never be inserted inline. Create new component for icon if it doesn't exist in `components/svg-icon/svg`
 
+## Storage layer
+
+`OFFLINE_CACHE_ENABLED = true` in `src/lib/Storage.ts`, so the active delegate is `OfflineCacheStorage`, not `NetworkStorage`. The `@delegateSource()` decorator routes calls to the first active delegate that has the method.
+
+**When adding a new storage method:**
+1. Add the signature to `StorageSchema` (`src/models/Storage.ts`)
+2. Implement it in `NetworkStorage` (`src/lib/NetworkStorage.ts`)
+3. Add a `@delegateSource()` stub in `Storage` (`src/lib/Storage.ts`)
+4. Add a pass-through in `OfflineCacheStorage` (`src/lib/OfflineCacheStorage.ts`) — either delegating to `networkStorage` directly (network-only ops) or with offline queue logic (cacheable ops). **Skipping step 4 means the method is never called.**
+
 ## Extra rules
 
 - Keep all edits, reads and and shell commands confined to this projects root directory or its subdirectories. Do not traverse into directories outside of this projects root

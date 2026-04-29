@@ -12,7 +12,11 @@ import { ThemeName } from './Page';
 import { RequestBody } from '@/components/entity-form/entity-form.models';
 import { BulkOperationPayload } from '@/components/bulk-manager/bulk-manager.models';
 import { EntityListResult } from '@/components/entity-list/entity-list.models';
-import { CreateAccountResponseBody } from '@/components/account-form/account-form.models';
+import {
+  CreateAccountResponseBody,
+  UpdateAccountRequestBody,
+  UpdatePasswordRequestBody,
+} from '@/components/account-form/account-form.models';
 
 export enum StorageItemKey {
   ACTIVE_LIST_FILTER_KEY = 'listFilter',
@@ -132,6 +136,12 @@ export interface StorageSchema {
     lastName: string,
     ott: string,
   ): Promise<StorageResult<CreateAccountResponseBody>>;
+  updateAccount?(
+    body: UpdateAccountRequestBody,
+  ): Promise<StorageResult<void>>;
+  updatePassword?(
+    body: UpdatePasswordRequestBody,
+  ): Promise<StorageResult<void>>;
   setStorageSource?(source: StorageSource): void;
   getStorageSource?(): StorageSource | null;
   setAssistSaveImage?(enabled: boolean): void;

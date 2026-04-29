@@ -40,3 +40,13 @@ export interface CreateAccountRequestBody {
 export interface CreateAccountResponseBody {
   id: string;
 }
+
+export interface UpdateAccountRequestBody {
+  firstName: string;
+  lastName: string;
+  username: string;
+}
+
+export interface UpdatePasswordRequestBody {
+  password: string;
+}

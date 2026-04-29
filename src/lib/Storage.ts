@@ -37,7 +37,11 @@ import {
   EntityListResult,
   PublicEntityListResult,
 } from '@/components/entity-list/entity-list.models';
-import { CreateAccountResponseBody } from '@/components/account-form/account-form.models';
+import {
+  CreateAccountResponseBody,
+  UpdateAccountRequestBody,
+  UpdatePasswordRequestBody,
+} from '@/components/account-form/account-form.models';
 import {
   AccessPolicy,
   AccessPolicyGroup,
@@ -770,6 +774,20 @@ export class Storage implements StorageSchema {
       isOk: false,
       error: new Error('Not implemented'),
     });
+  }
+
+  @delegateSource()
+  async updateAccount(
+    _body: UpdateAccountRequestBody,
+  ): Promise<StorageResult<void>> {
+    return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
+  }
+
+  @delegateSource()
+  async updatePassword(
+    _body: UpdatePasswordRequestBody,
+  ): Promise<StorageResult<void>> {
+    return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
   }
 
   @delegateSource()

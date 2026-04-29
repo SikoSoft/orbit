@@ -1020,8 +1020,6 @@
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
-        "entityNameSingular": "action",
-        "entityNamePlural": "actions",
         "tagSuggestions": "disabled",
         "public": false
       },
@@ -1052,8 +1050,6 @@
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
-        "entityNameSingular": "action",
-        "entityNamePlural": "actions",
         "tagSuggestions": "disabled",
         "public": false
       },
@@ -1084,8 +1080,6 @@
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
-        "entityNameSingular": "action",
-        "entityNamePlural": "actions",
         "tagSuggestions": "disabled",
         "public": false
       },
@@ -1116,8 +1110,6 @@
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
-        "entityNameSingular": "action",
-        "entityNamePlural": "actions",
         "tagSuggestions": "disabled",
         "public": false
       },
@@ -1148,8 +1140,6 @@
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
-        "entityNameSingular": "action",
-        "entityNamePlural": "actions",
         "tagSuggestions": "disabled",
         "public": false
       },
@@ -1180,8 +1170,6 @@
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
-        "entityNameSingular": "action",
-        "entityNamePlural": "actions",
         "tagSuggestions": "disabled",
         "public": false
       },
@@ -1212,8 +1200,6 @@
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
-        "entityNameSingular": "action",
-        "entityNamePlural": "actions",
         "tagSuggestions": "disabled",
         "public": false
       },
@@ -1244,8 +1230,6 @@
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
-        "entityNameSingular": "action",
-        "entityNamePlural": "actions",
         "tagSuggestions": "disabled",
         "public": false
       },
@@ -1276,8 +1260,6 @@
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
-        "entityNameSingular": "action",
-        "entityNamePlural": "actions",
         "tagSuggestions": "disabled",
         "public": false
       },
@@ -1308,8 +1290,6 @@
       "setting": {
         "paginationType": "lazy",
         "paginationPageSize": 10,
-        "entityNameSingular": "action",
-        "entityNamePlural": "actions",
         "tagSuggestions": "disabled",
         "public": false
       },

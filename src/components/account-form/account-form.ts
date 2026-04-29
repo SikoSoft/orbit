@@ -6,6 +6,7 @@ import { NotificationType } from '@ss/ui/components/notification-provider.models
 import { performLogin } from '@/lib/Auth';
 import { navigate } from '@/lib/Router';
 import { UserLoggedInEvent } from '@/events/user-logged-in';
+import { appState } from '@/state';
 
 import {
   AccountFormField,
@@ -24,7 +25,10 @@ import {
   InputChangedEvent,
   InputSubmittedEvent,
 } from '@ss/ui/components/ss-input.events';
-import { AccountCreatedEvent } from './account-form.events';
+import {
+  AccountCreatedEvent,
+  AccountUpdatedEvent,
+} from './account-form.events';
 import { themed } from '@/lib/Theme';
 import { storage } from '@/lib/Storage';
 
@@ -102,9 +106,19 @@ export class AccountForm extends LitElement {
 
   private touchedFields = new Set<AccountFormFieldName>();
 
+  private get isUpdateMode(): boolean {
+    return !!appState.user;
+  }
+
   connectedCallback(): void {
     super.connectedCallback();
     this.ott = new URLSearchParams(window.location.search).get('ott') ?? '';
+
+    if (appState.user) {
+      this.firstName = appState.user.firstName;
+      this.lastName = appState.user.lastName;
+      this.username = appState.user.username;
+    }
   }
 
   private get validationErrors(): ValidationRule[] {
@@ -119,10 +133,13 @@ export class AccountForm extends LitElement {
     if (!this.username.length) {
       failures.push(ValidationRule.USERNAME_REQUIRED);
     }
-    if (!this.password.length) {
-      failures.push(ValidationRule.PASSWORD_REQUIRED);
-    } else if (this.password !== this.passwordRepeat) {
-      failures.push(ValidationRule.PASSWORDS_MUST_MATCH);
+
+    if (!this.isUpdateMode) {
+      if (!this.password.length) {
+        failures.push(ValidationRule.PASSWORD_REQUIRED);
+      } else if (this.password !== this.passwordRepeat) {
+        failures.push(ValidationRule.PASSWORDS_MUST_MATCH);
+      }
     }
 
     return failures;
@@ -203,6 +220,17 @@ export class AccountForm extends LitElement {
 
     this.validationFailures = [];
     this.loading = true;
+
+    if (this.isUpdateMode) {
+      await this.updateAccount();
+    } else {
+      await this.createAccount();
+    }
+
+    this.loading = false;
+  }
+
+  private async createAccount(): Promise<void> {
     const result = await storage.createAccount(
       this.username,
       this.password,
@@ -222,8 +250,25 @@ export class AccountForm extends LitElement {
         navigate('/');
       }
     }
+  }
 
-    this.loading = false;
+  private async updateAccount(): Promise<void> {
+    console.log('update account');
+    const { firstName, lastName, username } = this;
+    const result = await storage.updateAccount({
+      firstName,
+      lastName,
+      username,
+    });
+
+    if (result.isOk) {
+      addToast(translate('accountUpdated'), NotificationType.SUCCESS);
+      this.dispatchEvent(
+        new AccountUpdatedEvent({ firstName, lastName, username }),
+      );
+    } else {
+      addToast(translate('accountUpdateFailed'), NotificationType.ERROR);
+    }
   }
 
   private renderField(
@@ -254,9 +299,16 @@ export class AccountForm extends LitElement {
   }
 
   render(): TemplateResult {
+    const heading = this.isUpdateMode
+      ? translate('updateAccount')
+      : translate('createAccount');
+    const buttonText = this.isUpdateMode
+      ? translate('update')
+      : translate('signUp');
+
     return html`
       <div class="box">
-        <h2>${translate('createAccount')}</h2>
+        <h2>${heading}</h2>
 
         <form class="form">
           <div class="field-group">
@@ -268,23 +320,27 @@ export class AccountForm extends LitElement {
             ${this.renderField(AccountFormField.USERNAME, 'username')}
           </div>
 
-          <div class="field-group">
-            ${this.renderField(
-              AccountFormField.PASSWORD,
-              'password',
-              InputType.PASSWORD,
-            )}
-            ${this.renderField(
-              AccountFormField.PASSWORD_REPEAT,
-              'confirmPassword',
-              InputType.PASSWORD,
-            )}
-          </div>
+          ${!this.isUpdateMode
+            ? html`
+                <div class="field-group">
+                  ${this.renderField(
+                    AccountFormField.PASSWORD,
+                    'password',
+                    InputType.PASSWORD,
+                  )}
+                  ${this.renderField(
+                    AccountFormField.PASSWORD_REPEAT,
+                    'confirmPassword',
+                    InputType.PASSWORD,
+                  )}
+                </div>
+              `
+            : ''}
 
           <div class="actions">
             <ss-button
               @click=${this.save}
-              text=${translate('signUp')}
+              text=${buttonText}
               ?loading=${this.loading}
             ></ss-button>
           </div>
