@@ -130,8 +130,7 @@ export class PageContainer extends MobxLitElement {
     const loader = document.getElementById('initial-loader');
     if (loader) {
       console.log('[orbit] page-container: dismissing initial loader');
-      loader.style.opacity = '0';
-      setTimeout(() => loader.remove(), 300);
+      loader.remove();
     }
   }
 

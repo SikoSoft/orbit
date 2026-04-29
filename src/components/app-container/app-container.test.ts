@@ -54,7 +54,7 @@ describe('app-container', () => {
     el.ready = false;
     await el.updateComplete;
     const container = el.shadowRoot!.querySelector('.app-container');
-    expect(container!.children.length).toBe(0);
+    expect(container!.querySelector('.loading')).toBeTruthy();
   });
 
   it('renders routerView when ready is true', async () => {

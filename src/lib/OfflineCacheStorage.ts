@@ -309,12 +309,12 @@ export class OfflineCacheStorage implements StorageSchema {
       try {
         console.log('[orbit] getEntityConfigs: fetching from network');
         const configs = await networkStorage.getEntityConfigs();
-        await this.db.import({
+        this.db.import({
           meta: emptyMeta(),
           [ExportDataType.ENTITY_CONFIGS]: configs,
           [ExportDataType.ENTITIES]: [],
           [ExportDataType.LIST_CONFIGS]: [],
-        });
+        }).catch(err => console.warn('[orbit] getEntityConfigs: cache write failed', err));
         console.log('[orbit] getEntityConfigs: network returned %d configs', configs.length);
         console.timeEnd('[orbit] getEntityConfigs');
         return configs;
@@ -578,12 +578,12 @@ export class OfflineCacheStorage implements StorageSchema {
       try {
         console.log('[orbit] getListConfigs: fetching from network');
         const configs = await networkStorage.getListConfigs();
-        await this.db.import({
+        this.db.import({
           meta: emptyMeta(),
           [ExportDataType.ENTITY_CONFIGS]: [],
           [ExportDataType.ENTITIES]: [],
           [ExportDataType.LIST_CONFIGS]: configs,
-        });
+        }).catch(err => console.warn('[orbit] getListConfigs: cache write failed', err));
         console.log('[orbit] getListConfigs: network returned %d configs', configs.length);
         console.timeEnd('[orbit] getListConfigs');
         return configs;
