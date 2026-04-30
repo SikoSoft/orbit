@@ -9,6 +9,7 @@ import {
   settingsConfig,
   ControlType,
   SettingConfig,
+  SettingName,
 } from 'api-spec/models/Setting';
 import { appState } from '@/state';
 import { addToast } from '@/lib/Util';
@@ -37,18 +38,36 @@ export class SettingForm extends MobxLitElement {
   [SettingFormProp.LIST_CONFIG_ID]: SettingFormProps[SettingFormProp.LIST_CONFIG_ID] =
     settingFormProps[SettingFormProp.LIST_CONFIG_ID].default;
 
+  protected get visibleSettings(): SettingConfig[] {
+    return Object.values(settingsConfig);
+  }
+
+  protected getSettingValue(name: SettingName): unknown {
+    return this.state.listConfig.setting[name];
+  }
+
+  protected async doSave(setting: Setting): Promise<boolean> {
+    return storage.saveSetting(
+      setting,
+      this[SettingFormProp.LIST_CONFIG_ID] || undefined,
+    );
+  }
+
+  protected onSaved(_setting: Setting): void {}
+
   renderSetting(setting: SettingConfig): TemplateResult {
+    const value = this.getSettingValue(setting.name);
     switch (setting.control.type) {
       case ControlType.BOOLEAN:
         return html`<boolean-setting
           name=${setting.name}
-          .value=${this.state.listConfig.setting[setting.name]}
+          .value=${value}
           @setting-updated=${this.handleSettingUpdated}
         ></boolean-setting>`;
       case ControlType.NUMBER:
         return html`<number-setting
           name=${setting.name}
-          value=${this.state.listConfig.setting[setting.name]}
+          value=${value}
           min=${ifDefined(setting.control.min)}
           max=${ifDefined(setting.control.max)}
           step=${ifDefined(setting.control.step)}
@@ -57,7 +76,7 @@ export class SettingForm extends MobxLitElement {
       case ControlType.SELECT:
         return html`<select-setting
           name=${setting.name}
-          value=${this.state.listConfig.setting[setting.name]}
+          value=${value}
           .options=${setting.control.options}
           @setting-updated=${this.handleSettingUpdated}
         ></select-setting>`;
@@ -65,7 +84,7 @@ export class SettingForm extends MobxLitElement {
       case ControlType.TEXT:
         return html`<text-setting
           name=${setting.name}
-          value=${this.state.listConfig.setting[setting.name]}
+          value=${value}
           @setting-updated=${this.handleSettingUpdated}
         ></text-setting>`;
         */
@@ -78,12 +97,9 @@ export class SettingForm extends MobxLitElement {
     this.saveDebouncer.cancel();
     this.saveDebouncer.debounce(async () => {
       const setting = event.detail as Setting;
-      const isOk = await storage.saveSetting(
-        this[SettingFormProp.LIST_CONFIG_ID],
-        setting,
-      );
+      const isOk = await this.doSave(setting);
       if (isOk) {
-        this.state.setSetting(setting);
+        this.onSaved(setting);
         addToast(translate('settingUpdated'), NotificationType.SUCCESS);
         return;
       }
@@ -95,9 +111,7 @@ export class SettingForm extends MobxLitElement {
   render(): TemplateResult {
     return html`
       <form>
-        ${Object.values(settingsConfig).map(setting =>
-          this.renderSetting(setting),
-        )}
+        ${this.visibleSettings.map(setting => this.renderSetting(setting))}
       </form>
     `;
   }

@@ -530,7 +530,7 @@ describe('SQLiteStorage', () => {
 
     it('saves a setting within a list config', async () => {
       const id = await db.addListConfig();
-      await db.saveSetting(id, { name: SettingName.PUBLIC, value: true });
+      await db.saveSetting({ name: SettingName.PUBLIC, value: true }, id);
       const [config] = await db.getListConfigs();
       expect(
         (config.setting as Record<string, unknown>)[SettingName.PUBLIC],

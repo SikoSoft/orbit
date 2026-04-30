@@ -680,15 +680,19 @@ export class OfflineCacheStorage implements StorageSchema {
     return true;
   }
 
-  async saveSetting(listConfigId: string, setting: Setting): Promise<boolean> {
-    await this.db.saveSetting(listConfigId, setting);
+  async saveSetting(setting: Setting, listConfigId?: string, isSystem?: boolean): Promise<boolean> {
+    if (listConfigId) {
+      await this.db.saveSetting(setting, listConfigId);
 
-    if (this.isOnline && !this.isTempId(listConfigId)) {
-      return networkStorage.saveSetting(listConfigId, setting);
+      if (this.isOnline && !this.isTempId(listConfigId)) {
+        return networkStorage.saveSetting(setting, listConfigId);
+      }
+
+      await this.db.enqueue('saveSetting', [setting, listConfigId]);
+      return true;
     }
 
-    await this.db.enqueue('saveSetting', [listConfigId, setting]);
-    return true;
+    return networkStorage.saveSetting(setting, undefined, isSystem);
   }
 
   // ─── Import / Export / Clear ─────────────────────────────────────────────────
@@ -1101,10 +1105,10 @@ export class OfflineCacheStorage implements StorageSchema {
 
       case 'saveSetting': {
         const listConfigId = await this.db.resolveStrId(
-          args[0] as string,
+          args[1] as string,
           'list_config',
         );
-        await networkStorage.saveSetting(listConfigId, args[1] as Setting);
+        await networkStorage.saveSetting(args[0] as Setting, listConfigId);
         break;
       }
 

@@ -24,7 +24,7 @@ import '@ss/ui/components/ss-carousel';
 import '@ss/ui/components/ss-select';
 import '@ss/ui/components/confirmation-modal';
 import '@ss/ui/components/pop-up';
-import '@/components/setting/setting-form/setting-form';
+import '@/components/setting/list-settings/list-settings';
 import '@/components/list-filter/list-filter';
 import '@/components/list-sort/list-sort';
 import '@/components/theme-manager/theme-manager';
@@ -668,10 +668,10 @@ export class ListConfig extends MobxLitElement {
           ?open=${this.settingIsOpen}
           @toggled=${this.toggleSetting}
         >
-          <setting-form
+          <list-settings
             listConfigId=${this.state.listConfigId}
             @setting-updated=${this.handleSettingUpdated}
-          ></setting-form>
+          ></list-settings>
 
           ${this.state.listConfig && this.state.listConfig.setting.public
             ? html`<div class="public-link">

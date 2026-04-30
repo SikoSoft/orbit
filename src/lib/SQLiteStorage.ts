@@ -804,7 +804,11 @@ export class SQLiteStorage implements StorageSchema {
     return true;
   }
 
-  async saveSetting(listConfigId: string, setting: Setting): Promise<boolean> {
+  async saveSetting(setting: Setting, listConfigId?: string): Promise<boolean> {
+    if (!listConfigId) {
+      return false;
+    }
+
     const rows = await this.execRows(
       'SELECT setting FROM list_config WHERE id = ?',
       [listConfigId],
