@@ -26,7 +26,7 @@ import {
   StorageSchema,
   StorageSource,
 } from '@/models/Storage';
-import { Setting } from 'api-spec/models/Setting';
+import { Setting, Settings } from 'api-spec/models/Setting';
 import { EntityConfig, EntityPropertyConfig } from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
 import { translate } from './Localization';
@@ -441,6 +441,11 @@ export class Storage implements StorageSchema {
     }
 
     return authToken;
+  }
+
+  @delegateSource()
+  async getSettings(): Promise<{ user: Settings; system: Settings }> {
+    return Promise.reject();
   }
 
   @delegateSource()

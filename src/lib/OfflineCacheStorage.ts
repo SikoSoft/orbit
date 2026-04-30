@@ -3,7 +3,7 @@ import type { SqlValue } from '@sqlite.org/sqlite-wasm';
 import { EntityConfig, EntityPropertyConfig } from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
 import { ListConfig, ListFilter, ListSort } from 'api-spec/models/List';
-import { Setting } from 'api-spec/models/Setting';
+import { Setting, Settings } from 'api-spec/models/Setting';
 import {
   ExportDataContents,
   ExportDataType,
@@ -678,6 +678,10 @@ export class OfflineCacheStorage implements StorageSchema {
 
     await this.db.enqueue('deleteListConfig', [id]);
     return true;
+  }
+
+  async getSettings(): Promise<{ user: Settings; system: Settings }> {
+    return networkStorage.getSettings();
   }
 
   async saveSetting(setting: Setting, listConfigId?: string, isSystem?: boolean): Promise<boolean> {

@@ -7,7 +7,7 @@ import {
 } from 'api-spec/models/List';
 import { api } from './Api';
 import { StorageResult, StorageSchema, StorageSource } from '@/models/Storage';
-import { Setting } from 'api-spec/models/Setting';
+import { Setting, Settings } from 'api-spec/models/Setting';
 import { EntityConfig, EntityPropertyConfig } from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
 import { translate } from './Localization';
@@ -106,6 +106,16 @@ export class NetworkStorage implements StorageSchema {
     }
 
     return false;
+  }
+
+  async getSettings(): Promise<{ user: Settings; system: Settings }> {
+    const result = await api.get<{ user: Settings; system: Settings }>('setting');
+
+    if (result && result.isOk) {
+      return result.response;
+    }
+
+    return Promise.reject();
   }
 
   async saveSetting(setting: Setting, listConfigId?: string, isSystem?: boolean): Promise<boolean> {

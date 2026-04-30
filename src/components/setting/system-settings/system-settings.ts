@@ -5,7 +5,6 @@ import {
   SettingConfig,
   SettingGroup,
   SettingName,
-  defaultSettings,
 } from 'api-spec/models/Setting';
 import { storage } from '@/lib/Storage';
 import { SettingForm } from '@/components/setting/setting-form/setting-form';
@@ -19,7 +18,7 @@ export class SystemSettings extends SettingForm {
   }
 
   protected override getSettingValue(name: SettingName): unknown {
-    return defaultSettings[name];
+    return this.state.systemSettings[name];
   }
 
   protected override async doSave(setting: Setting): Promise<boolean> {

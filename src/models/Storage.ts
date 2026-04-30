@@ -1,4 +1,4 @@
-import { Setting } from 'api-spec/models/Setting';
+import { Setting, Settings } from 'api-spec/models/Setting';
 import { ListConfig, ListSort, ListFilter } from 'api-spec/models/List';
 import { EntityConfig, EntityPropertyConfig } from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
@@ -76,6 +76,7 @@ export interface StorageSchema {
   updateListSort?(listConfigId: string, sort: ListSort): Promise<void>;
   updateListFilter?(listConfigId: string, filter: ListFilter): Promise<void>;
   updateListThemes?(listConfigId: string, themes: string[]): Promise<void>;
+  getSettings?(): Promise<{ user: Settings; system: Settings }>;
   saveSetting?(setting: Setting, listConfigId?: string, isSystem?: boolean): Promise<boolean>;
   updateEntityConfig?(
     entityConfig: EntityConfig,

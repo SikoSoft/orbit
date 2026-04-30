@@ -88,6 +88,12 @@ export class AppState {
   public listSetting: Settings = defaultSettings;
 
   @observable
+  public userSettings: Settings = defaultSettings;
+
+  @observable
+  public systemSettings: Settings = defaultSettings;
+
+  @observable
   public advancedMode: boolean = false;
 
   @observable
@@ -230,6 +236,16 @@ export class AppState {
   @action
   setListSetting(setting: Settings): void {
     this.listSetting = setting;
+  }
+
+  @action
+  setUserSettings(settings: Settings): void {
+    this.userSettings = settings;
+  }
+
+  @action
+  setSystemSettings(settings: Settings): void {
+    this.systemSettings = settings;
   }
 
   @action

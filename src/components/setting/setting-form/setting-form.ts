@@ -67,7 +67,7 @@ export class SettingForm extends MobxLitElement {
       case ControlType.NUMBER:
         return html`<number-setting
           name=${setting.name}
-          value=${value}
+          .value=${value}
           min=${ifDefined(setting.control.min)}
           max=${ifDefined(setting.control.max)}
           step=${ifDefined(setting.control.step)}
@@ -76,18 +76,16 @@ export class SettingForm extends MobxLitElement {
       case ControlType.SELECT:
         return html`<select-setting
           name=${setting.name}
-          value=${value}
+          .value=${value}
           .options=${setting.control.options}
           @setting-updated=${this.handleSettingUpdated}
         ></select-setting>`;
-      /*
       case ControlType.TEXT:
         return html`<text-setting
           name=${setting.name}
-          value=${value}
+          .value=${value}
           @setting-updated=${this.handleSettingUpdated}
         ></text-setting>`;
-        */
     }
   }
 

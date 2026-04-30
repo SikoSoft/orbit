@@ -181,15 +181,21 @@ export class AppContainer extends MobxLitElement {
         this.state.authToken
       ) {
         console.time('[orbit] restoreState:fetchConfigs');
-        const [listConfigs, entityConfigs] = await Promise.all([
+        const [listConfigs, entityConfigs, settings] = await Promise.all([
           storage.getListConfigs(),
           storage.getEntityConfigs(),
+          storage.getSettings().catch(() => null),
         ]);
         console.timeEnd('[orbit] restoreState:fetchConfigs');
         console.log('[orbit] restoreState: got %d listConfigs, %d entityConfigs', listConfigs.length, entityConfigs.length);
 
         this.state.setListConfigs(listConfigs);
         this.state.setEntityConfigs(entityConfigs);
+
+        if (settings) {
+          this.state.setUserSettings(settings.user);
+          this.state.setSystemSettings(settings.system);
+        }
 
         const listConfigId = storage.getActiveListConfigId();
         this.state.setListConfigId(listConfigId);
