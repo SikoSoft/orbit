@@ -21,11 +21,13 @@ import {
   SettingFormProps,
 } from './setting-form.models';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
+import { SelectChangedEvent } from '@ss/ui/components/ss-select.events';
 
 import '@/components/setting/boolean-setting/boolean-setting';
 import '@/components/setting/number-setting/number-setting';
 import '@/components/setting/select-setting/select-setting';
 import '@/components/setting/text-setting/text-setting';
+import '@ss/ui/components/ss-select';
 
 import { SettingUpdatedEvent } from '@/events/setting-updated';
 
@@ -56,6 +58,9 @@ export class SettingForm extends MobxLitElement {
   protected onSaved(_setting: Setting): void {}
 
   renderSetting(setting: SettingConfig): TemplateResult {
+    if (setting.name === SettingName.DEFAULT_LIST_CONFIG) {
+      return this.renderDefaultListConfigSetting(setting);
+    }
     const value = this.getSettingValue(setting.name);
     switch (setting.control.type) {
       case ControlType.BOOLEAN:
@@ -80,16 +85,29 @@ export class SettingForm extends MobxLitElement {
           .options=${setting.control.options}
           @setting-updated=${this.handleSettingUpdated}
         ></select-setting>`;
-      case ControlType.TEXT:
-        return html`<text-setting
-          name=${setting.name}
-          .value=${value}
-          @setting-updated=${this.handleSettingUpdated}
-        ></text-setting>`;
     }
   }
 
-  private async handleSettingUpdated<SettingType>(
+  protected renderDefaultListConfigSetting(
+    setting: SettingConfig,
+  ): TemplateResult {
+    const value = this.getSettingValue(setting.name) as string;
+    const options = this.state.listConfigs.map(config => ({
+      label: config.name,
+      value: config.id,
+    }));
+    return html`<ss-select
+      selected=${value}
+      .options=${options}
+      @select-changed=${(e: SelectChangedEvent<string>) => {
+        this.handleSettingUpdated(
+          new SettingUpdatedEvent({ name: setting.name, value: e.detail.value }),
+        );
+      }}
+    ></ss-select>`;
+  }
+
+  protected async handleSettingUpdated<SettingType>(
     event: SettingUpdatedEvent<SettingType>,
   ): Promise<void> {
     this.saveDebouncer.cancel();
