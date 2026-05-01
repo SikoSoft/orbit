@@ -253,7 +253,6 @@ export class AccountForm extends LitElement {
   }
 
   private async updateAccount(): Promise<void> {
-    console.log('update account');
     const { firstName, lastName, username } = this;
     const result = await storage.updateAccount({
       firstName,

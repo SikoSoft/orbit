@@ -109,7 +109,9 @@ export class NetworkStorage implements StorageSchema {
   }
 
   async getSettings(): Promise<{ user: Settings; system: Settings }> {
-    const result = await api.get<{ user: Settings; system: Settings }>('setting');
+    const result = await api.get<{ user: Settings; system: Settings }>(
+      'setting',
+    );
 
     if (result && result.isOk) {
       return result.response;
@@ -118,7 +120,11 @@ export class NetworkStorage implements StorageSchema {
     return Promise.reject();
   }
 
-  async saveSetting(setting: Setting, listConfigId?: string, isSystem?: boolean): Promise<boolean> {
+  async saveSetting(
+    setting: Setting,
+    listConfigId?: string,
+    isSystem?: boolean,
+  ): Promise<boolean> {
     const url = listConfigId
       ? `setting/${listConfigId}`
       : isSystem
@@ -500,7 +506,6 @@ export class NetworkStorage implements StorageSchema {
   async updateAccount(
     body: UpdateAccountRequestBody,
   ): Promise<StorageResult<void>> {
-    console.log('updateAccount!!');
     const result = await api.put<UpdateAccountRequestBody, void>('user', body);
 
     if (result && result.isOk) {
