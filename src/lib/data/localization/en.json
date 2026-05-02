@@ -1,6 +1,8 @@
 {
   "initializing": "Initializing...",
   "add": "Add",
+  "published": "Published",
+  "unpublished": "Unpublished",
   "addProperty": "Add Property",
   "update": "Update",
   "entityTypeRequired": "Entity type is required",

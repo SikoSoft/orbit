@@ -66,6 +66,8 @@ import { navigate } from '@/lib/Router';
 
 import '@ss/ui/components/sortable-list';
 import { SortUpdatedEvent } from '@ss/ui/components/sortable-list.events';
+import '@ss/ui/components/ss-toggle';
+import { ToggleChangedEvent } from '@ss/ui/components/ss-toggle.events';
 import { reaction } from 'mobx';
 import { themed } from '@/lib/Theme';
 import { PropertyField } from '@/components/entity-form/property-field/property-field';
@@ -109,6 +111,13 @@ export class EntityForm extends ViewElement {
 
     .save-button::part(button) {
       font-weight: bold;
+    }
+
+    .published {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
     }
 
     .property-option {
@@ -188,6 +197,10 @@ export class EntityForm extends ViewElement {
   [EntityFormProp.EDIT_ACCESS_POLICY_ID]: EntityFormProps[EntityFormProp.EDIT_ACCESS_POLICY_ID] =
     entityFormProps[EntityFormProp.EDIT_ACCESS_POLICY_ID].default;
 
+  @property({ type: Boolean })
+  [EntityFormProp.PUBLISHED]: EntityFormProps[EntityFormProp.PUBLISHED] =
+    entityFormProps[EntityFormProp.PUBLISHED].default;
+
   @state() initialTags: string = '';
   @state() confirmModalShown: boolean = false;
   @state() advancedMode: boolean = false;
@@ -205,6 +218,7 @@ export class EntityForm extends ViewElement {
   @state() initialHash = '';
   @state() instancesHash = '';
   @state() initialSortedIds: string[] = [];
+  @state() initialPublished: boolean = false;
 
   @state() propertyReferences: PropertyReference[] = [];
   @state() propertyPopUpIsOpen = false;
@@ -249,7 +263,8 @@ export class EntityForm extends ViewElement {
     return (
       this.initialHash !== this.instancesHash ||
       JSON.stringify(this.tagsAndSuggestions) !== this.initialTags ||
-      JSON.stringify(this.sortedIds) !== JSON.stringify(this.initialSortedIds)
+      JSON.stringify(this.sortedIds) !== JSON.stringify(this.initialSortedIds) ||
+      this.published !== this.initialPublished
     );
   }
 
@@ -287,6 +302,7 @@ export class EntityForm extends ViewElement {
 
         this.tags =
           this.state.listConfig.filter.tagging[ListFilterType.CONTAINS_ALL_OF];
+        this.published = this.state.listConfig.setting[SettingName.AUTO_PUBLISH];
 
         if (this.availableEntityConfigs.length === 1) {
           this.type = this.availableEntityConfigs[0].id;
@@ -403,6 +419,7 @@ export class EntityForm extends ViewElement {
       this.propertiesSetup = true;
       this.initialHash = this.instancesHash = await this.getInstancesHash();
       this.initialSortedIds = [...this.sortedIds];
+      this.initialPublished = this.published;
     }
   }
 
@@ -552,6 +569,7 @@ export class EntityForm extends ViewElement {
           tags: this.tagsAndSuggestions,
           properties,
           propertyReferences: this.propertyReferences,
+          published: this.published,
         };
 
         const isNew = !this.entityId;
@@ -634,6 +652,7 @@ export class EntityForm extends ViewElement {
     if (!this.entityId) {
       this.tags =
         this.state.listConfig.filter.tagging[ListFilterType.CONTAINS_ALL_OF];
+      this.published = this.state.listConfig.setting[SettingName.AUTO_PUBLISH];
     }
     this.state.setTagSuggestions([]);
 
@@ -729,6 +748,10 @@ export class EntityForm extends ViewElement {
     this.type = parseInt(e.detail.value);
     this.propertiesSetup = false;
     this.propertyInstances = [];
+  }
+
+  private handlePublishedChanged(e: ToggleChangedEvent): void {
+    this.published = e.detail.on;
   }
 
   private async handlePropertyChanged(e: PropertyChangedEvent): Promise<void> {
@@ -982,6 +1005,14 @@ export class EntityForm extends ViewElement {
           )}
         </div>
       </tag-manager>
+
+      <div class="published">
+        <label>${translate('published')}</label>
+        <ss-toggle
+          ?on=${this.published}
+          @toggle-changed=${this.handlePublishedChanged}
+        ></ss-toggle>
+      </div>
 
       <div class="buttons">
         <ss-button

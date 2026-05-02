@@ -20,6 +20,7 @@ export enum EntityListItemProp {
   PUBLIC_VIEW = 'publicView',
   VIEW_ACCESS_POLICY_ID = 'viewAccessPolicyId',
   EDIT_ACCESS_POLICY_ID = 'editAccessPolicyId',
+  PUBLISHED = 'published',
 }
 
 export interface EntityListItemProps extends PropTypes {
@@ -34,6 +35,7 @@ export interface EntityListItemProps extends PropTypes {
   [EntityListItemProp.PUBLIC_VIEW]: boolean;
   [EntityListItemProp.VIEW_ACCESS_POLICY_ID]: number;
   [EntityListItemProp.EDIT_ACCESS_POLICY_ID]: number;
+  [EntityListItemProp.PUBLISHED]: boolean;
 }
 
 export const entityListItemProps: PropConfigMap<EntityListItemProps> = {
@@ -113,5 +115,12 @@ export const entityListItemProps: PropConfigMap<EntityListItemProps> = {
       type: ControlType.NUMBER,
     },
     description: 'The ID of the edit access policy',
+  },
+  [EntityListItemProp.PUBLISHED]: {
+    default: false,
+    control: {
+      type: ControlType.BOOLEAN,
+    },
+    description: 'Whether the entity is published',
   },
 };

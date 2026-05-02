@@ -57,6 +57,7 @@ function makePayload(
     tags: [],
     properties: [],
     propertyReferences: [],
+    published: false,
     ...overrides,
   };
 }

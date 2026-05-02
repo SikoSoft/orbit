@@ -34,6 +34,7 @@ export enum EntityFormProp {
   PROPERTIES = 'properties',
   VIEW_ACCESS_POLICY_ID = 'viewAccessPolicyId',
   EDIT_ACCESS_POLICY_ID = 'editAccessPolicyId',
+  PUBLISHED = 'published',
 }
 
 export interface EntityFormProps extends PropTypes {
@@ -46,6 +47,7 @@ export interface EntityFormProps extends PropTypes {
   [EntityFormProp.PROPERTIES]: EntityProperty[];
   [EntityFormProp.VIEW_ACCESS_POLICY_ID]: number;
   [EntityFormProp.EDIT_ACCESS_POLICY_ID]: number;
+  [EntityFormProp.PUBLISHED]: boolean;
 }
 
 export const entityFormProps: PropConfigMap<EntityFormProps> = {
@@ -112,6 +114,13 @@ export const entityFormProps: PropConfigMap<EntityFormProps> = {
     },
     description: 'The ID of the edit access policy',
   },
+  [EntityFormProp.PUBLISHED]: {
+    default: false,
+    control: {
+      type: ControlType.BOOLEAN,
+    },
+    description: 'Whether the entity is published',
+  },
 };
 
 export interface TabEntry {
@@ -131,6 +140,7 @@ export interface RequestBody {
   tags: string[];
   properties: EntityProperty[];
   propertyReferences: PropertyReference[];
+  published: boolean;
 }
 
 export enum SuggestionInputType {

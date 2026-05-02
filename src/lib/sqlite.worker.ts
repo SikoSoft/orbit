@@ -132,6 +132,7 @@ async function initDb(dbPath: string): Promise<void> {
     `ALTER TABLE entity_property_config ADD COLUMN options_only INTEGER NOT NULL DEFAULT 0`,
     `ALTER TABLE entity_property_config ADD COLUMN options TEXT NOT NULL DEFAULT '[]'`,
     `ALTER TABLE entity_config ADD COLUMN public INTEGER NOT NULL DEFAULT 0`,
+    `ALTER TABLE entity ADD COLUMN published INTEGER NOT NULL DEFAULT 0`,
   ];
   for (const migration of migrations) {
     try {

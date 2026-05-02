@@ -466,6 +466,8 @@ export class SQLiteStorage implements StorageSchema {
         updatedAt: row['updated_at'] as string,
         viewAccessPolicyId: 0,
         editAccessPolicyId: 0,
+        published: Boolean(row['published']),
+        suggestion: false,
         tags: tagRows
           .filter(t => t['entity_id'] === id)
           .map(t => t['tag'] as string),
@@ -620,8 +622,8 @@ export class SQLiteStorage implements StorageSchema {
     const now = new Date().toISOString();
 
     await this.run(
-      `INSERT INTO entity (type, created_at, updated_at) VALUES (?, ?, ?)`,
-      [payload.entityConfigId, now, now],
+      `INSERT INTO entity (type, created_at, updated_at, published) VALUES (?, ?, ?, ?)`,
+      [payload.entityConfigId, now, now, payload.published ? 1 : 0],
     );
 
     const id = (await this.execValue('SELECT last_insert_rowid()')) as number;
@@ -636,11 +638,10 @@ export class SQLiteStorage implements StorageSchema {
   async updateEntity(id: number, payload: RequestBody): Promise<Entity | null> {
     const now = new Date().toISOString();
 
-    await this.run(`UPDATE entity SET type = ?, updated_at = ? WHERE id = ?`, [
-      payload.entityConfigId,
-      now,
-      id,
-    ]);
+    await this.run(
+      `UPDATE entity SET type = ?, updated_at = ?, published = ? WHERE id = ?`,
+      [payload.entityConfigId, now, payload.published ? 1 : 0, id],
+    );
 
     await this.run('DELETE FROM entity_tag WHERE entity_id = ?', [id]);
     await this.run('DELETE FROM entity_property WHERE entity_id = ?', [id]);

@@ -105,6 +105,17 @@ export class EntityListItem extends MobxLitElement {
     .property-longtext .property-value {
       white-space: pre-wrap;
     }
+
+    .unpublished-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      background-color: color-mix(in srgb, currentColor 12%, transparent);
+      opacity: 0.7;
+      margin-bottom: 0.25rem;
+    }
   `;
   @property({ type: Number })
   [EntityListItemProp.TYPE]: EntityListItemProps[EntityListItemProp.TYPE] =
@@ -150,6 +161,10 @@ export class EntityListItem extends MobxLitElement {
   [EntityListItemProp.EDIT_ACCESS_POLICY_ID]: EntityListItemProps[EntityListItemProp.EDIT_ACCESS_POLICY_ID] =
     entityListItemProps[EntityListItemProp.EDIT_ACCESS_POLICY_ID].default;
 
+  @property({ type: Boolean })
+  [EntityListItemProp.PUBLISHED]: EntityListItemProps[EntityListItemProp.PUBLISHED] =
+    entityListItemProps[EntityListItemProp.PUBLISHED].default;
+
   @state() mode: EntityListItemMode = EntityListItemMode.PREVIEW;
   @state() pointerDown: Date = new Date();
   @state() downTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
@@ -166,6 +181,7 @@ export class EntityListItem extends MobxLitElement {
       preview: this.mode === EntityListItemMode.PREVIEW,
       full: this.mode === EntityListItemMode.FULL,
       edit: this.mode === EntityListItemMode.EDIT,
+      unpublished: !this.published,
     };
   }
 
@@ -390,6 +406,7 @@ export class EntityListItem extends MobxLitElement {
                 viewAccessPolicyId=${this.viewAccessPolicyId}
                 editAccessPolicyId=${this.editAccessPolicyId}
                 type=${this.type}
+                ?published=${this.published}
                 .tags=${this.tags}
                 .properties=${this.properties}
               ></entity-form>
@@ -406,6 +423,9 @@ export class EntityListItem extends MobxLitElement {
                   ? html` <div class="debug-entity-type">
                       ${this.entityConfig?.name || this.type}
                     </div>`
+                  : nothing}
+                ${!this.published
+                  ? html`<div class="unpublished-badge">${translate('unpublished')}</div>`
                   : nothing}
                 <div class="show-full">
                   <ss-button @click=${this.showFull}
