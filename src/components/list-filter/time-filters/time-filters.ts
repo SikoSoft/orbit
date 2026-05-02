@@ -58,15 +58,15 @@ export class TimeFilters extends LitElement {
     super.connectedCallback();
 
     if (!this.date) {
-      this.date = Time.dateString(new Date());
+      this.date = Time.formatDateTime(new Date());
     }
 
     if (!this.start) {
-      this.start = Time.dateString(new Date(new Date().getTime() - 86400000));
+      this.start = Time.formatDateTime(new Date(new Date().getTime() - 86400000));
     }
 
     if (!this.end) {
-      this.end = Time.dateString(new Date());
+      this.end = Time.formatDateTime(new Date());
     }
   }
 
@@ -136,7 +136,7 @@ export class TimeFilters extends LitElement {
                 <ss-input
                   id="date"
                   @input-changed=${this.handleDateChanged}
-                  type=${InputType.DATE}
+                  type=${InputType.DATETIME_LOCAL}
                   value=${this.date}
                 ></ss-input>
               `
@@ -145,14 +145,14 @@ export class TimeFilters extends LitElement {
                   <ss-input
                     id="start"
                     @input-changed=${this.handleStartChanged}
-                    type=${InputType.DATE}
+                    type=${InputType.DATETIME_LOCAL}
                     value=${this.start}
                   ></ss-input>
 
                   <ss-input
                     id="end"
                     @input-changed=${this.handleEndChanged}
-                    type=${InputType.DATE}
+                    type=${InputType.DATETIME_LOCAL}
                     value=${this.end}
                   ></ss-input>
                 `
