@@ -701,10 +701,10 @@ export class OfflineCacheStorage implements StorageSchema {
 
   // ─── Import / Export / Clear ─────────────────────────────────────────────────
 
-  async exportEntities(entityConfigIds: number[]): Promise<Entity.Entity[]> {
+  async exportEntities(entityConfigIds: number[], startDate?: string, endDate?: string): Promise<Entity.Entity[]> {
     if (this.isOnline) {
       try {
-        return await networkStorage.exportEntities(entityConfigIds);
+        return await networkStorage.exportEntities(entityConfigIds, startDate, endDate);
       } catch {
         // fall through
       }

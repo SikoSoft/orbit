@@ -44,6 +44,29 @@ export class ExportTool extends MobxLitElement {
       align-items: center;
       gap: 0.5rem;
     }
+
+    .time-range {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .time-range-options {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .time-range-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .time-range-dates {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
   `;
 
   @state()
@@ -63,6 +86,15 @@ export class ExportTool extends MobxLitElement {
 
   @state()
   selectedListConfigs: string[] = [];
+
+  @state()
+  timeRangeType: 'allTime' | 'range' = 'allTime';
+
+  @state()
+  startDate: string = '';
+
+  @state()
+  endDate: string = '';
 
   @state()
   dataSetsHash: string = '';
@@ -108,8 +140,30 @@ export class ExportTool extends MobxLitElement {
   }
 
   async getEntityData(): Promise<string> {
-    const data = await storage.exportEntities(this.getEntityConfigIdsForData());
+    const data = await storage.exportEntities(
+      this.getEntityConfigIdsForData(),
+      ...this.getDateRangeArgs(),
+    );
     return JSON.stringify(data);
+  }
+
+  getDateRangeArgs(): [string?, string?] {
+    if (this.timeRangeType === 'range') {
+      return [this.startDate || undefined, this.endDate || undefined];
+    }
+    return [];
+  }
+
+  handleTimeRangeTypeChanged(type: 'allTime' | 'range'): void {
+    this.timeRangeType = type;
+  }
+
+  handleStartDateChanged(e: InputChangedEvent): void {
+    this.startDate = e.detail.value;
+  }
+
+  handleEndDateChanged(e: InputChangedEvent): void {
+    this.endDate = e.detail.value;
   }
 
   async exportData(): Promise<void> {
@@ -141,6 +195,7 @@ export class ExportTool extends MobxLitElement {
       ) {
         dataFile.entities = await storage.exportEntities(
           this.getEntityConfigIdsForData(),
+          ...this.getDateRangeArgs(),
         );
       }
 
@@ -375,6 +430,51 @@ export class ExportTool extends MobxLitElement {
               </div>
             `,
           )}
+        </div>
+
+        <div class="time-range">
+          <h3>${translate('exportTimeRange')}</h3>
+          <div class="time-range-options">
+            <div class="time-range-option">
+              <input
+                type="radio"
+                id="timeRange-allTime"
+                name="timeRange"
+                ?checked=${this.timeRangeType === 'allTime'}
+                @change=${(): void => this.handleTimeRangeTypeChanged('allTime')}
+              />
+              <label for="timeRange-allTime">${translate('allTime')}</label>
+            </div>
+            <div class="time-range-option">
+              <input
+                type="radio"
+                id="timeRange-range"
+                name="timeRange"
+                ?checked=${this.timeRangeType === 'range'}
+                @change=${(): void => this.handleTimeRangeTypeChanged('range')}
+              />
+              <label for="timeRange-range">${translate('range')}</label>
+            </div>
+          </div>
+
+          ${this.timeRangeType === 'range'
+            ? html`
+                <div class="time-range-dates">
+                  <ss-input
+                    type="datetime-local"
+                    value=${this.startDate}
+                    label=${translate('startDate')}
+                    @input-changed=${this.handleStartDateChanged}
+                  ></ss-input>
+                  <ss-input
+                    type="datetime-local"
+                    value=${this.endDate}
+                    label=${translate('endDate')}
+                    @input-changed=${this.handleEndDateChanged}
+                  ></ss-input>
+                </div>
+              `
+            : ''}
         </div>
 
         <div class="file-name">
