@@ -10,6 +10,7 @@ import {
   ControlType,
   SettingConfig,
   SettingName,
+  SettingContextType,
 } from 'api-spec/models/Setting';
 import { appState } from '@/state';
 import { addToast } from '@/lib/Util';
@@ -35,13 +36,16 @@ import { SettingUpdatedEvent } from '@/events/setting-updated';
 export class SettingForm extends MobxLitElement {
   public state = appState;
   private saveDebouncer = new Debouncer(300);
+  protected context: SettingContextType = SettingContextType.APP;
 
   @property()
   [SettingFormProp.LIST_CONFIG_ID]: SettingFormProps[SettingFormProp.LIST_CONFIG_ID] =
     settingFormProps[SettingFormProp.LIST_CONFIG_ID].default;
 
   protected get visibleSettings(): SettingConfig[] {
-    return Object.values(settingsConfig);
+    return Object.values(settingsConfig).filter(s =>
+      s.context.includes(this.context),
+    );
   }
 
   protected getSettingValue(name: SettingName): unknown {
