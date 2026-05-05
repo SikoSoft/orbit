@@ -529,11 +529,23 @@ export class PropertyConfigForm extends LitElement {
     }
   }
 
-  renderOptionsField(): TemplateResult | typeof nothing {
+  get optionsFieldsVisible(): boolean {
+    const dataType = this.propertyConfig[PropertyConfigFormProp.DATA_TYPE];
+    return dataType === DataType.SHORT_TEXT || dataType === DataType.INT;
+  }
+
+  isFieldVisible(field: PropertyConfigFormProp): boolean {
     if (
-      this.propertyConfig[PropertyConfigFormProp.DATA_TYPE] !==
-      DataType.SHORT_TEXT
+      field === PropertyConfigFormProp.OPTIONS ||
+      field === PropertyConfigFormProp.OPTIONS_ONLY
     ) {
+      return this.optionsFieldsVisible;
+    }
+    return true;
+  }
+
+  renderOptionsField(): TemplateResult | typeof nothing {
+    if (!this.optionsFieldsVisible) {
       return nothing;
     }
 
@@ -616,17 +628,19 @@ export class PropertyConfigForm extends LitElement {
             this.visibleFields,
             field => field,
             field =>
-              html` <div
-                class=${classMap({
-                  field: true,
-                  invalid: this.invalidFields.includes(field),
-                })}
-              >
-                <label for=${field}
-                  >${translate(`propertyConfig.field.${field}`)}</label
-                >
-                ${this.renderField(field)}
-              </div>`,
+              this.isFieldVisible(field)
+                ? html` <div
+                    class=${classMap({
+                      field: true,
+                      invalid: this.invalidFields.includes(field),
+                    })}
+                  >
+                    <label for=${field}
+                      >${translate(`propertyConfig.field.${field}`)}</label
+                    >
+                    ${this.renderField(field)}
+                  </div>`
+                : nothing,
           )}
         </fieldset>
         <div class="buttons">
