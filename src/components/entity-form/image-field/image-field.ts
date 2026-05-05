@@ -123,8 +123,9 @@ export class ImageField extends MobxLitElement {
     addToast(translate('fileUploadFailed'), NotificationType.ERROR);
   }
 
-  focus(): void {
-    const input = this.renderRoot.querySelector('ss-input');
+  async focus(): Promise<void> {
+    await this.updateComplete;
+    const input = this.renderRoot?.querySelector('ss-input');
     if (input) {
       (input as HTMLElement).focus();
     }

@@ -70,6 +70,7 @@ import '@ss/ui/components/ss-toggle';
 import { ToggleChangedEvent } from '@ss/ui/components/ss-toggle.events';
 import { reaction } from 'mobx';
 import { themed } from '@/lib/Theme';
+import { LitElement } from 'lit';
 import { PropertyField } from '@/components/entity-form/property-field/property-field';
 import { storage } from '@/lib/Storage';
 
@@ -664,12 +665,14 @@ export class EntityForm extends ViewElement {
     this.focusFirstField();
   }
 
-  focusFirstField(): void {
+  async focusFirstField(): Promise<void> {
+    await this.updateComplete;
     const firstField = this.renderRoot.querySelector(
       'property-field',
     ) as PropertyField | null;
 
     if (firstField) {
+      await (firstField as unknown as LitElement).updateComplete;
       firstField.focus();
     }
   }

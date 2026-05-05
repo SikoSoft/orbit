@@ -179,8 +179,9 @@ export class ShortTextField extends MobxLitElement {
     }
   }
 
-  focus(): void {
-    const input = this.renderRoot.querySelector('ss-input');
+  async focus(): Promise<void> {
+    await this.updateComplete;
+    const input = this.renderRoot?.querySelector('ss-input');
     if (input) {
       (input as SSInput).focus();
     }

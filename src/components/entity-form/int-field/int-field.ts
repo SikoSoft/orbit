@@ -58,8 +58,9 @@ export class IntField extends LitElement {
     );
   }
 
-  focus(): void {
-    const input = this.renderRoot.querySelector('ss-input');
+  async focus(): Promise<void> {
+    await this.updateComplete;
+    const input = this.renderRoot?.querySelector('ss-input');
     if (input) {
       (input as HTMLElement).focus();
     }

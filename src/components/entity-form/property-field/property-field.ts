@@ -251,8 +251,9 @@ export class PropertyField extends MobxLitElement {
     this.delete();
   }
 
-  focus(): void {
-    const input = this.renderRoot.querySelector(
+  async focus(): Promise<void> {
+    await this.updateComplete;
+    const input = this.renderRoot?.querySelector(
       'boolean-field, date-field, image-field, short-text-field, long-text-field, int-field',
     );
     if (input) {

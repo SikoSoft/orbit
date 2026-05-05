@@ -129,8 +129,9 @@ export class DateField extends LitElement {
     );
   }
 
-  focus(): void {
-    this.inputElement.focus();
+  async focus(): Promise<void> {
+    await this.updateComplete;
+    this.inputElement?.focus();
   }
 
   renderUseNow(): TemplateResult {
