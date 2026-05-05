@@ -22,7 +22,6 @@ import { NotificationType } from '@ss/ui/components/notification-provider.models
 import '@ss/ui/components/ss-button';
 import '@ss/ui/components/ss-carousel';
 import '@ss/ui/components/ss-select';
-import '@ss/ui/components/confirmation-modal';
 import '@ss/ui/components/pop-up';
 import '@/components/setting/list-settings/list-settings';
 import '@/components/list-filter/list-filter';
@@ -183,6 +182,26 @@ export class ListConfig extends MobxLitElement {
         word-break: break-all;
       }
     }
+
+    .delete-config-modal {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+
+      .delete-items-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+      }
+
+      .delete-config-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+      }
+    }
   `;
   private defaultModeStyles = css`
     .config-slide {
@@ -231,6 +250,7 @@ export class ListConfig extends MobxLitElement {
   @state() navigationIndex: number = 0;
   @state() themeManagerIsOpen: boolean = false;
   @state() confirmDeleteIsOpen: boolean = false;
+  @state() deleteItemsChecked: boolean = false;
   @state() filterIsOpen: boolean = false;
   @state() settingIsOpen: boolean = false;
   @state() sortIsOpen: boolean = false;
@@ -436,7 +456,7 @@ export class ListConfig extends MobxLitElement {
   }
 
   async deleteConfig(): Promise<void> {
-    const result = await storage.deleteListConfig(this.id);
+    const result = await storage.deleteListConfig(this.id, this.deleteItemsChecked);
     if (!result) {
       addToast(translate('failedToDeleteListConfig'), NotificationType.ERROR);
       return;
@@ -717,19 +737,45 @@ export class ListConfig extends MobxLitElement {
         </ss-collapsable>
       </div>
 
-      <confirmation-modal
+      <pop-up
         ?open=${this.confirmDeleteIsOpen}
-        message=${translate('confirmDeleteListConfig')}
-        confirmText=${translate('delete')}
-        cancelText=${translate('cancel')}
-        @confirmation-accepted=${(): void => {
-          this.deleteConfig();
+        closeOnOutsideClick
+        closeOnEsc
+        closeButton
+        @pop-up-closed=${(): void => {
           this.confirmDeleteIsOpen = false;
+          this.deleteItemsChecked = false;
         }}
-        @confirmation-declined=${(): void => {
-          this.confirmDeleteIsOpen = false;
-        }}
-      ></confirmation-modal>
+      >
+        <div class="delete-config-modal">
+          <p>${translate('confirmDeleteListConfig')}</p>
+          <label class="delete-items-label">
+            <input
+              type="checkbox"
+              ?checked=${this.deleteItemsChecked}
+              @change=${(e: Event): void => {
+                this.deleteItemsChecked = (e.target as HTMLInputElement).checked;
+              }}
+            />
+            ${translate('deleteItemsInList')}
+          </label>
+          <div class="delete-config-actions">
+            <ss-button
+              @click=${(): void => {
+                this.deleteConfig();
+                this.confirmDeleteIsOpen = false;
+                this.deleteItemsChecked = false;
+              }}
+            >${translate('delete')}</ss-button>
+            <ss-button
+              @click=${(): void => {
+                this.confirmDeleteIsOpen = false;
+                this.deleteItemsChecked = false;
+              }}
+            >${translate('cancel')}</ss-button>
+          </div>
+        </div>
+      </pop-up>
 
       <pop-up
         ?open=${this.themeManagerIsOpen}

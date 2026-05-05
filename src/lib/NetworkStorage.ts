@@ -98,8 +98,9 @@ export class NetworkStorage implements StorageSchema {
     return '';
   }
 
-  async deleteListConfig(id: string): Promise<boolean> {
-    const result = await api.delete<null>(`listConfig/${id}`);
+  async deleteListConfig(id: string, deleteItems?: boolean): Promise<boolean> {
+    const url = deleteItems ? `listConfig/${id}?deleteItems=1` : `listConfig/${id}`;
+    const result = await api.delete<null>(url);
 
     if (result && result.isOk) {
       return true;

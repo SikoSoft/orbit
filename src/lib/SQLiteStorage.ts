@@ -800,9 +800,159 @@ export class SQLiteStorage implements StorageSchema {
     ]);
   }
 
-  async deleteListConfig(id: string): Promise<boolean> {
+  async deleteListConfig(id: string, deleteItems?: boolean): Promise<boolean> {
+    if (deleteItems) {
+      await this.deleteOrphanedEntities(id);
+    }
     await this.run('DELETE FROM list_config WHERE id = ?', [id]);
     return true;
+  }
+
+  private async deleteOrphanedEntities(listConfigId: string): Promise<void> {
+    const configRows = await this.execRows(
+      'SELECT filter FROM list_config WHERE id = ?',
+      [listConfigId],
+    );
+    if (configRows.length === 0) {
+      return;
+    }
+
+    const deletedFilter = JSON.parse(
+      configRows[0]['filter'] as string,
+    ) as ListFilter;
+    const candidateIds = await this.getEntityIdsForFilter(deletedFilter);
+    if (candidateIds.length === 0) {
+      return;
+    }
+
+    const otherConfigs = (await this.getListConfigs()).filter(
+      c => c.id !== listConfigId,
+    );
+
+    for (const entityId of candidateIds) {
+      let matchesOther = false;
+      for (const config of otherConfigs) {
+        if (await this.entityMatchesFilter(entityId, config.filter)) {
+          matchesOther = true;
+          break;
+        }
+      }
+      if (!matchesOther) {
+        await this.deleteEntity(entityId);
+      }
+    }
+  }
+
+  private async getEntityIdsForFilter(filter: ListFilter): Promise<number[]> {
+    const { conditions, bindings } = await this.buildFilterConditions(filter);
+    const whereClause =
+      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const rows = await this.execRows(
+      `SELECT DISTINCT e.id FROM entity e ${whereClause}`,
+      bindings,
+    );
+    return rows.map(r => r['id'] as number);
+  }
+
+  private async entityMatchesFilter(
+    entityId: number,
+    filter: ListFilter,
+  ): Promise<boolean> {
+    if (filter.includeAll) {
+      return true;
+    }
+    const { conditions, bindings } = await this.buildFilterConditions(filter);
+    conditions.push('e.id = ?');
+    bindings.push(entityId);
+    const whereClause = `WHERE ${conditions.join(' AND ')}`;
+    const count = await this.execValue(
+      `SELECT COUNT(*) FROM entity e ${whereClause}`,
+      bindings,
+    );
+    return (count as number) > 0;
+  }
+
+  private async buildFilterConditions(filter: ListFilter): Promise<{
+    conditions: string[];
+    bindings: BindableValue[];
+  }> {
+    const conditions: string[] = [];
+    const bindings: BindableValue[] = [];
+
+    if (filter.includeAll) {
+      return { conditions, bindings };
+    }
+
+    if (filter.includeTypes.length > 0) {
+      const ph = filter.includeTypes.map(() => '?').join(',');
+      conditions.push(`e.type IN (${ph})`);
+      bindings.push(...filter.includeTypes);
+    }
+
+    const { time } = filter;
+    if (time.type === ListFilterTimeType.EXACT_DATE) {
+      conditions.push(`date(e.created_at) = date(?)`);
+      bindings.push(time.date);
+    } else if (time.type === ListFilterTimeType.RANGE) {
+      conditions.push(`e.created_at >= ? AND e.created_at <= ?`);
+      bindings.push(time.start, time.end);
+    }
+
+    for (const propertyFilter of filter.properties) {
+      const propConfigRows = await this.execRows(
+        'SELECT data_type FROM entity_property_config WHERE id = ?',
+        [propertyFilter.propertyId],
+      );
+      if (propConfigRows.length === 0) {
+        continue;
+      }
+      const dataType = propConfigRows[0]['data_type'] as DataType;
+      const serializedValue = serializePropertyValue(propertyFilter.value, dataType);
+      conditions.push(
+        `EXISTS (SELECT 1 FROM entity_property ep WHERE ep.entity_id = e.id AND ep.property_config_id = ? AND ep.value = ?)`,
+      );
+      bindings.push(propertyFilter.propertyId, serializedValue);
+    }
+
+    if (!filter.includeAllTagging) {
+      const allOfTags = filter.tagging[ListFilterType.CONTAINS_ALL_OF] ?? [];
+      const oneOfTags = filter.tagging[ListFilterType.CONTAINS_ONE_OF] ?? [];
+      const hasTagConditions = allOfTags.length > 0 || oneOfTags.length > 0;
+
+      if (hasTagConditions || !filter.includeUntagged) {
+        const tagParts: string[] = [];
+
+        if (hasTagConditions) {
+          const matchedParts: string[] = [];
+          for (const tag of allOfTags) {
+            matchedParts.push(
+              `EXISTS (SELECT 1 FROM entity_tag et WHERE et.entity_id = e.id AND et.tag = ?)`,
+            );
+            bindings.push(tag);
+          }
+          if (oneOfTags.length > 0) {
+            const ph = oneOfTags.map(() => '?').join(',');
+            matchedParts.push(
+              `EXISTS (SELECT 1 FROM entity_tag et WHERE et.entity_id = e.id AND et.tag IN (${ph}))`,
+            );
+            bindings.push(...oneOfTags);
+          }
+          tagParts.push(`(${matchedParts.join(' AND ')})`);
+        }
+
+        if (filter.includeUntagged) {
+          tagParts.push(
+            `NOT EXISTS (SELECT 1 FROM entity_tag et WHERE et.entity_id = e.id)`,
+          );
+        }
+
+        if (tagParts.length > 0) {
+          conditions.push(`(${tagParts.join(' OR ')})`);
+        }
+      }
+    }
+
+    return { conditions, bindings };
   }
 
   async saveSetting(setting: Setting, listConfigId?: string): Promise<boolean> {

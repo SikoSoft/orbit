@@ -336,7 +336,7 @@ export class Storage implements StorageSchema {
   }
 
   @delegateSource()
-  async deleteListConfig(id: string): Promise<boolean> {
+  async deleteListConfig(id: string, _deleteItems?: boolean): Promise<boolean> {
     const listConfigs = await this.getListConfigs();
     localStorage.setItem(
       StorageItemKey.LIST_CONFIGS_KEY,

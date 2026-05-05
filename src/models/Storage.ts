@@ -71,7 +71,7 @@ export interface StorageSchema {
   getAuthToken?(): string;
   getListConfigs?(): Promise<ListConfig[]>;
   addListConfig?(): Promise<string>;
-  deleteListConfig?(id: string): Promise<boolean>;
+  deleteListConfig?(id: string, deleteItems?: boolean): Promise<boolean>;
   saveListConfig?(listConfig: ListConfig): Promise<StorageResult<ListConfig>>;
   updateListSort?(listConfigId: string, sort: ListSort): Promise<void>;
   updateListFilter?(listConfigId: string, filter: ListFilter): Promise<void>;

@@ -669,14 +669,14 @@ export class OfflineCacheStorage implements StorageSchema {
     await this.db.enqueue('updateListThemes', [listConfigId, themes]);
   }
 
-  async deleteListConfig(id: string): Promise<boolean> {
-    await this.db.deleteListConfig(id);
+  async deleteListConfig(id: string, deleteItems?: boolean): Promise<boolean> {
+    await this.db.deleteListConfig(id, deleteItems);
 
     if (this.isOnline && !this.isTempId(id)) {
-      return networkStorage.deleteListConfig(id);
+      return networkStorage.deleteListConfig(id, deleteItems);
     }
 
-    await this.db.enqueue('deleteListConfig', [id]);
+    await this.db.enqueue('deleteListConfig', [id, deleteItems ?? false]);
     return true;
   }
 
@@ -1103,7 +1103,7 @@ export class OfflineCacheStorage implements StorageSchema {
           args[0] as string,
           'list_config',
         );
-        await networkStorage.deleteListConfig(listConfigId);
+        await networkStorage.deleteListConfig(listConfigId, args[1] as boolean);
         break;
       }
 
