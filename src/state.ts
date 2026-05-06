@@ -1,6 +1,13 @@
 import { action, makeObservable, observable } from 'mobx';
 
-import { defaultSettings, Setting, Settings } from 'api-spec/models/Setting';
+import {
+  defaultSettings,
+  Setting,
+  SettingContextType,
+  SettingName,
+  Settings,
+  settingsConfig,
+} from 'api-spec/models/Setting';
 import {
   EntityConfig,
   Entity,
@@ -483,6 +490,36 @@ export class AppState {
 
   hasRole(role: string): boolean {
     return !!this.user?.roles?.includes(role);
+  }
+
+  getSetting<T>(name: SettingName): T | undefined {
+    const setting = settingsConfig[name];
+    if (!setting) {
+      return undefined;
+    }
+
+    for (const context of setting.context) {
+      if (
+        context === SettingContextType.LIST &&
+        this.listSetting[name] !== undefined
+      ) {
+        return this.listSetting[name] as T;
+      }
+      if (
+        context === SettingContextType.USER &&
+        this.userSettings[name] !== undefined
+      ) {
+        return this.userSettings[name] as T;
+      }
+      if (
+        context === SettingContextType.APP &&
+        this.systemSettings[name] !== undefined
+      ) {
+        return this.systemSettings[name] as T;
+      }
+    }
+
+    return setting.defaultValue as T;
   }
 
   constructor() {

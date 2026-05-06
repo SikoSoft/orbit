@@ -30,12 +30,18 @@ import { appState } from '@/state';
 import { addToast } from '@/lib/Util';
 import { translate } from '@/lib/Localization';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
+import { Debouncer } from '@/lib/Debouncer';
+import { SettingName } from 'api-spec/models/Setting';
 
 const minLengthForSuggestion = 1;
 
 @customElement('short-text-field')
 export class ShortTextField extends MobxLitElement {
   public state = appState;
+
+  private suggestionDebouncer = new Debouncer(
+    appState.getSetting(SettingName.REQUEST_DEBOUNCE_DELAY) ?? 300,
+  );
 
   @property({ type: Number })
   [ShortTextFieldProp.INSTANCE_ID]: ShortTextFieldProps[ShortTextFieldProp.INSTANCE_ID] =
@@ -102,7 +108,7 @@ export class ShortTextField extends MobxLitElement {
     const changedEvent = new PropertyChangedEvent(changedPayload);
     this.dispatchEvent(changedEvent);
 
-    this.requestPropertySuggestions();
+    this.suggestionDebouncer.debounce(() => this.requestPropertySuggestions());
   }
 
   private async requestPropertySuggestions(): Promise<void> {

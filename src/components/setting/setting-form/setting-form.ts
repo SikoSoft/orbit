@@ -35,7 +35,9 @@ import { SettingUpdatedEvent } from '@/events/setting-updated';
 @customElement('setting-form')
 export class SettingForm extends MobxLitElement {
   public state = appState;
-  private saveDebouncer = new Debouncer(300);
+  private saveDebouncer = new Debouncer(
+    appState.getSetting<number>(SettingName.REQUEST_DEBOUNCE_DELAY) ?? 300,
+  );
   protected context: SettingContextType = SettingContextType.APP;
 
   @property()
