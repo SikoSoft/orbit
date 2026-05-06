@@ -37,6 +37,7 @@ Orbit is a Lit + MobX activity/list management SPA backed by the `gapi` Azure Fu
 - Each directory: `component-name.ts` (main), optionally `component-name.models.ts` (types), `component-name.test.ts` (tests) and `component-name.events.ts` (custom DOM events)
 - Extend `MobxLitElement` from `@adobe/lit-mobx` for reactive MobX integration
 - Register with `@customElement('tag-name')`
+- Always use Lit's repeat directive, instead of map, for iterating in templates
 
 **Import order within files:**
 
@@ -89,6 +90,7 @@ Keep `api-spec` version in sync when making API contract changes. Internal packa
 `OFFLINE_CACHE_ENABLED = true` in `src/lib/Storage.ts`, so the active delegate is `OfflineCacheStorage`, not `NetworkStorage`. The `@delegateSource()` decorator routes calls to the first active delegate that has the method.
 
 **When adding a new storage method:**
+
 1. Add the signature to `StorageSchema` (`src/models/Storage.ts`)
 2. Implement it in `NetworkStorage` (`src/lib/NetworkStorage.ts`)
 3. Add a `@delegateSource()` stub in `Storage` (`src/lib/Storage.ts`)
