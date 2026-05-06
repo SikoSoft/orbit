@@ -920,6 +920,16 @@ export class Storage implements StorageSchema {
   ): Promise<boolean> {
     return Promise.resolve(false);
   }
+
+  @delegateSource()
+  async getEntitySuggestions(_filter: ListFilter): Promise<Entity.Entity[]> {
+    return Promise.resolve([]);
+  }
+
+  @delegateSource()
+  async addEntitySuggestion(_id: number): Promise<boolean> {
+    return Promise.resolve(false);
+  }
 }
 
 export const storage = new Storage();

@@ -733,6 +733,35 @@ export class NetworkStorage implements StorageSchema {
 
     return false;
   }
+
+  async getEntitySuggestions(
+    filter: ListFilter,
+  ): Promise<Entity.Entity[]> {
+    const suggestionFilter = { ...filter, suggestion: true };
+    const queryParams = new URLSearchParams({
+      filter: JSON.stringify(suggestionFilter),
+    });
+    const result = await api.get<{ entities: Entity.Entity[]; total: number }>(
+      `entity?${queryParams}`,
+    );
+
+    if (result && result.isOk) {
+      return result.response.entities;
+    }
+    return [];
+  }
+
+  async addEntitySuggestion(id: number): Promise<boolean> {
+    const result = await api.put<
+      { published: boolean; suggestion: boolean },
+      Entity.Entity
+    >(`entity/${id}`, { published: true, suggestion: false });
+
+    if (result && result.isOk) {
+      return true;
+    }
+    return false;
+  }
 }
 
 export const networkStorage = new NetworkStorage();

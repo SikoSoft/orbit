@@ -186,4 +186,6 @@ export interface StorageSchema {
     viewAccessPolicyId: number,
     editAccessPolicyId: number,
   ): Promise<boolean>;
+  getEntitySuggestions?(filter: ListFilter): Promise<Entity.Entity[]>;
+  addEntitySuggestion?(id: number): Promise<boolean>;
 }

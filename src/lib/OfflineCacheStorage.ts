@@ -857,6 +857,16 @@ export class OfflineCacheStorage implements StorageSchema {
     );
   }
 
+  async getEntitySuggestions(
+    filter: ListFilter,
+  ): Promise<Entity.Entity[]> {
+    return networkStorage.getEntitySuggestions(filter);
+  }
+
+  async addEntitySuggestion(id: number): Promise<boolean> {
+    return networkStorage.addEntitySuggestion(id);
+  }
+
   // ─── Offline Sync ─────────────────────────────────────────────────────────────
 
   private isTempId(_id: string): boolean {

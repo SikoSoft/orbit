@@ -43,6 +43,7 @@ import '@ss/ui/components/tab-pane';
 import '@/components/entity-form/property-field/property-field';
 import '@/components/svg-icon/svg-icon';
 import '@/components/access-policy-assignment/access-policy-assignment';
+import '@/components/entity-suggestions/entity-suggestions';
 
 import {
   EntityItemCanceledEvent,
@@ -264,7 +265,8 @@ export class EntityForm extends ViewElement {
     return (
       this.initialHash !== this.instancesHash ||
       JSON.stringify(this.tagsAndSuggestions) !== this.initialTags ||
-      JSON.stringify(this.sortedIds) !== JSON.stringify(this.initialSortedIds) ||
+      JSON.stringify(this.sortedIds) !==
+        JSON.stringify(this.initialSortedIds) ||
       this.published !== this.initialPublished
     );
   }
@@ -303,7 +305,8 @@ export class EntityForm extends ViewElement {
 
         this.tags =
           this.state.listConfig.filter.tagging[ListFilterType.CONTAINS_ALL_OF];
-        this.published = this.state.listConfig.setting[SettingName.AUTO_PUBLISH];
+        this.published =
+          this.state.listConfig.setting[SettingName.AUTO_PUBLISH];
 
         if (this.availableEntityConfigs.length === 1) {
           this.type = this.availableEntityConfigs[0].id;
@@ -914,6 +917,9 @@ export class EntityForm extends ViewElement {
 
   renderPropertiesTab(): TemplateResult {
     return html`
+      ${!this.entityId
+        ? html`<entity-suggestions></entity-suggestions>`
+        : nothing}
       ${!this.entityId && this.availableEntityConfigs.length > 1
         ? html` <div class="type">
             <ss-select
