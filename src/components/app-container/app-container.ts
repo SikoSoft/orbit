@@ -33,6 +33,7 @@ import '@/components/bulk-manager/bulk-manager';
 import '@/components/list-config/list-config';
 import '@/components/svg-icon/svg/svg-spinner';
 import { Introspection } from 'api-spec/models/Introspection';
+import { SettingName } from 'api-spec/models/Setting';
 import { StorageSource } from '@/models/Storage';
 import { AssistEntityAddedEvent } from '../add-entity-widget/add-entity-widget.events';
 
@@ -202,7 +203,9 @@ export class AppContainer extends MobxLitElement {
       }
 
       if (!this.state.listConfigId && this.state.listConfigs.length) {
-        this.state.setListConfigId(this.state.listConfigs[0].id);
+        const defaultListConfigId = this.state.getSetting<string>(SettingName.DEFAULT_LIST_CONFIG);
+        const defaultConfig = defaultListConfigId && this.state.listConfigs.find(c => c.id === defaultListConfigId);
+        this.state.setListConfigId(defaultConfig ? defaultConfig.id : this.state.listConfigs[0].id);
       }
 
       this.state.setListContextMode(storage.getListContextMode());
