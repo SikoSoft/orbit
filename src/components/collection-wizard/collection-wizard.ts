@@ -1,5 +1,6 @@
 import { css, html, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 
 import { translate } from '@/lib/Localization';
@@ -259,7 +260,9 @@ export class CollectionWizard extends MobxLitElement {
         </div>
 
         <div class="grid">
-          ${collectionOptions.map(
+          ${repeat(
+            collectionOptions,
+            option => option.id,
             option => html`
               <div
                 class="card ${this.isLoading ? 'loading' : ''}"
