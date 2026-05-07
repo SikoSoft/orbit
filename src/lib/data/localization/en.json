@@ -7,6 +7,7 @@
   "update": "Update",
   "entityTypeRequired": "Entity type is required",
   "added": "Added!",
+  "itemHasBeenAdded": "The item has been added",
   "updated": "Updated!",
   "removed": "Removed!",
   "delete": "Delete",

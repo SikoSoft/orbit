@@ -2,9 +2,12 @@ import { html, css, nothing, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 
+import { NotificationType } from '@ss/ui/components/notification-provider.models';
+
 import { translate } from '@/lib/Localization';
 import { storage } from '@/lib/Storage';
 import { themed } from '@/lib/Theme';
+import { addToast } from '@/lib/Util';
 
 import {
   EntitySuggestionProp,
@@ -44,6 +47,7 @@ export class EntitySuggestion extends MobxLitElement {
       return;
     }
     await storage.addEntitySuggestion(this.entity.id);
+    addToast(translate('itemHasBeenAdded'), NotificationType.INFO);
     this.dispatchEvent(new EntitySuggestionAddedEvent({ id: this.entity.id }));
   }
 
