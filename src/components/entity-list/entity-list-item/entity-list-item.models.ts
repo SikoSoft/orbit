@@ -21,6 +21,7 @@ export enum EntityListItemProp {
   VIEW_ACCESS_POLICY_ID = 'viewAccessPolicyId',
   EDIT_ACCESS_POLICY_ID = 'editAccessPolicyId',
   PUBLISHED = 'published',
+  SUGGESTION = 'suggestion',
 }
 
 export interface EntityListItemProps extends PropTypes {
@@ -36,6 +37,7 @@ export interface EntityListItemProps extends PropTypes {
   [EntityListItemProp.VIEW_ACCESS_POLICY_ID]: number;
   [EntityListItemProp.EDIT_ACCESS_POLICY_ID]: number;
   [EntityListItemProp.PUBLISHED]: boolean;
+  [EntityListItemProp.SUGGESTION]: boolean;
 }
 
 export const entityListItemProps: PropConfigMap<EntityListItemProps> = {
@@ -122,5 +124,12 @@ export const entityListItemProps: PropConfigMap<EntityListItemProps> = {
       type: ControlType.BOOLEAN,
     },
     description: 'Whether the entity is published',
+  },
+  [EntityListItemProp.SUGGESTION]: {
+    default: false,
+    control: {
+      type: ControlType.BOOLEAN,
+    },
+    description: 'Whether the entity is a suggestion',
   },
 };

@@ -165,6 +165,10 @@ export class EntityListItem extends MobxLitElement {
   [EntityListItemProp.PUBLISHED]: EntityListItemProps[EntityListItemProp.PUBLISHED] =
     entityListItemProps[EntityListItemProp.PUBLISHED].default;
 
+  @property({ type: Boolean })
+  [EntityListItemProp.SUGGESTION]: EntityListItemProps[EntityListItemProp.SUGGESTION] =
+    entityListItemProps[EntityListItemProp.SUGGESTION].default;
+
   @state() mode: EntityListItemMode = EntityListItemMode.PREVIEW;
   @state() pointerDown: Date = new Date();
   @state() downTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
@@ -182,6 +186,7 @@ export class EntityListItem extends MobxLitElement {
       full: this.mode === EntityListItemMode.FULL,
       edit: this.mode === EntityListItemMode.EDIT,
       unpublished: !this.published,
+      suggestion: this.suggestion,
     };
   }
 
@@ -424,7 +429,7 @@ export class EntityListItem extends MobxLitElement {
                       ${this.entityConfig?.name || this.type}
                     </div>`
                   : nothing}
-                ${!this.published
+                ${!this.published && !this.suggestion
                   ? html`<div class="unpublished-badge">${translate('unpublished')}</div>`
                   : nothing}
                 <div class="show-full">
