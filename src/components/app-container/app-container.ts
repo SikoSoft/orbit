@@ -21,6 +21,7 @@ import {
   NetworkApiRequestFailedEvent,
   networkApiRequestFailedEventName,
 } from '@/events/network-api-request-failed';
+import { networkApiRequestSucceededEventName } from '@/events/network-api-request-succeeded';
 import { AppReadyEvent } from '@/components/app-container/app-container.events';
 import { translate } from '@/lib/Localization';
 
@@ -94,6 +95,10 @@ export class AppContainer extends MobxLitElement {
       networkApiRequestFailedEventName,
       this.handleNetworkApiRequestFailed as EventListener,
     );
+    window.addEventListener(
+      networkApiRequestSucceededEventName,
+      this.handleNetworkApiRequestSucceeded,
+    );
 
     this.addEventListener('view-changed', (e: Event) => {
       this.handleViewChanged(e);
@@ -126,6 +131,10 @@ export class AppContainer extends MobxLitElement {
       networkApiRequestFailedEventName,
       this.handleNetworkApiRequestFailed as EventListener,
     );
+    window.removeEventListener(
+      networkApiRequestSucceededEventName,
+      this.handleNetworkApiRequestSucceeded,
+    );
   }
 
   private handleOnline = (): void => {
@@ -147,6 +156,12 @@ export class AppContainer extends MobxLitElement {
     if (event.detail.type === 'offline' || event.detail.type === 'network') {
       console.warn('Network API request failed, setting app state to offline');
       this.state.setOnline(false);
+    }
+  };
+
+  private handleNetworkApiRequestSucceeded = (): void => {
+    if (!this.state.online) {
+      this.state.setOnline(true);
     }
   };
 

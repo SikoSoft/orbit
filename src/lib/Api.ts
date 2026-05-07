@@ -4,6 +4,7 @@ import {
   NetworkApiRequestFailedEvent,
   type NetworkApiRequestFailedEventPayload,
 } from '@/events/network-api-request-failed';
+import { NetworkApiRequestSucceededEvent } from '@/events/network-api-request-succeeded';
 import { addToast } from '@/lib/Util';
 import { translate } from '@/lib/Localization';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
@@ -104,6 +105,10 @@ export class Api {
           status: response.status,
           url: url.href,
         });
+      }
+
+      if (okResponseCodes.includes(response.status)) {
+        window.dispatchEvent(new NetworkApiRequestSucceededEvent({}));
       }
 
       return {
