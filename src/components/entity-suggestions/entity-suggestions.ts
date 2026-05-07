@@ -1,6 +1,7 @@
-import { html, TemplateResult } from 'lit';
+import { html, css, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 
 import { Entity } from 'api-spec/models/Entity';
@@ -11,34 +12,139 @@ import { themed } from '@/lib/Theme';
 import { EntitySuggestionAddedEvent } from '@/components/entity-suggestion/entity-suggestion.events';
 import '@/components/entity-suggestion/entity-suggestion';
 
+const ONE_HOUR_MS = 60 * 60 * 1000;
+const FADE_DURATION_MS = 400;
+const CHECK_INTERVAL_MS = 60 * 1000;
+
+function isWithinHourWindow(createdAt: string): boolean {
+  const created = new Date(createdAt);
+  const now = new Date();
+  const createdTimeMs =
+    (created.getHours() * 60 + created.getMinutes()) * 60000;
+  const nowTimeMs = (now.getHours() * 60 + now.getMinutes()) * 60000;
+  const diff = Math.abs(createdTimeMs - nowTimeMs);
+  return Math.min(diff, 24 * 60 * 60 * 1000 - diff) <= ONE_HOUR_MS;
+}
+
 @themed()
 @customElement('entity-suggestions')
 export class EntitySuggestions extends MobxLitElement {
-  private state = appState;
+  static styles = css`
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
 
-  @state() private entities: Entity[] = [];
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+
+    .suggestion-wrapper {
+      animation: fadeIn 400ms ease-in-out;
+    }
+
+    .suggestion-wrapper.fading-out {
+      animation: fadeOut 400ms ease-in-out forwards;
+    }
+  `;
+
+  private appState = appState;
+  private allEntities: Entity[] = [];
+  private intervalId: ReturnType<typeof setInterval> | null = null;
+
+  @state() private displayedEntities: Entity[] = [];
+  @state() private fadingOutIds: Set<number> = new Set();
 
   async connectedCallback(): Promise<void> {
     super.connectedCallback();
-    this.entities = await storage.getEntitySuggestions(
-      this.state.listConfig.filter,
+    this.allEntities = await storage.getEntitySuggestions(
+      this.appState.listConfig.filter,
+    );
+    this.updateVisibility();
+    this.intervalId = setInterval(
+      () => this.updateVisibility(),
+      CHECK_INTERVAL_MS,
     );
   }
 
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    if (this.intervalId !== null) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
+  }
+
+  private updateVisibility(): void {
+    const inWindowIds = new Set(
+      this.allEntities
+        .filter(e => isWithinHourWindow(e.createdAt))
+        .map(e => e.id),
+    );
+
+    const toAdd = this.allEntities.filter(
+      e =>
+        inWindowIds.has(e.id) &&
+        !this.displayedEntities.some(d => d.id === e.id),
+    );
+
+    const toRemove = this.displayedEntities.filter(
+      e => !inWindowIds.has(e.id) && !this.fadingOutIds.has(e.id),
+    );
+
+    if (toAdd.length > 0) {
+      this.displayedEntities = [...this.displayedEntities, ...toAdd];
+    }
+
+    toRemove.forEach(entity => {
+      const id = entity.id;
+      this.fadingOutIds = new Set([...this.fadingOutIds, id]);
+      setTimeout(() => {
+        this.displayedEntities = this.displayedEntities.filter(
+          e => e.id !== id,
+        );
+        this.fadingOutIds = new Set(
+          [...this.fadingOutIds].filter(fid => fid !== id),
+        );
+      }, FADE_DURATION_MS);
+    });
+  }
+
   private handleSuggestionAdded(e: EntitySuggestionAddedEvent): void {
-    this.entities = this.entities.filter(entity => entity.id !== e.detail.id);
+    const { id } = e.detail;
+    this.allEntities = this.allEntities.filter(entity => entity.id !== id);
+    this.displayedEntities = this.displayedEntities.filter(
+      entity => entity.id !== id,
+    );
+    this.fadingOutIds = new Set([...this.fadingOutIds].filter(fid => fid !== id));
   }
 
   render(): TemplateResult {
     return html`
       ${repeat(
-        this.entities,
+        this.displayedEntities,
         entity => entity.id,
         entity => html`
-          <entity-suggestion
-            .entity=${entity}
-            @entity-suggestion-added=${this.handleSuggestionAdded}
-          ></entity-suggestion>
+          <div
+            class=${classMap({
+              'suggestion-wrapper': true,
+              'fading-out': this.fadingOutIds.has(entity.id),
+            })}
+          >
+            <entity-suggestion
+              .entity=${entity}
+              @entity-suggestion-added=${this.handleSuggestionAdded}
+            ></entity-suggestion>
+          </div>
         `,
       )}
     `;
