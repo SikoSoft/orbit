@@ -84,6 +84,7 @@ Keep `api-spec` version in sync when making API contract changes. Internal packa
 - Do not hard code any messages in the UI elements. Always use translate() function with a camelCased key.
 - Every function must include a return type
 - SVG icons should never be inserted inline. Create new component for icon if it doesn't exist in `components/svg-icon/svg`
+- Every custom event must have its own class extending `CustomEvent<TPayload>`, a named export for the event name string, and a payload type — never dispatch a bare `new CustomEvent(...)`. Events with no payload use `Record<string, never>` as the type. See `src/events/` for examples.
 
 ## Storage layer
 
