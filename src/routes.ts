@@ -65,4 +65,10 @@ export const routes: Route[] = [
     action: async () =>
       await import('@/views/user-settings-view/user-settings-view'),
   },
+  {
+    path: '/dashboard',
+    component: 'user-dashboard-view',
+    action: async () =>
+      await import('@/views/user-dashboard-view/user-dashboard-view'),
+  },
 ];
