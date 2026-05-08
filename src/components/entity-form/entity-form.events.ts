@@ -6,6 +6,7 @@ export interface EntityItemUpdatedEventPayload {
   id: number;
   tags: string[];
   properties: EntityProperty[];
+  published: boolean;
 }
 
 export class EntityItemUpdatedEvent extends CustomEvent<EntityItemUpdatedEventPayload> {

@@ -622,6 +622,7 @@ export class EntityForm extends ViewElement {
             id: this.entityId,
             tags: this.tags,
             properties: result.properties,
+            published: payload.published,
           }),
         );
 

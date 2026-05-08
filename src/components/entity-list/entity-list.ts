@@ -184,7 +184,7 @@ export class EntityList extends ViewElement {
   }
 
   private handleItemUpdated(e: EntityItemUpdatedEvent): void {
-    const { properties, tags } = e.detail;
+    const { properties, tags, published } = e.detail;
 
     const updatedList = this.state.listEntities.map(item =>
       item.id === e.detail.id
@@ -192,6 +192,7 @@ export class EntityList extends ViewElement {
             ...item,
             properties,
             tags,
+            published,
           }
         : item,
     );
