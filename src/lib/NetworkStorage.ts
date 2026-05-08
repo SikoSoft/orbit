@@ -357,6 +357,15 @@ export class NetworkStorage implements StorageSchema {
     return false;
   }
 
+  async getEntity(id: number): Promise<Entity.Entity | null> {
+    const result = await api.get<Entity.Entity>(`entity/${id}`);
+
+    if (result && result.isOk) {
+      return result.response;
+    }
+    return null;
+  }
+
   async getTags(tag: string): Promise<string[]> {
     const result = await api.get<{ tags: string[] }>(`tag/${tag}`);
 

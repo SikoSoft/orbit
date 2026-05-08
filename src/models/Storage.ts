@@ -113,6 +113,7 @@ export interface StorageSchema {
   addEntity?(entity: RequestBody): Promise<Entity.Entity | null>;
   updateEntity?(id: number, entity: RequestBody): Promise<Entity.Entity | null>;
   deleteEntity?(id: number): Promise<boolean>;
+  getEntity?(id: number): Promise<Entity.Entity | null>;
   getTags?(tag: string): Promise<string[]>;
   bulkOperation?(payload: BulkOperationPayload): Promise<boolean>;
   getPropertySuggestions?(

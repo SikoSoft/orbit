@@ -26,6 +26,11 @@ export const routes: Route[] = [
     action: async () => await import('@/components/entity-form/entity-form'),
   },
   {
+    path: '/entity-view/:id',
+    component: 'entity-view',
+    action: async () => await import('@/views/entity-view/entity-view'),
+  },
+  {
     path: '/login',
     component: 'login-form',
     action: async () => await import('@/components/login-form/login-form'),
