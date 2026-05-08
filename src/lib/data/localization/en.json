@@ -299,5 +299,6 @@
   "settingsTab.user": "User",
   "settingsTab.system": "System",
   "deleteItemsInList": "Delete items in list",
-  "deleteListConfigTitle": "Delete List Configuration"
+  "deleteListConfigTitle": "Delete List Configuration",
+  "managedByExternalParty": "This list configuration is managed by an external party."
 }
