@@ -7,7 +7,7 @@ import { storage } from '@/lib/Storage';
 import { appState } from '@/state';
 import { ViewElement } from '@/lib/ViewElement';
 import { api } from '@/lib/Api';
-import { setupRouter } from '@/lib/Router';
+import { navigate, setupRouter } from '@/lib/Router';
 import { themed } from '@/lib/Theme';
 import { Router } from '@/models/Router';
 import { routes } from '@/routes';
@@ -280,6 +280,7 @@ export class AppContainer extends MobxLitElement {
   private async handleUserLoggedIn(): Promise<void> {
     await this.restoreState();
     this.syncUserData();
+    navigate('/dashboard');
   }
 
   private async syncUserData(): Promise<void> {
