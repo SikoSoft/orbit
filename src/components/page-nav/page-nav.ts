@@ -23,7 +23,7 @@ const views: PageViewConfig[] = [
   {
     id: PageView.INPUT,
     label: translate('new'),
-    url: '/',
+    url: '/add',
   },
   { id: PageView.LIST, label: translate('list'), url: '/entities' },
   { id: PageView.ADMIN, label: translate('admin'), url: '/admin' },
@@ -75,7 +75,7 @@ export class PageNav extends MobxLitElement {
     pageNavProps[PageNavProp.ACTIVE].default;
 
   @state()
-  activePath: string = '/';
+  activePath: string = views[0].url;
 
   @state()
   get displayViews(): PageViewConfig[] {

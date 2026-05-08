@@ -170,9 +170,7 @@ export class AppContainer extends MobxLitElement {
     this.state.setAuthToken(authToken);
   }
 
-  protected updated(
-    changedProperties: Map<string | symbol, unknown>,
-  ): void {
+  protected updated(changedProperties: Map<string | symbol, unknown>): void {
     if (changedProperties.has('ready') && this.ready) {
       console.log('[orbit] app-container: ready, dispatching app-ready');
       this.dispatchEvent(new AppReadyEvent({}));
@@ -190,7 +188,11 @@ export class AppContainer extends MobxLitElement {
         this.state.setStorageSource(storageSource);
       }
 
-      console.log('[orbit] restoreState: storageSource=%s authToken=%s', storageSource, !!this.state.authToken);
+      console.log(
+        '[orbit] restoreState: storageSource=%s authToken=%s',
+        storageSource,
+        !!this.state.authToken,
+      );
 
       if (
         this.state.storageSource === StorageSource.DEVICE ||
@@ -203,7 +205,11 @@ export class AppContainer extends MobxLitElement {
           storage.getSettings().catch(() => null),
         ]);
         console.timeEnd('[orbit] restoreState:fetchConfigs');
-        console.log('[orbit] restoreState: got %d listConfigs, %d entityConfigs', listConfigs.length, entityConfigs.length);
+        console.log(
+          '[orbit] restoreState: got %d listConfigs, %d entityConfigs',
+          listConfigs.length,
+          entityConfigs.length,
+        );
 
         this.state.setListConfigs(listConfigs);
         this.state.setEntityConfigs(entityConfigs);
@@ -218,9 +224,15 @@ export class AppContainer extends MobxLitElement {
       }
 
       if (!this.state.listConfigId && this.state.listConfigs.length) {
-        const defaultListConfigId = this.state.getSetting<string>(SettingName.DEFAULT_LIST_CONFIG);
-        const defaultConfig = defaultListConfigId && this.state.listConfigs.find(c => c.id === defaultListConfigId);
-        this.state.setListConfigId(defaultConfig ? defaultConfig.id : this.state.listConfigs[0].id);
+        const defaultListConfigId = this.state.getSetting<string>(
+          SettingName.DEFAULT_LIST_CONFIG,
+        );
+        const defaultConfig =
+          defaultListConfigId &&
+          this.state.listConfigs.find(c => c.id === defaultListConfigId);
+        this.state.setListConfigId(
+          defaultConfig ? defaultConfig.id : this.state.listConfigs[0].id,
+        );
       }
 
       this.state.setListContextMode(storage.getListContextMode());
@@ -280,7 +292,7 @@ export class AppContainer extends MobxLitElement {
   private async handleUserLoggedIn(): Promise<void> {
     await this.restoreState();
     this.syncUserData();
-    navigate('/dashboard');
+    navigate('/');
   }
 
   private async syncUserData(): Promise<void> {
@@ -361,7 +373,9 @@ export class AppContainer extends MobxLitElement {
       >
         ${this.ready
           ? this.routerView
-          : html`<div class="loading" aria-label=${translate('initializing')}><svg-spinner></svg-spinner></div>`}
+          : html`<div class="loading" aria-label=${translate('initializing')}>
+              <svg-spinner></svg-spinner>
+            </div>`}
       </div>
     `;
   }
