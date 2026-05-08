@@ -301,4 +301,6 @@
   "deleteItemsInList": "Delete items in list",
   "deleteListConfigTitle": "Delete List Configuration",
   "managedByExternalParty": "This list configuration is managed by an external party."
+  "loading": "Loading...",
+  "entityNotFound": "Entity not found"
 }

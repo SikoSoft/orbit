@@ -724,6 +724,11 @@ export class Storage implements StorageSchema {
   }
 
   @delegateSource()
+  async getEntity(_id: number): Promise<Entity.Entity | null> {
+    return Promise.resolve(null);
+  }
+
+  @delegateSource()
   async getTags(_tag: string): Promise<string[]> {
     return Promise.resolve([]);
   }

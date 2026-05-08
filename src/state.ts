@@ -363,10 +363,16 @@ export class AppState {
 
   @action
   setSetting(setting: Setting): void {
-    this.listSetting = {
-      ...this.listSetting,
+    const updatedSetting = {
+      ...this.listConfig.setting,
       [setting.name]: setting.value,
     };
+    this.listSetting = updatedSetting;
+    this.listConfigs = this.listConfigs.map(config =>
+      config.id === this.listConfigId
+        ? { ...config, setting: updatedSetting }
+        : config,
+    );
   }
 
   @action
