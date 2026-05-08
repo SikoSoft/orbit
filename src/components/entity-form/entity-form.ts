@@ -275,8 +275,8 @@ export class EntityForm extends ViewElement {
   get availableEntityConfigs(): EntityConfig[] {
     return this.state.entityConfigs.filter(
       config =>
-        this.state.listConfig.filter.includeTypes.length === 0 ||
-        this.state.listConfig.filter.includeTypes.includes(config.id),
+        this.state.listFilter.includeTypes.length === 0 ||
+        this.state.listFilter.includeTypes.includes(config.id),
     );
   }
 
@@ -297,16 +297,16 @@ export class EntityForm extends ViewElement {
     this.initialTags = JSON.stringify(this.tags);
 
     reaction(
-      () => appState.listConfig,
+      () => [appState.listConfigId, appState.listFilter],
       () => {
         if (this.entityId) {
           return;
         }
 
         this.tags =
-          this.state.listConfig.filter.tagging[ListFilterType.CONTAINS_ALL_OF];
+          this.state.listFilter.tagging[ListFilterType.CONTAINS_ALL_OF];
         this.published =
-          this.state.listConfig.setting[SettingName.AUTO_PUBLISH];
+          this.state.listSetting[SettingName.AUTO_PUBLISH];
 
         if (this.availableEntityConfigs.length === 1) {
           this.type = this.availableEntityConfigs[0].id;
@@ -655,8 +655,8 @@ export class EntityForm extends ViewElement {
     this.tagValue = '';
     if (!this.entityId) {
       this.tags =
-        this.state.listConfig.filter.tagging[ListFilterType.CONTAINS_ALL_OF];
-      this.published = this.state.listConfig.setting[SettingName.AUTO_PUBLISH];
+        this.state.listFilter.tagging[ListFilterType.CONTAINS_ALL_OF];
+      this.published = this.state.listSetting[SettingName.AUTO_PUBLISH];
     }
     this.state.setTagSuggestions([]);
 
