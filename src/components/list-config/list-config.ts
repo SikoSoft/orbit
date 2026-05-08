@@ -181,6 +181,17 @@ export class ListConfig extends MobxLitElement {
         color: var(--text-color);
         word-break: break-all;
       }
+
+      .managed-indicator {
+        margin-top: 0.5rem;
+        text-align: center;
+        font-size: 0.8rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        background-color: color-mix(in srgb, currentColor 10%, transparent);
+        border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+        opacity: 0.8;
+      }
     }
 
     .delete-config-modal {
@@ -313,6 +324,14 @@ export class ListConfig extends MobxLitElement {
     }
 
     return this.name === this.state.listConfig.name;
+  }
+
+  @state()
+  get isManagedExternally(): boolean {
+    if (!this.state.user?.id || !this.state.listConfig?.userId) {
+      return false;
+    }
+    return this.state.listConfig.userId !== this.state.user.id;
   }
 
   @state() get classes(): Record<string, boolean> {
@@ -616,6 +635,12 @@ export class ListConfig extends MobxLitElement {
                         @click=${this.enableEditMode}
                       ></ss-input>
                     </div>
+
+                    ${this.state.user?.id && config.userId && config.userId !== this.state.user.id
+                      ? html`<div class="managed-indicator">
+                          ${translate('managedByExternalParty')}
+                        </div>`
+                      : nothing}
 
                     <div class="buttons">
                       <div class="buttons-inner">

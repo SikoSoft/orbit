@@ -301,5 +301,8 @@
   "deleteItemsInList": "Delete items in list",
   "deleteListConfigTitle": "Delete List Configuration",
   "dashboard.welcome": "Welcome, {name}!",
-  "dashboard.manageAccess": "Manage Access Policies"
+  "dashboard.manageAccess": "Manage Access Policies",
+  "managedByExternalParty": "This list configuration is managed by an external party.",
+  "loading": "Loading...",
+  "entityNotFound": "Entity not found"
 }

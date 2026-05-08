@@ -528,6 +528,10 @@ export class OfflineCacheStorage implements StorageSchema {
     return true;
   }
 
+  async getEntity(id: number): Promise<Entity.Entity | null> {
+    return networkStorage.getEntity(id);
+  }
+
   async getTags(tag: string): Promise<string[]> {
     if (this.isOnline) {
       try {
