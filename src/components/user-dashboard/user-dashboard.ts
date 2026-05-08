@@ -50,8 +50,8 @@ export class UserDashboard extends MobxLitElement {
             </p>`
           : nothing}
         <div class="links">
-          <a href="/access">${translate('dashboard.manageAccess')}</a>
-          <a href="/settings">${translate('settings')}</a>
+          <a href="access">${translate('dashboard.manageAccess')}</a>
+          <a href="settings">${translate('settings')}</a>
         </div>
       </div>
     `;
