@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import type { BindableValue, SqlValue } from '@sqlite.org/sqlite-wasm';
 
 import {
@@ -174,7 +173,7 @@ export class SQLiteStorage implements StorageSchema {
       }
     };
 
-    const initId = uuidv4();
+    const initId = crypto.randomUUID();
     new Promise<void>((resolve, reject) => {
       this.pending.set(initId, {
         resolve: resolve as (v: unknown) => void,
@@ -194,7 +193,7 @@ export class SQLiteStorage implements StorageSchema {
     sql: string,
     bind: BindableValue[] = [],
   ): Promise<T> {
-    const id = uuidv4();
+    const id = crypto.randomUUID();
     return new Promise<T>((resolve, reject) => {
       this.pending.set(id, {
         resolve: resolve as (v: unknown) => void,
@@ -730,7 +729,7 @@ export class SQLiteStorage implements StorageSchema {
   }
 
   async addListConfig(): Promise<string> {
-    const id = uuidv4();
+    const id = crypto.randomUUID();
 
     await this.run(
       `INSERT INTO list_config (id, name, filter, sort, setting, themes)

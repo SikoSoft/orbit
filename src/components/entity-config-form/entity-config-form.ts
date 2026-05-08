@@ -1,7 +1,6 @@
 import { html, css, nothing, TemplateResult } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { produce } from 'immer';
 
 import {
   defaultEntityConfig,
@@ -247,13 +246,14 @@ export class EntityConfigForm extends MobxLitElement {
     this.isSaving = true;
     let result: Entity.EntityConfig | null = null;
 
-    const entityConfig = produce(this.entityConfig, draft => {
-      if (this.saveNewRevision) {
-        draft.id = 0;
-        draft.revisionOf = this.entityConfig.id;
-        draft.properties = draft.properties.map(p => ({ ...p, id: 0 }));
-      }
-    });
+    const entityConfig = this.saveNewRevision
+      ? {
+          ...this.entityConfig,
+          id: 0,
+          revisionOf: this.entityConfig.id,
+          properties: this.entityConfig.properties.map(p => ({ ...p, id: 0 })),
+        }
+      : { ...this.entityConfig };
 
     if (entityConfig.id) {
       result = await storage.updateEntityConfig(entityConfig);
@@ -288,36 +288,33 @@ export class EntityConfigForm extends MobxLitElement {
   }
 
   addPropertyToTop(): void {
-    const entityPropertyConfig = produce(
-      defaultEntityPropertyConfig,
-      draft => draft,
-    );
-
-    const entityConfig = produce(this.entityConfig, draft => {
-      draft.properties.unshift(entityPropertyConfig);
-    });
-    this.entityConfig = entityConfig;
+    this.entityConfig = {
+      ...this.entityConfig,
+      properties: [{ ...defaultEntityPropertyConfig }, ...this.entityConfig.properties],
+    };
   }
 
   addPropertyToBottom(): void {
-    const entityConfig = produce(this.entityConfig, draft => {
-      draft.properties.push(defaultEntityPropertyConfig);
-    });
-    this.entityConfig = entityConfig;
+    this.entityConfig = {
+      ...this.entityConfig,
+      properties: [...this.entityConfig.properties, { ...defaultEntityPropertyConfig }],
+    };
   }
 
   updateProperty(index: number, updatedProperty: EntityPropertyConfig): void {
-    const entityConfig = produce(this.entityConfig, draft => {
-      draft.properties[index] = updatedProperty;
-    });
-    this.entityConfig = entityConfig;
+    this.entityConfig = {
+      ...this.entityConfig,
+      properties: this.entityConfig.properties.map((p, i) =>
+        i === index ? updatedProperty : p,
+      ),
+    };
   }
 
   deleteProperty(index: number): void {
-    const entityConfig = produce(this.entityConfig, draft => {
-      draft.properties.splice(index, 1);
-    });
-    this.entityConfig = entityConfig;
+    this.entityConfig = {
+      ...this.entityConfig,
+      properties: this.entityConfig.properties.filter((_, i) => i !== index),
+    };
   }
 
   isPanelOpen(id: number): boolean {
@@ -353,12 +350,9 @@ export class EntityConfigForm extends MobxLitElement {
     );
 
     const { problems } = e.detail;
-    this.propertyConfigProblems = produce(
-      this.propertyConfigProblems,
-      draft => {
-        draft[index] = problems;
-      },
-    );
+    this.propertyConfigProblems = this.propertyConfigProblems.map((p, i) =>
+      i === index ? problems : p,
+    ) as PropertyConfigProblemMap;
 
     if (this.revisionInfo) {
       this.revisionInfo.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -366,36 +360,25 @@ export class EntityConfigForm extends MobxLitElement {
   }
 
   breakingChangesResolved(index: number): void {
-    this.propertyConfigProblems = produce(
-      this.propertyConfigProblems,
-      draft => {
-        draft[index] = undefined;
-      },
-    );
+    this.propertyConfigProblems = this.propertyConfigProblems.map((p, i) =>
+      i === index ? undefined : p,
+    ) as PropertyConfigProblemMap;
   }
 
   updateAllowPropertyOrdering(allow: boolean): void {
-    this.entityConfig = produce(this.entityConfig, draft => {
-      draft.allowPropertyOrdering = allow;
-    });
+    this.entityConfig = { ...this.entityConfig, allowPropertyOrdering: allow };
   }
 
   updateAIEnabled(enabled: boolean): void {
-    this.entityConfig = produce(this.entityConfig, draft => {
-      draft.aiEnabled = enabled;
-    });
+    this.entityConfig = { ...this.entityConfig, aiEnabled: enabled };
   }
 
   updateAIIdentifyPrompt(prompt: string): void {
-    this.entityConfig = produce(this.entityConfig, draft => {
-      draft.aiIdentifyPrompt = prompt;
-    });
+    this.entityConfig = { ...this.entityConfig, aiIdentifyPrompt: prompt };
   }
 
   updatePublic(isPublic: boolean): void {
-    this.entityConfig = produce(this.entityConfig, draft => {
-      draft.public = isPublic;
-    });
+    this.entityConfig = { ...this.entityConfig, public: isPublic };
   }
 
   get tabRegistry(): TabEntry[] {

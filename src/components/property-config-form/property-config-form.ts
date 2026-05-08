@@ -21,7 +21,6 @@ import {
   PropertyDataValue,
   ShortTextDataValue,
 } from 'api-spec/models/Entity';
-import { produce } from 'immer';
 
 import { ControlType, SelectControl } from '@/models/Control';
 import { storage } from '@/lib/Storage';
@@ -166,7 +165,7 @@ export class PropertyConfigForm extends LitElement {
   connectedCallback(): void {
     super.connectedCallback();
 
-    this.propertyConfig = produce(this.updatedPropertyConfig, draft => draft);
+    this.propertyConfig = { ...this.updatedPropertyConfig };
   }
 
   protected willUpdate(changedProperties: PropertyValues): void {
@@ -213,15 +212,7 @@ export class PropertyConfigForm extends LitElement {
         break;
     }
 
-    const propertyConfig: EntityPropertyConfig = produce(
-      this.propertyConfig,
-      draft => ({
-        ...draft,
-        ...typedValue,
-      }),
-    );
-
-    this.propertyConfig = propertyConfig;
+    this.propertyConfig = { ...this.propertyConfig, ...typedValue };
   }
 
   updateField(
@@ -233,12 +224,7 @@ export class PropertyConfigForm extends LitElement {
       value = Number(value) || 0;
     }
 
-    const propertyConfig = produce(this.propertyConfig, draft => ({
-      ...draft,
-      [field]: value,
-    }));
-
-    this.propertyConfig = propertyConfig;
+    this.propertyConfig = { ...this.propertyConfig, [field]: value };
     this.invalidFields = this.invalidFields.filter(f => f !== field);
   }
 

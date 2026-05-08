@@ -2,7 +2,6 @@ import { TemplateResult, css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import { translate } from '@/lib/Localization';
-import JSZip from 'jszip';
 import { repeat } from 'lit/directives/repeat.js';
 import { ImportResultType } from './import-tool.models';
 import { ExportDataContents } from 'api-spec/models/Data';
@@ -50,6 +49,7 @@ export class ImportTool extends MobxLitElement {
 
   async handleZipFile(file: File): Promise<void> {
     try {
+      const { default: JSZip } = await import('jszip');
       const zip = new JSZip();
       const zipContents = await zip.loadAsync(file);
 

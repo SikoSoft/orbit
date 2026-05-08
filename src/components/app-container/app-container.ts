@@ -25,13 +25,6 @@ import { networkApiRequestSucceededEventName } from '@/events/network-api-reques
 import { AppReadyEvent } from '@/components/app-container/app-container.events';
 import { translate } from '@/lib/Localization';
 
-import '@/components/entity-form/entity-form';
-import '@/components/entity-list/entity-list';
-import '@/components/admin-dashboard/admin-dashboard';
-import '@/components/floating-widget/floating-widget';
-import '@/components/forbidden-notice/forbidden-notice';
-import '@/components/bulk-manager/bulk-manager';
-import '@/components/list-config/list-config';
 import '@/components/svg-icon/svg/svg-spinner';
 import { Introspection } from 'api-spec/models/Introspection';
 import { SettingName } from 'api-spec/models/Setting';

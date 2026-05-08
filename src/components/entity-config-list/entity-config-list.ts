@@ -10,7 +10,6 @@ import { appState } from '@/state';
 import '@ss/ui/components/ss-button';
 import '@/components/entity-config-form/entity-config-form';
 
-import { produce } from 'immer';
 import { defaultEntityConfig } from 'api-spec/models/Entity';
 import { ViewElement } from '@/lib/ViewElement';
 import {
@@ -52,9 +51,7 @@ export class EntityConfigList extends ViewElement {
   }
 
   addEntityConfig(): void {
-    const entityConfig = produce(defaultEntityConfig, draft => {
-      draft.userId = this.state.user?.id ?? '';
-    });
+    const entityConfig = { ...defaultEntityConfig, userId: this.state.user?.id ?? '' };
 
     this.state.setEntityConfigs([...this.state.entityConfigs, entityConfig]);
   }
@@ -66,9 +63,8 @@ export class EntityConfigList extends ViewElement {
   }
 
   handleEntityConfigUpdated(e: EntityConfigUpdatedEvent, index: number): void {
-    const updatedConfigs = produce(toJS(this.state.entityConfigs), draft => {
-      draft[index] = e.detail;
-    });
+    const configs = toJS(this.state.entityConfigs);
+    const updatedConfigs = configs.map((c, i) => (i === index ? e.detail : c));
 
     this.dispatchEvent(
       new CollapsableToggledEvent({

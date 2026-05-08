@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import {
   ListConfig,
   ListContext,
@@ -320,7 +319,7 @@ export class Storage implements StorageSchema {
 
   @delegateSource()
   async addListConfig(): Promise<string> {
-    const id = uuidv4();
+    const id = crypto.randomUUID();
     const listConfig = {
       id,
       name: translate('configName'),

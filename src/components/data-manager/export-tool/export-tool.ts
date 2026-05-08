@@ -3,12 +3,9 @@ import { appState } from '@/state';
 import { MobxLitElement } from '@adobe/lit-mobx';
 import { css, html, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { saveAs } from 'file-saver';
-
 import '@ss/ui/components/ss-button';
 import '@ss/ui/components/ss-select';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
-import JSZip from 'jszip';
 import {
   ExportEntityConfigData,
   ExportDataContents,
@@ -168,6 +165,10 @@ export class ExportTool extends MobxLitElement {
 
   async exportData(): Promise<void> {
     try {
+      const [{ default: JSZip }, { saveAs }] = await Promise.all([
+        import('jszip'),
+        import('file-saver'),
+      ]);
       const zip = new JSZip();
 
       const dataFile: ExportDataContents = {
