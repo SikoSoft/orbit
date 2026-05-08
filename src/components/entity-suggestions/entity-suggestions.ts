@@ -16,14 +16,18 @@ const ONE_HOUR_MS = 60 * 60 * 1000;
 const FADE_DURATION_MS = 400;
 const CHECK_INTERVAL_MS = 60 * 1000;
 
-function isWithinHourWindow(createdAt: string): boolean {
+function timeOfDayDiffMs(createdAt: string): number {
   const created = new Date(createdAt);
   const now = new Date();
   const createdTimeMs =
     (created.getHours() * 60 + created.getMinutes()) * 60000;
   const nowTimeMs = (now.getHours() * 60 + now.getMinutes()) * 60000;
   const diff = Math.abs(createdTimeMs - nowTimeMs);
-  return Math.min(diff, 24 * 60 * 60 * 1000 - diff) <= ONE_HOUR_MS;
+  return Math.min(diff, 24 * 60 * 60 * 1000 - diff);
+}
+
+function isWithinHourWindow(createdAt: string): boolean {
+  return timeOfDayDiffMs(createdAt) <= ONE_HOUR_MS;
 }
 
 @themed()
@@ -101,9 +105,12 @@ export class EntitySuggestions extends MobxLitElement {
       e => !inWindowIds.has(e.id) && !this.fadingOutIds.has(e.id),
     );
 
-    if (toAdd.length > 0) {
-      this.displayedEntities = [...this.displayedEntities, ...toAdd];
-    }
+    const base =
+      toAdd.length > 0 ? [...this.displayedEntities, ...toAdd] : this.displayedEntities;
+
+    this.displayedEntities = [...base].sort(
+      (a, b) => timeOfDayDiffMs(a.createdAt) - timeOfDayDiffMs(b.createdAt),
+    );
 
     toRemove.forEach(entity => {
       const id = entity.id;
