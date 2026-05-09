@@ -5,6 +5,8 @@ import { MobxLitElement } from '@adobe/lit-mobx';
 import { marked } from 'marked';
 import { default as DOMPurify } from 'dompurify';
 
+import { NotificationType } from '@ss/ui/components/notification-provider.models';
+
 import {
   DataType,
   EntityConfig,
@@ -21,16 +23,20 @@ import {
   EntityListItemProps,
 } from './entity-list-item.models';
 import { appState } from '@/state';
-
-import { PointerDownEvent } from '@/events/pointer-down';
-import { PointerUpEvent } from '@/events/pointer-up';
-import { PointerLongPressEvent } from '@/events/pointer-long-press';
-
-import '@/components/entity-form/entity-form';
 import { translate } from '@/lib/Localization';
 import { repeat } from 'lit/directives/repeat.js';
 import { themed } from '@/lib/Theme';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
+import { storage } from '@/lib/Storage';
+import { addToast } from '@/lib/Util';
+
+import { PointerDownEvent } from '@/events/pointer-down';
+import { PointerUpEvent } from '@/events/pointer-up';
+import { PointerLongPressEvent } from '@/events/pointer-long-press';
+import { EntitySuggestionAddedEvent } from '@/components/entity-suggestion/entity-suggestion.events';
+
+import '@ss/ui/components/ss-button';
+import '@/components/entity-form/entity-form';
 
 const holdThreshold = 500;
 
@@ -115,6 +121,12 @@ export class EntityListItem extends MobxLitElement {
       background-color: color-mix(in srgb, currentColor 12%, transparent);
       opacity: 0.7;
       margin-bottom: 0.25rem;
+    }
+
+    .suggestion-add {
+      display: flex;
+      justify-content: center;
+      padding: 0.5rem;
     }
   `;
   @property({ type: Number })
@@ -223,6 +235,21 @@ export class EntityListItem extends MobxLitElement {
 
   setMode(mode: EntityListItemMode): void {
     this.mode = mode;
+  }
+
+  override firstUpdated(): void {
+    if (
+      this.suggestion &&
+      new URLSearchParams(window.location.search).get('addSuggestion') === '1'
+    ) {
+      void this.handleAddSuggestion();
+    }
+  }
+
+  private async handleAddSuggestion(): Promise<void> {
+    await storage.addEntitySuggestion(this.entityId);
+    addToast(translate('itemHasBeenAdded'), NotificationType.INFO);
+    this.dispatchEvent(new EntitySuggestionAddedEvent({ id: this.entityId }));
   }
 
   private handleMouseDown(e: Event): boolean {
@@ -464,6 +491,16 @@ export class EntityListItem extends MobxLitElement {
                       `
                     : nothing}
                 </div>
+                ${this.suggestion
+                  ? html`
+                      <div class="suggestion-add">
+                        <ss-button
+                          text=${translate('add')}
+                          @click=${this.handleAddSuggestion}
+                        ></ss-button>
+                      </div>
+                    `
+                  : nothing}
               </div>
             `}
       </div>
