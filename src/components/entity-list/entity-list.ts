@@ -27,6 +27,7 @@ import {
   EntityItemDeletedEvent,
   EntityItemUpdatedEvent,
 } from '../entity-form/entity-form.events';
+import { EntitySuggestionAddedEvent } from '@/components/entity-suggestion/entity-suggestion.events';
 import { themed } from '@/lib/Theme';
 import {
   entityListLoadEventName,
@@ -200,6 +201,15 @@ export class EntityList extends ViewElement {
     this.state.setListEntities(updatedList);
   }
 
+  private handleSuggestionAdded(e: EntitySuggestionAddedEvent): void {
+    const updatedList = this.state.listEntities.map(item =>
+      item.id === e.detail.id
+        ? { ...item, suggestion: false, published: true }
+        : item,
+    );
+    this.state.setListEntities(updatedList);
+  }
+
   private async handleScroll(): Promise<void> {
     if (this.paginationType === PaginationType.LAZY) {
       if (this.lazyLoaderIsVisible && !this.loading && !this.reachedEnd) {
@@ -271,7 +281,9 @@ export class EntityList extends ViewElement {
   private handlePointerUp(e: PointerUpEvent): void {
     const listItem = e.target as EntityListItem;
     if (!this.state.selectMode) {
-      listItem.setMode(EntityListItemMode.EDIT);
+      if (listItem.mode === EntityListItemMode.PREVIEW) {
+        listItem.setMode(EntityListItemMode.FULL);
+      }
       return;
     }
     this.state.toggleEntitySelection(listItem.entityId);
@@ -315,6 +327,7 @@ export class EntityList extends ViewElement {
                   @pointer-up=${this.handlePointerUp}
                   @entity-item-deleted=${this.handleItemDeleted}
                   @entity-item-updated=${this.handleItemUpdated}
+                  @entity-suggestion-added=${this.handleSuggestionAdded}
                 ></entity-list-item>
               `,
             )}

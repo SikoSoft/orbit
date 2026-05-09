@@ -34,9 +34,11 @@ import { PointerDownEvent } from '@/events/pointer-down';
 import { PointerUpEvent } from '@/events/pointer-up';
 import { PointerLongPressEvent } from '@/events/pointer-long-press';
 import { EntitySuggestionAddedEvent } from '@/components/entity-suggestion/entity-suggestion.events';
+import { EntityActionBarEditEvent } from './entity-action-bar/entity-action-bar.events';
 
 import '@ss/ui/components/ss-button';
 import '@/components/entity-form/entity-form';
+import './entity-action-bar/entity-action-bar';
 
 const holdThreshold = 500;
 
@@ -55,6 +57,7 @@ export class EntityListItem extends MobxLitElement {
     }
 
     .entity-list-item {
+      position: relative;
       padding: 0.5rem;
       text-align: center;
       transition: all 0.2s;
@@ -62,6 +65,10 @@ export class EntityListItem extends MobxLitElement {
       &.selected {
         background-color: #fdc;
         color: #000;
+      }
+
+      &.full {
+        padding-bottom: 3rem;
       }
     }
 
@@ -121,12 +128,6 @@ export class EntityListItem extends MobxLitElement {
       background-color: color-mix(in srgb, currentColor 12%, transparent);
       opacity: 0.7;
       margin-bottom: 0.25rem;
-    }
-
-    .suggestion-add {
-      display: flex;
-      justify-content: center;
-      padding: 0.5rem;
     }
   `;
   @property({ type: Number })
@@ -249,7 +250,12 @@ export class EntityListItem extends MobxLitElement {
   private async handleAddSuggestion(): Promise<void> {
     await storage.addEntitySuggestion(this.entityId);
     addToast(translate('itemHasBeenAdded'), NotificationType.INFO);
+    this.mode = EntityListItemMode.PREVIEW;
     this.dispatchEvent(new EntitySuggestionAddedEvent({ id: this.entityId }));
+  }
+
+  private handleEditRequested(_e: EntityActionBarEditEvent): void {
+    this.mode = EntityListItemMode.EDIT;
   }
 
   private handleMouseDown(e: Event): boolean {
@@ -457,7 +463,9 @@ export class EntityListItem extends MobxLitElement {
                     </div>`
                   : nothing}
                 ${!this.published && !this.suggestion
-                  ? html`<div class="unpublished-badge">${translate('unpublished')}</div>`
+                  ? html`<div class="unpublished-badge">
+                      ${translate('unpublished')}
+                    </div>`
                   : nothing}
                 <div class="show-full">
                   <ss-button @click=${this.showFull}
@@ -491,14 +499,13 @@ export class EntityListItem extends MobxLitElement {
                       `
                     : nothing}
                 </div>
-                ${this.suggestion
+                ${this.mode === EntityListItemMode.FULL
                   ? html`
-                      <div class="suggestion-add">
-                        <ss-button
-                          text=${translate('add')}
-                          @click=${this.handleAddSuggestion}
-                        ></ss-button>
-                      </div>
+                      <entity-action-bar
+                        ?suggestion=${this.suggestion}
+                        @entity-action-bar-add=${this.handleAddSuggestion}
+                        @entity-action-bar-edit=${this.handleEditRequested}
+                      ></entity-action-bar>
                     `
                   : nothing}
               </div>
