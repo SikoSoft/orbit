@@ -13,6 +13,11 @@ import {
   TextContext,
   FilterProperty,
 } from 'api-spec/models/List';
+
+interface ExtendedListFilter extends ListFilterModel {
+  published?: boolean;
+  suggestion?: boolean;
+}
 import { translate } from '@/lib/Localization';
 
 import { appState } from '@/state';
@@ -26,6 +31,7 @@ import { FilterPropertiesUpdatedEvent } from '@/components/list-filter/filter-pr
 import { ListFilterUpdatedEvent } from './list-filter.events';
 import { TagsUpdatedEvent } from '@ss/ui/components/tag-manager.events';
 import { TagSuggestionsRequestedEvent } from '@ss/ui/components/tag-input.events';
+import { OptionSelectorChangedEvent } from '@/components/option-selector/option-selector.events';
 
 import { SSInput } from '@ss/ui/components/ss-input';
 import '@ss/ui/components/ss-select';
@@ -33,6 +39,7 @@ import '@ss/ui/components/tag-manager';
 import '@/components/list-filter/time-filters/time-filters';
 import '@/components/list-filter/text-filters/text-filters';
 import '@/components/list-filter/filter-properties/filter-properties';
+import '@/components/option-selector/option-selector';
 
 import { SelectChangedEvent } from '@ss/ui/components/ss-select.events';
 import { themed } from '@/lib/Theme';
@@ -83,6 +90,8 @@ export class ListFilter extends MobxLitElement {
   @state() time: TimeContext = { type: ListFilterTimeType.ALL_TIME };
   @state() text: TextContext[] = [];
   @state() properties: FilterProperty[] = [];
+  @state() published: boolean | null = null;
+  @state() suggestion: boolean | null = null;
 
   @state() savedFilters: SavedListFilter[] = [];
   @state() saveMode: boolean = false;
@@ -128,7 +137,7 @@ export class ListFilter extends MobxLitElement {
     );
   }
 
-  get filter(): ListFilterModel {
+  get filter(): ExtendedListFilter {
     return {
       includeAll: this.includeAll,
       includeTypes: this.includeTypes,
@@ -140,6 +149,8 @@ export class ListFilter extends MobxLitElement {
       },
       time: this.time,
       properties: this.properties,
+      ...(this.published !== null && { published: this.published }),
+      ...(this.suggestion !== null && { suggestion: this.suggestion }),
     };
   }
 
@@ -158,20 +169,25 @@ export class ListFilter extends MobxLitElement {
   }
 
   sync(_reset: boolean = false): void {
+    const listFilter = this.state.listFilter as ExtendedListFilter;
     Object.values(ListFilterType).forEach(type => {
-      this[type] = this.state.listFilter.tagging[type];
+      this[type] = listFilter.tagging[type];
     });
-    this.includeTypes = this.state.listFilter.includeTypes;
-    this.includeTypes = this.state.listFilter.includeTypes;
-    this.includeUntagged = this.state.listFilter.includeUntagged;
-    this.includeAll = this.state.listFilter.includeAll;
-    this.includeAllTagging = this.state.listFilter.includeAllTagging;
-    if (this.state.listFilter.time) {
-      this.time = this.state.listFilter.time;
+    this.includeTypes = listFilter.includeTypes;
+    this.includeTypes = listFilter.includeTypes;
+    this.includeUntagged = listFilter.includeUntagged;
+    this.includeAll = listFilter.includeAll;
+    this.includeAllTagging = listFilter.includeAllTagging;
+    if (listFilter.time) {
+      this.time = listFilter.time;
     }
-    if (this.state.listFilter.properties) {
-      this.properties = this.state.listFilter.properties;
+    if (listFilter.properties) {
+      this.properties = listFilter.properties;
     }
+    this.published =
+      listFilter.published !== undefined ? listFilter.published : null;
+    this.suggestion =
+      listFilter.suggestion !== undefined ? listFilter.suggestion : null;
   }
 
   private handleIncludeUntaggedChanged(): void {
@@ -241,6 +257,46 @@ export class ListFilter extends MobxLitElement {
     this.includeTypes = e.detail.value.map(v => Number(v));
   }
 
+  private handlePublishedChanged(e: OptionSelectorChangedEvent): void {
+    const { selected } = e.detail;
+    if (selected.includes('true') && selected.includes('false')) {
+      this.published = null;
+    } else if (selected.includes('true')) {
+      this.published = true;
+    } else if (selected.includes('false')) {
+      this.published = false;
+    } else {
+      this.published = null;
+    }
+  }
+
+  private handleSuggestionChanged(e: OptionSelectorChangedEvent): void {
+    const { selected } = e.detail;
+    if (selected.includes('true') && selected.includes('false')) {
+      this.suggestion = null;
+    } else if (selected.includes('true')) {
+      this.suggestion = true;
+    } else if (selected.includes('false')) {
+      this.suggestion = false;
+    } else {
+      this.suggestion = null;
+    }
+  }
+
+  private publishedToSelected(): string[] {
+    if (this.published === null) {
+      return ['true', 'false'];
+    }
+    return [String(this.published)];
+  }
+
+  private suggestionToSelected(): string[] {
+    if (this.suggestion === null) {
+      return ['true', 'false'];
+    }
+    return [String(this.suggestion)];
+  }
+
   render(): TemplateResult {
     return html`
       <div class=${classMap(this.classes)}>
@@ -278,6 +334,38 @@ export class ListFilter extends MobxLitElement {
               e: FilterPropertiesUpdatedEvent,
             ): void => this.handlePropertiesChanged(e)}
           ></filter-properties>
+
+          <fieldset>
+            <legend>${translate('published')}</legend>
+            <option-selector
+              multiple
+              required
+              .options=${[
+                { name: translate('published'), value: 'true' },
+                { name: translate('unpublished'), value: 'false' },
+              ]}
+              .selected=${this.publishedToSelected()}
+              @option-selector-changed=${(
+                e: OptionSelectorChangedEvent,
+              ): void => this.handlePublishedChanged(e)}
+            ></option-selector>
+          </fieldset>
+
+          <fieldset>
+            <legend>${translate('suggestion')}</legend>
+            <option-selector
+              multiple
+              required
+              .options=${[
+                { name: translate('suggestion'), value: 'true' },
+                { name: translate('nonSuggestion'), value: 'false' },
+              ]}
+              .selected=${this.suggestionToSelected()}
+              @option-selector-changed=${(
+                e: OptionSelectorChangedEvent,
+              ): void => this.handleSuggestionChanged(e)}
+            ></option-selector>
+          </fieldset>
 
           <fieldset class=${classMap(this.taggingClasses)}>
             <legend>${translate('tagging')}</legend>

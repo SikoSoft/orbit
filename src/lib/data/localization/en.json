@@ -304,5 +304,7 @@
   "dashboard.manageAccess": "Manage Access Policies",
   "managedByExternalParty": "This list configuration is managed by an external party.",
   "loading": "Loading...",
-  "entityNotFound": "Entity not found"
+  "entityNotFound": "Entity not found",
+  "suggestion": "Suggestion",
+  "nonSuggestion": "Non-suggestion"
 }
