@@ -97,6 +97,19 @@ const dbReady = new Promise<void>((resolve, reject) => {
   rejectDbReady = reject;
 });
 
+function acquireDbLock(lockName: string): Promise<boolean> {
+  return new Promise<boolean>(resolve => {
+    navigator.locks.request(lockName, { ifAvailable: true, mode: 'exclusive' }, lock => {
+      if (lock === null) {
+        resolve(false);
+        return undefined;
+      }
+      resolve(true);
+      return new Promise<void>(() => {}); // hold lock for worker lifetime
+    });
+  });
+}
+
 async function initDb(dbPath: string): Promise<void> {
   type InitFn = (opts: {
     locateFile: (filename: string) => string;
@@ -110,15 +123,24 @@ async function initDb(dbPath: string): Promise<void> {
   if (dbPath === ':memory:') {
     db = new sqlite3.oo1.DB(':memory:', 'c');
   } else {
-    try {
-      const poolName = `opfs-sahpool-${dbPath.replace(/[^a-zA-Z0-9]/g, '-')}`;
-      const poolUtil: SAHPoolUtil = await sqlite3.installOpfsSAHPoolVfs({ name: poolName });
-      db = new poolUtil.OpfsSAHPoolDb(dbPath);
-    } catch (e) {
-      console.warn(
-        'SQLiteStorage: OPFS unavailable, falling back to in-memory database.',
-        e,
-      );
+    const canUseOpfs =
+      typeof navigator !== 'undefined' &&
+      'locks' in navigator &&
+      (await acquireDbLock(`orbit-db-lock-${dbPath.replace(/[^a-zA-Z0-9]/g, '-')}`));
+
+    if (canUseOpfs) {
+      try {
+        const poolName = `opfs-sahpool-${dbPath.replace(/[^a-zA-Z0-9]/g, '-')}`;
+        const poolUtil: SAHPoolUtil = await sqlite3.installOpfsSAHPoolVfs({ name: poolName });
+        db = new poolUtil.OpfsSAHPoolDb(dbPath);
+      } catch (e) {
+        console.warn(
+          'SQLiteStorage: OPFS unavailable, falling back to in-memory database.',
+          e,
+        );
+        db = new sqlite3.oo1.DB(':memory:', 'c');
+      }
+    } else {
       db = new sqlite3.oo1.DB(':memory:', 'c');
     }
   }
