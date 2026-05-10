@@ -44,6 +44,7 @@ import {
 @customElement('entity-list')
 export class EntityList extends ViewElement {
   public state = appState;
+  private isAlive = false;
 
   static styles = css`
     ss-collapsable {
@@ -123,6 +124,8 @@ export class EntityList extends ViewElement {
   async connectedCallback(): Promise<void> {
     super.connectedCallback();
 
+    this.isAlive = true;
+
     window.addEventListener('scroll', this.scrollHandler);
 
     window.addEventListener(entityListLoadEventName, () => {
@@ -154,6 +157,7 @@ export class EntityList extends ViewElement {
   disconnectedCallback(): void {
     super.disconnectedCallback();
     window.removeEventListener('scroll', this.scrollHandler);
+    this.isAlive = false;
   }
 
   protected async firstUpdated(
@@ -165,6 +169,10 @@ export class EntityList extends ViewElement {
 
     while (this.lazyLoaderIsVisible && !this.reachedEnd) {
       await this.handleScroll();
+
+      if (!this.isAlive) {
+        break;
+      }
     }
   }
 
