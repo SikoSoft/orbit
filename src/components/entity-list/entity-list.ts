@@ -21,8 +21,6 @@ import '@ss/ui/components/ss-collapsable';
 import '@/components/list-paginator/list-paginator';
 import '@/components/entity-list/entity-list-item/entity-list-item';
 import { EntityListItem } from './entity-list-item/entity-list-item';
-
-import { EntityListItemMode } from './entity-list-item/entity-list-item.models';
 import {
   EntityItemDeletedEvent,
   EntityItemUpdatedEvent,
@@ -279,13 +277,10 @@ export class EntityList extends ViewElement {
   }
 
   private handlePointerUp(e: PointerUpEvent): void {
-    const listItem = e.target as EntityListItem;
     if (!this.state.selectMode) {
-      if (listItem.mode === EntityListItemMode.PREVIEW) {
-        listItem.setMode(EntityListItemMode.FULL);
-      }
       return;
     }
+    const listItem = e.target as EntityListItem;
     this.state.toggleEntitySelection(listItem.entityId);
   }
 

@@ -284,6 +284,9 @@ export class EntityListItem extends MobxLitElement {
 
     if (!this.downActivation) {
       this.dispatchEvent(new PointerUpEvent({ time: new Date() }));
+      if (!this.state.selectMode && this.mode === EntityListItemMode.PREVIEW) {
+        this.mode = EntityListItemMode.FULL;
+      }
     }
     this.downActivation = false;
     if (this.downTimeout) {
@@ -328,6 +331,9 @@ export class EntityListItem extends MobxLitElement {
     e.preventDefault();
     if (!this.touchMoved && !this.downActivation) {
       this.dispatchEvent(new PointerUpEvent({ time: new Date() }));
+      if (!this.state.selectMode && this.mode === EntityListItemMode.PREVIEW) {
+        this.mode = EntityListItemMode.FULL;
+      }
     }
     this.downActivation = false;
     this.touchMoved = false;
