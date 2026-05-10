@@ -505,16 +505,16 @@ export class EntityListItem extends MobxLitElement {
                       `
                     : nothing}
                 </div>
-                ${this.mode === EntityListItemMode.FULL
-                  ? html`
-                      <entity-action-bar
-                        ?suggestion=${this.suggestion}
-                        @entity-action-bar-add=${this.handleAddSuggestion}
-                        @entity-action-bar-edit=${this.handleEditRequested}
-                      ></entity-action-bar>
-                    `
-                  : nothing}
               </div>
+              ${this.mode === EntityListItemMode.FULL
+                ? html`
+                    <entity-action-bar
+                      ?suggestion=${this.suggestion}
+                      @entity-action-bar-add=${this.handleAddSuggestion}
+                      @entity-action-bar-edit=${this.handleEditRequested}
+                    ></entity-action-bar>
+                  `
+                : nothing}
             `}
       </div>
     `;
