@@ -11,7 +11,9 @@ import { MobxReactionsController } from '@/lib/MobxReactionController';
 import { translate } from '@/lib/Localization';
 
 import '@/components/entity-list/entity-list-item/entity-list-item';
+import { themed } from '@/lib/Theme';
 
+@themed()
 @customElement('entity-instance')
 export class EntityInstance extends MobxLitElement {
   private appState = appState;
@@ -64,18 +66,20 @@ export class EntityInstance extends MobxLitElement {
     }
 
     return html`
-      <entity-list-item
-        type=${this.entity.type}
-        entityId=${this.entity.id}
-        createdAt=${this.entity.createdAt}
-        updatedAt=${this.entity.updatedAt}
-        .tags=${this.entity.tags}
-        .properties=${this.entity.properties}
-        viewAccessPolicyId=${this.entity.viewAccessPolicyId}
-        editAccessPolicyId=${this.entity.editAccessPolicyId}
-        ?published=${this.entity.published}
-        ?suggestion=${this.entity.suggestion}
-      ></entity-list-item>
+      <div class="box">
+        <entity-list-item
+          type=${this.entity.type}
+          entityId=${this.entity.id}
+          createdAt=${this.entity.createdAt}
+          updatedAt=${this.entity.updatedAt}
+          .tags=${this.entity.tags}
+          .properties=${this.entity.properties}
+          viewAccessPolicyId=${this.entity.viewAccessPolicyId}
+          editAccessPolicyId=${this.entity.editAccessPolicyId}
+          ?published=${this.entity.published}
+          ?suggestion=${this.entity.suggestion}
+        ></entity-list-item>
+      </div>
     `;
   }
 }
