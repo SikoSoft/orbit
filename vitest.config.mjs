@@ -55,6 +55,11 @@ export default defineConfig({
           name: 'unit',
           environment: 'happy-dom',
           include: ['src/tests/unit/**/*.test.ts'],
+          server: {
+            deps: {
+              inline: [/@ss\/ui/],
+            },
+          },
         },
       },
       {
