@@ -5,6 +5,7 @@ import '@/components/login-form/login-form';
 import '@/components/user-header/user-header';
 import '@/components/setting/user-settings/user-settings';
 import '@/components/setting/system-settings/system-settings';
+import '@/components/notification-settings/notification-settings';
 import '@ss/ui/components/tab-container';
 import '@ss/ui/components/tab-pane';
 
@@ -59,9 +60,12 @@ export class UserSettingsView extends ViewElement {
       <user-header></user-header>
       <div class="view-content">
         ${this.isLoggedIn
-          ? this.isAdmin
-            ? this.renderAdminSettings()
-            : html`<user-settings></user-settings>`
+          ? html`
+              ${this.isAdmin
+                ? this.renderAdminSettings()
+                : html`<user-settings></user-settings>`}
+              <notification-settings></notification-settings>
+            `
           : html`<login-form></login-form>`}
       </div>
     `;

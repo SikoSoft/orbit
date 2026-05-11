@@ -1,4 +1,4 @@
-import { action, makeObservable, observable } from 'mobx';
+import { action, makeObservable, observable, runInAction } from 'mobx';
 
 import {
   defaultSettings,
@@ -29,6 +29,11 @@ import {
 import { defaultTheme, ThemeName } from './models/Page';
 import { StorageSource } from './models/Storage';
 import { User } from 'api-spec/models/Identity';
+import {
+  subscribe,
+  unsubscribe,
+  getSubscription,
+} from '@/lib/push-subscription';
 
 export const defaultListFilter: ListFilter = {
   tagging: {
@@ -180,6 +185,15 @@ export class AppState {
 
   @observable
   public user: User | null = null;
+
+  @observable
+  public swRegistration: ServiceWorkerRegistration | null = null;
+
+  @observable
+  public subscription: PushSubscription | null = null;
+
+  @observable
+  public permissionState: NotificationPermission = 'default';
 
   get listConfig(): ListConfig {
     return (
@@ -492,6 +506,50 @@ export class AppState {
   @action
   setUser(user: User | null): void {
     this.user = user;
+  }
+
+  @action
+  setSwRegistration(reg: ServiceWorkerRegistration | null): void {
+    this.swRegistration = reg;
+  }
+
+  @action
+  setSubscription(sub: PushSubscription | null): void {
+    this.subscription = sub;
+  }
+
+  @action
+  setPermissionState(state: NotificationPermission): void {
+    this.permissionState = state;
+  }
+
+  get notificationsSupported(): boolean {
+    return 'serviceWorker' in navigator && 'PushManager' in window;
+  }
+
+  @action
+  async enableNotifications(): Promise<void> {
+    if (!this.swRegistration) {
+      return;
+    }
+    await subscribe(this.swRegistration);
+    const sub = await getSubscription(this.swRegistration);
+    runInAction(() => {
+      this.subscription = sub;
+      this.permissionState = Notification.permission;
+    });
+  }
+
+  @action
+  async disableNotifications(): Promise<void> {
+    if (!this.swRegistration || !this.subscription) {
+      return;
+    }
+    await unsubscribe(this.swRegistration);
+    runInAction(() => {
+      this.subscription = null;
+      this.permissionState = Notification.permission;
+    });
   }
 
   hasRole(role: string): boolean {

@@ -307,5 +307,10 @@
   "entityNotFound": "Entity not found",
   "suggestion": "Suggestion",
   "nonSuggestion": "Non-suggestion",
-  "auto": "Auto"
+  "auto": "Auto",
+  "notifications.heading": "Notifications",
+  "notifications.enable": "Enable notifications",
+  "notifications.disable": "Disable notifications",
+  "notifications.notSupported": "Push notifications are not supported in this browser.",
+  "notifications.blocked": "Notifications have been blocked. To receive notifications, please re-enable them in your browser settings."
 }

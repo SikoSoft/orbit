@@ -30,6 +30,10 @@ import { Introspection } from 'api-spec/models/Introspection';
 import { SettingName } from 'api-spec/models/Setting';
 import { StorageSource } from '@/models/Storage';
 import { AssistEntityAddedEvent } from '../add-entity-widget/add-entity-widget.events';
+import {
+  registerServiceWorker,
+  getSubscription,
+} from '@/lib/push-subscription';
 
 export interface ViewChangedEvent extends CustomEvent {
   detail: PageView;
@@ -243,6 +247,18 @@ export class AppContainer extends MobxLitElement {
 
       if (view) {
         this.view = view;
+      }
+
+      if (this.state.notificationsSupported) {
+        try {
+          const reg = await registerServiceWorker();
+          this.state.setSwRegistration(reg);
+          const sub = await getSubscription(reg);
+          this.state.setSubscription(sub);
+          this.state.setPermissionState(Notification.permission);
+        } catch (err) {
+          console.warn('[orbit] push notification init failed:', err);
+        }
       }
     } catch (error) {
       console.error('[orbit] restoreState: error', error);
