@@ -306,5 +306,6 @@
   "loading": "Loading...",
   "entityNotFound": "Entity not found",
   "suggestion": "Suggestion",
-  "nonSuggestion": "Non-suggestion"
+  "nonSuggestion": "Non-suggestion",
+  "auto": "Auto"
 }

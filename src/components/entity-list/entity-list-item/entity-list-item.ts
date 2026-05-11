@@ -61,14 +61,17 @@ export class EntityListItem extends MobxLitElement {
       padding: 0.5rem;
       text-align: center;
       transition: all 0.2s;
+      overflow: hidden;
+      border: 1px solid transparent;
 
       &.selected {
         background-color: #fdc;
         color: #000;
       }
 
-      &.full {
-        // padding-bottom: 3rem;
+      &.full,
+      &.edit {
+        border: 1px solid #444;
       }
 
       &.suggestion {
@@ -133,6 +136,33 @@ export class EntityListItem extends MobxLitElement {
       background-color: color-mix(in srgb, currentColor 12%, transparent);
       opacity: 0.7;
       margin-bottom: 0.25rem;
+    }
+
+    .suggestion-badge {
+      position: absolute;
+      z-index: 1;
+      top: 0.5rem;
+      left: -1.5rem;
+      text-transform: uppercase;
+      font-weight: bold;
+      background-color: #4caf50;
+      padding: 0.25rem 2rem;
+      transform: rotate(-45deg);
+      font-size: 0.75rem;
+      color: #efffdf;
+    }
+
+    .action-bar-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      border-top: 1px solid #ddd;
+      background-color: rgba(255, 255, 255, 0.5);
+
+      entity-action-bar {
+        display: block;
+      }
     }
   `;
   @property({ type: Number })
@@ -462,6 +492,9 @@ export class EntityListItem extends MobxLitElement {
         @mouseenter=${this.handleMouseEnter}
         @mouseleave=${this.handleMouseLeave}
       >
+        ${this.suggestion
+          ? html`<div class="suggestion-badge">${translate('auto')}</div>`
+          : nothing}
         ${this.mode === EntityListItemMode.EDIT
           ? html`
               <entity-form
@@ -533,11 +566,13 @@ export class EntityListItem extends MobxLitElement {
               </div>
               ${this.mode === EntityListItemMode.FULL
                 ? html`
-                    <entity-action-bar
-                      ?suggestion=${this.suggestion}
-                      @entity-action-bar-add=${this.handleAddSuggestion}
-                      @entity-action-bar-edit=${this.handleEditRequested}
-                    ></entity-action-bar>
+                    <div class="action-bar-container">
+                      <entity-action-bar
+                        ?suggestion=${this.suggestion}
+                        @entity-action-bar-add=${this.handleAddSuggestion}
+                        @entity-action-bar-edit=${this.handleEditRequested}
+                      ></entity-action-bar>
+                    </div>
                   `
                 : nothing}
             `}

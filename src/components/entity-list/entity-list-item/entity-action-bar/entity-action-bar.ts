@@ -21,13 +21,6 @@ import '@ss/ui/components/ss-button';
 @customElement('entity-action-bar')
 export class EntityActionBar extends MobxLitElement {
   static styles = css`
-    :host {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-    }
-
     .action-bar {
       display: flex;
       justify-content: center;
