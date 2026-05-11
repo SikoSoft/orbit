@@ -68,7 +68,12 @@ export class EntityListItem extends MobxLitElement {
       }
 
       &.full {
-        padding-bottom: 3rem;
+        // padding-bottom: 3rem;
+      }
+
+      &.suggestion {
+        opacity: 0.8;
+        background-color: #efffdf;
       }
     }
 
@@ -343,6 +348,22 @@ export class EntityListItem extends MobxLitElement {
     }
   }
 
+  handleMouseEnter(): void {
+    if (this.mode === EntityListItemMode.EDIT) {
+      return;
+    }
+
+    this.mode = EntityListItemMode.FULL;
+  }
+
+  handleMouseLeave(): void {
+    if (this.mode === EntityListItemMode.EDIT) {
+      return;
+    }
+
+    this.mode = EntityListItemMode.PREVIEW;
+  }
+
   private renderProperty(
     property: EntityProperty,
   ): TemplateResult | typeof nothing {
@@ -436,7 +457,11 @@ export class EntityListItem extends MobxLitElement {
 
   render(): TemplateResult {
     return html`
-      <div class=${classMap(this.classes)}>
+      <div
+        class=${classMap(this.classes)}
+        @mouseenter=${this.handleMouseEnter}
+        @mouseleave=${this.handleMouseLeave}
+      >
         ${this.mode === EntityListItemMode.EDIT
           ? html`
               <entity-form
