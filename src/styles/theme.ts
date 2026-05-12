@@ -1,4 +1,4 @@
-import { Theme, ThemeName } from '@/models/Page';
+import { Theme, ThemeName, ThemeType } from '@/models/Page';
 import { css } from 'lit';
 
 export const themes: Record<ThemeName, Theme> = {
@@ -6,26 +6,31 @@ export const themes: Record<ThemeName, Theme> = {
     name: ThemeName.LIGHT,
     backgroundColor: css`#ededed`,
     sheet: new CSSStyleSheet(),
+    type: [ThemeType.LAYOUT, ThemeType.COLOR],
   },
   [ThemeName.DARK]: {
     name: ThemeName.DARK,
     backgroundColor: css`#12221a`,
     sheet: new CSSStyleSheet(),
+    type: [ThemeType.LAYOUT, ThemeType.COLOR],
   },
   [ThemeName.TODO]: {
     name: ThemeName.TODO,
     backgroundColor: css`#ffffff`,
     sheet: new CSSStyleSheet(),
+    type: [ThemeType.LAYOUT],
   },
   [ThemeName.XMAS]: {
     name: ThemeName.XMAS,
     backgroundColor: css`#bb0000`,
     sheet: new CSSStyleSheet(),
+    type: [ThemeType.LAYOUT, ThemeType.COLOR],
   },
   [ThemeName.CRAFTACULAR]: {
     name: ThemeName.CRAFTACULAR,
     backgroundColor: css`#3d5a1e`,
     sheet: new CSSStyleSheet(),
+    type: [ThemeType.LAYOUT, ThemeType.COLOR],
   },
 };
 

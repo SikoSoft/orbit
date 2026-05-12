@@ -85,6 +85,13 @@ describe('page-container', () => {
       el.setListConfigThemes([ThemeName.DARK, ThemeName.TODO]);
       expect(el.themes).toEqual([ThemeName.DARK, ThemeName.TODO]);
     });
+
+    it('prepends the base theme when all listConfigThemes are partial (layout-only)', async () => {
+      const el = await mount();
+      el.setTheme(ThemeName.LIGHT);
+      el.setListConfigThemes([ThemeName.TODO]);
+      expect(el.themes).toEqual([ThemeName.LIGHT, ThemeName.TODO]);
+    });
   });
 
   describe('classes getter', () => {
