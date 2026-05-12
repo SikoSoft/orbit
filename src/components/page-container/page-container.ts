@@ -90,7 +90,7 @@ export class PageContainer extends MobxLitElement {
     const totalTypeCount = Object.values(ThemeType).length;
     const allPartial = this.listConfigThemes.every(themeName => {
       const theme = themes[themeName as ThemeName];
-      return theme && theme.type.length < totalTypeCount;
+      return theme && new Set(theme.type).size !== totalTypeCount;
     });
 
     return allPartial
