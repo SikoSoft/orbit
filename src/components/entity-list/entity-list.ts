@@ -167,7 +167,11 @@ export class EntityList extends ViewElement {
 
     await this.load();
 
-    while (this.lazyLoaderIsVisible && !this.reachedEnd) {
+    while (
+      this.paginationType === PaginationType.LAZY &&
+      this.lazyLoaderIsVisible &&
+      !this.reachedEnd
+    ) {
       await this.handleScroll();
 
       if (!this.isAlive) {
