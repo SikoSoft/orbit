@@ -19,8 +19,14 @@ export enum ThemeName {
 }
 export const defaultTheme: ThemeName = ThemeName.LIGHT;
 
+export enum ThemeType {
+  LAYOUT = 'layout',
+  COLOR = 'color',
+}
+
 export interface Theme {
   name: ThemeName;
   backgroundColor: CSSResult;
   sheet: CSSStyleSheet;
+  type: ThemeType[];
 }

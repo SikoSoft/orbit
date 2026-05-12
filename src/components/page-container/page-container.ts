@@ -13,7 +13,7 @@ import {
   pageContainerProps,
 } from './page-container.models';
 import { reaction } from 'mobx';
-import { ThemeName, defaultTheme } from '@/models/Page';
+import { ThemeName, ThemeType, defaultTheme } from '@/models/Page';
 import { StorageItemKey } from '@/models/Storage';
 import { ThemesUpdatedEvent } from './page-container.events';
 import { translate } from '@/lib/Localization';
@@ -83,9 +83,19 @@ export class PageContainer extends MobxLitElement {
 
   @state()
   get themes(): string[] {
-    return this.listConfigThemes.length
-      ? Array.from(this.listConfigThemes)
-      : [this.theme];
+    if (!this.listConfigThemes.length) {
+      return [this.theme];
+    }
+
+    const totalTypeCount = Object.values(ThemeType).length;
+    const allPartial = this.listConfigThemes.every(themeName => {
+      const theme = themes[themeName as ThemeName];
+      return theme && theme.type.length < totalTypeCount;
+    });
+
+    return allPartial
+      ? [this.theme, ...this.listConfigThemes]
+      : Array.from(this.listConfigThemes);
   }
 
   @state()
