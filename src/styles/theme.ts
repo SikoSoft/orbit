@@ -1,5 +1,5 @@
-import { Theme, ThemeName, ThemeType } from '@/models/Page';
 import { css, unsafeCSS } from 'lit';
+import { Theme, ThemeName, ThemeType } from '@/models/Page';
 
 export const themes: Record<ThemeName, Theme> = {
   [ThemeName.LIGHT]: {
