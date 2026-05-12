@@ -40,6 +40,7 @@ jobs:
         env:
           APP_BASE_API_URL: ${{ env.APP_BASE_API_URL}}
           BASE_URL: ${{ env.BASE_URL }}
+          APP_VAPID_PUBLIC_KEY: ${{ vars.APP_VAPID_PUBLIC_KEY }}
 
       - name: Upload to blob storage
         uses: azure/CLI@v1
