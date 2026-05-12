@@ -12,7 +12,8 @@ export function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration> {
-  return navigator.serviceWorker.register(import.meta.env.BASE_URL + 'sw.js');
+  await navigator.serviceWorker.register(import.meta.env.BASE_URL + 'sw.js');
+  return navigator.serviceWorker.ready;
 }
 
 export async function subscribe(
