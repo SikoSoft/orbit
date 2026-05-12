@@ -26,8 +26,18 @@ function timeOfDayDiffMs(createdAt: string): number {
   return Math.min(diff, 24 * 60 * 60 * 1000 - diff);
 }
 
+function isSameDay(createdAt: string): boolean {
+  const created = new Date(createdAt);
+  const now = new Date();
+  return (
+    created.getFullYear() === now.getFullYear() &&
+    created.getMonth() === now.getMonth() &&
+    created.getDate() === now.getDate()
+  );
+}
+
 function isWithinHourWindow(createdAt: string): boolean {
-  return timeOfDayDiffMs(createdAt) <= ONE_HOUR_MS;
+  return isSameDay(createdAt) && timeOfDayDiffMs(createdAt) <= ONE_HOUR_MS;
 }
 
 @themed()
