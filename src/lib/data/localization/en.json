@@ -312,5 +312,16 @@
   "notifications.enable": "Enable notifications",
   "notifications.disable": "Disable notifications",
   "notifications.notSupported": "Push notifications are not supported in this browser.",
-  "notifications.blocked": "Notifications have been blocked. To receive notifications, please re-enable them in your browser settings."
+  "notifications.blocked": "Notifications have been blocked. To receive notifications, please re-enable them in your browser settings.",
+  "pushNotification.heading": "Send Test Notification",
+  "pushNotification.title": "Title",
+  "pushNotification.body": "Body",
+  "pushNotification.actionTitle": "Action Title",
+  "pushNotification.actionTitlePlaceholder": "e.g. View (optional)",
+  "pushNotification.actionUrl": "Action URL",
+  "pushNotification.actionUrlPlaceholder": "e.g. /entities (optional)",
+  "pushNotification.send": "Send Notification",
+  "pushNotification.sent": "Notification sent.",
+  "pushNotification.failed": "Failed to send notification.",
+  "pushNotification.titleBodyRequired": "Title and body are required."
 }
