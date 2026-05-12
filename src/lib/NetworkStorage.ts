@@ -99,7 +99,9 @@ export class NetworkStorage implements StorageSchema {
   }
 
   async deleteListConfig(id: string, deleteItems?: boolean): Promise<boolean> {
-    const url = deleteItems ? `listConfig/${id}?deleteItems=1` : `listConfig/${id}`;
+    const url = deleteItems
+      ? `listConfig/${id}?deleteItems=1`
+      : `listConfig/${id}`;
     const result = await api.delete<null>(url);
 
     if (result && result.isOk) {
@@ -277,7 +279,11 @@ export class NetworkStorage implements StorageSchema {
     return false;
   }
 
-  async exportEntities(entityConfigIds: number[], startDate?: string, endDate?: string): Promise<Entity.Entity[]> {
+  async exportEntities(
+    entityConfigIds: number[],
+    startDate?: string,
+    endDate?: string,
+  ): Promise<Entity.Entity[]> {
     const result = await api.post<
       { entityConfigIds: number[]; startDate?: string; endDate?: string },
       { entities: Entity.Entity[] }
@@ -743,10 +749,8 @@ export class NetworkStorage implements StorageSchema {
     return false;
   }
 
-  async getEntitySuggestions(
-    filter: ListFilter,
-  ): Promise<Entity.Entity[]> {
-    const suggestionFilter = { ...filter, suggestion: true };
+  async getEntitySuggestions(filter: ListFilter): Promise<Entity.Entity[]> {
+    const suggestionFilter = { ...filter, suggestion: true, published: null };
     const queryParams = new URLSearchParams({
       filter: JSON.stringify(suggestionFilter),
     });
