@@ -1,5 +1,5 @@
-import { css, unsafeCSS } from 'lit';
 import { Theme, ThemeName, ThemeType } from '@/models/Page';
+import { css } from 'lit';
 
 export const themes: Record<ThemeName, Theme> = {
   [ThemeName.LIGHT]: {
@@ -323,9 +323,6 @@ export const craftacularStyles = [
     }
 
     :host {
-      //background-image: url('${unsafeCSS(
-        import.meta.env.BASE_URL,
-      )}grass.png');
       background-repeat: repeat;
       background-size: 64px 64px;
     }
