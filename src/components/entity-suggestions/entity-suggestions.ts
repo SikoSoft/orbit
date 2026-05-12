@@ -3,6 +3,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
+import { reaction, IReactionDisposer } from 'mobx';
 
 import { Entity } from 'api-spec/models/Entity';
 import { appState } from '@/state';
@@ -74,19 +75,22 @@ export class EntitySuggestions extends MobxLitElement {
   private appState = appState;
   private allEntities: Entity[] = [];
   private intervalId: ReturnType<typeof setInterval> | null = null;
+  private listConfigDisposer: IReactionDisposer | null = null;
+  private fadeoutTimeouts: Set<ReturnType<typeof setTimeout>> = new Set();
 
   @state() private displayedEntities: Entity[] = [];
   @state() private fadingOutIds: Set<number> = new Set();
 
   async connectedCallback(): Promise<void> {
     super.connectedCallback();
-    this.allEntities = await storage.getEntitySuggestions(
-      this.appState.listConfig.filter,
-    );
-    this.updateVisibility();
+    await this.fetchSuggestions();
     this.intervalId = setInterval(
       () => this.updateVisibility(),
       CHECK_INTERVAL_MS,
+    );
+    this.listConfigDisposer = reaction(
+      () => JSON.stringify(this.appState.listConfig),
+      () => this.fetchSuggestions(),
     );
   }
 
@@ -96,6 +100,23 @@ export class EntitySuggestions extends MobxLitElement {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
+    if (this.listConfigDisposer !== null) {
+      this.listConfigDisposer();
+      this.listConfigDisposer = null;
+    }
+    this.fadeoutTimeouts.forEach(id => clearTimeout(id));
+    this.fadeoutTimeouts.clear();
+  }
+
+  private async fetchSuggestions(): Promise<void> {
+    this.fadeoutTimeouts.forEach(id => clearTimeout(id));
+    this.fadeoutTimeouts.clear();
+    this.displayedEntities = [];
+    this.fadingOutIds = new Set();
+    this.allEntities = await storage.getEntitySuggestions(
+      this.appState.listConfig.filter,
+    );
+    this.updateVisibility();
   }
 
   private updateVisibility(): void {
@@ -125,7 +146,8 @@ export class EntitySuggestions extends MobxLitElement {
     toRemove.forEach(entity => {
       const id = entity.id;
       this.fadingOutIds = new Set([...this.fadingOutIds, id]);
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
+        this.fadeoutTimeouts.delete(timeoutId);
         this.displayedEntities = this.displayedEntities.filter(
           e => e.id !== id,
         );
@@ -133,6 +155,7 @@ export class EntitySuggestions extends MobxLitElement {
           [...this.fadingOutIds].filter(fid => fid !== id),
         );
       }, FADE_DURATION_MS);
+      this.fadeoutTimeouts.add(timeoutId);
     });
   }
 
