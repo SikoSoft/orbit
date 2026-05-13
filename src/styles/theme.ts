@@ -1,5 +1,11 @@
 import { Theme, ThemeName, ThemeType } from '@/models/Page';
-import { css } from 'lit';
+import { css, unsafeCSS } from 'lit';
+
+export const breakpoints = {
+  sm: '600px',
+  md: '900px',
+  lg: '1200px',
+} as const;
 
 export const themes: Record<ThemeName, Theme> = {
   [ThemeName.LIGHT]: {
@@ -31,6 +37,12 @@ export const themes: Record<ThemeName, Theme> = {
     backgroundColor: css`#3d5a1e`,
     sheet: new CSSStyleSheet(),
     type: [ThemeType.LAYOUT, ThemeType.COLOR],
+  },
+  [ThemeName.COLLECTION]: {
+    name: ThemeName.COLLECTION,
+    backgroundColor: css``,
+    sheet: new CSSStyleSheet(),
+    type: [ThemeType.LAYOUT],
   },
 };
 
@@ -364,3 +376,41 @@ export const craftacularStyles = [
 ];
 
 themes[ThemeName.CRAFTACULAR].sheet.replaceSync(craftacularStyles.join('\n'));
+
+export const collectionStyles = [
+  css`
+    .properties {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: start;
+      gap: 0.5rem;
+    }
+
+    .property.image {
+      grid-column: 1;
+      grid-row: 1 / span 100;
+    }
+
+    .property:not(.image) {
+      grid-column: 2;
+    }
+
+    @media (max-width: ${unsafeCSS(breakpoints.sm)}) {
+      .properties {
+        grid-template-columns: 1fr;
+      }
+
+      .property.image {
+        grid-column: 1;
+        grid-row: auto;
+        order: -1;
+      }
+
+      .property:not(.image) {
+        grid-column: 1;
+      }
+    }
+  `,
+];
+
+themes[ThemeName.COLLECTION].sheet.replaceSync(collectionStyles.join('\n'));
