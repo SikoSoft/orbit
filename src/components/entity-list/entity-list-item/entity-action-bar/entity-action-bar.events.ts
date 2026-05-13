@@ -21,3 +21,15 @@ export class EntityActionBarEditEvent extends CustomEvent<Record<string, never>>
     });
   }
 }
+
+export const entityActionBarDeleteEventName = 'entity-action-bar-delete';
+
+export class EntityActionBarDeleteEvent extends CustomEvent<Record<string, never>> {
+  constructor() {
+    super(entityActionBarDeleteEventName, {
+      bubbles: true,
+      composed: true,
+      detail: {},
+    });
+  }
+}

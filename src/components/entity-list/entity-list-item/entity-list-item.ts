@@ -34,9 +34,14 @@ import { PointerDownEvent } from '@/events/pointer-down';
 import { PointerUpEvent } from '@/events/pointer-up';
 import { PointerLongPressEvent } from '@/events/pointer-long-press';
 import { EntitySuggestionAddedEvent } from '@/components/entity-suggestion/entity-suggestion.events';
-import { EntityActionBarEditEvent } from './entity-action-bar/entity-action-bar.events';
+import {
+  EntityActionBarDeleteEvent,
+  EntityActionBarEditEvent,
+} from './entity-action-bar/entity-action-bar.events';
+import { EntityItemDeletedEvent } from '@/components/entity-form/entity-form.events';
 
 import '@ss/ui/components/ss-button';
+import '@ss/ui/components/confirmation-modal';
 import '@/components/entity-form/entity-form';
 import './entity-action-bar/entity-action-bar';
 
@@ -221,6 +226,7 @@ export class EntityListItem extends MobxLitElement {
   @state() pointerDown: Date = new Date();
   @state() downTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
   @state() downActivation: boolean = false;
+  @state() confirmDeleteShown: boolean = false;
   private touchStartX: number = 0;
   private touchStartY: number = 0;
   private touchMoved: boolean = false;
@@ -291,6 +297,21 @@ export class EntityListItem extends MobxLitElement {
 
   private handleEditRequested(_e: EntityActionBarEditEvent): void {
     this.mode = EntityListItemMode.EDIT;
+  }
+
+  private handleDeleteRequested(_e: EntityActionBarDeleteEvent): void {
+    this.confirmDeleteShown = true;
+  }
+
+  private async handleDeleteConfirmed(): Promise<void> {
+    this.confirmDeleteShown = false;
+    try {
+      await storage.deleteEntity(this.entityId);
+      addToast(translate('removed'), NotificationType.INFO);
+    } catch (error) {
+      console.error(`Error encountered when deleting entity: ${error}`);
+    }
+    this.dispatchEvent(new EntityItemDeletedEvent({ id: this.entityId }));
   }
 
   private handleMouseDown(e: Event): boolean {
@@ -571,12 +592,21 @@ export class EntityListItem extends MobxLitElement {
                         ?suggestion=${this.suggestion}
                         @entity-action-bar-add=${this.handleAddSuggestion}
                         @entity-action-bar-edit=${this.handleEditRequested}
+                        @entity-action-bar-delete=${this.handleDeleteRequested}
                       ></entity-action-bar>
                     </div>
                   `
                 : nothing}
             `}
       </div>
+      <confirmation-modal
+        @confirmation-accepted=${this.handleDeleteConfirmed}
+        @confirmation-declined=${(): void => {
+          this.confirmDeleteShown = false;
+        }}
+        message=${translate('confirmDeleteSuggestion')}
+        ?open=${this.confirmDeleteShown}
+      ></confirmation-modal>
     `;
   }
 }

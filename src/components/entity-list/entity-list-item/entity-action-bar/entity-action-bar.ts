@@ -12,6 +12,7 @@ import {
 } from './entity-action-bar.models';
 import {
   EntityActionBarAddEvent,
+  EntityActionBarDeleteEvent,
   EntityActionBarEditEvent,
 } from './entity-action-bar.events';
 
@@ -41,6 +42,10 @@ export class EntityActionBar extends MobxLitElement {
     this.dispatchEvent(new EntityActionBarEditEvent());
   }
 
+  private handleDelete(): void {
+    this.dispatchEvent(new EntityActionBarDeleteEvent());
+  }
+
   render(): TemplateResult {
     return html`
       <div class="action-bar">
@@ -49,6 +54,11 @@ export class EntityActionBar extends MobxLitElement {
               <ss-button
                 text=${translate('add')}
                 @click=${this.handleAdd}
+              ></ss-button>
+              <ss-button
+                negative
+                text=${translate('delete')}
+                @click=${this.handleDelete}
               ></ss-button>
             `
           : null}
