@@ -584,6 +584,7 @@ export class ListConfig extends MobxLitElement {
   }
 
   updateThemes(e: ThemesUpdatedEvent): void {
+    e.stopPropagation();
     const themes = e.detail.themes;
 
     this.state.setThemes(themes);
