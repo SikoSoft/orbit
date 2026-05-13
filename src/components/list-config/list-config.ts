@@ -593,6 +593,7 @@ export class ListConfig extends MobxLitElement {
     const themes = e.detail.themes;
     storage.updateListThemes(this.state.listConfig.id, themes);
     addToast(translate('themesSaved'), NotificationType.SUCCESS);
+    this.themeManagerIsOpen = false;
   };
 
   render(): TemplateResult {
