@@ -1,9 +1,8 @@
 import { css, html, nothing, TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
-import { SettingName } from 'api-spec/models/Setting';
-
 import '@/components/entity-list/entity-list';
+import '@/components/entity-list-filter/entity-list-filter';
 import '@/components/list-config/list-config';
 import '@/components/public-entity-list/public-entity-list';
 import '@/components/user-header/user-header';
@@ -11,7 +10,7 @@ import '@/components/bulk-manager/bulk-manager';
 
 import { appState } from '@/state';
 import { storage } from '@/lib/Storage';
-import { navigate, routerState } from '@/lib/Router';
+import { routerState } from '@/lib/Router';
 import { ViewElement } from '@/lib/ViewElement';
 import { EntityList } from '@/components/entity-list/entity-list';
 import { PublicEntityList } from '@/components/public-entity-list/public-entity-list';
@@ -76,17 +75,9 @@ export class ListView extends ViewElement {
     const id = routerState.params['id'] || '';
 
     if (!id) {
-      const defaultId = this.appState.getSetting<string>(
-        SettingName.DEFAULT_LIST_CONFIG,
-      );
-      const defaultConfig =
-        defaultId && this.appState.listConfigs.find(c => c.id === defaultId);
-      const targetId = defaultConfig
-        ? defaultConfig.id
-        : this.appState.listConfigs[0]?.id;
-
-      if (targetId) {
-        navigate('/list/' + targetId);
+      if (this.appState.listConfigId !== '') {
+        this.appState.setListConfigId('');
+        storage.saveActiveListConfigId('');
       }
       return;
     }
@@ -112,6 +103,7 @@ export class ListView extends ViewElement {
       <user-header></user-header>
       <bulk-manager></bulk-manager>
       <div class="view-content">
+        <entity-list-filter></entity-list-filter>
         <entity-list></entity-list>
       </div>
     `;
