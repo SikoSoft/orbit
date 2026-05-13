@@ -48,7 +48,8 @@ export class ListView extends ViewElement {
     });
     this.addEventListener(listConfigChangedEventName, (e: Event) => {
       const event = e as ListConfigChangedEvent;
-      history.replaceState({}, '', '/list/' + event.detail.listConfigId);
+      const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+      history.replaceState({}, '', base + '/list/' + event.detail.listConfigId);
     });
   }
 
