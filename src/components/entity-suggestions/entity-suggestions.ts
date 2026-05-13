@@ -11,6 +11,7 @@ import { storage } from '@/lib/Storage';
 import { themed } from '@/lib/Theme';
 
 import { EntitySuggestionAddedEvent } from '@/components/entity-suggestion/entity-suggestion.events';
+import { EntityItemDeletedEvent } from '@/components/entity-form/entity-form.events';
 import '@/components/entity-suggestion/entity-suggestion';
 
 const ONE_HOUR_MS = 60 * 60 * 1000;
@@ -168,6 +169,15 @@ export class EntitySuggestions extends MobxLitElement {
     this.fadingOutIds = new Set([...this.fadingOutIds].filter(fid => fid !== id));
   }
 
+  private handleEntityDeleted(e: EntityItemDeletedEvent): void {
+    const { id } = e.detail;
+    this.allEntities = this.allEntities.filter(entity => entity.id !== id);
+    this.displayedEntities = this.displayedEntities.filter(
+      entity => entity.id !== id,
+    );
+    this.fadingOutIds = new Set([...this.fadingOutIds].filter(fid => fid !== id));
+  }
+
   render(): TemplateResult {
     return html`
       ${repeat(
@@ -183,6 +193,7 @@ export class EntitySuggestions extends MobxLitElement {
             <entity-suggestion
               .entity=${entity}
               @entity-suggestion-added=${this.handleSuggestionAdded}
+              @entity-item-deleted=${this.handleEntityDeleted}
             ></entity-suggestion>
           </div>
         `,
