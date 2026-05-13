@@ -12,7 +12,7 @@ import {
   ExportDataSet,
   ExportDataType,
 } from 'api-spec/models/Data';
-import { addToast, sha256 } from '@/lib/Util';
+import { addToast } from '@/lib/Util';
 import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
 import { repeat } from 'lit/directives/repeat.js';
 import { storage } from '@/lib/Storage';
@@ -92,12 +92,6 @@ export class ExportTool extends MobxLitElement {
 
   @state()
   endDate: string = '';
-
-  @state()
-  dataSetsHash: string = '';
-
-  @state()
-  listConfigsHash: string = '';
 
   @state()
   get everythingIsSelected(): boolean {
@@ -227,10 +221,7 @@ export class ExportTool extends MobxLitElement {
     this.fileName = e.detail.value;
   }
 
-  async handleDataSetChanged(
-    entityConfigId: number,
-    dataType: ExportDataType,
-  ): Promise<void> {
+  handleDataSetChanged(entityConfigId: number, dataType: ExportDataType): void {
     const isSelected = this.selectedDataSets.some(
       ds => ds.entityConfigId === entityConfigId && ds.dataType === dataType,
     );
@@ -240,8 +231,6 @@ export class ExportTool extends MobxLitElement {
         ds =>
           !(ds.entityConfigId === entityConfigId && ds.dataType === dataType),
       );
-
-      this.syncDataSets();
       return;
     }
 
@@ -253,7 +242,6 @@ export class ExportTool extends MobxLitElement {
       ...this.selectedDataSets,
       { entityConfigId, dataType },
     ];
-    this.syncDataSets();
   }
 
   selectEntityConfig(entityConfigId: number): void {
@@ -267,18 +255,6 @@ export class ExportTool extends MobxLitElement {
       ...this.selectedDataSets,
       { entityConfigId, dataType: ExportDataType.ENTITY_CONFIGS },
     ];
-  }
-
-  async syncDataSets(): Promise<void> {
-    this.dataSetsHash = await sha256(
-      this.selectedDataSets
-        .map(ds => `${ds.entityConfigId}-${ds.dataType}`)
-        .join(','),
-    );
-  }
-
-  async syncListConfigs(): Promise<void> {
-    this.listConfigsHash = await sha256(this.selectedListConfigs.join(','));
   }
 
   dataSetIsSelected(entityConfigId: number, dataType: ExportDataType): boolean {
@@ -302,7 +278,6 @@ export class ExportTool extends MobxLitElement {
   selectEverything(): void {
     if (this.everythingIsSelected) {
       this.selectedDataSets = [];
-      this.syncDataSets();
       return;
     }
 
@@ -313,8 +288,6 @@ export class ExportTool extends MobxLitElement {
       }
     }
     this.selectedDataSets = allDataSets;
-    this.syncDataSets();
-
     this.selectAllListConfigs();
   }
 
@@ -322,15 +295,13 @@ export class ExportTool extends MobxLitElement {
     this.selectedListConfigs = this.allListConfigsAreSelected
       ? []
       : this.state.listConfigs.map(config => config.id);
-
-    this.syncListConfigs();
   }
 
   listConfigIsSelected(listConfigId: string): boolean {
     return this.selectedListConfigs.includes(listConfigId);
   }
 
-  async handleListConfigChanged(listConfigId: string): Promise<void> {
+  handleListConfigChanged(listConfigId: string): void {
     const isSelected = this.selectedListConfigs.includes(listConfigId);
 
     if (isSelected) {
@@ -341,13 +312,12 @@ export class ExportTool extends MobxLitElement {
     }
 
     this.selectedListConfigs = [...this.selectedListConfigs, listConfigId];
-    this.syncListConfigs();
   }
 
   render(): TemplateResult {
     return html`
       <div class="export-tool">
-        <div class="data-sets" data-hash=${this.dataSetsHash}>
+        <div class="data-sets">
           <div class="include-type-header">
             <input
               type="checkbox"
@@ -360,7 +330,7 @@ export class ExportTool extends MobxLitElement {
 
           ${repeat(
             this.state.entityConfigs,
-            config => `${this.dataSetsHash}-${config.id}`,
+            config => config.id,
             config => html`
               <div>
                 <div class="include-type-header">
@@ -388,7 +358,7 @@ export class ExportTool extends MobxLitElement {
                           config.id,
                           ExportDataType.ENTITIES,
                         )}
-                        @change=${(): Promise<void> =>
+                        @change=${(): void =>
                           this.handleDataSetChanged(config.id, dataType)}
                       />
                       <label for="${config.id}-${dataType}">
@@ -417,14 +387,14 @@ export class ExportTool extends MobxLitElement {
 
           ${repeat(
             this.state.listConfigs,
-            config => `${this.dataSetsHash}-${config.id}`,
+            config => config.id,
             config => html`
               <div class="include-type">
                 <input
                   type="checkbox"
                   id="listConfig-${config.id}"
                   ?checked=${this.listConfigIsSelected(config.id)}
-                  @change=${(): Promise<void> =>
+                  @change=${(): void =>
                     this.handleListConfigChanged(config.id)}
                 />
                 <label for="listConfig-${config.id}"> ${config.name} </label>
