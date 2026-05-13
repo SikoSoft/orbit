@@ -757,19 +757,11 @@ export class Storage implements StorageSchema {
 
   @delegateSource()
   async getList(
-    _id: string,
-    _start: number,
-    _perPage: number,
+    id: string,
+    start: number,
+    perPage: number,
   ): Promise<StorageResult<PublicEntityListResult>> {
-    return Promise.resolve({
-      isOk: true,
-      value: {
-        entities: [],
-        total: 0,
-        listConfig: {} as ListConfig,
-        entityConfigs: [] as EntityConfig[],
-      },
-    });
+    return networkStorage.getList(id, start, perPage);
   }
 
   @delegateSource()

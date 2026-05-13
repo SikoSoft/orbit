@@ -40,8 +40,9 @@ export class PublicEntityList extends EntityList {
       if (listResult.isOk) {
         this.state.setEntityConfigs(listResult.value.entityConfigs);
         if (
-          !this.state.listConfig ||
-          this.state.listConfig.id !== listResult.value.listConfig.id
+          listResult.value.listConfig?.id &&
+          (!this.state.listConfig ||
+            this.state.listConfig.id !== listResult.value.listConfig.id)
         ) {
           this.state.addListConfig(listResult.value.listConfig);
           this.state.setListConfigId(this.listConfigId);

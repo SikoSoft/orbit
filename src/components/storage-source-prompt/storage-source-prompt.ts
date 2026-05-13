@@ -109,7 +109,8 @@ export class StorageSourcePrompt extends MobxLitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.visible = !storage.getStorageSource();
+    const isPublicList = window.location.pathname.includes('/list/');
+    this.visible = !storage.getStorageSource() && !isPublicList;
   }
 
   private select(source: StorageSource): void {
