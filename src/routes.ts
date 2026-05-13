@@ -31,10 +31,14 @@ export const routes: Route[] = [
     action: async () => await import('@/components/login-form/login-form'),
   },
   {
+    path: '/list',
+    component: 'list-view',
+    action: async () => await import('@/views/list-view/list-view'),
+  },
+  {
     path: '/list/:id',
-    component: 'public-list-view',
-    action: async () =>
-      await import('@/views/public-list-view/public-list-view'),
+    component: 'list-view',
+    action: async () => await import('@/views/list-view/list-view'),
   },
   {
     path: '/account',
