@@ -139,7 +139,7 @@ export class ImageField extends MobxLitElement {
     return html`
       ${this.src
         ? html`<div class="preview">
-            <img src=${this.src} alt=${this.alt} />
+            <img src=${this.src} alt=${this.alt} crossorigin="anonymous" />
           </div>`
         : nothing}
 
