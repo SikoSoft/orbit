@@ -379,9 +379,13 @@ themes[ThemeName.CRAFTACULAR].sheet.replaceSync(craftacularStyles.join('\n'));
 
 export const collectionStyles = [
   css`
+    .time {
+      display: none;
+    }
+
     .properties {
       display: grid;
-      grid-template-columns: auto 1fr;
+      grid-template-columns: 1fr 1.618fr;
       align-items: start;
       gap: 0.5rem;
     }
