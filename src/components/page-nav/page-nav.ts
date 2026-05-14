@@ -25,7 +25,7 @@ const views: PageViewConfig[] = [
     label: translate('new'),
     url: '/add',
   },
-  { id: PageView.LIST, label: translate('list'), url: '/entities' },
+  { id: PageView.LIST, label: translate('list'), url: '/list' },
   { id: PageView.ADMIN, label: translate('admin'), url: '/admin' },
 ];
 
