@@ -3,11 +3,7 @@ import { css, html, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import { translate } from '@/lib/Localization';
-import { appState } from '@/state';
-import { api } from '@/lib/Api';
-import { storage } from '@/lib/Storage';
-import { addToast } from '@/lib/Util';
-import { NotificationType } from '@ss/ui/components/notification-provider.models';
+import { performLogout } from '@/lib/Auth';
 
 import { UserLoggedOutEvent } from '@/events/user-logged-out';
 
@@ -26,19 +22,12 @@ export class UserPane extends MobxLitElement {
     }
   `;
 
-  private state = appState;
-
   @state() username: string = '';
   @state() password: string = '';
 
   private async logout(): Promise<void> {
-    const result = await api.get<unknown>('logout');
-    if (result) {
-      storage.setAuthToken('');
-      api.setAuthToken('');
-      this.state.setAuthToken('');
-      this.state.setForbidden(true);
-      addToast(translate('youAreNowLoggedOut'), NotificationType.INFO);
+    const success = await performLogout();
+    if (success) {
       this.dispatchEvent(new UserLoggedOutEvent({}));
     }
   }

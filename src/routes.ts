@@ -75,4 +75,9 @@ export const routes: Route[] = [
     action: async () =>
       await import('@/views/entity-form-view/entity-form-view'),
   },
+  {
+    path: '/logout',
+    component: 'logout-view',
+    action: async () => await import('@/views/logout-view/logout-view'),
+  },
 ];

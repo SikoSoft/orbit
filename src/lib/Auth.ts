@@ -6,6 +6,19 @@ import { translate } from '@/lib/Localization';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 import { LoginRequestBody, LoginResponseBody } from '@/models/Identity';
 
+export async function performLogout(): Promise<boolean> {
+  const result = await api.get<unknown>('logout');
+  if (result) {
+    storage.setAuthToken('');
+    api.setAuthToken('');
+    appState.setAuthToken('');
+    appState.setForbidden(true);
+    addToast(translate('youAreNowLoggedOut'), NotificationType.INFO);
+    return true;
+  }
+  return false;
+}
+
 export async function performLogin(
   username: string,
   password: string,
