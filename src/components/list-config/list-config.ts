@@ -119,6 +119,16 @@ export class ListConfig extends MobxLitElement {
         }
       }
 
+      .everything-slide .name,
+      .everything-slide .name:hover {
+        ss-input::part(input) {
+          cursor: default;
+          border-color: transparent;
+          background-color: transparent;
+          pointer-events: none;
+        }
+      }
+
       .carousel-wrapper {
         padding: 1rem;
         position: relative;
@@ -500,31 +510,59 @@ export class ListConfig extends MobxLitElement {
   }
 
   sync(_reset = false): void {
-    if (!this.state.listConfig) {
+    if (!this[ListConfigProp.VIEW_ONLY] && !this.state.listConfigId) {
+      this.state.setTitle(translate('everything'));
+      this.id = '';
+      this.name = translate('everything');
+      this.navigationIndex = 0;
       return;
     }
 
-    this.state.setTitle(this.state.listConfig.name);
-    this.id = this.state.listConfig.id;
-    this.name = this.state.listConfig.name;
-    this.navigationIndex = this.state.listConfigs.findIndex(
-      config => config.id === this.id,
+    const config = this.state.listConfigs.find(
+      c => c.id === this.state.listConfigId,
     );
+    if (!config) {
+      return;
+    }
+
+    this.state.setTitle(config.name);
+    this.id = config.id;
+    this.name = config.name;
+    this.navigationIndex =
+      this.state.listConfigs.findIndex(c => c.id === this.id) +
+      (this[ListConfigProp.VIEW_ONLY] ? 0 : 1);
   }
 
   setListConfigId(listConfigId: string): void {
-    if (!this.state.listConfig) {
-      return;
-    }
     storage.saveActiveListConfigId(listConfigId);
     this.state.setListConfigId(listConfigId);
-    this.state.setTitle(this.state.listConfig.name);
-    this.id = this.state.listConfig.id;
-    this.name = this.state.listConfig.name;
     this.dispatchEvent(new ListConfigChangedEvent({ listConfigId }));
   }
 
   carouselSlideChanged(e: CarouselSlideChangedEvent): void {
+    if (!this[ListConfigProp.VIEW_ONLY]) {
+      if (e.detail.slideIndex === 0) {
+        if (this.state.listConfigId === '') {
+          return;
+        }
+        this.state.setEditListConfigMode(false);
+        this.state.setSelectListConfigMode(false);
+        this.navigationIndex = e.detail.navigationIndex;
+        this.setListConfigId('');
+        return;
+      }
+      const newListConfigId =
+        this.state.listConfigs[e.detail.slideIndex - 1]?.id;
+      if (!newListConfigId || newListConfigId === this.state.listConfigId) {
+        return;
+      }
+      this.state.setEditListConfigMode(false);
+      this.state.setSelectListConfigMode(false);
+      this.navigationIndex = e.detail.navigationIndex;
+      this.setListConfigId(newListConfigId);
+      return;
+    }
+
     const newListConfigId = this.state.listConfigs[e.detail.slideIndex]?.id;
     if (!newListConfigId || newListConfigId === this.state.listConfigId) {
       return;
@@ -544,13 +582,17 @@ export class ListConfig extends MobxLitElement {
   }
 
   private handleFilterUpdated(_e: ListFilterUpdatedEvent): void {
-    storage.updateListFilter(this.state.listConfigId, this.state.listFilter);
+    if (this.state.listConfigId) {
+      storage.updateListFilter(this.state.listConfigId, this.state.listFilter);
+    }
     this.filterIsOpen = false;
     this.dispatchEvent(new EntityListLoadEvent());
   }
 
   private handleSortUpdated(_e: ListSortUpdatedEvent): void {
-    storage.updateListSort(this.state.listConfigId, this.state.listSort);
+    if (this.state.listConfigId) {
+      storage.updateListSort(this.state.listConfigId, this.state.listSort);
+    }
     this.sortIsOpen = false;
     this.dispatchEvent(new EntityListSyncEvent());
   }
@@ -611,11 +653,22 @@ export class ListConfig extends MobxLitElement {
           @carousel-slide-changed=${this.carouselSlideChanged}
         >
           ${this.ready
-            ? repeat(
-                this.state.listConfigs,
-                config => config.id,
-                config =>
-                  html`<div class="config-slide">
+            ? html`
+                ${!this[ListConfigProp.VIEW_ONLY]
+                  ? html`<div class="config-slide everything-slide">
+                      <div class="name">
+                        <ss-input
+                          type=${InputType.TEXT}
+                          value=${translate('everything')}
+                        ></ss-input>
+                      </div>
+                    </div>`
+                  : nothing}
+                ${repeat(
+                  this.state.listConfigs,
+                  config => config.id,
+                  config =>
+                    html`<div class="config-slide">
                     <div
                       class="close"
                       @click=${(e: MouseEvent): void => {
@@ -676,7 +729,8 @@ export class ListConfig extends MobxLitElement {
                       </div>
                     </div>
                   </div>`,
-              )
+                )}
+              `
             : nothing}
 
           <style>
