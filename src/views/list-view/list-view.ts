@@ -2,7 +2,7 @@ import { css, html, nothing, TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import '@/components/entity-list/entity-list';
-import '@/components/entity-list-filter/entity-list-filter';
+import '@/components/entity-list-customizer/entity-list-customizer';
 import '@/components/list-config/list-config';
 import '@/components/public-entity-list/public-entity-list';
 import '@/components/user-header/user-header';
@@ -92,9 +92,7 @@ export class ListView extends ViewElement {
   render(): TemplateResult {
     if (!this.isLoggedIn()) {
       return html`
-        ${this.listReady
-          ? html`<list-config viewOnly></list-config>`
-          : nothing}
+        ${this.listReady ? html`<list-config viewOnly></list-config>` : nothing}
         <public-entity-list publicView></public-entity-list>
       `;
     }
@@ -103,7 +101,7 @@ export class ListView extends ViewElement {
       <user-header></user-header>
       <bulk-manager></bulk-manager>
       <div class="view-content">
-        <entity-list-filter></entity-list-filter>
+        <entity-list-customizer></entity-list-customizer>
         <entity-list></entity-list>
       </div>
     `;
