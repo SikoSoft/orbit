@@ -4,6 +4,7 @@ import { customElement, state } from 'lit/decorators.js';
 
 import { translate } from '@/lib/Localization';
 import { performLogout } from '@/lib/Auth';
+import { navigate } from '@/lib/Router';
 
 import { UserLoggedOutEvent } from '@/events/user-logged-out';
 
@@ -29,6 +30,7 @@ export class UserPane extends MobxLitElement {
     const success = await performLogout();
     if (success) {
       this.dispatchEvent(new UserLoggedOutEvent({}));
+      navigate('/');
     }
   }
 
