@@ -17,6 +17,7 @@ import { ThemeName, ThemeType, defaultTheme } from '@/models/Page';
 import { StorageItemKey } from '@/models/Storage';
 import { ThemesUpdatedEvent } from './page-container.events';
 import { translate } from '@/lib/Localization';
+import { initErrorLogger, teardownErrorLogger } from '@/lib/ErrorLogger';
 
 @customElement('page-container')
 export class PageContainer extends MobxLitElement {
@@ -147,8 +148,14 @@ export class PageContainer extends MobxLitElement {
     this.dismissInitialLoader();
   }
 
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    teardownErrorLogger();
+  }
+
   connectedCallback(): void {
     super.connectedCallback();
+    initErrorLogger();
     this.setTheme(this.getThemeFromStorage());
 
     reaction(
