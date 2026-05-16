@@ -12,9 +12,9 @@ export class UserHeader extends LitElement {
   render(): TemplateResult {
     return html`<logged-in>
       <template>
-        <list-config></list-config>
-
         <page-nav></page-nav>
+
+        <list-config></list-config>
 
         <floating-widget position="top"></floating-widget>
 

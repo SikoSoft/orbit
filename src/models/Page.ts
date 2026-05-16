@@ -1,6 +1,7 @@
 import { CSSResult } from 'lit';
 
 export enum PageView {
+  HOME = 'home',
   INPUT = 'input',
   LIST = 'list',
   MOCK = 'mock',

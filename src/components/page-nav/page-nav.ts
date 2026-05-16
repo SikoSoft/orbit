@@ -8,6 +8,8 @@ import { appState } from '@/state';
 import { PageNavProp, pageNavProps, PageNavProps } from './page-nav.models';
 import { navigate, routerState } from '@/lib/Router';
 
+import '@ss/ui/components/tab-container';
+import '@ss/ui/components/tab-pane';
 import { TabIndexChangedEvent } from '@ss/ui/components/tab-container.events';
 import { repeat } from 'lit/directives/repeat.js';
 import { MobxReactionsController } from '@/lib/MobxReactionController';
@@ -20,6 +22,7 @@ export interface PageViewConfig {
 }
 
 const views: PageViewConfig[] = [
+  { id: PageView.HOME, label: translate('home'), url: '/' },
   {
     id: PageView.INPUT,
     label: translate('new'),
@@ -40,6 +43,7 @@ export class PageNav extends MobxLitElement {
   static styles = css`
     .box {
       overflow: hidden;
+      margin-top: 1rem;
     }
 
     nav span {
