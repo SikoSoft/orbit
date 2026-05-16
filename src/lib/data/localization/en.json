@@ -88,6 +88,7 @@
   "failedToDeleteEntityConfig": "Failed to delete entity config. Please try again.",
   "entityConfigDeleted": "Entity config deleted successfully.",
   "entityConfiguration": "Entity Configuration",
+  "entityConfig": "Entity Config",
   "entityName": "Entity Name",
   "entityDescription": "Entity Description",
   "create": "Create",

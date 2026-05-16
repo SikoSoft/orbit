@@ -15,6 +15,20 @@ export const routes: Route[] = [
       await import('@/views/admin-dashboard-view/admin-dashboard-view'),
   },
   {
+    path: '/admin/data',
+    component: 'admin-data-view',
+    action: async () =>
+      await import('@/views/admin-data-view/admin-data-view'),
+  },
+  {
+    path: '/admin/entityConfig',
+    component: 'admin-entity-config-view',
+    action: async () =>
+      await import(
+        '@/views/admin-entity-config-view/admin-entity-config-view'
+      ),
+  },
+  {
     path: '/entities',
     component: 'entity-list-view',
     action: async () =>

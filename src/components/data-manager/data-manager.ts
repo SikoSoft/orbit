@@ -6,7 +6,6 @@ import { MobxLitElement } from '@adobe/lit-mobx';
 import { Role } from 'api-spec/models/Identity';
 import { appState } from '@/state';
 
-import '@ss/ui/components/ss-collapsable';
 import '@ss/ui/components/tab-container';
 import '@ss/ui/components/tab-pane';
 import '@/components/data-manager/export-tool/export-tool';
@@ -49,11 +48,7 @@ export class DataManager extends MobxLitElement {
 
   render(): TemplateResult {
     return html`
-      <ss-collapsable
-        title=${translate('dataManager')}
-        ?open=${this.open}
-        panelId=${`data-manager`}
-      >
+      <div class="box">
         <tab-container
           paneId="data-manager"
           index=${this.state.tabState['data-manager'] ?? 0}
@@ -75,7 +70,7 @@ export class DataManager extends MobxLitElement {
               `
             : nothing}
         </tab-container>
-      </ss-collapsable>
+      </div>
     `;
   }
 }
