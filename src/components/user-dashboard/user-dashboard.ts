@@ -6,8 +6,6 @@ import { appState } from '@/state';
 import { translate } from '@/lib/Localization';
 import { StorageSource } from '@/models/Storage';
 
-import '@/components/push-notification/push-notification';
-
 @customElement('user-dashboard')
 export class UserDashboard extends MobxLitElement {
   private state = appState;
@@ -55,7 +53,6 @@ export class UserDashboard extends MobxLitElement {
           <a href="access">${translate('dashboard.manageAccess')}</a>
           <a href="settings">${translate('settings')}</a>
         </div>
-        <push-notification></push-notification>
       </div>
     `;
   }

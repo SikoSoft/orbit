@@ -80,4 +80,9 @@ export const routes: Route[] = [
     component: 'logout-view',
     action: async () => await import('@/views/logout-view/logout-view'),
   },
+  {
+    path: '/debug',
+    component: 'debug-view',
+    action: async () => await import('@/views/debug-view/debug-view'),
+  },
 ];
