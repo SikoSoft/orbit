@@ -25,7 +25,7 @@ export class EntityListCustomizer extends MobxLitElement {
       .enity-list-customizer {
         position: sticky;
         margin-bottom: 1rem;
-        z-index: 1000;
+        z-index: 500;
         top: 2.5rem;
 
         .inner {
