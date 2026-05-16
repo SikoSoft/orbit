@@ -19,14 +19,44 @@ import { UserLoggedInEvent } from '@/events/user-logged-in';
 import { SSInput } from '@ss/ui/components/ss-input';
 import { themed } from '@/lib/Theme';
 import { StorageSource } from '@/models/Storage';
+import '@/components/svg-icon/svg-icon';
+import { IconName } from '@/components/svg-icon/svg-icon.models';
 
 @themed()
 @customElement('login-form')
 export class LoginForm extends MobxLitElement {
   static styles = css`
     .box {
-      padding: 1rem;
-      margin-bottom: 1rem;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 1rem;
+      gap: 0.5rem;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      text-align: center;
+      opacity: 0.5;
+    }
+
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      padding: 1.5rem;
+    }
+
+    ss-button::part(button) {
+      font-weight: bold;
+      padding: 0.75rem;
+      font-size: 1.25rem;
     }
   `;
 
@@ -81,30 +111,36 @@ export class LoginForm extends MobxLitElement {
     }
 
     return html`
-      <form>
-        <ss-input
-          id="username"
-          placeholder=${translate('username')}
-          @input-submitted=${this.handleUsernameSubmitted}
-          @input-changed=${this.handleUsernameChanged}
-          value=${this.username}
-        ></ss-input>
+      <div class="box">
+        <div class="header">
+          <svg-icon name=${IconName.CLOUD} size="48"></svg-icon>
+          <h2>${translate('login')}</h2>
+        </div>
+        <form class="form">
+          <ss-input
+            id="username"
+            placeholder=${translate('username')}
+            @input-submitted=${this.handleUsernameSubmitted}
+            @input-changed=${this.handleUsernameChanged}
+            value=${this.username}
+          ></ss-input>
 
-        <ss-input
-          id="password"
-          placeholder=${translate('password')}
-          type="password"
-          @input-submitted=${this.handlePasswordSubmitted}
-          @input-changed=${this.handlePasswordChanged}
-          value=${this.password}
-        ></ss-input>
+          <ss-input
+            id="password"
+            placeholder=${translate('password')}
+            type="password"
+            @input-submitted=${this.handlePasswordSubmitted}
+            @input-changed=${this.handlePasswordChanged}
+            value=${this.password}
+          ></ss-input>
 
-        <ss-button
-          @click=${this.login}
-          text=${translate('login')}
-          ?loading=${this.loading}
-        ></ss-button>
-      </form>
+          <ss-button
+            @click=${this.login}
+            text=${translate('login')}
+            ?loading=${this.loading}
+          ></ss-button>
+        </form>
+      </div>
     `;
   }
 }
