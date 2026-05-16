@@ -142,9 +142,11 @@ export function setupRouter(
   _navigate = navigateImpl;
 
   const onClick = (e: MouseEvent): void => {
-    const a = (e.target as HTMLElement).closest(
-      'a[href]',
-    ) as HTMLAnchorElement | null;
+    const a =
+      e.composedPath().find(
+        (el): el is HTMLAnchorElement =>
+          el instanceof HTMLAnchorElement && el.hasAttribute('href'),
+      ) ?? null;
 
     if (!a) {
       return;
@@ -158,7 +160,7 @@ export function setupRouter(
       }
 
       e.preventDefault();
-      navigateImpl(url.pathname + url.search + url.hash);
+      navigateImpl(normalize(url.pathname) + url.search + url.hash);
     }
   };
 

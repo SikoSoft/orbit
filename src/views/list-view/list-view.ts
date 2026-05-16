@@ -4,6 +4,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import '@/components/entity-list/entity-list';
 import '@/components/entity-list-customizer/entity-list-customizer';
 import '@/components/list-config/list-config';
+import '@/components/logged-in/logged-in';
 import '@/components/public-entity-list/public-entity-list';
 import '@/components/user-header/user-header';
 import '@/components/bulk-manager/bulk-manager';
@@ -101,6 +102,7 @@ export class ListView extends ViewElement {
       <user-header></user-header>
       <bulk-manager></bulk-manager>
       <div class="view-content">
+        <logged-in><list-config></list-config></logged-in>
         <entity-list-customizer></entity-list-customizer>
         <entity-list></entity-list>
       </div>

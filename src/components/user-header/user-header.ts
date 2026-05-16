@@ -3,7 +3,6 @@ import { customElement } from 'lit/decorators.js';
 
 import '@/components/logged-in/logged-in';
 import '@/components/page-nav/page-nav';
-import '@/components/list-config/list-config';
 import '@/components/floating-widget/floating-widget';
 import '@/components/add-entity-widget/add-entity-widget';
 
@@ -13,8 +12,6 @@ export class UserHeader extends LitElement {
     return html`<logged-in>
       <template>
         <page-nav></page-nav>
-
-        <list-config></list-config>
 
         <floating-widget position="top"></floating-widget>
 
