@@ -16,6 +16,7 @@ import { reaction } from 'mobx';
 import { ThemeName, ThemeType, defaultTheme } from '@/models/Page';
 import { StorageItemKey } from '@/models/Storage';
 import { ThemesUpdatedEvent } from './page-container.events';
+import { routerState } from '@/lib/Router';
 import { translate } from '@/lib/Localization';
 import { initErrorLogger, teardownErrorLogger } from '@/lib/ErrorLogger';
 
@@ -172,6 +173,18 @@ export class PageContainer extends MobxLitElement {
       () => appState.title,
       () => {
         document.title = this.state.title;
+      },
+      {
+        fireImmediately: false,
+      },
+    );
+
+    reaction(
+      () => routerState.currentPath,
+      path => {
+        if (!path.startsWith('/list')) {
+          this.setListConfigThemes([]);
+        }
       },
       {
         fireImmediately: false,
