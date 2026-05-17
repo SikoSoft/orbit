@@ -76,9 +76,10 @@ export class ListView extends ViewElement {
     const id = routerState.params['id'] || '';
 
     if (!id) {
-      if (this.appState.listConfigId !== '') {
-        this.appState.setListConfigId('');
-        storage.saveActiveListConfigId('');
+      const activeId = this.appState.listConfigId;
+      if (activeId) {
+        const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+        history.replaceState({}, '', base + '/list/' + activeId);
       }
       return;
     }
