@@ -72,6 +72,7 @@ export class EntityListItem extends MobxLitElement {
       &.selected {
         background-color: #fdc;
         color: #000;
+        border: 1px solid #f85;
       }
 
       &.full,
@@ -82,6 +83,10 @@ export class EntityListItem extends MobxLitElement {
       &.suggestion {
         opacity: 0.8;
         background-color: #efffdf;
+
+        &.selected {
+          background-color: #4caf50;
+        }
       }
     }
 
