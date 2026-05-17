@@ -13,7 +13,9 @@ import { ViewElement } from '@/lib/ViewElement';
 import { translate } from '@/lib/Localization';
 import { appState } from '@/state';
 import { TabIndexChangedEvent } from '@ss/ui/components/tab-container.events';
+import { themed } from '@/lib/Theme';
 
+@themed()
 @customElement('user-settings-view')
 export class UserSettingsView extends ViewElement {
   private state = appState;
@@ -21,6 +23,7 @@ export class UserSettingsView extends ViewElement {
   static styles = css`
     .view-content {
       margin-top: 1rem;
+      padding: 1rem;
     }
   `;
 
@@ -58,7 +61,7 @@ export class UserSettingsView extends ViewElement {
   render(): TemplateResult {
     return html`
       <user-header></user-header>
-      <div class="view-content">
+      <div class="view-content box">
         ${this.isLoggedIn
           ? html`
               ${this.isAdmin
