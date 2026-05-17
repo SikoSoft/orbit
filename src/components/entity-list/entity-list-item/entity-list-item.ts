@@ -315,7 +315,7 @@ export class EntityListItem extends MobxLitElement {
   }
 
   private handleMouseDown(e: Event): boolean {
-    if (this.publicView) {
+    if (this.publicView || this.mode === EntityListItemMode.EDIT) {
       return false;
     }
 
@@ -334,7 +334,7 @@ export class EntityListItem extends MobxLitElement {
   }
 
   private handleMouseUp(e: Event): boolean {
-    if (this.publicView) {
+    if (this.publicView || this.mode === EntityListItemMode.EDIT) {
       return false;
     }
 
@@ -354,6 +354,9 @@ export class EntityListItem extends MobxLitElement {
   }
 
   private handleTouchStart(e: TouchEvent): void {
+    if (this.mode === EntityListItemMode.EDIT) {
+      return;
+    }
     this.touchStartX = e.touches[0].clientX;
     this.touchStartY = e.touches[0].clientY;
     this.touchMoved = false;
@@ -372,6 +375,9 @@ export class EntityListItem extends MobxLitElement {
   }
 
   private handleTouchMove(e: TouchEvent): void {
+    if (this.mode === EntityListItemMode.EDIT) {
+      return;
+    }
     const dx = e.touches[0].clientX - this.touchStartX;
     const dy = e.touches[0].clientY - this.touchStartY;
     if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
@@ -384,6 +390,9 @@ export class EntityListItem extends MobxLitElement {
   }
 
   private handleTouchEnd(e: TouchEvent): void {
+    if (this.mode === EntityListItemMode.EDIT) {
+      return;
+    }
     e.preventDefault();
     if (!this.touchMoved && !this.downActivation) {
       this.dispatchEvent(new PointerUpEvent({ time: new Date() }));
@@ -512,6 +521,11 @@ export class EntityListItem extends MobxLitElement {
         class=${classMap(this.classes)}
         @mouseenter=${this.handleMouseEnter}
         @mouseleave=${this.handleMouseLeave}
+        @mousedown=${this.handleMouseDown}
+        @mouseup=${this.handleMouseUp}
+        @touchstart=${this.handleTouchStart}
+        @touchmove=${this.handleTouchMove}
+        @touchend=${this.handleTouchEnd}
       >
         ${this.suggestion
           ? html`<div class="suggestion-badge">${translate('auto')}</div>`
@@ -535,13 +549,7 @@ export class EntityListItem extends MobxLitElement {
               ></entity-form>
             `
           : html`
-              <div
-                @mousedown=${this.handleMouseDown}
-                @mouseup=${this.handleMouseUp}
-                @touchstart=${this.handleTouchStart}
-                @touchmove=${this.handleTouchMove}
-                @touchend=${this.handleTouchEnd}
-              >
+              <div>
                 ${this.state.debugMode
                   ? html` <div class="debug-entity-type">
                       ${this.entityConfig?.name || this.type}
