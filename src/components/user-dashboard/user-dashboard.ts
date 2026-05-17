@@ -40,11 +40,11 @@ export class UserDashboard extends MobxLitElement {
       justify-content: center;
       gap: 1rem;
       padding: 2.5rem 1.5rem;
-      border: 2px solid var(--color-border, #ddd);
-      border-radius: 0.5rem;
-      background: var(--color-surface, #fff);
+      border: 2px solid var(--border-color, #ccc);
+      border-radius: var(--border-radius, 0.5rem);
+      background: var(--box-background-color, #fff);
       text-decoration: none;
-      color: inherit;
+      color: var(--box-text-color, var(--text-color, inherit));
       cursor: pointer;
       transition:
         background 0.15s ease,
@@ -52,8 +52,8 @@ export class UserDashboard extends MobxLitElement {
     }
 
     .card:hover {
-      background: var(--color-surface-hover, #f5f5f5);
-      border-color: var(--color-primary, #666);
+      background: var(--background-hover-color, #f5f5f5);
+      border-color: var(--primary-color, #0066ff);
     }
 
     .card svg-key,
