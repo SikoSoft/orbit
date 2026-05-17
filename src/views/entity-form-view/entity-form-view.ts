@@ -3,6 +3,7 @@ import { customElement, query } from 'lit/decorators.js';
 
 import '@/components/entity-form/entity-form';
 import '@/components/login-form/login-form';
+import '@/components/list-config/list-config';
 import '@/components/logged-in/logged-in';
 import '@/components/logged-out/logged-out';
 import '@/components/user-header/user-header';
@@ -35,7 +36,9 @@ export class EntityFormView extends ViewElement {
           ><template><login-form></login-form></template
         ></logged-out>
         <logged-in
-          ><template><entity-form></entity-form></template
+          ><template>
+            <list-config></list-config>
+            <entity-form></entity-form></template
         ></logged-in>
       </div>`;
   }
