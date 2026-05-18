@@ -335,5 +335,6 @@
   "pushNotification.failed": "Failed to send notification.",
   "pushNotification.titleBodyRequired": "Title and body are required.",
   "dashboard.activityChart": "Activity by Month",
-  "dashboard.categoryChart": "Category Breakdown"
+  "dashboard.categoryChart": "Category Breakdown",
+  "account": "Account"
 }

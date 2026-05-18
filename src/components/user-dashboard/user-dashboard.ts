@@ -3,6 +3,7 @@ import { css, html, nothing, TemplateResult } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import type { ChartData, ChartOptions } from 'chart.js';
 
+import '@/components/svg-icon/svg/svg-profile';
 import '@/components/svg-icon/svg/svg-key';
 import '@/components/svg-icon/svg/svg-settings';
 import '@/components/svg-icon/svg/svg-database';
@@ -74,6 +75,7 @@ export class UserDashboard extends MobxLitElement {
       border-color: var(--primary-color, #0066ff);
     }
 
+    .card svg-profile,
     .card svg-key,
     .card svg-settings,
     .card svg-database,
@@ -194,6 +196,11 @@ export class UserDashboard extends MobxLitElement {
             </p>`
           : nothing}
         <div class="cards">
+          <a href="account" class="card">
+            <svg-profile></svg-profile>
+            <span class="card-label">${translate('account')}</span>
+          </a>
+
           <a href="access" class="card">
             <svg-key></svg-key>
             <span class="card-label">${translate('access')}</span>
