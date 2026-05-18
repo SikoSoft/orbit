@@ -9,6 +9,7 @@ import {
 
 import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
 import { SettingUpdatedEvent } from '@/events/setting-updated';
+import { translate } from '@/lib/Localization';
 
 import '@ss/ui/components/ss-input';
 import '@ss/ui/components/ss-toggle';
@@ -55,7 +56,7 @@ export class NumberSetting extends LitElement {
   render(): TemplateResult {
     return html`
       <div class="number-setting">
-        <label>${this.name}</label>
+        <label>${translate(this.name)}</label>
 
         <ss-input
           type="number"

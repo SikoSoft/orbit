@@ -9,6 +9,7 @@ import {
 
 import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
 import { SettingUpdatedEvent } from '@/events/setting-updated';
+import { translate } from '@/lib/Localization';
 
 import '@ss/ui/components/ss-toggle';
 import { themed } from '@/lib/Theme';
@@ -42,7 +43,7 @@ export class TextSetting extends LitElement {
   render(): TemplateResult {
     return html`
       <div class="text-setting">
-        <label>${this.name}</label>
+        <label>${translate(this.name)}</label>
 
         <ss-input
           @input-changed=${this.handleInputChanged}

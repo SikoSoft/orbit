@@ -9,6 +9,7 @@ import {
 
 import { SelectChangedEvent } from '@ss/ui/components/ss-select.events';
 import { SettingUpdatedEvent } from '@/events/setting-updated';
+import { translate } from '@/lib/Localization';
 
 import '@ss/ui/components/ss-select';
 import { themed } from '@/lib/Theme';
@@ -46,7 +47,7 @@ export class SelectSetting extends LitElement {
   render(): TemplateResult {
     return html`
       <div class="select-setting">
-        <label>${this.name}</label>
+        <label>${translate(this.name)}</label>
 
         <ss-select
           @select-changed=${this.handleSelectChanged}
