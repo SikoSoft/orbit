@@ -5,6 +5,7 @@ import type { ChartData, ChartOptions } from 'chart.js';
 
 import '@/components/svg-icon/svg/svg-profile';
 import '@/components/svg-icon/svg/svg-key';
+import '@/components/svg-icon/svg/svg-lock';
 import '@/components/svg-icon/svg/svg-settings';
 import '@/components/svg-icon/svg/svg-database';
 import '@/components/svg-icon/svg/svg-layers';
@@ -77,6 +78,7 @@ export class UserDashboard extends MobxLitElement {
 
     .card svg-profile,
     .card svg-key,
+    .card svg-lock,
     .card svg-settings,
     .card svg-database,
     .card svg-layers {
@@ -199,6 +201,11 @@ export class UserDashboard extends MobxLitElement {
           <a href="account" class="card">
             <svg-profile></svg-profile>
             <span class="card-label">${translate('account')}</span>
+          </a>
+
+          <a href="password" class="card">
+            <svg-lock></svg-lock>
+            <span class="card-label">${translate('password')}</span>
           </a>
 
           <a href="access" class="card">
