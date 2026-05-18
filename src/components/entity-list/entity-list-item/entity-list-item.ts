@@ -590,7 +590,7 @@ export class EntityListItem extends MobxLitElement {
                     >${translate('showEdit')}</ss-button
                   >
                 </div>
-                <div class="properties">
+                <div class="properties item-properties">
                   ${repeat(
                     this.properties,
                     property => property.id,

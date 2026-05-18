@@ -383,34 +383,34 @@ export const collectionStyles = [
       display: none;
     }
 
-    .properties {
+    .item-properties {
       display: grid;
       grid-template-columns: 1fr 1.618fr;
       align-items: start;
       column-gap: 0.5rem;
     }
 
-    .property.image {
+    .item-properties .property.image {
       grid-column: 1;
       grid-row: 1 / span 100;
     }
 
-    .property:not(.image) {
+    .item-properties .property:not(.image) {
       grid-column: 2;
     }
 
     @media (max-width: ${unsafeCSS(breakpoints.sm)}) {
-      .properties {
+      .item-properties {
         grid-template-columns: 1fr;
       }
 
-      .property.image {
+      .item-properties .property.image {
         grid-column: 1;
         grid-row: auto;
         order: -1;
       }
 
-      .property:not(.image) {
+      .item-properties .property:not(.image) {
         grid-column: 1;
       }
     }
