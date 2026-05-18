@@ -220,12 +220,12 @@ export class UserDashboard extends MobxLitElement {
 
           <a href="admin/data" class="card">
             <svg-database></svg-database>
-            <span class="card-label">${translate('dataManager')}</span>
+            <span class="card-label">${translate('data')}</span>
           </a>
 
           <a href="admin/entityConfig" class="card">
             <svg-layers></svg-layers>
-            <span class="card-label">${translate('entityConfig')}</span>
+            <span class="card-label">${translate('entities')}</span>
           </a>
         </div>
 

@@ -168,6 +168,8 @@
   "dateField.useNow": "Use the current time at creation",
   "dateField.useCustom": "Use Custom Date",
   "dataManager": "Data Manager",
+  "data": "Data",
+  "entities": "Entities",
   "import": "Import",
   "export": "Export",
   "importData": "Import Data",
