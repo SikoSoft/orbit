@@ -102,18 +102,21 @@ export class SettingForm extends MobxLitElement {
       label: config.name,
       value: config.id,
     }));
-    return html`<ss-select
-      selected=${value}
-      .options=${options}
-      @select-changed=${(e: SelectChangedEvent<string>): void => {
-        this.handleSettingUpdated(
-          new SettingUpdatedEvent({
-            name: setting.name,
-            value: e.detail.value,
-          }),
-        );
-      }}
-    ></ss-select>`;
+    return html`<div class="select-setting">
+      <label>${translate(setting.name)}</label>
+      <ss-select
+        selected=${value}
+        .options=${options}
+        @select-changed=${(e: SelectChangedEvent<string>): void => {
+          this.handleSettingUpdated(
+            new SettingUpdatedEvent({
+              name: setting.name,
+              value: e.detail.value,
+            }),
+          );
+        }}
+      ></ss-select>
+    </div>`;
   }
 
   protected async handleSettingUpdated<SettingType>(

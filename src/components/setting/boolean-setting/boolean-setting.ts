@@ -9,6 +9,7 @@ import {
 
 import { ToggleChangedEvent } from '@ss/ui/components/ss-toggle.events';
 import { SettingUpdatedEvent } from '@/events/setting-updated';
+import { translate } from '@/lib/Localization';
 
 import '@ss/ui/components/ss-toggle';
 import { themed } from '@/lib/Theme';
@@ -42,7 +43,7 @@ export class BooleanSetting extends LitElement {
   render(): TemplateResult {
     return html`
       <div class="boolean-setting">
-        <label>${this.name}</label>
+        <label>${translate(this.name)}</label>
 
         <ss-toggle
           ?on=${this.value}
