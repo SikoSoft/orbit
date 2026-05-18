@@ -50,8 +50,8 @@ export const routes: Route[] = [
   },
   {
     path: '/account',
-    component: 'account-form',
-    action: async () => await import('@/components/account-form/account-form'),
+    component: 'account-view',
+    action: async () => await import('@/views/account-view/account-view'),
   },
   {
     path: '/wizard',
