@@ -11,7 +11,7 @@ import '@/components/bulk-manager/bulk-manager';
 
 import { appState } from '@/state';
 import { storage } from '@/lib/Storage';
-import { routerState } from '@/lib/Router';
+import { routerState, navigate } from '@/lib/Router';
 import { ViewElement } from '@/lib/ViewElement';
 import { EntityList } from '@/components/entity-list/entity-list';
 import { PublicEntityList } from '@/components/public-entity-list/public-entity-list';
@@ -20,6 +20,9 @@ import {
   listConfigChangedEventName,
   ListConfigChangedEvent,
 } from '@/components/list-config/list-config.events';
+import { performLogout } from '@/lib/Auth';
+import { forbiddenApiRequestEventName } from '@/events/forbidden-api-request';
+import { UserLoggedOutEvent } from '@/events/user-logged-out';
 
 @customElement('list-view')
 export class ListView extends ViewElement {
@@ -53,11 +56,35 @@ export class ListView extends ViewElement {
     });
   }
 
+  private handleForbiddenRequest = async (): Promise<void> => {
+    window.removeEventListener(
+      forbiddenApiRequestEventName,
+      this.handleForbiddenRequest,
+    );
+    const success = await performLogout();
+    if (success) {
+      this.dispatchEvent(new UserLoggedOutEvent({}));
+      navigate('/');
+    }
+  };
+
   connectedCallback(): void {
     super.connectedCallback();
+    window.addEventListener(
+      forbiddenApiRequestEventName,
+      this.handleForbiddenRequest,
+    );
     if (this.isLoggedIn()) {
       this.initAuthenticated();
     }
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    window.removeEventListener(
+      forbiddenApiRequestEventName,
+      this.handleForbiddenRequest,
+    );
   }
 
   sync(reset: boolean): void {

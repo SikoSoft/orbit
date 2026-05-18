@@ -29,12 +29,6 @@ export const routes: Route[] = [
       ),
   },
   {
-    path: '/entities',
-    component: 'entity-list-view',
-    action: async () =>
-      await import('@/views/entity-list-view/entity-list-view'),
-  },
-  {
     path: '/entity/:id',
     component: 'entity-view',
     action: async () => await import('@/views/entity-view/entity-view'),
