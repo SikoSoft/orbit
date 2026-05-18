@@ -358,8 +358,17 @@ export class EntityListItem extends MobxLitElement {
     return false;
   }
 
+  private isEventFromActionBar(e: Event): boolean {
+    return e.composedPath().some(
+      el => el instanceof HTMLElement && el.classList.contains('action-bar-container'),
+    );
+  }
+
   private handleTouchStart(e: TouchEvent): void {
     if (this.mode === EntityListItemMode.EDIT) {
+      return;
+    }
+    if (this.isEventFromActionBar(e)) {
       return;
     }
     this.touchStartX = e.touches[0].clientX;
@@ -383,6 +392,9 @@ export class EntityListItem extends MobxLitElement {
     if (this.mode === EntityListItemMode.EDIT) {
       return;
     }
+    if (this.isEventFromActionBar(e)) {
+      return;
+    }
     const dx = e.touches[0].clientX - this.touchStartX;
     const dy = e.touches[0].clientY - this.touchStartY;
     if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
@@ -396,6 +408,9 @@ export class EntityListItem extends MobxLitElement {
 
   private handleTouchEnd(e: TouchEvent): void {
     if (this.mode === EntityListItemMode.EDIT) {
+      return;
+    }
+    if (this.isEventFromActionBar(e)) {
       return;
     }
     e.preventDefault();
