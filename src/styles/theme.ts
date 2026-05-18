@@ -387,7 +387,7 @@ export const collectionStyles = [
       display: grid;
       grid-template-columns: 1fr 1.618fr;
       align-items: start;
-      gap: 0.5rem;
+      column-gap: 0.5rem;
     }
 
     .property.image {
