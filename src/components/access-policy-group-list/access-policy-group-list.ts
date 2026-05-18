@@ -22,6 +22,7 @@ export class AccessPolicyGroupList extends MobxLitElement {
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      padding: 1rem;
     }
 
     .groups-list {

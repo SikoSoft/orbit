@@ -15,6 +15,9 @@ export class AccessPoliciesView extends ViewElement {
     css`
       .view-content {
         margin-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
       }
     `,
   ];

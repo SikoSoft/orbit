@@ -26,6 +26,7 @@ export class AccessPolicyList extends MobxLitElement {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      padding: 1rem;
     }
 
     .no-policies {
