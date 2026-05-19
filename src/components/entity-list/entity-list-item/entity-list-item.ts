@@ -30,6 +30,8 @@ import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { storage } from '@/lib/Storage';
 import { addToast } from '@/lib/Util';
 
+import '@/components/svg-icon/svg/svg-close';
+
 import { PointerDownEvent } from '@/events/pointer-down';
 import { PointerUpEvent } from '@/events/pointer-up';
 import { PointerLongPressEvent } from '@/events/pointer-long-press';
@@ -113,6 +115,51 @@ export class EntityListItem extends MobxLitElement {
     .property.image {
       img {
         max-width: 100%;
+        cursor: zoom-in;
+      }
+    }
+
+    .image-zoom-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .image-zoom-modal {
+      position: relative;
+      width: 90vw;
+      height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .image-zoom-modal img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .image-zoom-close {
+      position: absolute;
+      top: -2.5rem;
+      right: 0;
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      padding: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      svg-close {
+        width: 2rem;
+        height: 2rem;
       }
     }
 
@@ -232,6 +279,7 @@ export class EntityListItem extends MobxLitElement {
   @state() downTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
   @state() downActivation: boolean = false;
   @state() confirmDeleteShown: boolean = false;
+  @state() zoomedImage: ImageDataValue | null = null;
   private touchStartX: number = 0;
   private touchStartY: number = 0;
   private touchMoved: boolean = false;
@@ -512,9 +560,29 @@ export class EntityListItem extends MobxLitElement {
 
     const value = property.value as ImageDataValue;
 
-    return html` <span class="property image"
-      ><img src=${value.src} alt=${value.alt} crossorigin="anonymous"
-    /></span>`;
+    return html`<span class="property image"
+      ><img
+        src=${value.src}
+        alt=${value.alt}
+        crossorigin="anonymous"
+        @click=${(e: Event): void => {
+          e.stopPropagation();
+          this.zoomedImage = value;
+        }}
+        @mousedown=${(e: Event): void => {
+          e.stopPropagation();
+        }}
+        @mouseup=${(e: Event): void => {
+          e.stopPropagation();
+        }}
+        @touchstart=${(e: Event): void => {
+          e.stopPropagation();
+        }}
+        @touchend=${(e: Event): void => {
+          e.stopPropagation();
+        }}
+      /></span
+    >`;
   }
 
   getPropertyConfig(
@@ -635,6 +703,38 @@ export class EntityListItem extends MobxLitElement {
         message=${translate('confirmDeleteSuggestion')}
         ?open=${this.confirmDeleteShown}
       ></confirmation-modal>
+      ${this.zoomedImage
+        ? html`
+            <div
+              class="image-zoom-overlay"
+              @click=${(): void => {
+                this.zoomedImage = null;
+              }}
+            >
+              <div
+                class="image-zoom-modal"
+                @click=${(e: Event): void => {
+                  e.stopPropagation();
+                }}
+              >
+                <button
+                  class="image-zoom-close"
+                  aria-label=${translate('close')}
+                  @click=${(): void => {
+                    this.zoomedImage = null;
+                  }}
+                >
+                  <svg-close></svg-close>
+                </button>
+                <img
+                  src=${this.zoomedImage.src}
+                  alt=${this.zoomedImage.alt}
+                  crossorigin="anonymous"
+                />
+              </div>
+            </div>
+          `
+        : nothing}
     `;
   }
 }
