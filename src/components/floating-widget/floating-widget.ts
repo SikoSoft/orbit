@@ -360,13 +360,19 @@ export class FloatingWidget extends MobxLitElement {
             ></ss-toggle>
           </div>
 
-          <div class="option">
-            <h4>${translate('debugMode')}</h4>
-            <ss-toggle
-              @toggle-changed=${this.handleToggleDebugChanged}
-              ?on=${this.state.debugMode}
-            ></ss-toggle>
-          </div>
+          ${
+            this.state.hasRole('admin')
+              ? html`
+                  <div class="option">
+                    <h4>${translate('debugMode')}</h4>
+                    <ss-toggle
+                      @toggle-changed=${this.handleToggleDebugChanged}
+                      ?on=${this.state.debugMode}
+                    ></ss-toggle>
+                  </div>
+                `
+              : nothing
+          }
         </div>
       </div>
     `;
