@@ -184,6 +184,8 @@ export class PageContainer extends MobxLitElement {
       path => {
         if (!path.startsWith('/list')) {
           this.setListConfigThemes([]);
+        } else {
+          this.setListConfigThemes(this.state.listConfig.themes);
         }
       },
       {
