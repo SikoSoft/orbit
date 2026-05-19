@@ -1,4 +1,4 @@
-import { html, TemplateResult } from 'lit';
+import { css, html, TemplateResult } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import '@/components/logged-in/logged-in';
@@ -8,10 +8,20 @@ import { ViewElement } from '@/lib/ViewElement';
 
 @customElement('reset-password-view')
 export class ResetPasswordView extends ViewElement {
+  static styles = [
+    css`
+      .view-content {
+        margin-top: 1rem;
+      }
+    `,
+  ];
+
   render(): TemplateResult {
     return html`<user-header></user-header>
-      <logged-in
-        ><template><password-form></password-form></template
-      ></logged-in>`;
+      <div class="view-content">
+        <logged-in
+          ><template><password-form></password-form></template
+        ></logged-in>
+      </div>`;
   }
 }
