@@ -83,6 +83,7 @@ export class ListFilter extends MobxLitElement {
 
   @state() [ListFilterType.CONTAINS_ONE_OF]: string[] = [];
   @state() [ListFilterType.CONTAINS_ALL_OF]: string[] = [];
+  @state() userIds: string[] = [];
   @state() includeTypes: number[] = [];
   @state() includeUntagged: boolean = false;
   @state() includeAll: boolean = true;
@@ -139,6 +140,7 @@ export class ListFilter extends MobxLitElement {
 
   get filter(): ExtendedListFilter {
     return {
+      userIds: this.userIds,
       includeAll: this.includeAll,
       includeTypes: this.includeTypes,
       includeUntagged: this.includeUntagged,

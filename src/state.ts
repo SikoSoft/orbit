@@ -36,6 +36,7 @@ import {
 } from '@/lib/push-subscription';
 
 export const defaultListFilter: ListFilter = {
+  userIds: [],
   tagging: {
     [ListFilterType.CONTAINS_ALL_OF]: [],
     [ListFilterType.CONTAINS_ONE_OF]: [],

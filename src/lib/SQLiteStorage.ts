@@ -460,6 +460,7 @@ export class SQLiteStorage implements StorageSchema {
       const id = row['id'] as number;
       return {
         id,
+        userId: '',
         type: row['type'] as number,
         createdAt: row['created_at'] as string,
         updatedAt: row['updated_at'] as string,
@@ -906,7 +907,10 @@ export class SQLiteStorage implements StorageSchema {
         continue;
       }
       const dataType = propConfigRows[0]['data_type'] as DataType;
-      const serializedValue = serializePropertyValue(propertyFilter.value, dataType);
+      const serializedValue = serializePropertyValue(
+        propertyFilter.value,
+        dataType,
+      );
       conditions.push(
         `EXISTS (SELECT 1 FROM entity_property ep WHERE ep.entity_id = e.id AND ep.property_config_id = ? AND ep.value = ?)`,
       );
