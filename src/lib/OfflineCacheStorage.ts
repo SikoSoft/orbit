@@ -27,6 +27,10 @@ import {
   UpdateAccountRequestBody,
   UpdatePasswordRequestBody,
 } from '@/components/account-form/account-form.models';
+import {
+  MfaSetupResponseBody,
+  MfaVerifySetupRequestBody,
+} from '@/models/Identity';
 
 import { SQLiteStorage, serializePropertyValue } from './SQLiteStorage';
 import { networkStorage } from './NetworkStorage';
@@ -1150,6 +1154,14 @@ export class OfflineCacheStorage implements StorageSchema {
       })),
     );
     return { ...payload, entityConfigId, properties };
+  }
+
+  async getMfaSetup(): Promise<StorageResult<MfaSetupResponseBody>> {
+    return networkStorage.getMfaSetup();
+  }
+
+  async verifyMfaSetup(body: MfaVerifySetupRequestBody): Promise<StorageResult<void>> {
+    return networkStorage.verifyMfaSetup(body);
   }
 }
 

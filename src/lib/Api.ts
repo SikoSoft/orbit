@@ -26,7 +26,7 @@ export interface ApiErrorContext {
   error?: unknown;
 }
 
-export const emptyResponseCodes = [202, 204];
+export const emptyResponseCodes = [204];
 export const okResponseCodes = [200, 201, 202, 204];
 export const serverErrorResponseCodes = [500, 502, 503, 504];
 
@@ -96,7 +96,11 @@ export class Api {
       const response = await fetch(request);
 
       if (response.ok && !emptyResponseCodes.includes(response.status)) {
-        json = await response.json();
+        try {
+          json = await response.json();
+        } catch {
+          // response had no parseable body
+        }
       }
 
       if (!okResponseCodes.includes(response.status)) {

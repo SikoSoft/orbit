@@ -30,6 +30,10 @@ import {
   AccessPolicyGroup,
   AccessPolicyParty,
 } from 'api-spec/models/Access';
+import {
+  MfaSetupResponseBody,
+  MfaVerifySetupRequestBody,
+} from '@/models/Identity';
 
 export class NetworkStorage implements StorageSchema {
   isActive = true;
@@ -774,6 +778,26 @@ export class NetworkStorage implements StorageSchema {
       return true;
     }
     return false;
+  }
+
+  async getMfaSetup(): Promise<StorageResult<MfaSetupResponseBody>> {
+    const result = await api.get<MfaSetupResponseBody>('mfaSetup');
+
+    if (result && result.isOk) {
+      return { isOk: true, value: result.response };
+    }
+
+    return { isOk: false, error: new Error('Failed to fetch MFA setup') };
+  }
+
+  async verifyMfaSetup(body: MfaVerifySetupRequestBody): Promise<StorageResult<void>> {
+    const result = await api.post<MfaVerifySetupRequestBody, void>('mfaVerifySetup', body);
+
+    if (result && result.isOk) {
+      return { isOk: true, value: undefined };
+    }
+
+    return { isOk: false, error: new Error('Failed to verify MFA setup') };
   }
 }
 

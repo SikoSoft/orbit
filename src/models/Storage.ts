@@ -17,6 +17,10 @@ import {
   UpdateAccountRequestBody,
   UpdatePasswordRequestBody,
 } from '@/components/account-form/account-form.models';
+import {
+  MfaSetupResponseBody,
+  MfaVerifySetupRequestBody,
+} from '@/models/Identity';
 
 export enum StorageItemKey {
   ACTIVE_LIST_FILTER_KEY = 'listFilter',
@@ -189,4 +193,6 @@ export interface StorageSchema {
   ): Promise<boolean>;
   getEntitySuggestions?(filter: ListFilter): Promise<Entity.Entity[]>;
   addEntitySuggestion?(id: number): Promise<boolean>;
+  getMfaSetup?(): Promise<StorageResult<MfaSetupResponseBody>>;
+  verifyMfaSetup?(body: MfaVerifySetupRequestBody): Promise<StorageResult<void>>;
 }

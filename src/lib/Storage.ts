@@ -46,6 +46,10 @@ import {
   AccessPolicyGroup,
   AccessPolicyParty,
 } from 'api-spec/models/Access';
+import {
+  MfaSetupResponseBody,
+  MfaVerifySetupRequestBody,
+} from '@/models/Identity';
 
 export interface SavedListFilter {
   filter: ListFilter;
@@ -925,6 +929,16 @@ export class Storage implements StorageSchema {
   @delegateSource()
   async addEntitySuggestion(_id: number): Promise<boolean> {
     return Promise.resolve(false);
+  }
+
+  @delegateSource()
+  async getMfaSetup(): Promise<StorageResult<MfaSetupResponseBody>> {
+    return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
+  }
+
+  @delegateSource()
+  async verifyMfaSetup(_body: MfaVerifySetupRequestBody): Promise<StorageResult<void>> {
+    return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
   }
 }
 

@@ -21,6 +21,7 @@ import { themed } from '@/lib/Theme';
 import { StorageSource } from '@/models/Storage';
 import '@/components/svg-icon/svg-icon';
 import { IconName } from '@/components/svg-icon/svg-icon.models';
+import '@/components/mfa-verify-form/mfa-verify-form';
 
 @themed()
 @customElement('login-form')
@@ -65,6 +66,7 @@ export class LoginForm extends MobxLitElement {
   @state() username: string = '';
   @state() password: string = '';
   @state() loading: boolean = false;
+  @state() private pendingMfaToken: string = '';
 
   @query('#username') private usernameField!: SSInput;
 
@@ -94,15 +96,48 @@ export class LoginForm extends MobxLitElement {
 
   private async login(): Promise<void> {
     this.loading = true;
-    const success = await performLogin(this.username, this.password);
+    const result = await performLogin(this.username, this.password);
 
-    if (success) {
+    if (result.type === 'success') {
       this.dispatchEvent(new UserLoggedInEvent({}));
+      this.username = '';
+      this.password = '';
+    } else if (result.type === 'mfaRequired') {
+      this.pendingMfaToken = result.pendingMfaToken;
       this.username = '';
       this.password = '';
     }
 
     this.loading = false;
+  }
+
+  private renderCredentialsForm(): TemplateResult {
+    return html`
+      <form class="form">
+        <ss-input
+          id="username"
+          placeholder=${translate('username')}
+          @input-submitted=${this.handleUsernameSubmitted}
+          @input-changed=${this.handleUsernameChanged}
+          value=${this.username}
+        ></ss-input>
+
+        <ss-input
+          id="password"
+          placeholder=${translate('password')}
+          type="password"
+          @input-submitted=${this.handlePasswordSubmitted}
+          @input-changed=${this.handlePasswordChanged}
+          value=${this.password}
+        ></ss-input>
+
+        <ss-button
+          @click=${this.login}
+          text=${translate('login')}
+          ?loading=${this.loading}
+        ></ss-button>
+      </form>
+    `;
   }
 
   render(): TemplateResult | typeof nothing {
@@ -116,30 +151,11 @@ export class LoginForm extends MobxLitElement {
           <svg-icon name=${IconName.CLOUD} size="48"></svg-icon>
           <h2>${translate('login')}</h2>
         </div>
-        <form class="form">
-          <ss-input
-            id="username"
-            placeholder=${translate('username')}
-            @input-submitted=${this.handleUsernameSubmitted}
-            @input-changed=${this.handleUsernameChanged}
-            value=${this.username}
-          ></ss-input>
-
-          <ss-input
-            id="password"
-            placeholder=${translate('password')}
-            type="password"
-            @input-submitted=${this.handlePasswordSubmitted}
-            @input-changed=${this.handlePasswordChanged}
-            value=${this.password}
-          ></ss-input>
-
-          <ss-button
-            @click=${this.login}
-            text=${translate('login')}
-            ?loading=${this.loading}
-          ></ss-button>
-        </form>
+        ${this.pendingMfaToken
+          ? html`<mfa-verify-form
+              .pendingMfaToken=${this.pendingMfaToken}
+            ></mfa-verify-form>`
+          : this.renderCredentialsForm()}
       </div>
     `;
   }

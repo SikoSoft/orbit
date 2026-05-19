@@ -338,5 +338,15 @@
   "pushNotification.titleBodyRequired": "Title and body are required.",
   "dashboard.activityChart": "Activity by Month",
   "dashboard.categoryChart": "Category Breakdown",
-  "account": "Account"
+  "account": "Account",
+  "enable2FA": "Two-Factor Authentication",
+  "mfa.enterCode": "Enter the 6-digit code from your authenticator app",
+  "mfa.verifyCode": "Verify Code",
+  "mfa.invalidCode": "Invalid or expired code. Please try again.",
+  "mfa.setupHeading": "Set Up Two-Factor Authentication",
+  "mfa.setupInstructions": "Scan this QR code with Google Authenticator, Authy, or a similar app, then enter the 6-digit code to confirm.",
+  "mfa.confirmSetup": "Confirm Setup",
+  "mfa.setupSuccess": "Two-factor authentication enabled successfully.",
+  "mfa.setupError": "Invalid code. Please try again.",
+  "mfa.cancel": "Cancel"
 }
