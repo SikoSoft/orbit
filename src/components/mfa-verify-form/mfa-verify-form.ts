@@ -1,5 +1,5 @@
 import { css, html, LitElement, TemplateResult } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { translate } from '@/lib/Localization';
 import { performMfaVerify } from '@/lib/Auth';
@@ -11,7 +11,10 @@ import {
   MfaVerifyFormProps,
 } from './mfa-verify-form.models';
 
-import { InputChangedEvent, InputSubmittedEvent } from '@ss/ui/components/ss-input.events';
+import {
+  InputChangedEvent,
+  InputSubmittedEvent,
+} from '@ss/ui/components/ss-input.events';
 import { themed } from '@/lib/Theme';
 
 import '@ss/ui/components/ss-button';
@@ -33,8 +36,15 @@ export class MfaVerifyForm extends LitElement {
   [MfaVerifyFormProp.PENDING_MFA_TOKEN]: MfaVerifyFormProps[MfaVerifyFormProp.PENDING_MFA_TOKEN] =
     mfaVerifyFormProps[MfaVerifyFormProp.PENDING_MFA_TOKEN].default;
 
+  @query('#mfa-code') private codeInput!: HTMLElement & { focus(): void };
+
   @state() private code: string = '';
   @state() private loading: boolean = false;
+
+  async firstUpdated(): Promise<void> {
+    await this.updateComplete;
+    this.codeInput.focus();
+  }
 
   private handleCodeChanged(e: InputChangedEvent): void {
     this.code = e.detail.value;
