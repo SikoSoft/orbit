@@ -182,6 +182,15 @@ export class EntityListItem extends MobxLitElement {
 
     .property-longtext .property-value {
       white-space: pre-wrap;
+
+      ul,
+      ol {
+        margin: 0;
+
+        li p {
+          margin: 0;
+        }
+      }
     }
 
     .unpublished-badge {
