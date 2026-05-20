@@ -28,11 +28,13 @@ export class LongTextField extends LitElement {
       color: var(--text-color);
       background-color: var(--background-color);
       box-sizing: border-box;
+      transition: height 0.2s ease;
     }
 
     textarea:focus {
       outline: none;
       border-color: var(--primary-color);
+      height: 300px;
     }
   `;
 
