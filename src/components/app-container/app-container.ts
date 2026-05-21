@@ -101,8 +101,20 @@ export class AppContainer extends MobxLitElement {
       this.handleViewChanged(e);
     });
 
-    window.addEventListener('unload', () => {
-      storage.setWindowScrollPosition(window.scrollX, window.scrollY);
+    let saveScrollPosition = false;
+
+    let scrollSaveTimer: ReturnType<typeof setTimeout> | undefined;
+    window.addEventListener('scroll', () => {
+      if (saveScrollPosition) {
+        clearTimeout(scrollSaveTimer);
+        scrollSaveTimer = setTimeout(() => {
+          storage.setWindowScrollPosition(window.scrollX, window.scrollY);
+        }, 100);
+      }
+    });
+
+    window.addEventListener('view-init', () => {
+      saveScrollPosition = false;
     });
 
     window.addEventListener('view-ready', () => {
@@ -110,7 +122,10 @@ export class AppContainer extends MobxLitElement {
       const { x, y } = storage.getWindowScrollPosition();
       setTimeout(() => {
         window.scrollTo(x, y);
-      }, 1);
+        setTimeout(() => {
+          saveScrollPosition = true;
+        }, 10);
+      }, 100);
     });
 
     this.restoreState();

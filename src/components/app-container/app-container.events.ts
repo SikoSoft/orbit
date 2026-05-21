@@ -26,6 +26,20 @@ export class ViewReadyEvent extends CustomEvent<ViewReadyPayload> {
   }
 }
 
+export const viewInitEventName = 'view-init';
+
+export type ViewInitPayload = Record<string, never>;
+
+export class ViewInitEvent extends CustomEvent<ViewInitPayload> {
+  constructor(detail: ViewInitPayload) {
+    super(viewInitEventName, {
+      detail,
+      bubbles: true,
+      composed: true,
+    });
+  }
+}
+
 export const invalidSession = 'invalid-session';
 
 export type InvalidSessionPayload = Record<string, never>;
