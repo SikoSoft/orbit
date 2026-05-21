@@ -314,6 +314,7 @@ export class AppContainer extends MobxLitElement {
   }
 
   private async handleUserLoggedIn(): Promise<void> {
+    this.state.setWidgetIsOpen(false);
     await this.restoreState();
     this.syncUserData();
     navigate('/');
