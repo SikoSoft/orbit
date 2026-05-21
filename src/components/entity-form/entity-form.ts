@@ -30,6 +30,7 @@ import {
   ValidateionResult,
 } from './entity-form.models';
 import { addToast, sha256 } from '@/lib/Util';
+import { Time } from '@/lib/Time';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 
 import '@ss/ui/components/pop-up';
@@ -378,13 +379,22 @@ export class EntityForm extends ViewElement {
 
     if (this.entityConfig && !this.propertiesSetup) {
       const existingProperties: PropertyInstance[] = this.properties.map(
-        property => ({
-          propertyConfigId: property.propertyConfigId,
-          instanceId: property.id,
-          uiId: uuidv4(),
-          value: property.value,
-          valueIsSet: true,
-        }),
+        property => {
+          const propConfig = this.entityConfig!.properties.find(
+            p => p.id === property.propertyConfigId,
+          );
+          let value = property.value;
+          if (propConfig?.dataType === DataType.DATE && typeof value === 'number') {
+            value = Time.formatDateTime(new Date(value));
+          }
+          return {
+            propertyConfigId: property.propertyConfigId,
+            instanceId: property.id,
+            uiId: uuidv4(),
+            value,
+            valueIsSet: true,
+          };
+        },
       );
 
       const availableProperties: PropertyInstance[] =
