@@ -165,6 +165,37 @@ export class UserDashboard extends MobxLitElement {
     };
   }
 
+  private get scatterChartData(): ChartData {
+    return {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      datasets: [
+        {
+          label: 'Items Added',
+          data: [12, 19, 8, 15, 22, 17],
+          backgroundColor: CHART_COLORS[0],
+          borderColor: CHART_BORDERS[0],
+          borderWidth: 1,
+        },
+      ],
+    };
+  }
+
+  private get scatterChartOptions(): ChartOptions<'bar'> {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 5 },
+        },
+      },
+    };
+  }
+
   private get pieChartData(): ChartData {
     return {
       labels: ['Work', 'Personal', 'Learning', 'Shopping', 'Health'],
@@ -230,6 +261,18 @@ export class UserDashboard extends MobxLitElement {
         </div>
 
         <div class="charts">
+          <div class="chart-container">
+            <h3 class="chart-title">${translate('dashboard.scatterChart')}</h3>
+            <div class="chart-wrapper">
+              <chart-js
+                type="scatter"
+                .data=${this.scatterChartData}
+                .options=${this.scatterChartOptions}
+                label=${translate('dashboard.scatterChart')}
+              ></chart-js>
+            </div>
+          </div>
+
           <div class="chart-container">
             <h3 class="chart-title">${translate('dashboard.activityChart')}</h3>
             <div class="chart-wrapper">
