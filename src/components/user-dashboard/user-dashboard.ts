@@ -3,17 +3,14 @@ import { css, html, nothing, TemplateResult } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import type { ChartData, ChartOptions } from 'chart.js';
 
-import '@/components/svg-icon/svg/svg-account';
-import '@/components/svg-icon/svg/svg-key';
-import '@/components/svg-icon/svg/svg-lock';
-import '@/components/svg-icon/svg/svg-settings';
-import '@/components/svg-icon/svg/svg-database';
-import '@/components/svg-icon/svg/svg-layers';
 import '@/components/chart-js/chart-js';
+import '@/components/dashboard-cards/dashboard-cards';
 
 import { appState } from '@/state';
 import { translate } from '@/lib/Localization';
 import { StorageSource } from '@/models/Storage';
+import { IconName } from '@/components/svg-icon/svg-icon.models';
+import { DashboardCard } from '@/components/dashboard-cards/dashboard-cards.models';
 
 const CHART_COLORS = [
   'rgba(54, 162, 235, 0.8)',
@@ -46,49 +43,8 @@ export class UserDashboard extends MobxLitElement {
       font-size: 1.5rem;
     }
 
-    .cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
+    dashboard-cards {
       margin-top: 1rem;
-    }
-
-    .card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      padding: 2.5rem 1.5rem;
-      border: 2px solid var(--border-color, #ccc);
-      border-radius: var(--border-radius, 0.5rem);
-      background: var(--box-background-color, #fff);
-      text-decoration: none;
-      color: var(--box-text-color, var(--text-color, inherit));
-      cursor: pointer;
-      transition:
-        background 0.15s ease,
-        border-color 0.15s ease;
-    }
-
-    .card:hover {
-      background: var(--background-hover-color, #f5f5f5);
-      border-color: var(--primary-color, #0066ff);
-    }
-
-    .card svg-account,
-    .card svg-key,
-    .card svg-lock,
-    .card svg-settings,
-    .card svg-database,
-    .card svg-layers {
-      width: 3rem;
-      height: 3rem;
-    }
-
-    .card-label {
-      font-size: 1.1rem;
-      font-weight: 600;
     }
 
     .charts {
@@ -120,6 +76,20 @@ export class UserDashboard extends MobxLitElement {
       height: 280px;
     }
   `;
+
+  private get cards(): DashboardCard[] {
+    return [
+      { label: translate('account'), icon: IconName.ACCOUNT, url: 'account' },
+      { label: translate('password'), icon: IconName.LOCK, url: 'password' },
+      { label: translate('access'), icon: IconName.KEY, url: 'access' },
+      {
+        label: translate('settings'),
+        icon: IconName.SETTINGS,
+        url: 'settings',
+      },
+      { label: translate('admin'), icon: IconName.ADMIN, url: '/admin' },
+    ];
+  }
 
   private get isCloudStorage(): boolean {
     return this.state.storageSource === StorageSource.CLOUD;
@@ -228,37 +198,7 @@ export class UserDashboard extends MobxLitElement {
               ${translate('dashboard.welcome', { name: this.displayName })}
             </p>`
           : nothing}
-        <div class="cards">
-          <a href="account" class="card">
-            <svg-account></svg-account>
-            <span class="card-label">${translate('account')}</span>
-          </a>
-
-          <a href="password" class="card">
-            <svg-lock></svg-lock>
-            <span class="card-label">${translate('password')}</span>
-          </a>
-
-          <a href="access" class="card">
-            <svg-key></svg-key>
-            <span class="card-label">${translate('access')}</span>
-          </a>
-
-          <a href="settings" class="card">
-            <svg-settings></svg-settings>
-            <span class="card-label">${translate('settings')}</span>
-          </a>
-
-          <a href="admin/data" class="card">
-            <svg-database></svg-database>
-            <span class="card-label">${translate('data')}</span>
-          </a>
-
-          <a href="admin/entityConfig" class="card">
-            <svg-layers></svg-layers>
-            <span class="card-label">${translate('entities')}</span>
-          </a>
-        </div>
+        <dashboard-cards .cards=${this.cards}></dashboard-cards>
 
         <div class="charts">
           <div class="chart-container">

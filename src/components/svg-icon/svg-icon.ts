@@ -3,11 +3,17 @@ import { property, customElement } from 'lit/decorators.js';
 
 import { themed } from '@/lib/Theme';
 
+import './svg/svg-account';
+import './svg/svg-admin';
 import './svg/svg-camera';
 import './svg/svg-cloud';
+import './svg/svg-database';
 import './svg/svg-device';
 import './svg/svg-folder';
 import './svg/svg-image';
+import './svg/svg-key';
+import './svg/svg-layers';
+import './svg/svg-lock';
 import './svg/svg-settings';
 import './svg/svg-spinner';
 import './svg/svg-upload';
@@ -68,16 +74,28 @@ export class SvgIcon extends LitElement {
 
   renderIcon(): TemplateResult | typeof nothing {
     switch (this[SvgIconProp.NAME]) {
+      case IconName.ACCOUNT:
+        return html`<svg-account></svg-account>`;
+      case IconName.ADMIN:
+        return html`<svg-admin></svg-admin>`;
       case IconName.CAMERA:
         return html`<svg-camera></svg-camera>`;
       case IconName.CLOUD:
         return html`<svg-cloud></svg-cloud>`;
+      case IconName.DATABASE:
+        return html`<svg-database></svg-database>`;
       case IconName.DEVICE:
         return html`<svg-device></svg-device>`;
       case IconName.FOLDER:
         return html`<svg-folder></svg-folder>`;
       case IconName.IMAGE:
         return html`<svg-image></svg-image>`;
+      case IconName.KEY:
+        return html`<svg-key></svg-key>`;
+      case IconName.LAYERS:
+        return html`<svg-layers></svg-layers>`;
+      case IconName.LOCK:
+        return html`<svg-lock></svg-lock>`;
       case IconName.SETTINGS:
         return html`<svg-settings></svg-settings>`;
       case IconName.SPINNER:

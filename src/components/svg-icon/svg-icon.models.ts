@@ -2,11 +2,17 @@ import { ControlType } from '@/models/Control';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
 
 export enum IconName {
+  ACCOUNT = 'account',
+  ADMIN = 'admin',
   CAMERA = 'camera',
   CLOUD = 'cloud',
+  DATABASE = 'database',
   DEVICE = 'device',
   FOLDER = 'folder',
   IMAGE = 'image',
+  KEY = 'key',
+  LAYERS = 'layers',
+  LOCK = 'lock',
   SETTINGS = 'settings',
   SPINNER = 'spinner',
   UPLOAD = 'upload',
