@@ -29,6 +29,14 @@ export const routes: Route[] = [
       ),
   },
   {
+    path: '/admin/medalConfig',
+    component: 'admin-medal-config-view',
+    action: async () =>
+      await import(
+        '@/views/admin-medal-config-view/admin-medal-config-view'
+      ),
+  },
+  {
     path: '/entity/:id',
     component: 'entity-view',
     action: async () => await import('@/views/entity-view/entity-view'),

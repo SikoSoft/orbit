@@ -31,6 +31,7 @@ import {
   MfaSetupResponseBody,
   MfaVerifySetupRequestBody,
 } from '@/models/Identity';
+import { MedalConfig } from 'api-spec/models/Medal';
 
 import { SQLiteStorage, serializePropertyValue } from './SQLiteStorage';
 import { networkStorage } from './NetworkStorage';
@@ -1162,6 +1163,31 @@ export class OfflineCacheStorage implements StorageSchema {
 
   async verifyMfaSetup(body: MfaVerifySetupRequestBody): Promise<StorageResult<void>> {
     return networkStorage.verifyMfaSetup(body);
+  }
+
+  async getMedalConfigs(): Promise<MedalConfig[]> {
+    return networkStorage.getMedalConfigs();
+  }
+
+  async getMedalConfig(id: number): Promise<MedalConfig | null> {
+    return networkStorage.getMedalConfig(id);
+  }
+
+  async createMedalConfig(
+    body: Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<MedalConfig | null> {
+    return networkStorage.createMedalConfig(body);
+  }
+
+  async updateMedalConfig(
+    id: number,
+    body: Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<MedalConfig | null> {
+    return networkStorage.updateMedalConfig(id, body);
+  }
+
+  async deleteMedalConfig(id: number): Promise<boolean> {
+    return networkStorage.deleteMedalConfig(id);
   }
 }
 

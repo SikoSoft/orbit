@@ -348,5 +348,21 @@
   "mfa.confirmSetup": "Confirm Setup",
   "mfa.setupSuccess": "Two-factor authentication enabled successfully.",
   "mfa.setupError": "Invalid code. Please try again.",
-  "mfa.cancel": "Cancel"
+  "mfa.cancel": "Cancel",
+  "medalConfig": "Medal Config",
+  "addMedalConfig": "Add Medal Config",
+  "noMedalConfigs": "No medal configurations found.",
+  "medalConfigSaved": "Medal config saved successfully.",
+  "medalConfigDeleted": "Medal config deleted successfully.",
+  "failedToSaveMedalConfig": "Failed to save medal config. Please try again.",
+  "failedToDeleteMedalConfig": "Failed to delete medal config. Please try again.",
+  "medalConfigNameRequired": "Medal config name is required.",
+  "medalConfigCriteriaInvalid": "Criteria must be valid JSON.",
+  "name": "Name",
+  "description": "Description",
+  "series": "Series",
+  "icon": "Icon",
+  "recurrence": "Recurrence",
+  "prestige": "Prestige",
+  "criteria": "Criteria"
 }

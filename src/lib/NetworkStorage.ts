@@ -34,6 +34,7 @@ import {
   MfaSetupResponseBody,
   MfaVerifySetupRequestBody,
 } from '@/models/Identity';
+import { MedalConfig } from 'api-spec/models/Medal';
 
 export class NetworkStorage implements StorageSchema {
   isActive = true;
@@ -798,6 +799,67 @@ export class NetworkStorage implements StorageSchema {
     }
 
     return { isOk: false, error: new Error('Failed to verify MFA setup') };
+  }
+
+  async getMedalConfigs(): Promise<MedalConfig[]> {
+    const result = await api.get<{ medalConfigs: MedalConfig[] }>('medalConfig');
+
+    if (result && result.isOk) {
+      return Promise.resolve(result.response.medalConfigs);
+    }
+
+    return Promise.reject();
+  }
+
+  async getMedalConfig(id: number): Promise<MedalConfig | null> {
+    const result = await api.get<MedalConfig>(`medalConfig/${id}`);
+
+    if (result && result.isOk) {
+      return result.response;
+    }
+
+    return null;
+  }
+
+  async createMedalConfig(
+    body: Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<MedalConfig | null> {
+    const result = await api.post<Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>, MedalConfig>(
+      'medalConfig',
+      body,
+    );
+
+    if (result && result.isOk) {
+      return result.response;
+    }
+
+    return null;
+  }
+
+  async updateMedalConfig(
+    id: number,
+    body: Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<MedalConfig | null> {
+    const result = await api.put<Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>, MedalConfig>(
+      `medalConfig/${id}`,
+      body,
+    );
+
+    if (result && result.isOk) {
+      return result.response;
+    }
+
+    return null;
+  }
+
+  async deleteMedalConfig(id: number): Promise<boolean> {
+    const result = await api.delete<null>(`medalConfig/${id}`);
+
+    if (result && result.isOk) {
+      return true;
+    }
+
+    return false;
   }
 }
 

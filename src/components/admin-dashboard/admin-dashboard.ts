@@ -18,6 +18,11 @@ export class AdminDashboard extends ViewElement {
         icon: IconName.SETTINGS,
         url: 'admin/entityConfig',
       },
+      {
+        label: translate('medalConfig'),
+        icon: IconName.LAYERS,
+        url: 'admin/medalConfig',
+      },
     ];
   }
 

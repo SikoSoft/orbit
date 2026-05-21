@@ -50,6 +50,7 @@ import {
   MfaSetupResponseBody,
   MfaVerifySetupRequestBody,
 } from '@/models/Identity';
+import { MedalConfig } from 'api-spec/models/Medal';
 
 export interface SavedListFilter {
   filter: ListFilter;
@@ -939,6 +940,36 @@ export class Storage implements StorageSchema {
   @delegateSource()
   async verifyMfaSetup(_body: MfaVerifySetupRequestBody): Promise<StorageResult<void>> {
     return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
+  }
+
+  @delegateSource()
+  async getMedalConfigs(): Promise<MedalConfig[]> {
+    return Promise.resolve([]);
+  }
+
+  @delegateSource()
+  async getMedalConfig(_id: number): Promise<MedalConfig | null> {
+    return Promise.resolve(null);
+  }
+
+  @delegateSource()
+  async createMedalConfig(
+    _body: Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<MedalConfig | null> {
+    return Promise.resolve(null);
+  }
+
+  @delegateSource()
+  async updateMedalConfig(
+    _id: number,
+    _body: Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<MedalConfig | null> {
+    return Promise.resolve(null);
+  }
+
+  @delegateSource()
+  async deleteMedalConfig(_id: number): Promise<boolean> {
+    return Promise.resolve(false);
   }
 }
 

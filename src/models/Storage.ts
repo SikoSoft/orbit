@@ -1,4 +1,5 @@
 import { Setting, Settings } from 'api-spec/models/Setting';
+import { MedalConfig } from 'api-spec/models/Medal';
 import { ListConfig, ListSort, ListFilter } from 'api-spec/models/List';
 import { EntityConfig, EntityPropertyConfig } from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
@@ -195,4 +196,9 @@ export interface StorageSchema {
   addEntitySuggestion?(id: number): Promise<boolean>;
   getMfaSetup?(): Promise<StorageResult<MfaSetupResponseBody>>;
   verifyMfaSetup?(body: MfaVerifySetupRequestBody): Promise<StorageResult<void>>;
+  getMedalConfigs?(): Promise<MedalConfig[]>;
+  getMedalConfig?(id: number): Promise<MedalConfig | null>;
+  createMedalConfig?(body: Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>): Promise<MedalConfig | null>;
+  updateMedalConfig?(id: number, body: Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>): Promise<MedalConfig | null>;
+  deleteMedalConfig?(id: number): Promise<boolean>;
 }
