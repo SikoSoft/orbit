@@ -59,7 +59,6 @@ export class ListConfig extends MobxLitElement {
     :host {
       display: block;
       width: 100%;
-      touch-action: none;
     }
 
     .list-config {
@@ -132,6 +131,7 @@ export class ListConfig extends MobxLitElement {
       .carousel-wrapper {
         padding: 1rem;
         position: relative;
+        touch-action: none;
       }
 
       .collapsable-menus {
