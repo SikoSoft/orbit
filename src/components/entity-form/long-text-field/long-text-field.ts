@@ -61,6 +61,10 @@ export class LongTextField extends LitElement {
   @query('textarea')
   textareaElement: HTMLTextAreaElement | undefined;
 
+  protected handleFocus(): void {
+    this.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   protected handleInputChanged(): void {
     if (!this.textareaElement) {
       return;
@@ -87,6 +91,7 @@ export class LongTextField extends LitElement {
   render(): TemplateResult {
     return html`
       <textarea
+        @focus=${this.handleFocus}
         @input=${this.handleInputChanged}
         .value=${this[LongTextFieldProp.VALUE]}
       ></textarea>
