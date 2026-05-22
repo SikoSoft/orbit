@@ -51,6 +51,15 @@ self.addEventListener('push', event => {
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   const actionUrls = event.notification.data?.actionUrls ?? {};
+
+  if (event.action === 'add') {
+    const url = actionUrls[event.action];
+    if (url) {
+      event.waitUntil(fetch(url));
+    }
+    return;
+  }
+
   const url = event.action ? actionUrls[event.action] : '/';
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
