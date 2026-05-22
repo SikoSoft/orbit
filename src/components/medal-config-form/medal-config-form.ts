@@ -1,7 +1,9 @@
 import { html, css, nothing, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 
-import { MedalConfig, Criterion, Criteria } from 'api-spec/models/Medal';
+import { MedalConfig, Criterion, Criteria, FactRequest, FactOperation } from 'api-spec/models/Medal';
+import { defaultListFilter } from 'api-spec/models/List';
 import { addToast } from '@/lib/Util';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 import {
@@ -16,6 +18,9 @@ import '@ss/ui/components/ss-collapsable';
 import '@ss/ui/components/confirmation-modal';
 import '@ss/ui/components/ss-button';
 import '@ss/ui/components/ss-input';
+import '@/components/medal-config-form/fact-request-editor/fact-request-editor';
+import '@/components/medal-config-form/criteria-editor/criteria-editor';
+
 import { MobxLitElement } from '@adobe/lit-mobx';
 import { translate } from '@/lib/Localization';
 import {
@@ -23,6 +28,11 @@ import {
   MedalConfigUpdatedEvent,
 } from './medal-config-form.events';
 import { themed } from '@/lib/Theme';
+import {
+  FactRequestChangedEvent,
+  FactRequestRemovedEvent,
+} from './fact-request-editor/fact-request-editor.events';
+import { CriteriaChangedEvent } from './criteria-editor/criteria-editor.events';
 
 @themed()
 @customElement('medal-config-form')
@@ -43,17 +53,13 @@ export class MedalConfigForm extends MobxLitElement {
       margin-bottom: 0.25rem;
     }
 
-    .field textarea {
-      width: 100%;
-      min-height: 6rem;
-      font-family: monospace;
-      box-sizing: border-box;
+    .section-title {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
     }
 
-    .field .error {
-      color: red;
-      font-size: 0.875rem;
-      margin-top: 0.25rem;
+    .section {
+      margin-bottom: 1.25rem;
     }
 
     .buttons {
@@ -79,14 +85,9 @@ export class MedalConfigForm extends MobxLitElement {
     recurrence: 0,
     prestige: 0,
     icon: '',
+    factRequests: [],
     criteria: {} as Criterion | Criteria,
   };
-
-  @state()
-  criteriaText: string = '{}';
-
-  @state()
-  criteriaError: string = '';
 
   @state()
   isSaving: boolean = false;
@@ -129,6 +130,10 @@ export class MedalConfigForm extends MobxLitElement {
   [MedalConfigFormProp.CRITERIA]: MedalConfigFormProps[MedalConfigFormProp.CRITERIA] =
     medalConfigFormProps[MedalConfigFormProp.CRITERIA].default;
 
+  @property({ type: Array })
+  [MedalConfigFormProp.FACT_REQUESTS]: MedalConfigFormProps[MedalConfigFormProp.FACT_REQUESTS] =
+    medalConfigFormProps[MedalConfigFormProp.FACT_REQUESTS].default;
+
   connectedCallback(): void {
     super.connectedCallback();
     this.localConfig = {
@@ -139,9 +144,15 @@ export class MedalConfigForm extends MobxLitElement {
       recurrence: this[MedalConfigFormProp.RECURRENCE],
       prestige: this[MedalConfigFormProp.PRESTIGE],
       icon: this[MedalConfigFormProp.ICON],
+      factRequests: this[MedalConfigFormProp.FACT_REQUESTS],
       criteria: this[MedalConfigFormProp.CRITERIA],
     };
-    this.criteriaText = JSON.stringify(this[MedalConfigFormProp.CRITERIA], null, 2);
+  }
+
+  private get factAliases(): string[] {
+    return this.localConfig.factRequests
+      .map(fr => fr.alias)
+      .filter(a => a.trim() !== '');
   }
 
   validate(): string[] {
@@ -149,24 +160,16 @@ export class MedalConfigForm extends MobxLitElement {
     if (!this.localConfig.name) {
       errors.push(translate('medalConfigNameRequired'));
     }
-    try {
-      JSON.parse(this.criteriaText);
-    } catch {
-      errors.push(translate('medalConfigCriteriaInvalid'));
-    }
     return errors;
   }
 
   async save(): Promise<void> {
     const errors = this.validate();
     if (errors.length > 0) {
-      const criteriaInvalid = errors.includes(translate('medalConfigCriteriaInvalid'));
-      this.criteriaError = criteriaInvalid ? translate('medalConfigCriteriaInvalid') : '';
       addToast(errors[0], NotificationType.ERROR);
       return;
     }
 
-    this.criteriaError = '';
     this.isSaving = true;
 
     const body = {
@@ -176,7 +179,8 @@ export class MedalConfigForm extends MobxLitElement {
       recurrence: this.localConfig.recurrence,
       prestige: this.localConfig.prestige,
       icon: this.localConfig.icon,
-      criteria: JSON.parse(this.criteriaText) as Criterion | Criteria,
+      factRequests: this.localConfig.factRequests,
+      criteria: this.localConfig.criteria,
     };
 
     let result: MedalConfig | null = null;
@@ -210,6 +214,17 @@ export class MedalConfigForm extends MobxLitElement {
     this.dispatchEvent(new MedalConfigDeletedEvent({ id: this.localConfig.id }));
   }
 
+  private addFactRequest(): void {
+    const newRequest: FactRequest = {
+      alias: '',
+      context: { operation: FactOperation.ENTITY_COUNT, filter: { ...defaultListFilter } },
+    };
+    this.localConfig = {
+      ...this.localConfig,
+      factRequests: [...this.localConfig.factRequests, newRequest],
+    };
+  }
+
   render(): TemplateResult {
     return html`
       <ss-collapsable
@@ -217,78 +232,104 @@ export class MedalConfigForm extends MobxLitElement {
         ?open=${this.open}
         panelId=${`medalConfigForm-${this.localConfig.id}`}
       >
-        <div class="field">
-          <label>${translate('name')}</label>
-          <ss-input
-            .value=${this.localConfig.name}
-            @input-changed=${(e: InputChangedEvent): void => {
-              this.localConfig = { ...this.localConfig, name: e.detail.value };
-            }}
-          ></ss-input>
+        <div class="section">
+          <div class="field">
+            <label>${translate('name')}</label>
+            <ss-input
+              .value=${this.localConfig.name}
+              @input-changed=${(e: InputChangedEvent): void => {
+                this.localConfig = { ...this.localConfig, name: e.detail.value };
+              }}
+            ></ss-input>
+          </div>
+
+          <div class="field">
+            <label>${translate('description')}</label>
+            <ss-input
+              .value=${this.localConfig.description}
+              @input-changed=${(e: InputChangedEvent): void => {
+                this.localConfig = { ...this.localConfig, description: e.detail.value };
+              }}
+            ></ss-input>
+          </div>
+
+          <div class="field">
+            <label>${translate('series')}</label>
+            <ss-input
+              .value=${this.localConfig.series}
+              @input-changed=${(e: InputChangedEvent): void => {
+                this.localConfig = { ...this.localConfig, series: e.detail.value };
+              }}
+            ></ss-input>
+          </div>
+
+          <div class="field">
+            <label>${translate('icon')}</label>
+            <ss-input
+              .value=${this.localConfig.icon}
+              @input-changed=${(e: InputChangedEvent): void => {
+                this.localConfig = { ...this.localConfig, icon: e.detail.value };
+              }}
+            ></ss-input>
+          </div>
+
+          <div class="field">
+            <label>${translate('recurrence')}</label>
+            <ss-input
+              .value=${String(this.localConfig.recurrence)}
+              @input-changed=${(e: InputChangedEvent): void => {
+                this.localConfig = { ...this.localConfig, recurrence: Number(e.detail.value) };
+              }}
+            ></ss-input>
+          </div>
+
+          <div class="field">
+            <label>${translate('prestige')}</label>
+            <ss-input
+              .value=${String(this.localConfig.prestige)}
+              @input-changed=${(e: InputChangedEvent): void => {
+                this.localConfig = { ...this.localConfig, prestige: Number(e.detail.value) };
+              }}
+            ></ss-input>
+          </div>
         </div>
 
-        <div class="field">
-          <label>${translate('description')}</label>
-          <ss-input
-            .value=${this.localConfig.description}
-            @input-changed=${(e: InputChangedEvent): void => {
-              this.localConfig = { ...this.localConfig, description: e.detail.value };
-            }}
-          ></ss-input>
-        </div>
-
-        <div class="field">
-          <label>${translate('series')}</label>
-          <ss-input
-            .value=${this.localConfig.series}
-            @input-changed=${(e: InputChangedEvent): void => {
-              this.localConfig = { ...this.localConfig, series: e.detail.value };
-            }}
-          ></ss-input>
-        </div>
-
-        <div class="field">
-          <label>${translate('icon')}</label>
-          <ss-input
-            .value=${this.localConfig.icon}
-            @input-changed=${(e: InputChangedEvent): void => {
-              this.localConfig = { ...this.localConfig, icon: e.detail.value };
-            }}
-          ></ss-input>
-        </div>
-
-        <div class="field">
-          <label>${translate('recurrence')}</label>
-          <ss-input
-            .value=${String(this.localConfig.recurrence)}
-            @input-changed=${(e: InputChangedEvent): void => {
-              this.localConfig = { ...this.localConfig, recurrence: Number(e.detail.value) };
-            }}
-          ></ss-input>
-        </div>
-
-        <div class="field">
-          <label>${translate('prestige')}</label>
-          <ss-input
-            .value=${String(this.localConfig.prestige)}
-            @input-changed=${(e: InputChangedEvent): void => {
-              this.localConfig = { ...this.localConfig, prestige: Number(e.detail.value) };
-            }}
-          ></ss-input>
-        </div>
-
-        <div class="field">
-          <label>${translate('criteria')}</label>
-          <textarea
-            .value=${this.criteriaText}
-            @input=${(e: Event): void => {
-              this.criteriaText = (e.target as HTMLTextAreaElement).value;
-              this.criteriaError = '';
-            }}
-          ></textarea>
-          ${this.criteriaError
-            ? html`<div class="error">${this.criteriaError}</div>`
+        <div class="section">
+          <div class="section-title">${translate('factRequests')}</div>
+          ${this.localConfig.factRequests.length === 0
+            ? html`<div style="font-style:italic;opacity:0.6;margin-bottom:0.5rem;">${translate('noFactRequests')}</div>`
             : nothing}
+          ${repeat(
+            this.localConfig.factRequests,
+            (_, i) => i,
+            (fr, i) => html`
+              <fact-request-editor
+                .factRequest=${fr}
+                .index=${i}
+                @fact-request-changed=${(e: FactRequestChangedEvent): void => {
+                  const updated = [...this.localConfig.factRequests];
+                  updated[e.detail.index] = e.detail.factRequest;
+                  this.localConfig = { ...this.localConfig, factRequests: updated };
+                }}
+                @fact-request-removed=${(e: FactRequestRemovedEvent): void => {
+                  const updated = this.localConfig.factRequests.filter((_, idx) => idx !== e.detail.index);
+                  this.localConfig = { ...this.localConfig, factRequests: updated };
+                }}
+              ></fact-request-editor>
+            `,
+          )}
+          <ss-button @click=${this.addFactRequest}>${translate('addFactRequest')}</ss-button>
+        </div>
+
+        <div class="section">
+          <div class="section-title">${translate('criteria')}</div>
+          <criteria-editor
+            .criteria=${this.localConfig.criteria}
+            .factAliases=${this.factAliases}
+            @criteria-changed=${(e: CriteriaChangedEvent): void => {
+              this.localConfig = { ...this.localConfig, criteria: e.detail.criteria };
+            }}
+          ></criteria-editor>
         </div>
 
         <div class="buttons">

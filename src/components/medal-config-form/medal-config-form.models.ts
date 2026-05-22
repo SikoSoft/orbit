@@ -1,5 +1,5 @@
 import { ControlType } from '@/models/Control';
-import { Criterion, Criteria } from 'api-spec/models/Medal';
+import { Criterion, Criteria, FactRequest } from 'api-spec/models/Medal';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
 
 export enum MedalConfigFormProp {
@@ -11,6 +11,7 @@ export enum MedalConfigFormProp {
   PRESTIGE = 'prestige',
   ICON = 'icon',
   CRITERIA = 'criteria',
+  FACT_REQUESTS = 'factRequests',
 }
 
 export interface MedalConfigFormProps extends PropTypes {
@@ -22,6 +23,7 @@ export interface MedalConfigFormProps extends PropTypes {
   [MedalConfigFormProp.PRESTIGE]: number;
   [MedalConfigFormProp.ICON]: string;
   [MedalConfigFormProp.CRITERIA]: Criterion | Criteria;
+  [MedalConfigFormProp.FACT_REQUESTS]: FactRequest[];
 }
 
 export const medalConfigFormProps: PropConfigMap<MedalConfigFormProps> = {
@@ -64,5 +66,10 @@ export const medalConfigFormProps: PropConfigMap<MedalConfigFormProps> = {
     default: {} as Criterion | Criteria,
     control: { type: ControlType.HIDDEN },
     description: 'The criteria for earning the medal',
+  },
+  [MedalConfigFormProp.FACT_REQUESTS]: {
+    default: [],
+    control: { type: ControlType.HIDDEN },
+    description: 'The fact requests defining data sources for criteria',
   },
 };

@@ -26,6 +26,7 @@ const defaultMedalConfig: MedalConfig = {
   icon: '',
   createdAt: '',
   updatedAt: '',
+  factRequests: [],
   criteria: {},
 };
 
@@ -89,6 +90,7 @@ export class MedalConfigList extends ViewElement {
                   prestige=${config.prestige}
                   icon=${config.icon}
                   .criteria=${config.criteria}
+                  .factRequests=${config.factRequests}
                   ?open=${!config.id}
                   @medal-config-deleted=${this.handleMedalConfigDeleted}
                   @medal-config-updated=${(e: MedalConfigUpdatedEvent): void =>
