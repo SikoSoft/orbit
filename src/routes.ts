@@ -42,6 +42,12 @@ export const routes: Route[] = [
     action: async () => await import('@/views/entity-view/entity-view'),
   },
   {
+    path: '/medals',
+    component: 'user-medals-view',
+    action: async () =>
+      await import('@/views/user-medals-view/user-medals-view'),
+  },
+  {
     path: '/login',
     component: 'login-form',
     action: async () => await import('@/components/login-form/login-form'),

@@ -31,7 +31,7 @@ import {
   MfaSetupResponseBody,
   MfaVerifySetupRequestBody,
 } from '@/models/Identity';
-import { MedalConfig } from 'api-spec/models/Medal';
+import { Medal, MedalConfig } from 'api-spec/models/Medal';
 
 import { SQLiteStorage, serializePropertyValue } from './SQLiteStorage';
 import { networkStorage } from './NetworkStorage';
@@ -1163,6 +1163,10 @@ export class OfflineCacheStorage implements StorageSchema {
 
   async verifyMfaSetup(body: MfaVerifySetupRequestBody): Promise<StorageResult<void>> {
     return networkStorage.verifyMfaSetup(body);
+  }
+
+  async getMedals(): Promise<Medal[]> {
+    return networkStorage.getMedals();
   }
 
   async getMedalConfigs(): Promise<MedalConfig[]> {

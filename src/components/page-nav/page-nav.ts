@@ -29,6 +29,7 @@ const views: PageViewConfig[] = [
     url: '/add',
   },
   { id: PageView.LIST, label: translate('list'), url: '/list' },
+  { id: PageView.MEDALS, label: translate('medals'), url: '/medals' },
 ];
 
 const debugViews: PageViewConfig[] = [...views];

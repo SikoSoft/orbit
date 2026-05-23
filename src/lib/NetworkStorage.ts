@@ -34,7 +34,7 @@ import {
   MfaSetupResponseBody,
   MfaVerifySetupRequestBody,
 } from '@/models/Identity';
-import { MedalConfig } from 'api-spec/models/Medal';
+import { Medal, MedalConfig } from 'api-spec/models/Medal';
 
 export class NetworkStorage implements StorageSchema {
   isActive = true;
@@ -799,6 +799,16 @@ export class NetworkStorage implements StorageSchema {
     }
 
     return { isOk: false, error: new Error('Failed to verify MFA setup') };
+  }
+
+  async getMedals(): Promise<Medal[]> {
+    const result = await api.get<{ medals: Medal[] }>('medal');
+
+    if (result && result.isOk) {
+      return Promise.resolve(result.response.medals);
+    }
+
+    return Promise.reject();
   }
 
   async getMedalConfigs(): Promise<MedalConfig[]> {

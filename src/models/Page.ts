@@ -7,6 +7,7 @@ export enum PageView {
   MOCK = 'mock',
   ADMIN = 'admin',
   ENTITY_CONFIG_LIST = 'entityConfigList',
+  MEDALS = 'medals',
 }
 
 export const defaultPageView: PageView = PageView.INPUT;

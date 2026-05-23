@@ -352,6 +352,7 @@
   "medals": "Medals",
   "medalConfig": "Medal Config",
   "addMedalConfig": "Add Medal Config",
+  "noMedals": "You have not earned any medals yet.",
   "noMedalConfigs": "No medal configurations found.",
   "medalConfigSaved": "Medal config saved successfully.",
   "medalConfigDeleted": "Medal config deleted successfully.",
