@@ -174,7 +174,7 @@ export class ListFilter extends MobxLitElement {
   }
 
   updated(changedProperties: PropertyValues): void {
-    if (changedProperties.has('externalFilter') && this.externalFilter !== undefined) {
+    if (changedProperties.has(ListFilterProp.EXTERNAL_FILTER)) {
       this.sync();
     }
   }
