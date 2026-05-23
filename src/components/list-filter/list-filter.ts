@@ -13,6 +13,11 @@ import {
   TextContext,
   FilterProperty,
 } from 'api-spec/models/List';
+import {
+  ListFilterProp,
+  listFilterProps,
+  ListFilterProps,
+} from './list-filter.models';
 
 import { translate } from '@/lib/Localization';
 
@@ -75,7 +80,9 @@ export class ListFilter extends MobxLitElement {
     }
   `;
 
-  @property({ type: Object }) externalFilter?: ListFilterSpec;
+  @property({ type: Object })
+  [ListFilterProp.EXTERNAL_FILTER]: ListFilterProps[ListFilterProp.EXTERNAL_FILTER] =
+    listFilterProps[ListFilterProp.EXTERNAL_FILTER].default;
 
   @state() [ListFilterType.CONTAINS_ONE_OF]: string[] = [];
   @state() [ListFilterType.CONTAINS_ALL_OF]: string[] = [];
