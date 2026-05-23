@@ -3,17 +3,17 @@ import { PropConfigMap, PropTypes } from '@/models/Prop';
 import { ListFilter as ListFilterSpec } from 'api-spec/models/List';
 
 export enum ListFilterProp {
-  EXTERNAL_FILTER = 'externalFilter',
+  LIST_FILTER = 'listFilter',
 }
 
 export interface ListFilterProps extends PropTypes {
-  [ListFilterProp.EXTERNAL_FILTER]: ListFilterSpec | undefined;
+  [ListFilterProp.LIST_FILTER]: ListFilterSpec | undefined;
 }
 
 export const listFilterProps: PropConfigMap<ListFilterProps> = {
-  [ListFilterProp.EXTERNAL_FILTER]: {
+  [ListFilterProp.LIST_FILTER]: {
     default: undefined,
     control: { type: ControlType.HIDDEN },
-    description: 'Optional external filter used instead of the app state filter',
+    description: 'Filter value passed in from outside',
   },
 };

@@ -142,7 +142,7 @@ export class FactRequestEditor extends MobxLitElement {
           }}
         >
           <list-filter
-            .externalFilter=${context.filter}
+            .listFilter=${context.filter}
             @list-filter-updated=${(e: ListFilterUpdatedEvent): void => {
               this.handleFilterUpdated(e, context, fr);
             }}

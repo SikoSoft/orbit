@@ -3,7 +3,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
-import { reaction } from 'mobx';
 
 import {
   ListFilter as ListFilterSpec,
@@ -81,8 +80,8 @@ export class ListFilter extends MobxLitElement {
   `;
 
   @property({ type: Object })
-  [ListFilterProp.EXTERNAL_FILTER]: ListFilterProps[ListFilterProp.EXTERNAL_FILTER] =
-    listFilterProps[ListFilterProp.EXTERNAL_FILTER].default;
+  [ListFilterProp.LIST_FILTER]: ListFilterProps[ListFilterProp.LIST_FILTER] =
+    listFilterProps[ListFilterProp.LIST_FILTER].default;
 
   @state() [ListFilterType.CONTAINS_ONE_OF]: string[] = [];
   @state() [ListFilterType.CONTAINS_ALL_OF]: string[] = [];
@@ -161,26 +160,21 @@ export class ListFilter extends MobxLitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-
-    reaction(
-      () => this.state.listConfigId,
-      () => {
-        this.sync();
-      },
-    );
-
     this.sync();
     this.savedFilters = storage.getSavedFilters();
   }
 
   updated(changedProperties: PropertyValues): void {
-    if (changedProperties.has(ListFilterProp.EXTERNAL_FILTER)) {
+    if (changedProperties.has(ListFilterProp.LIST_FILTER)) {
       this.sync();
     }
   }
 
   sync(_reset: boolean = false): void {
-    const listFilter = (this.externalFilter ?? this.state.listFilter) as ListFilterSpec;
+    if (!this[ListFilterProp.LIST_FILTER]) {
+      return;
+    }
+    const listFilter = this[ListFilterProp.LIST_FILTER] as ListFilterSpec;
     Object.values(ListFilterType).forEach(type => {
       this[type] = listFilter.tagging?.[type] ?? [];
     });
