@@ -433,7 +433,7 @@ export class NetworkStorage implements StorageSchema {
       const queryParams = {
         perPage: `${perPage}`,
         ...(start > 0 ? { start: `${start}` } : {}),
-        ...(!listFilter.includeAll
+        ...(!(listFilter.includeAll ?? true)
           ? { filter: JSON.stringify(listFilter) }
           : {}),
         ...(!sortIsDefault() ? { sort: JSON.stringify(listSort) } : {}),

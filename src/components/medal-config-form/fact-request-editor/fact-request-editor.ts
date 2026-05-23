@@ -138,7 +138,7 @@ export class FactRequestEditor extends MobxLitElement {
     fr: FactRequest,
   ): TemplateResult {
     const { filter } = context;
-    const timeType = filter.time.type;
+    const timeType = (filter.time ?? { type: ListFilterTimeType.ALL_TIME }).type;
 
     return html`
       <div class="context-fields">

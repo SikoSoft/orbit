@@ -1,13 +1,8 @@
-import { ListFilter as ListFilterModel } from 'api-spec/models/List';
-
-export interface ExtendedListFilter extends ListFilterModel {
-  published?: boolean;
-  suggestion?: boolean;
-}
+import { ListFilter } from 'api-spec/models/List';
 
 export const listFilterUpdatedEventName = 'list-filter-updated';
 
-export type ListFilterUpdatedEventPayload = ExtendedListFilter;
+export type ListFilterUpdatedEventPayload = ListFilter;
 
 export class ListFilterUpdatedEvent extends CustomEvent<ListFilterUpdatedEventPayload> {
   constructor(payload: ListFilterUpdatedEventPayload) {

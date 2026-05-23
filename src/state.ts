@@ -244,6 +244,12 @@ export class AppState {
 
   @action
   setListFilterTagging(type: ListFilterType, tags: string[]): void {
+    if (!this.listFilter.tagging) {
+      this.listFilter.tagging = {
+        [ListFilterType.CONTAINS_ALL_OF]: [],
+        [ListFilterType.CONTAINS_ONE_OF]: [],
+      };
+    }
     this.listFilter.tagging[type] = tags;
   }
 
@@ -286,7 +292,7 @@ export class AppState {
   setListConfigId(id: string): void {
     if (this.listConfigId && this.listConfig) {
       this.removeTagSuggestions(
-        this.listConfig.filter.tagging[ListFilterType.CONTAINS_ALL_OF],
+        this.listConfig.filter.tagging?.[ListFilterType.CONTAINS_ALL_OF] ?? [],
       );
     }
     this.listConfigId = id;

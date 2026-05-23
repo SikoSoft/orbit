@@ -276,8 +276,8 @@ export class EntityForm extends ViewElement {
   get availableEntityConfigs(): EntityConfig[] {
     return this.state.entityConfigs.filter(
       config =>
-        this.state.listFilter.includeTypes.length === 0 ||
-        this.state.listFilter.includeTypes.includes(config.id),
+        (this.state.listFilter.includeTypes?.length ?? 0) === 0 ||
+        this.state.listFilter.includeTypes?.includes(config.id),
     );
   }
 
@@ -305,7 +305,7 @@ export class EntityForm extends ViewElement {
         }
 
         this.tags =
-          this.state.listFilter.tagging[ListFilterType.CONTAINS_ALL_OF];
+          this.state.listFilter.tagging?.[ListFilterType.CONTAINS_ALL_OF] ?? [];
         this.published =
           this.state.listSetting[SettingName.AUTO_PUBLISH];
 
@@ -666,7 +666,7 @@ export class EntityForm extends ViewElement {
     this.tagValue = '';
     if (!this.entityId) {
       this.tags =
-        this.state.listFilter.tagging[ListFilterType.CONTAINS_ALL_OF];
+        this.state.listFilter.tagging?.[ListFilterType.CONTAINS_ALL_OF] ?? [];
       this.published = this.state.listSetting[SettingName.AUTO_PUBLISH];
     }
     this.state.setTagSuggestions([]);

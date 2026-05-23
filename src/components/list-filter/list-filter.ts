@@ -6,6 +6,7 @@ import { MobxLitElement } from '@adobe/lit-mobx';
 import { reaction } from 'mobx';
 
 import {
+  ListFilter as ListFilterSpec,
   ListFilterType,
   ListFilterTimeType,
   TimeContext,
@@ -21,7 +22,7 @@ import { SettingName, TagSuggestions } from 'api-spec/models/Setting';
 
 import { TimeFiltersUpdatedEvent } from '@/components/list-filter/time-filters/time-filters.events';
 import { FilterPropertiesUpdatedEvent } from '@/components/list-filter/filter-properties/filter-properties.events';
-import { ExtendedListFilter, ListFilterUpdatedEvent } from './list-filter.events';
+import { ListFilterUpdatedEvent } from './list-filter.events';
 import { TagsUpdatedEvent } from '@ss/ui/components/tag-manager.events';
 import { TagSuggestionsRequestedEvent } from '@ss/ui/components/tag-input.events';
 import { OptionSelectorChangedEvent } from '@/components/option-selector/option-selector.events';
@@ -131,7 +132,7 @@ export class ListFilter extends MobxLitElement {
     );
   }
 
-  get filter(): ExtendedListFilter {
+  get filter(): ListFilterSpec {
     return {
       userIds: this.userIds,
       includeAll: this.includeAll,
@@ -164,15 +165,14 @@ export class ListFilter extends MobxLitElement {
   }
 
   sync(_reset: boolean = false): void {
-    const listFilter = this.state.listFilter as ExtendedListFilter;
+    const listFilter = this.state.listFilter as ListFilterSpec;
     Object.values(ListFilterType).forEach(type => {
-      this[type] = listFilter.tagging[type];
+      this[type] = listFilter.tagging?.[type] ?? [];
     });
-    this.includeTypes = listFilter.includeTypes;
-    this.includeTypes = listFilter.includeTypes;
-    this.includeUntagged = listFilter.includeUntagged;
-    this.includeAll = listFilter.includeAll;
-    this.includeAllTagging = listFilter.includeAllTagging;
+    this.includeTypes = listFilter.includeTypes ?? [];
+    this.includeUntagged = listFilter.includeUntagged ?? true;
+    this.includeAll = listFilter.includeAll ?? true;
+    this.includeAllTagging = listFilter.includeAllTagging ?? true;
     if (listFilter.time) {
       this.time = listFilter.time;
     }

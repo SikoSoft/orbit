@@ -48,7 +48,7 @@ export class ListSort extends MobxLitElement {
 
   get availableSortProperties(): ListSortCustomProperty[] {
     return this.state.entityConfigs
-      .filter(config => this.state.listFilter.includeTypes.includes(config.id))
+      .filter(config => this.state.listFilter.includeTypes?.includes(config.id))
       .reduce((acc: ListSortCustomProperty[], config: EntityConfig) => {
         const customProps = config.properties.map(prop => ({
           propertyId: prop.id,

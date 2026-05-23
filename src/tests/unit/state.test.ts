@@ -144,7 +144,7 @@ describe('AppState', () => {
         'foo',
         'bar',
       ]);
-      expect(state.listFilter.tagging[ListFilterType.CONTAINS_ALL_OF]).toEqual([
+      expect(state.listFilter.tagging?.[ListFilterType.CONTAINS_ALL_OF]).toEqual([
         'foo',
         'bar',
       ]);

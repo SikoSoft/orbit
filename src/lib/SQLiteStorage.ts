@@ -487,16 +487,17 @@ export class SQLiteStorage implements StorageSchema {
     const conditions: string[] = [];
     const bindings: BindableValue[] = [];
 
-    if (!listFilter.includeAll) {
+    if (!(listFilter.includeAll ?? true)) {
       // Type filter
-      if (listFilter.includeTypes.length > 0) {
-        const ph = listFilter.includeTypes.map(() => '?').join(',');
+      const includeTypes = listFilter.includeTypes ?? [];
+      if (includeTypes.length > 0) {
+        const ph = includeTypes.map(() => '?').join(',');
         conditions.push(`e.type IN (${ph})`);
-        bindings.push(...listFilter.includeTypes);
+        bindings.push(...includeTypes);
       }
 
       // Time filter
-      const { time } = listFilter;
+      const time = listFilter.time ?? { type: ListFilterTimeType.ALL_TIME };
       if (time.type === ListFilterTimeType.EXACT_DATE) {
         conditions.push(`date(e.created_at) = date(?)`);
         bindings.push(time.date);
@@ -506,7 +507,7 @@ export class SQLiteStorage implements StorageSchema {
       }
 
       // Property filters
-      for (const propertyFilter of listFilter.properties) {
+      for (const propertyFilter of (listFilter.properties ?? [])) {
         const propConfigRows = await this.execRows(
           'SELECT data_type FROM entity_property_config WHERE id = ?',
           [propertyFilter.propertyId],
@@ -526,14 +527,15 @@ export class SQLiteStorage implements StorageSchema {
       }
 
       // Tag filters
-      if (!listFilter.includeAllTagging) {
+      if (!(listFilter.includeAllTagging ?? true)) {
         const allOfTags =
-          listFilter.tagging[ListFilterType.CONTAINS_ALL_OF] ?? [];
+          listFilter.tagging?.[ListFilterType.CONTAINS_ALL_OF] ?? [];
         const oneOfTags =
-          listFilter.tagging[ListFilterType.CONTAINS_ONE_OF] ?? [];
+          listFilter.tagging?.[ListFilterType.CONTAINS_ONE_OF] ?? [];
         const hasTagConditions = allOfTags.length > 0 || oneOfTags.length > 0;
+        const includeUntagged = listFilter.includeUntagged ?? true;
 
-        if (hasTagConditions || !listFilter.includeUntagged) {
+        if (hasTagConditions || !includeUntagged) {
           const tagParts: string[] = [];
 
           if (hasTagConditions) {
@@ -557,7 +559,7 @@ export class SQLiteStorage implements StorageSchema {
             tagParts.push(`(${matchedParts.join(' AND ')})`);
           }
 
-          if (listFilter.includeUntagged) {
+          if (includeUntagged) {
             tagParts.push(
               `NOT EXISTS (SELECT 1 FROM entity_tag et WHERE et.entity_id = e.id)`,
             );
@@ -879,17 +881,18 @@ export class SQLiteStorage implements StorageSchema {
     const conditions: string[] = [];
     const bindings: BindableValue[] = [];
 
-    if (filter.includeAll) {
+    if (filter.includeAll ?? true) {
       return { conditions, bindings };
     }
 
-    if (filter.includeTypes.length > 0) {
-      const ph = filter.includeTypes.map(() => '?').join(',');
+    const includeTypes = filter.includeTypes ?? [];
+    if (includeTypes.length > 0) {
+      const ph = includeTypes.map(() => '?').join(',');
       conditions.push(`e.type IN (${ph})`);
-      bindings.push(...filter.includeTypes);
+      bindings.push(...includeTypes);
     }
 
-    const { time } = filter;
+    const time = filter.time ?? { type: ListFilterTimeType.ALL_TIME };
     if (time.type === ListFilterTimeType.EXACT_DATE) {
       conditions.push(`date(e.created_at) = date(?)`);
       bindings.push(time.date);
@@ -898,7 +901,7 @@ export class SQLiteStorage implements StorageSchema {
       bindings.push(time.start, time.end);
     }
 
-    for (const propertyFilter of filter.properties) {
+    for (const propertyFilter of (filter.properties ?? [])) {
       const propConfigRows = await this.execRows(
         'SELECT data_type FROM entity_property_config WHERE id = ?',
         [propertyFilter.propertyId],
@@ -917,12 +920,13 @@ export class SQLiteStorage implements StorageSchema {
       bindings.push(propertyFilter.propertyId, serializedValue);
     }
 
-    if (!filter.includeAllTagging) {
-      const allOfTags = filter.tagging[ListFilterType.CONTAINS_ALL_OF] ?? [];
-      const oneOfTags = filter.tagging[ListFilterType.CONTAINS_ONE_OF] ?? [];
+    if (!(filter.includeAllTagging ?? true)) {
+      const allOfTags = filter.tagging?.[ListFilterType.CONTAINS_ALL_OF] ?? [];
+      const oneOfTags = filter.tagging?.[ListFilterType.CONTAINS_ONE_OF] ?? [];
       const hasTagConditions = allOfTags.length > 0 || oneOfTags.length > 0;
+      const includeUntagged = filter.includeUntagged ?? true;
 
-      if (hasTagConditions || !filter.includeUntagged) {
+      if (hasTagConditions || !includeUntagged) {
         const tagParts: string[] = [];
 
         if (hasTagConditions) {
@@ -943,7 +947,7 @@ export class SQLiteStorage implements StorageSchema {
           tagParts.push(`(${matchedParts.join(' AND ')})`);
         }
 
-        if (filter.includeUntagged) {
+        if (includeUntagged) {
           tagParts.push(
             `NOT EXISTS (SELECT 1 FROM entity_tag et WHERE et.entity_id = e.id)`,
           );
