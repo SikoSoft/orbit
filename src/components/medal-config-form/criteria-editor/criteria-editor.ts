@@ -320,7 +320,9 @@ export class CriteriaEditor extends MobxLitElement {
         <div class="group-actions">
           <ss-button
             @click=${(): void => {
-              this.applyUpdate(addChildAtPath(this.localCriteria, groupPath, { ...defaultCriterion }));
+              const aliases = this[CriteriaEditorProp.FACT_ALIASES];
+              const fact = aliases.length > 0 ? aliases[0] : defaultCriterion.fact;
+              this.applyUpdate(addChildAtPath(this.localCriteria, groupPath, { ...defaultCriterion, fact }));
             }}
           >${translate('addCriterion')}</ss-button>
           <ss-button
