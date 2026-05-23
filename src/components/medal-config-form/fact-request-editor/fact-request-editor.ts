@@ -201,6 +201,7 @@ export class FactRequestEditor extends MobxLitElement {
             .options=${operationOptions}
             .selected=${operation}
             @select-changed=${(e: SelectChangedEvent<FactOperation>): void => {
+              this.filterPopupOpen = false;
               const op = e.detail.value;
               let newContext;
               if (op === FactOperation.MEDAL_COUNT) {
