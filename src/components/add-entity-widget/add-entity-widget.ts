@@ -318,7 +318,6 @@ export class AddEntityWidget extends MobxLitElement {
 
   private handleIncludeImageChanged(e: ToggleChangedEvent): void {
     this.state.setAssistSaveImage(e.detail.on);
-    storage.setAssistSaveImage(e.detail.on);
   }
 
   private goToFirstMatchingListConfig(entity: Entity): void {

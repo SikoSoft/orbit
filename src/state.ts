@@ -1,4 +1,5 @@
 import { action, makeObservable, observable, runInAction } from 'mobx';
+import { initPersistedState, persisted } from '@/lib/persisted';
 
 import {
   defaultSettings,
@@ -27,7 +28,7 @@ import {
   ListSortNativeProperty,
 } from 'api-spec/models/List';
 import { defaultTheme, ThemeName } from './models/Page';
-import { StorageSource } from './models/Storage';
+import { StorageItemKey, StorageSource } from './models/Storage';
 import { User } from 'api-spec/models/Identity';
 import {
   subscribe,
@@ -107,9 +108,17 @@ export class AppState {
   public systemSettings: Settings = defaultSettings;
 
   @observable
+  @persisted(StorageItemKey.ADVANCED_MODE_KEY, {
+    parse: v => v === '1',
+    serialize: v => (v ? '1' : '0'),
+  })
   public advancedMode: boolean = false;
 
   @observable
+  @persisted(StorageItemKey.DEBUG_MODE_KEY, {
+    parse: v => v === '1',
+    serialize: v => (v ? '1' : '0'),
+  })
   public debugMode: boolean = false;
 
   @observable
@@ -155,9 +164,11 @@ export class AppState {
   public listContext: ListContext = structuredClone(defaultListContext);
 
   @observable
+  @persisted(StorageItemKey.COLLAPSABLE_PANEL_STATE, { deep: true })
   public collapsablePanelState: Record<string, boolean> = {};
 
   @observable
+  @persisted(StorageItemKey.TAB_INDEX_STATE, { deep: true })
   public tabState: Record<string, number> = {};
 
   @observable
@@ -170,6 +181,7 @@ export class AppState {
   public title: string = '';
 
   @observable
+  @persisted(StorageItemKey.ASSIST_SAVE_IMAGE)
   public assistSaveImage: boolean = true;
 
   @observable
@@ -589,6 +601,7 @@ export class AppState {
 
   constructor() {
     makeObservable(this);
+    initPersistedState(this);
   }
 }
 

@@ -101,10 +101,6 @@ export interface StorageSchema {
   ): Promise<Entity.EntityPropertyConfig | null>;
   setWindowScrollPosition?(x: number, y: number): void;
   getWindowScrollPosition?(): { x: number; y: number };
-  getCollapsablePanelState?(): Record<string, boolean>;
-  setCollapsablePanelState?(state: Record<string, boolean>): void;
-  getTabState?(): Record<string, number>;
-  setTabState?(state: Record<string, number>): void;
   setEntityPropertyOrder?(
     entityConfigId: number,
     propertyConfigOrder: { id: number; order: number }[],
@@ -151,8 +147,6 @@ export interface StorageSchema {
   ): Promise<StorageResult<void>>;
   setStorageSource?(source: StorageSource): void;
   getStorageSource?(): StorageSource | null;
-  setAssistSaveImage?(enabled: boolean): void;
-  getAssistSaveImage?(): boolean;
   getParties?(query: string): Promise<StorageResult<AccessPolicyParty[]>>;
   getAccessPolicyGroups?(): Promise<StorageResult<AccessPolicyGroup[]>>;
   createAccessPolicyGroup?(

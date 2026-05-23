@@ -250,12 +250,6 @@ export class AppContainer extends MobxLitElement {
       this.state.setListContextMode(storage.getListContextMode());
       this.state.setListContext(storage.getListContext());
 
-      this.state.setAdvancedMode(storage.getAdvancedMode());
-      this.state.setDebugMode(storage.getDebugMode());
-      this.state.setAssistSaveImage(storage.getAssistSaveImage());
-      this.state.setCollapsableState(storage.getCollapsablePanelState());
-      this.state.setTabState(storage.getTabState());
-
       this.state.setTheme(storage.getTheme());
 
       const view = storage.getSavedView();
@@ -338,13 +332,11 @@ export class AppContainer extends MobxLitElement {
   private handleCollapsableToggled(e: CollapsableToggledEvent): void {
     const { isOpen, panelId } = e.detail;
     this.state.setCollapsablePanelState(panelId, isOpen);
-    storage.setCollapsablePanelState(this.state.collapsablePanelState);
   }
 
   private handleTabChanged(e: TabIndexChangedEvent): void {
     const { index, paneId } = e.detail;
     this.state.setTabPaneState(paneId, index);
-    storage.setTabState(this.state.tabState);
   }
 
   private async handleStorageSourceUpdated(): Promise<void> {

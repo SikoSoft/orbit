@@ -238,12 +238,10 @@ export class FloatingWidget extends MobxLitElement {
 
   private handleToggleAdvancedChanged(event: ToggleChangedEvent): void {
     this.state.setAdvancedMode(event.detail.on);
-    storage.saveAdvancedMode(event.detail.on);
   }
 
   private handleToggleDebugChanged(event: ToggleChangedEvent): void {
     this.state.setDebugMode(event.detail.on);
-    storage.saveDebugMode(event.detail.on);
   }
 
   private handleStorageSourceChanged(event: CustomEvent): void {

@@ -202,51 +202,6 @@ export class Storage implements StorageSchema {
     return view;
   }
 
-  saveAdvancedMode(state: boolean): void {
-    localStorage.setItem(StorageItemKey.ADVANCED_MODE_KEY, state ? '1' : '0');
-  }
-
-  saveDebugMode(state: boolean): void {
-    localStorage.setItem(StorageItemKey.DEBUG_MODE_KEY, state ? '1' : '0');
-  }
-
-  getAdvancedMode(): boolean {
-    let advancedMode = false;
-    try {
-      const storedAdvancedMode = localStorage.getItem(
-        StorageItemKey.ADVANCED_MODE_KEY,
-      );
-      if (storedAdvancedMode) {
-        advancedMode = storedAdvancedMode === '1';
-      }
-    } catch (error) {
-      console.error(
-        `Encountered an error while trying to advanced mode: ${JSON.stringify(
-          error,
-        )}`,
-      );
-    }
-    return advancedMode;
-  }
-
-  getDebugMode(): boolean {
-    let debugMode = false;
-    try {
-      const storedDebugMode = localStorage.getItem(
-        StorageItemKey.DEBUG_MODE_KEY,
-      );
-      if (storedDebugMode) {
-        debugMode = storedDebugMode === '1';
-      }
-    } catch (error) {
-      console.error(
-        `Encountered an error while trying to debug mode: ${JSON.stringify(
-          error,
-        )}`,
-      );
-    }
-    return debugMode;
-  }
 
   async digestMessage(message: string): Promise<string> {
     const hashBuffer = await crypto.subtle.digest(
@@ -488,54 +443,6 @@ export class Storage implements StorageSchema {
     return position;
   }
 
-  getCollapsablePanelState(): Record<string, boolean> {
-    let state: Record<string, boolean> = {};
-    try {
-      const storedState = localStorage.getItem(
-        StorageItemKey.COLLAPSABLE_PANEL_STATE,
-      );
-      if (storedState) {
-        state = JSON.parse(storedState);
-      }
-    } catch (error) {
-      console.error(
-        `Encountered an error while trying to load collapsable panel state from storage: ${JSON.stringify(
-          error,
-        )}`,
-      );
-    }
-
-    return state;
-  }
-
-  setCollapsablePanelState(state: Record<string, boolean>): void {
-    localStorage.setItem(
-      StorageItemKey.COLLAPSABLE_PANEL_STATE,
-      JSON.stringify(state),
-    );
-  }
-
-  getTabState(): Record<string, number> {
-    let state: Record<string, number> = {};
-    try {
-      const storedState = localStorage.getItem(StorageItemKey.TAB_INDEX_STATE);
-      if (storedState) {
-        state = JSON.parse(storedState);
-      }
-    } catch (error) {
-      console.error(
-        `Encountered an error while trying to load tab state from storage: ${JSON.stringify(
-          error,
-        )}`,
-      );
-    }
-
-    return state;
-  }
-
-  setTabState(state: Record<string, number>): void {
-    localStorage.setItem(StorageItemKey.TAB_INDEX_STATE, JSON.stringify(state));
-  }
 
   getStorageSource(): StorageSource | null {
     let source: StorageSource | null = null;
@@ -558,32 +465,6 @@ export class Storage implements StorageSchema {
     return source;
   }
 
-  setAssistSaveImage(enabled: boolean): void {
-    localStorage.setItem(
-      StorageItemKey.ASSIST_SAVE_IMAGE,
-      JSON.stringify(enabled),
-    );
-  }
-
-  getAssistSaveImage(): boolean {
-    let enabled = true;
-    try {
-      const storedValue = localStorage.getItem(
-        StorageItemKey.ASSIST_SAVE_IMAGE,
-      );
-      if (storedValue) {
-        enabled = JSON.parse(storedValue);
-      }
-    } catch (error) {
-      console.error(
-        `Encountered an error while trying to load assist save image setting from storage: ${JSON.stringify(
-          error,
-        )}`,
-      );
-    }
-
-    return enabled;
-  }
 
   @delegateSource()
   async addEntityConfig(
