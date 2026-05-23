@@ -581,10 +581,12 @@ export class ListConfig extends MobxLitElement {
     this.themeManagerIsOpen = false;
   }
 
-  private handleFilterUpdated(_e: ListFilterUpdatedEvent): void {
+  private handleFilterUpdated(e: ListFilterUpdatedEvent): void {
+    this.state.setListFilter(e.detail);
     if (this.state.listConfigId) {
-      storage.updateListFilter(this.state.listConfigId, this.state.listFilter);
+      storage.updateListFilter(this.state.listConfigId, e.detail);
     }
+    addToast(translate('filterUpdated'), NotificationType.INFO);
     this.filterIsOpen = false;
     this.dispatchEvent(new EntityListLoadEvent());
   }

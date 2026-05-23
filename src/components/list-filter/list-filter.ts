@@ -7,28 +7,21 @@ import { reaction } from 'mobx';
 
 import {
   ListFilterType,
-  ListFilter as ListFilterModel,
   ListFilterTimeType,
   TimeContext,
   TextContext,
   FilterProperty,
 } from 'api-spec/models/List';
 
-interface ExtendedListFilter extends ListFilterModel {
-  published?: boolean;
-  suggestion?: boolean;
-}
 import { translate } from '@/lib/Localization';
 
 import { appState } from '@/state';
 import { SavedListFilter, storage } from '@/lib/Storage';
-import { addToast } from '@/lib/Util';
-import { NotificationType } from '@ss/ui/components/notification-provider.models';
 import { SettingName, TagSuggestions } from 'api-spec/models/Setting';
 
 import { TimeFiltersUpdatedEvent } from '@/components/list-filter/time-filters/time-filters.events';
 import { FilterPropertiesUpdatedEvent } from '@/components/list-filter/filter-properties/filter-properties.events';
-import { ListFilterUpdatedEvent } from './list-filter.events';
+import { ExtendedListFilter, ListFilterUpdatedEvent } from './list-filter.events';
 import { TagsUpdatedEvent } from '@ss/ui/components/tag-manager.events';
 import { TagSuggestionsRequestedEvent } from '@ss/ui/components/tag-input.events';
 import { OptionSelectorChangedEvent } from '@/components/option-selector/option-selector.events';
@@ -205,11 +198,7 @@ export class ListFilter extends MobxLitElement {
   }
 
   private handleUpdateClick(_e: CustomEvent): void {
-    this.state.setListFilter(this.filter);
-    storage.saveActiveFilter(this.state.listFilter);
-
-    this.dispatchEvent(new ListFilterUpdatedEvent({}));
-    addToast(translate('filterUpdated'), NotificationType.INFO);
+    this.dispatchEvent(new ListFilterUpdatedEvent(this.filter));
   }
 
   private handleTimeChanged(e: TimeFiltersUpdatedEvent): void {

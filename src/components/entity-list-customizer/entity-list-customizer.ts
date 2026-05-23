@@ -4,6 +4,9 @@ import { MobxLitElement } from '@adobe/lit-mobx';
 
 import { appState } from '@/state';
 import { translate } from '@/lib/Localization';
+import { storage } from '@/lib/Storage';
+import { addToast } from '@/lib/Util';
+import { NotificationType } from '@ss/ui/components/notification-provider.models';
 import { EntityListLoadEvent } from '@/components/entity-list/entity-list.events';
 import { ListFilterUpdatedEvent } from '@/components/list-filter/list-filter.events';
 import { ListSortUpdatedEvent } from '@/components/list-sort/list-sort.events';
@@ -42,7 +45,10 @@ export class EntityListCustomizer extends MobxLitElement {
     `,
   ];
 
-  private handleFilterUpdated = (_e: ListFilterUpdatedEvent): void => {
+  private handleFilterUpdated = (e: ListFilterUpdatedEvent): void => {
+    this.state.setListFilter(e.detail);
+    storage.saveActiveFilter(e.detail);
+    addToast(translate('filterUpdated'), NotificationType.INFO);
     this.dispatchEvent(new EntityListLoadEvent());
   };
 
