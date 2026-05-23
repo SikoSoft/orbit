@@ -1,5 +1,5 @@
-import { html, css, TemplateResult } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { html, css, PropertyValues, TemplateResult } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
@@ -74,6 +74,8 @@ export class ListFilter extends MobxLitElement {
       pointer-events: initial;
     }
   `;
+
+  @property({ type: Object }) externalFilter?: ListFilterSpec;
 
   @state() [ListFilterType.CONTAINS_ONE_OF]: string[] = [];
   @state() [ListFilterType.CONTAINS_ALL_OF]: string[] = [];
@@ -164,8 +166,14 @@ export class ListFilter extends MobxLitElement {
     this.savedFilters = storage.getSavedFilters();
   }
 
+  updated(changedProperties: PropertyValues): void {
+    if (changedProperties.has('externalFilter') && this.externalFilter !== undefined) {
+      this.sync();
+    }
+  }
+
   sync(_reset: boolean = false): void {
-    const listFilter = this.state.listFilter as ListFilterSpec;
+    const listFilter = (this.externalFilter ?? this.state.listFilter) as ListFilterSpec;
     Object.values(ListFilterType).forEach(type => {
       this[type] = listFilter.tagging?.[type] ?? [];
     });

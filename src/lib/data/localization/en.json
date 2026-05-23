@@ -371,6 +371,7 @@
   "alias": "Alias",
   "operation": "Operation",
   "filterSettings": "Filter Settings",
+  "configureFilter": "Configure Filter",
   "includeAll": "Include All",
   "includeUntagged": "Include Untagged",
   "timeFilter": "Time Filter",
