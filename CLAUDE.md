@@ -28,6 +28,56 @@ See [docs/architecture.md](docs/architecture.md) for system design specification
 - Register with `@customElement('tag-name')`
 - Always use Lit's repeat directive, instead of map, for iterating in templates
 
+**Property declaration convention:**
+
+Any component with custom properties must define them in its `.models.ts` file. The models file must export:
+
+1. A `{ComponentName}Prop` enum whose values are the kebab-case attribute names.
+2. An interface `{ComponentName}Props extends PropTypes` with each property typed using computed keys from the enum.
+3. A `{camelCaseName}Props: PropConfigMap<{ComponentName}Props>` constant with `default`, `description`, and `control` for every property.
+
+```ts
+// my-widget.models.ts
+import { ControlType } from '@/models/Control';
+import { PropConfigMap, PropTypes } from '@/models/Prop';
+
+export enum MyWidgetProp {
+  LABEL = 'label',
+  COUNT = 'count',
+}
+
+export interface MyWidgetProps extends PropTypes {
+  [MyWidgetProp.LABEL]: string;
+  [MyWidgetProp.COUNT]: number;
+}
+
+export const myWidgetProps: PropConfigMap<MyWidgetProps> = {
+  [MyWidgetProp.LABEL]: {
+    default: '',
+    description: 'The label text',
+    control: { type: ControlType.TEXT },
+  },
+  [MyWidgetProp.COUNT]: {
+    default: 0,
+    description: 'The item count',
+    control: { type: ControlType.NUMBER },
+  },
+};
+```
+
+The component then imports the enum, interface, and config map and uses them when declaring each `@property`:
+
+```ts
+// my-widget.ts
+import { MyWidgetProp, MyWidgetProps, myWidgetProps } from './my-widget.models';
+
+@property({ type: Number })
+[MyWidgetProp.COUNT]: MyWidgetProps[MyWidgetProp.COUNT] =
+  myWidgetProps[MyWidgetProp.COUNT].default;
+```
+
+Never hard-code default values or types in the component file — always derive them from the models file.
+
 **Import order within files:**
 
 1. Third-party (`lit`, `mobx`, `@ss/ui`, etc.)
