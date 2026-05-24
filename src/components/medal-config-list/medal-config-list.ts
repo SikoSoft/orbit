@@ -3,6 +3,8 @@ import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { MedalConfig } from 'api-spec/models/Medal';
+import { addToast } from '@/lib/Util';
+import { NotificationType } from '@ss/ui/components/notification-provider.models';
 import { translate } from '@/lib/Localization';
 import { storage } from '@/lib/Storage';
 
@@ -11,6 +13,7 @@ import '@/components/medal-config-form/medal-config-form';
 
 import { ViewElement } from '@/lib/ViewElement';
 import {
+  MedalConfigCopiedEvent,
   MedalConfigDeletedEvent,
   MedalConfigUpdatedEvent,
 } from '../medal-config-form/medal-config-form.events';
@@ -73,6 +76,45 @@ export class MedalConfigList extends ViewElement {
     this.medalConfigs = this.medalConfigs.filter(config => config.id !== e.detail.id);
   }
 
+  private generateUniqueName(name: string): string {
+    const existingNames = this.medalConfigs.map(c => c.name);
+    let counter = 2;
+    let candidate = `${name} ${counter}`;
+    while (existingNames.includes(candidate)) {
+      counter++;
+      candidate = `${name} ${counter}`;
+    }
+    return candidate;
+  }
+
+  async handleMedalConfigCopied(e: MedalConfigCopiedEvent): Promise<void> {
+    const uniqueName = this.generateUniqueName(e.detail.name);
+    const result = await storage.createMedalConfig({ ...e.detail, name: uniqueName });
+
+    if (!result) {
+      addToast(translate('failedToCopyMedalConfig'), NotificationType.ERROR);
+      return;
+    }
+
+    this.dispatchEvent(
+      new CollapsableToggledEvent({
+        isOpen: true,
+        panelId: `medalConfigForm-${result.id}`,
+      }),
+    );
+
+    this.medalConfigs = [...this.medalConfigs, result];
+
+    await this.updateComplete;
+
+    const forms = this.shadowRoot?.querySelectorAll('medal-config-form');
+    if (forms && forms.length > 0) {
+      forms[forms.length - 1].scrollIntoView({ behavior: 'smooth' });
+    }
+
+    addToast(translate('medalConfigCopied'), NotificationType.SUCCESS);
+  }
+
   handleMedalConfigUpdated(e: MedalConfigUpdatedEvent, index: number): void {
     this.dispatchEvent(
       new CollapsableToggledEvent({
@@ -110,6 +152,7 @@ export class MedalConfigList extends ViewElement {
                   .criteria=${config.criteria}
                   .factRequests=${config.factRequests}
                   ?open=${this.isPanelOpen(config.id)}
+                  @medal-config-copied=${this.handleMedalConfigCopied}
                   @medal-config-deleted=${this.handleMedalConfigDeleted}
                   @medal-config-updated=${(e: MedalConfigUpdatedEvent): void =>
                     this.handleMedalConfigUpdated(e, index)}

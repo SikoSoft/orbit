@@ -24,6 +24,7 @@ import '@/components/medal-config-form/criteria-editor/criteria-editor';
 import { MobxLitElement } from '@adobe/lit-mobx';
 import { translate } from '@/lib/Localization';
 import {
+  MedalConfigCopiedEvent,
   MedalConfigDeletedEvent,
   MedalConfigUpdatedEvent,
 } from './medal-config-form.events';
@@ -202,6 +203,13 @@ export class MedalConfigForm extends MobxLitElement {
     addToast(translate('medalConfigSaved'), NotificationType.SUCCESS);
   }
 
+  copy(): void {
+    const { name, description, series, recurrence, prestige, icon, factRequests, criteria } = this.localConfig;
+    this.dispatchEvent(
+      new MedalConfigCopiedEvent({ name, description, series, recurrence, prestige, icon, factRequests, criteria }),
+    );
+  }
+
   async delete(): Promise<void> {
     const result = await storage.deleteMedalConfig(this.localConfig.id);
 
@@ -338,6 +346,10 @@ export class MedalConfigForm extends MobxLitElement {
             ?disabled=${this.isSaving}
             @click=${this.save}
           >${translate(this.localConfig.id ? 'update' : 'create')}</ss-button>
+
+          ${this.localConfig.id
+            ? html`<ss-button @click=${this.copy}>${translate('copyMedalConfig')}</ss-button>`
+            : nothing}
 
           <ss-button
             negative
