@@ -136,6 +136,21 @@ Keep `api-spec` version in sync when making API contract changes. Internal packa
 3. Add a `@delegateSource()` stub in `Storage` (`src/lib/Storage.ts`)
 4. Add a pass-through in `OfflineCacheStorage` (`src/lib/OfflineCacheStorage.ts`) — either delegating to `networkStorage` directly (network-only ops) or with offline queue logic (cacheable ops). **Skipping step 4 means the method is never called.**
 
+## Collapsable panels
+
+When adding a collapsable panel (via `ss-collapsable`) inside a list component, always integrate with `collapsablePanelState` so open/closed state persists across renders:
+
+1. **In the list component** — add an `isPanelOpen(id: number): boolean` method:
+   - Return `true` when `!id` (new, unsaved items should default open).
+   - Otherwise return `this.state.collapsablePanelState[\`<panelKey>-${id}\`] || false`.
+2. **Bind the open attribute** — use `?open=${this.isPanelOpen(item.id)}` on the form element.
+3. **After a successful save** — dispatch a `CollapsableToggledEvent` with `isOpen: true` and the matching `panelId` so the panel stays open after the item gets its server-assigned id.
+4. **In the form component** — set `panelId={\`<panelKey>-${this.localConfig.id}\`}` on `ss-collapsable` so the event the collapsable emits carries the correct id for `app-container` to persist.
+
+The `app-container` already listens for `collapsable-toggled` events that bubble up and calls `state.setCollapsablePanelState(panelId, isOpen)`. No extra wiring is needed there.
+
+See `medal-config-list` / `medal-config-form` and `entity-config-list` / `entity-config-form` for reference implementations.
+
 ## Extra rules
 
 - Keep all edits, reads and and shell commands confined to this projects root directory or its subdirectories. Do not traverse into directories outside of this projects root
