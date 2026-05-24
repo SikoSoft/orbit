@@ -318,25 +318,38 @@ export class OfflineCacheStorage implements StorageSchema {
       try {
         console.log('[orbit] getEntityConfigs: fetching from network');
         const configs = await networkStorage.getEntityConfigs();
-        this.db.import({
-          meta: emptyMeta(),
-          [ExportDataType.ENTITY_CONFIGS]: configs,
-          [ExportDataType.ENTITIES]: [],
-          [ExportDataType.LIST_CONFIGS]: [],
-          [ExportDataType.MEDAL_CONFIGS]: [],
-          [ExportDataType.MEDALS]: [],
-        }).catch(err => console.warn('[orbit] getEntityConfigs: cache write failed', err));
-        console.log('[orbit] getEntityConfigs: network returned %d configs', configs.length);
+        this.db
+          .import({
+            meta: emptyMeta(),
+            [ExportDataType.ENTITY_CONFIGS]: configs,
+            [ExportDataType.ENTITIES]: [],
+            [ExportDataType.LIST_CONFIGS]: [],
+            [ExportDataType.MEDAL_CONFIGS]: [],
+            [ExportDataType.MEDALS]: [],
+          })
+          .catch(err =>
+            console.warn('[orbit] getEntityConfigs: cache write failed', err),
+          );
+        console.log(
+          '[orbit] getEntityConfigs: network returned %d configs',
+          configs.length,
+        );
         console.timeEnd('[orbit] getEntityConfigs');
         return configs;
       } catch (err) {
-        console.warn('[orbit] getEntityConfigs: network failed, falling back to cache', err);
+        console.warn(
+          '[orbit] getEntityConfigs: network failed, falling back to cache',
+          err,
+        );
       }
     } else {
       console.log('[orbit] getEntityConfigs: offline, reading from cache');
     }
     const configs = await this.db.getEntityConfigs();
-    console.log('[orbit] getEntityConfigs: cache returned %d configs', configs.length);
+    console.log(
+      '[orbit] getEntityConfigs: cache returned %d configs',
+      configs.length,
+    );
     console.timeEnd('[orbit] getEntityConfigs');
     return configs;
   }
@@ -506,8 +519,8 @@ export class OfflineCacheStorage implements StorageSchema {
       const result = await networkStorage.addEntity(payload);
       if (result) {
         await this.db.upsertEntity(payload, result.id);
-        return result;
       }
+      return result;
     }
 
     const tempId = await this.db.nextTempId('entity');
@@ -595,25 +608,38 @@ export class OfflineCacheStorage implements StorageSchema {
       try {
         console.log('[orbit] getListConfigs: fetching from network');
         const configs = await networkStorage.getListConfigs();
-        this.db.import({
-          meta: emptyMeta(),
-          [ExportDataType.ENTITY_CONFIGS]: [],
-          [ExportDataType.ENTITIES]: [],
-          [ExportDataType.LIST_CONFIGS]: configs,
-          [ExportDataType.MEDAL_CONFIGS]: [],
-          [ExportDataType.MEDALS]: [],
-        }).catch(err => console.warn('[orbit] getListConfigs: cache write failed', err));
-        console.log('[orbit] getListConfigs: network returned %d configs', configs.length);
+        this.db
+          .import({
+            meta: emptyMeta(),
+            [ExportDataType.ENTITY_CONFIGS]: [],
+            [ExportDataType.ENTITIES]: [],
+            [ExportDataType.LIST_CONFIGS]: configs,
+            [ExportDataType.MEDAL_CONFIGS]: [],
+            [ExportDataType.MEDALS]: [],
+          })
+          .catch(err =>
+            console.warn('[orbit] getListConfigs: cache write failed', err),
+          );
+        console.log(
+          '[orbit] getListConfigs: network returned %d configs',
+          configs.length,
+        );
         console.timeEnd('[orbit] getListConfigs');
         return configs;
       } catch (err) {
-        console.warn('[orbit] getListConfigs: network failed, falling back to cache', err);
+        console.warn(
+          '[orbit] getListConfigs: network failed, falling back to cache',
+          err,
+        );
       }
     } else {
       console.log('[orbit] getListConfigs: offline, reading from cache');
     }
     const configs = await this.db.getListConfigs();
-    console.log('[orbit] getListConfigs: cache returned %d configs', configs.length);
+    console.log(
+      '[orbit] getListConfigs: cache returned %d configs',
+      configs.length,
+    );
     console.timeEnd('[orbit] getListConfigs');
     return configs;
   }
@@ -703,7 +729,11 @@ export class OfflineCacheStorage implements StorageSchema {
     return networkStorage.getSettings();
   }
 
-  async saveSetting(setting: Setting, listConfigId?: string, isSystem?: boolean): Promise<boolean> {
+  async saveSetting(
+    setting: Setting,
+    listConfigId?: string,
+    isSystem?: boolean,
+  ): Promise<boolean> {
     if (listConfigId) {
       await this.db.saveSetting(setting, listConfigId);
 
@@ -720,10 +750,18 @@ export class OfflineCacheStorage implements StorageSchema {
 
   // ─── Import / Export / Clear ─────────────────────────────────────────────────
 
-  async exportEntities(entityConfigIds: number[], startDate?: string, endDate?: string): Promise<Entity.Entity[]> {
+  async exportEntities(
+    entityConfigIds: number[],
+    startDate?: string,
+    endDate?: string,
+  ): Promise<Entity.Entity[]> {
     if (this.isOnline) {
       try {
-        return await networkStorage.exportEntities(entityConfigIds, startDate, endDate);
+        return await networkStorage.exportEntities(
+          entityConfigIds,
+          startDate,
+          endDate,
+        );
       } catch {
         // fall through
       }
@@ -886,9 +924,7 @@ export class OfflineCacheStorage implements StorageSchema {
     );
   }
 
-  async getEntitySuggestions(
-    filter: ListFilter,
-  ): Promise<Entity.Entity[]> {
+  async getEntitySuggestions(filter: ListFilter): Promise<Entity.Entity[]> {
     return networkStorage.getEntitySuggestions(filter);
   }
 
@@ -1181,7 +1217,9 @@ export class OfflineCacheStorage implements StorageSchema {
     return networkStorage.getMfaSetup();
   }
 
-  async verifyMfaSetup(body: MfaVerifySetupRequestBody): Promise<StorageResult<void>> {
+  async verifyMfaSetup(
+    body: MfaVerifySetupRequestBody,
+  ): Promise<StorageResult<void>> {
     return networkStorage.verifyMfaSetup(body);
   }
 

@@ -306,8 +306,7 @@ export class EntityForm extends ViewElement {
 
         this.tags =
           this.state.listFilter.tagging?.[ListFilterType.CONTAINS_ALL_OF] ?? [];
-        this.published =
-          this.state.listSetting[SettingName.AUTO_PUBLISH];
+        this.published = this.state.listSetting[SettingName.AUTO_PUBLISH];
 
         if (this.availableEntityConfigs.length === 1) {
           this.type = this.availableEntityConfigs[0].id;
@@ -384,7 +383,10 @@ export class EntityForm extends ViewElement {
             p => p.id === property.propertyConfigId,
           );
           let value = property.value;
-          if (propConfig?.dataType === DataType.DATE && typeof value === 'number') {
+          if (
+            propConfig?.dataType === DataType.DATE &&
+            typeof value === 'number'
+          ) {
             value = Time.formatDateTime(new Date(value));
           }
           return {
