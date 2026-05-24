@@ -824,6 +824,7 @@ export class Storage implements StorageSchema {
   }
 
   @delegateSource()
+  @delegateSource()
   async getMedals(): Promise<Medal[]> {
     return Promise.resolve([]);
   }

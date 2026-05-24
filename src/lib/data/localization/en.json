@@ -199,6 +199,8 @@
   "noEntityConfigs": "No entity configurations found. :( Please add an entity configuration to get started.",
   "getStartedWithWizard": "Get started quickly by creating a collection",
   "allListConfigs": "All list configurations",
+  "allMedalConfigs": "All medal configurations",
+  "allMedals": "All medals",
   "showFull": "Show Full",
   "showEdit": "Show Edit",
   "theme": "Theme",

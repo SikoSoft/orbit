@@ -711,6 +711,8 @@ describe('SQLiteStorage', () => {
         [ExportDataType.ENTITY_CONFIGS]: configs,
         [ExportDataType.ENTITIES]: entities,
         [ExportDataType.LIST_CONFIGS]: [],
+        [ExportDataType.MEDAL_CONFIGS]: [],
+        [ExportDataType.MEDALS]: [],
       });
 
       const importedConfigs = await db.getEntityConfigs();

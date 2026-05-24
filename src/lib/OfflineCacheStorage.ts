@@ -319,6 +319,8 @@ export class OfflineCacheStorage implements StorageSchema {
           [ExportDataType.ENTITY_CONFIGS]: configs,
           [ExportDataType.ENTITIES]: [],
           [ExportDataType.LIST_CONFIGS]: [],
+          [ExportDataType.MEDAL_CONFIGS]: [],
+          [ExportDataType.MEDALS]: [],
         }).catch(err => console.warn('[orbit] getEntityConfigs: cache write failed', err));
         console.log('[orbit] getEntityConfigs: network returned %d configs', configs.length);
         console.timeEnd('[orbit] getEntityConfigs');
@@ -346,6 +348,8 @@ export class OfflineCacheStorage implements StorageSchema {
           [ExportDataType.ENTITY_CONFIGS]: [result],
           [ExportDataType.ENTITIES]: [],
           [ExportDataType.LIST_CONFIGS]: [],
+          [ExportDataType.MEDAL_CONFIGS]: [],
+          [ExportDataType.MEDALS]: [],
         });
         return result;
       }
@@ -592,6 +596,8 @@ export class OfflineCacheStorage implements StorageSchema {
           [ExportDataType.ENTITY_CONFIGS]: [],
           [ExportDataType.ENTITIES]: [],
           [ExportDataType.LIST_CONFIGS]: configs,
+          [ExportDataType.MEDAL_CONFIGS]: [],
+          [ExportDataType.MEDALS]: [],
         }).catch(err => console.warn('[orbit] getListConfigs: cache write failed', err));
         console.log('[orbit] getListConfigs: network returned %d configs', configs.length);
         console.timeEnd('[orbit] getListConfigs');

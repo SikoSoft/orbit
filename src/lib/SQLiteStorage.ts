@@ -1064,6 +1064,8 @@ export class SQLiteStorage implements StorageSchema {
         ),
         [ExportDataType.ENTITIES]: entities,
         [ExportDataType.LIST_CONFIGS]: listConfigs,
+        [ExportDataType.MEDAL_CONFIGS]: [],
+        [ExportDataType.MEDALS]: [],
       };
     } catch (error) {
       throw new Error(

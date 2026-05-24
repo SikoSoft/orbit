@@ -200,6 +200,8 @@ export class CollectionWizard extends MobxLitElement {
           },
         },
       ],
+      medalConfigs: [],
+      medals: [],
     };
 
     this.isLoading = true;

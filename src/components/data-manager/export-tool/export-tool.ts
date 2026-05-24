@@ -85,6 +85,12 @@ export class ExportTool extends MobxLitElement {
   selectedListConfigs: string[] = [];
 
   @state()
+  selectedMedalConfigs: boolean = false;
+
+  @state()
+  selectedMedals: boolean = false;
+
+  @state()
   timeRangeType: 'allTime' | 'range' = 'allTime';
 
   @state()
@@ -96,8 +102,10 @@ export class ExportTool extends MobxLitElement {
   @state()
   get everythingIsSelected(): boolean {
     return (
-      this.selectedDataSets.length ===
-      this.state.entityConfigs.length * Object.values(ExportDataType).length
+      this.selectedDataSets.length === this.state.entityConfigs.length * 2 &&
+      this.allListConfigsAreSelected &&
+      this.selectedMedalConfigs &&
+      this.selectedMedals
     );
   }
 
@@ -173,6 +181,8 @@ export class ExportTool extends MobxLitElement {
         entityConfigs: [],
         entities: [],
         listConfigs: [],
+        medalConfigs: [],
+        medals: [],
       };
 
       if (
@@ -198,6 +208,17 @@ export class ExportTool extends MobxLitElement {
         dataFile.listConfigs = this.state.listConfigs.filter(config =>
           this.selectedListConfigs.includes(config.id),
         );
+      }
+
+      if (this.selectedMedalConfigs) {
+        const medalConfigs = await storage.getMedalConfigs();
+        dataFile.medalConfigs = medalConfigs.map(
+          ({ createdAt: _, updatedAt: __, ...rest }) => rest,
+        );
+      }
+
+      if (this.selectedMedals) {
+        dataFile.medals = await storage.getMedals();
       }
 
       zip.file('data.json', JSON.stringify(dataFile, null, 2));
@@ -278,17 +299,20 @@ export class ExportTool extends MobxLitElement {
   selectEverything(): void {
     if (this.everythingIsSelected) {
       this.selectedDataSets = [];
+      this.selectedMedalConfigs = false;
+      this.selectedMedals = false;
       return;
     }
 
     const allDataSets: ExportDataSet[] = [];
     for (const config of this.state.entityConfigs) {
-      for (const dataType of Object.values(ExportDataType)) {
-        allDataSets.push({ entityConfigId: config.id, dataType });
-      }
+      allDataSets.push({ entityConfigId: config.id, dataType: ExportDataType.ENTITY_CONFIGS });
+      allDataSets.push({ entityConfigId: config.id, dataType: ExportDataType.ENTITIES });
     }
     this.selectedDataSets = allDataSets;
     this.selectAllListConfigs();
+    this.selectedMedalConfigs = true;
+    this.selectedMedals = true;
   }
 
   selectAllListConfigs(): void {
@@ -403,6 +427,34 @@ export class ExportTool extends MobxLitElement {
           )}
         </div>
 
+        <div class="medal-configs">
+          <div class="include-type-header">
+            <input
+              type="checkbox"
+              id="all-medal-configs"
+              ?checked=${this.selectedMedalConfigs}
+              @change=${(): void => {
+                this.selectedMedalConfigs = !this.selectedMedalConfigs;
+              }}
+            />
+            <h3>${translate('allMedalConfigs')}</h3>
+          </div>
+        </div>
+
+        <div class="medals">
+          <div class="include-type-header">
+            <input
+              type="checkbox"
+              id="all-medals"
+              ?checked=${this.selectedMedals}
+              @change=${(): void => {
+                this.selectedMedals = !this.selectedMedals;
+              }}
+            />
+            <h3>${translate('allMedals')}</h3>
+          </div>
+        </div>
+
         <div class="time-range">
           <h3>${translate('exportTimeRange')}</h3>
           <div class="time-range-options">
@@ -458,7 +510,9 @@ export class ExportTool extends MobxLitElement {
 
         <ss-button
           ?disabled=${(!this.selectedDataSets.length &&
-            !this.selectedListConfigs.length) ||
+            !this.selectedListConfigs.length &&
+            !this.selectedMedalConfigs &&
+            !this.selectedMedals) ||
           this.exporting}
           @click=${this.exportData}
           >${translate('exportData')}</ss-button
