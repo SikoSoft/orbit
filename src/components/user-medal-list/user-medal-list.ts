@@ -12,6 +12,11 @@ import { themed } from '@/lib/Theme';
 import '@/components/prestige-gem/prestige-gem';
 
 type RingStyles = Record<string, string>;
+type SortField = 'name' | 'prestige' | 'dateAwarded';
+type SortDir = 'asc' | 'desc';
+
+const PRESTIGE_LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const SORT_FIELDS: SortField[] = ['name', 'prestige', 'dateAwarded'];
 
 function getRingStyles(prestige: number): RingStyles {
   if (prestige <= 2) {
@@ -61,6 +66,85 @@ export class UserMedalList extends ViewElement {
     .no-medals {
       font-style: italic;
       padding: 1rem;
+    }
+
+    .controls {
+      padding: 1rem 1rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .row-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      opacity: 0.5;
+      min-width: 48px;
+    }
+
+    .prestige-btn {
+      width: 28px;
+      height: 28px;
+      border: 2px solid transparent;
+      border-radius: 6px;
+      background: none;
+      cursor: pointer;
+      padding: 2px;
+      opacity: 0.3;
+      transition:
+        opacity 0.15s,
+        border-color 0.15s;
+    }
+
+    .prestige-btn:hover {
+      opacity: 0.65;
+    }
+
+    .prestige-btn.active {
+      opacity: 1;
+      border-color: var(--primary-color, #888);
+    }
+
+    .series-select {
+      font-size: 0.85rem;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      border: 1px solid rgba(128, 128, 128, 0.3);
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .sort-btn {
+      font-size: 0.78rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      background: none;
+      color: inherit;
+      cursor: pointer;
+      opacity: 0.5;
+      transition:
+        opacity 0.15s,
+        border-color 0.15s;
+    }
+
+    .sort-btn:hover {
+      opacity: 0.85;
+    }
+
+    .sort-btn.active {
+      opacity: 1;
+      border-color: var(--primary-color, #888);
     }
 
     .medal-grid {
@@ -188,6 +272,18 @@ export class UserMedalList extends ViewElement {
   @state()
   medalConfigs: MedalConfig[] = [];
 
+  @state()
+  filterPrestige: number[] = [];
+
+  @state()
+  filterSeries: string = '';
+
+  @state()
+  sortBy: SortField = 'name';
+
+  @state()
+  sortDir: SortDir = 'asc';
+
   connectedCallback(): void {
     super.connectedCallback();
     this.loadData();
@@ -203,6 +299,81 @@ export class UserMedalList extends ViewElement {
     this.ready = true;
   }
 
+  get availableSeries(): string[] {
+    const seriesSet = new Set<string>();
+    this.medals.forEach(medal => {
+      const config = this.medalConfigs.find(c => c.id === medal.medalConfigId);
+      if (config?.series) {
+        seriesSet.add(config.series);
+      }
+    });
+    return Array.from(seriesSet).sort();
+  }
+
+  get filteredAndSortedMedals(): Medal[] {
+    let result = this.medals;
+
+    if (this.filterPrestige.length > 0) {
+      result = result.filter(medal => {
+        const config = this.medalConfigs.find(c => c.id === medal.medalConfigId);
+        return config !== undefined && this.filterPrestige.includes(config.prestige);
+      });
+    }
+
+    if (this.filterSeries) {
+      result = result.filter(medal => {
+        const config = this.medalConfigs.find(c => c.id === medal.medalConfigId);
+        return config?.series === this.filterSeries;
+      });
+    }
+
+    return [...result].sort((a, b) => {
+      const configA = this.medalConfigs.find(c => c.id === a.medalConfigId);
+      const configB = this.medalConfigs.find(c => c.id === b.medalConfigId);
+      let cmp = 0;
+      if (this.sortBy === 'name') {
+        cmp = (configA?.name ?? '').localeCompare(configB?.name ?? '');
+      } else if (this.sortBy === 'prestige') {
+        cmp = (configA?.prestige ?? 0) - (configB?.prestige ?? 0);
+      } else {
+        cmp =
+          new Date(a.awardedAt).getTime() - new Date(b.awardedAt).getTime();
+      }
+      return this.sortDir === 'asc' ? cmp : -cmp;
+    });
+  }
+
+  private togglePrestige(level: number): void {
+    if (this.filterPrestige.includes(level)) {
+      this.filterPrestige = this.filterPrestige.filter(p => p !== level);
+    } else {
+      this.filterPrestige = [...this.filterPrestige, level];
+    }
+  }
+
+  private handleSeriesChange(e: Event): void {
+    this.filterSeries = (e.target as HTMLSelectElement).value;
+  }
+
+  private handleSort(field: SortField): void {
+    if (this.sortBy === field) {
+      this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortBy = field;
+      this.sortDir = 'asc';
+    }
+  }
+
+  private getSortFieldLabel(field: SortField): string {
+    if (field === 'name') {
+      return translate('name');
+    }
+    if (field === 'prestige') {
+      return translate('prestige');
+    }
+    return translate('dateAwarded');
+  }
+
   renderFrame(config: MedalConfig | undefined): TemplateResult {
     const prestige = config?.prestige ?? 1;
     return html`
@@ -216,45 +387,127 @@ export class UserMedalList extends ViewElement {
     `;
   }
 
+  renderControls(): TemplateResult {
+    const series = this.availableSeries;
+    return html`
+      <div class="controls">
+        <div class="filter-row">
+          <span class="row-label">${translate('prestige')}</span>
+          ${repeat(
+            PRESTIGE_LEVELS,
+            p => p,
+            p => html`
+              <button
+                class="prestige-btn ${this.filterPrestige.includes(p) ? 'active' : ''}"
+                title="${translate('prestige')} ${p}"
+                @click=${(): void => {
+                  this.togglePrestige(p);
+                }}
+              >
+                <prestige-gem prestige=${p}></prestige-gem>
+              </button>
+            `,
+          )}
+        </div>
+        ${series.length > 0
+          ? html`
+              <div class="filter-row">
+                <span class="row-label">${translate('series')}</span>
+                <select
+                  class="series-select"
+                  @change=${(e: Event): void => {
+                    this.handleSeriesChange(e);
+                  }}
+                >
+                  <option value="">${translate('allSeries')}</option>
+                  ${repeat(
+                    series,
+                    s => s,
+                    s => html`
+                      <option value=${s} ?selected=${this.filterSeries === s}>
+                        ${s}
+                      </option>
+                    `,
+                  )}
+                </select>
+              </div>
+            `
+          : nothing}
+        <div class="filter-row">
+          <span class="row-label">${translate('sort')}</span>
+          ${repeat(
+            SORT_FIELDS,
+            f => f,
+            f => html`
+              <button
+                class="sort-btn ${this.sortBy === f ? 'active' : ''}"
+                @click=${(): void => {
+                  this.handleSort(f);
+                }}
+              >
+                ${this.getSortFieldLabel(f)}${this.sortBy === f
+                  ? this.sortDir === 'asc'
+                    ? ' ↑'
+                    : ' ↓'
+                  : ''}
+              </button>
+            `,
+          )}
+        </div>
+      </div>
+    `;
+  }
+
   render(): TemplateResult {
     if (this.medals.length === 0) {
       return html`<div class="no-medals">${translate('noMedals')}</div>`;
     }
 
+    const medals = this.filteredAndSortedMedals;
+
     return html`
-      <div class="medal-grid">
-        ${repeat(
-          this.medals,
-          medal => medal.id,
-          medal => {
-            const config = this.medalConfigs.find(
-              c => c.id === medal.medalConfigId,
-            );
-            const prestige = config?.prestige ?? 1;
-            return html`
-              <div class="medal-card box">
-                ${this.renderFrame(config)}
-                <div class="medal-content">
-                  ${config?.series
-                    ? html`<div class="medal-series">${config.series}</div>`
-                    : nothing}
-                  <div class="medal-name">${config?.name ?? ''}</div>
-                  <div class="medal-description">
-                    ${config?.description ?? ''}
-                  </div>
-                  <div class="medal-meta">
-                    ${translate('prestige')} ${prestige} &bull;
-                    ${new Date(medal.awardedAt).toLocaleDateString()}
-                  </div>
-                </div>
-                <div class="medal-gem">
-                  <prestige-gem prestige=${prestige}></prestige-gem>
-                </div>
-              </div>
-            `;
-          },
-        )}
-      </div>
+      ${this.renderControls()}
+      ${medals.length === 0
+        ? html`<div class="no-medals">
+            ${translate('noMedalsMatchFilter')}
+          </div>`
+        : html`
+            <div class="medal-grid">
+              ${repeat(
+                medals,
+                medal => medal.id,
+                medal => {
+                  const config = this.medalConfigs.find(
+                    c => c.id === medal.medalConfigId,
+                  );
+                  const prestige = config?.prestige ?? 1;
+                  return html`
+                    <div class="medal-card box">
+                      ${this.renderFrame(config)}
+                      <div class="medal-content">
+                        ${config?.series
+                          ? html`<div class="medal-series">
+                              ${config.series}
+                            </div>`
+                          : nothing}
+                        <div class="medal-name">${config?.name ?? ''}</div>
+                        <div class="medal-description">
+                          ${config?.description ?? ''}
+                        </div>
+                        <div class="medal-meta">
+                          ${translate('prestige')} ${prestige} &bull;
+                          ${new Date(medal.awardedAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <div class="medal-gem">
+                        <prestige-gem prestige=${prestige}></prestige-gem>
+                      </div>
+                    </div>
+                  `;
+                },
+              )}
+            </div>
+          `}
     `;
   }
 }
