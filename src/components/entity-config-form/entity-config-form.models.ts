@@ -1,5 +1,8 @@
 import { ControlType } from '@/models/Control';
-import { EntityPropertyConfig } from 'api-spec/models/Entity';
+import {
+  EntityConfigUniqueConstraint,
+  EntityPropertyConfig,
+} from 'api-spec/models/Entity';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
 import { RevisionProblems } from 'api-spec/models/Revision';
 import { AccessPolicy } from 'api-spec/models/Access';
@@ -24,7 +27,10 @@ export enum EntityConfigFormProp {
   VIEW_ACCESS_POLICY = 'viewAccessPolicy',
   EDIT_ACCESS_POLICY = 'editAccessPolicy',
   PUBLIC = 'public',
+  UNIQUE_CONSTRAINTS = 'uniqueConstraints',
 }
+
+export type { EntityConfigUniqueConstraint };
 
 export interface EntityConfigFormProps extends PropTypes {
   [EntityConfigFormProp.ENTITY_CONFIG_ID]: number;
@@ -37,6 +43,7 @@ export interface EntityConfigFormProps extends PropTypes {
   [EntityConfigFormProp.VIEW_ACCESS_POLICY]: AccessPolicy | null;
   [EntityConfigFormProp.EDIT_ACCESS_POLICY]: AccessPolicy | null;
   [EntityConfigFormProp.PUBLIC]: boolean;
+  [EntityConfigFormProp.UNIQUE_CONSTRAINTS]: EntityConfigUniqueConstraint[];
 }
 
 export const entityConfigFormProps: PropConfigMap<EntityConfigFormProps> = {
@@ -89,5 +96,10 @@ export const entityConfigFormProps: PropConfigMap<EntityConfigFormProps> = {
     default: false,
     control: { type: ControlType.BOOLEAN },
     description: 'Whether this configuration is publicly accessible',
+  },
+  [EntityConfigFormProp.UNIQUE_CONSTRAINTS]: {
+    default: [],
+    control: { type: ControlType.HIDDEN },
+    description: 'Unique field combinations for this entity config',
   },
 };

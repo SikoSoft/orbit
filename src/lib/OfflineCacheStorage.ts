@@ -1,6 +1,10 @@
 import type { SqlValue } from '@sqlite.org/sqlite-wasm';
 
-import { EntityConfig, EntityPropertyConfig } from 'api-spec/models/Entity';
+import {
+  EntityConfig,
+  EntityConfigUniqueConstraint,
+  EntityPropertyConfig,
+} from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
 import { ListConfig, ListFilter, ListSort } from 'api-spec/models/List';
 import { Setting, Settings } from 'api-spec/models/Setting';
@@ -869,6 +873,16 @@ export class OfflineCacheStorage implements StorageSchema {
       entityConfigId,
       viewAccessPolicyId,
       editAccessPolicyId,
+    );
+  }
+
+  async saveEntityConfigUniqueConstraints(
+    entityConfigId: number,
+    constraints: EntityConfigUniqueConstraint[],
+  ): Promise<boolean> {
+    return networkStorage.saveEntityConfigUniqueConstraints(
+      entityConfigId,
+      constraints,
     );
   }
 

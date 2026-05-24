@@ -181,6 +181,7 @@ describe('AppState', () => {
             defaultValue: '',
           } as EntityPropertyConfig,
         ],
+        uniqueConstraints: [],
       };
       state.setEntityConfigs([entityConfig]);
       expect(state.propertyConfigs).toHaveLength(1);

@@ -188,6 +188,7 @@ export class CollectionWizard extends MobxLitElement {
             optionsOnly: p.optionsOnly,
             options: p.options,
           })),
+          uniqueConstraints: [],
         },
       ],
       entities: [],

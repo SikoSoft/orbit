@@ -13,6 +13,7 @@ import { addToast } from '@/lib/Util';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 import {
   EntityConfigFormProp,
+  EntityConfigUniqueConstraint,
   entityConfigFormProps,
   EntityConfigFormProps,
   PropertyConfigInstance,
@@ -98,6 +99,27 @@ export class EntityConfigForm extends MobxLitElement {
     ss-collapsable::part(head) {
       font-weight: bold;
     }
+
+    .constraint {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .constraint-properties {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .constraint-property {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      cursor: pointer;
+    }
   `;
 
   @state()
@@ -167,6 +189,16 @@ export class EntityConfigForm extends MobxLitElement {
   [EntityConfigFormProp.PUBLIC]: EntityConfigFormProps[EntityConfigFormProp.PUBLIC] =
     entityConfigFormProps[EntityConfigFormProp.PUBLIC].default;
 
+  @property({ type: Array })
+  [EntityConfigFormProp.UNIQUE_CONSTRAINTS]: EntityConfigFormProps[EntityConfigFormProp.UNIQUE_CONSTRAINTS] =
+    entityConfigFormProps[EntityConfigFormProp.UNIQUE_CONSTRAINTS].default;
+
+  @state()
+  localConstraints: EntityConfigUniqueConstraint[] = [];
+
+  @state()
+  isSavingConstraints = false;
+
   @state()
   get hasBreakingChanges(): boolean {
     return (
@@ -214,7 +246,11 @@ export class EntityConfigForm extends MobxLitElement {
       viewAccessPolicy: this[EntityConfigFormProp.VIEW_ACCESS_POLICY],
       editAccessPolicy: this[EntityConfigFormProp.EDIT_ACCESS_POLICY],
       public: this[EntityConfigFormProp.PUBLIC],
+      uniqueConstraints: this[EntityConfigFormProp.UNIQUE_CONSTRAINTS],
     };
+    this.localConstraints = this[EntityConfigFormProp.UNIQUE_CONSTRAINTS].map(
+      c => ({ ...c, propertyIds: [...c.propertyIds] }),
+    );
   }
 
   updateName(name: string): void {
@@ -381,6 +417,48 @@ export class EntityConfigForm extends MobxLitElement {
     this.entityConfig = { ...this.entityConfig, public: isPublic };
   }
 
+  addConstraint(): void {
+    this.localConstraints = [...this.localConstraints, { propertyIds: [] }];
+  }
+
+  removeConstraint(index: number): void {
+    this.localConstraints = this.localConstraints.filter((_, i) => i !== index);
+  }
+
+  toggleConstraintProperty(constraintIndex: number, propertyId: number): void {
+    this.localConstraints = this.localConstraints.map((c, i) => {
+      if (i !== constraintIndex) {
+        return c;
+      }
+      const propertyIds = c.propertyIds.includes(propertyId)
+        ? c.propertyIds.filter(id => id !== propertyId)
+        : [...c.propertyIds, propertyId];
+      return { ...c, propertyIds };
+    });
+  }
+
+  async saveConstraints(): Promise<void> {
+    this.isSavingConstraints = true;
+    const result = await storage.saveEntityConfigUniqueConstraints(
+      this.entityConfig.id,
+      this.localConstraints,
+    );
+    this.isSavingConstraints = false;
+
+    if (!result) {
+      addToast(
+        translate('entityConfigForm.constraints.saveError'),
+        NotificationType.ERROR,
+      );
+      return;
+    }
+
+    addToast(
+      translate('entityConfigForm.constraints.saveSuccess'),
+      NotificationType.SUCCESS,
+    );
+  }
+
   get tabRegistry(): TabEntry[] {
     return [
       {
@@ -407,6 +485,11 @@ export class EntityConfigForm extends MobxLitElement {
             )}
           ></access-policy-assignment>`,
         shouldShow: () => this.state.hasRole(Role.ACCESS),
+      },
+      {
+        heading: translate('entityConfigForm.tab.constraints'),
+        content: () => this.renderConstraintsTab(),
+        shouldShow: () => !!this.entityConfig.id,
       },
     ];
   }
@@ -598,6 +681,58 @@ export class EntityConfigForm extends MobxLitElement {
               >${translate('addProperty')}</ss-button
             >`
           : nothing}
+      </div>
+    `;
+  }
+
+  renderConstraintsTab(): TemplateResult {
+    return html`
+      <div class="constraints">
+        ${repeat(
+          this.localConstraints,
+          (_, i) => i,
+          (constraint, index) => html`
+            <div class="constraint">
+              <div class="constraint-properties">
+                ${repeat(
+                  this.entityConfig.properties,
+                  p => p.id,
+                  property => html`
+                    <label class="constraint-property">
+                      <input
+                        type="checkbox"
+                        ?checked=${constraint.propertyIds.includes(property.id)}
+                        @change=${(): void =>
+                          this.toggleConstraintProperty(index, property.id)}
+                      />
+                      ${property.name}
+                    </label>
+                  `,
+                )}
+              </div>
+              <ss-button
+                negative
+                @click=${(): void => this.removeConstraint(index)}
+              >
+                ${translate('remove')}
+              </ss-button>
+            </div>
+          `,
+        )}
+
+        <div class="buttons">
+          <ss-button @click=${this.addConstraint}>
+            ${translate('entityConfigForm.constraints.addConstraint')}
+          </ss-button>
+
+          <ss-button
+            positive
+            ?disabled=${this.isSavingConstraints}
+            @click=${this.saveConstraints}
+          >
+            ${translate('save')}
+          </ss-button>
+        </div>
       </div>
     `;
   }

@@ -26,7 +26,11 @@ import {
   StorageSource,
 } from '@/models/Storage';
 import { Setting, Settings } from 'api-spec/models/Setting';
-import { EntityConfig, EntityPropertyConfig } from 'api-spec/models/Entity';
+import {
+  EntityConfig,
+  EntityConfigUniqueConstraint,
+  EntityPropertyConfig,
+} from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
 import { translate } from './Localization';
 import { ExportDataContents, NukedDataType } from 'api-spec/models/Data';
@@ -799,6 +803,14 @@ export class Storage implements StorageSchema {
     _entityConfigId: number,
     _viewAccessPolicyId: number,
     _editAccessPolicyId: number,
+  ): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
+  @delegateSource()
+  async saveEntityConfigUniqueConstraints(
+    _entityConfigId: number,
+    _constraints: EntityConfigUniqueConstraint[],
   ): Promise<boolean> {
     return Promise.resolve(false);
   }

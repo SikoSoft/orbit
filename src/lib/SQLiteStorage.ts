@@ -4,6 +4,7 @@ import {
   DataType,
   Entity,
   EntityConfig,
+  EntityConfigUniqueConstraint,
   EntityProperty,
   EntityPropertyConfig,
   ImageDataValue,
@@ -100,6 +101,7 @@ function rowToEntityConfig(row: Record<string, unknown>): EntityConfig {
     viewAccessPolicy: null,
     editAccessPolicy: null,
     properties: [],
+    uniqueConstraints: [],
   };
 }
 
@@ -330,6 +332,13 @@ export class SQLiteStorage implements StorageSchema {
     await this.run('DELETE FROM entity_config WHERE id = ?', [id]);
 
     return true;
+  }
+
+  async saveEntityConfigUniqueConstraints(
+    _entityConfigId: number,
+    _constraints: EntityConfigUniqueConstraint[],
+  ): Promise<boolean> {
+    return false;
   }
 
   // ─── Property Configs ─────────────────────────────────────────────────────

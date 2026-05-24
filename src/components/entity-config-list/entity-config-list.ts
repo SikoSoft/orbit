@@ -116,6 +116,7 @@ export class EntityConfigList extends ViewElement {
                   aiIdentifyPrompt=${config.aiIdentifyPrompt}
                   .viewAccessPolicy=${config.viewAccessPolicy}
                   .editAccessPolicy=${config.editAccessPolicy}
+                  .uniqueConstraints=${config.uniqueConstraints ?? []}
                 ></entity-config-form>
               `,
             )

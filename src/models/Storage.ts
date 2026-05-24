@@ -1,7 +1,11 @@
 import { Setting, Settings } from 'api-spec/models/Setting';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { ListConfig, ListSort, ListFilter } from 'api-spec/models/List';
-import { EntityConfig, EntityPropertyConfig } from 'api-spec/models/Entity';
+import {
+  EntityConfig,
+  EntityConfigUniqueConstraint,
+  EntityPropertyConfig,
+} from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
 import { ExportDataContents, NukedDataType } from 'api-spec/models/Data';
 import {
@@ -196,4 +200,8 @@ export interface StorageSchema {
   createMedalConfig?(body: Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>): Promise<MedalConfig | null>;
   updateMedalConfig?(id: number, body: Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>): Promise<MedalConfig | null>;
   deleteMedalConfig?(id: number): Promise<boolean>;
+  saveEntityConfigUniqueConstraints?(
+    entityConfigId: number,
+    constraints: EntityConfigUniqueConstraint[],
+  ): Promise<boolean>;
 }

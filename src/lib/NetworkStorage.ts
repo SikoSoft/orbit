@@ -8,7 +8,11 @@ import {
 import { api } from './Api';
 import { StorageResult, StorageSchema, StorageSource } from '@/models/Storage';
 import { Setting, Settings } from 'api-spec/models/Setting';
-import { EntityConfig, EntityPropertyConfig } from 'api-spec/models/Entity';
+import {
+  EntityConfig,
+  EntityConfigUniqueConstraint,
+  EntityPropertyConfig,
+} from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
 import { translate } from './Localization';
 import { ExportDataContents, NukedDataType } from 'api-spec/models/Data';
@@ -752,6 +756,17 @@ export class NetworkStorage implements StorageSchema {
     }
 
     return false;
+  }
+
+  async saveEntityConfigUniqueConstraints(
+    entityConfigId: number,
+    constraints: EntityConfigUniqueConstraint[],
+  ): Promise<boolean> {
+    const result = await api.put<EntityConfigUniqueConstraint[], null>(
+      `uniqueConstraints/${entityConfigId}`,
+      constraints,
+    );
+    return !!(result && result.isOk);
   }
 
   async getEntitySuggestions(filter: ListFilter): Promise<Entity.Entity[]> {
