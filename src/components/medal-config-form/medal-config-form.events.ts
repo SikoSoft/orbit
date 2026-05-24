@@ -1,5 +1,19 @@
 import { MedalConfig } from 'api-spec/models/Medal';
 
+export const medalConfigCopiedEventName = 'medal-config-copied';
+
+export type MedalConfigCopiedPayload = Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>;
+
+export class MedalConfigCopiedEvent extends CustomEvent<MedalConfigCopiedPayload> {
+  constructor(detail: MedalConfigCopiedPayload) {
+    super(medalConfigCopiedEventName, {
+      detail,
+      bubbles: true,
+      composed: true,
+    });
+  }
+}
+
 export const medalConfigUpdatedEventName = 'medal-config-updated';
 
 export type MedalConfigUpdatedPayload = MedalConfig;
