@@ -15,6 +15,8 @@ import {
   MedalConfigUpdatedEvent,
 } from '../medal-config-form/medal-config-form.events';
 import { themed } from '@/lib/Theme';
+import { CollapsableToggledEvent } from '@ss/ui/components/ss-collapsable.events';
+import { appState } from '@/state';
 
 const defaultMedalConfig: MedalConfig = {
   id: 0,
@@ -45,6 +47,8 @@ export class MedalConfigList extends ViewElement {
     }
   `;
 
+  private appState = appState;
+
   @state()
   medalConfigs: MedalConfig[] = [];
 
@@ -70,7 +74,21 @@ export class MedalConfigList extends ViewElement {
   }
 
   handleMedalConfigUpdated(e: MedalConfigUpdatedEvent, index: number): void {
+    this.dispatchEvent(
+      new CollapsableToggledEvent({
+        isOpen: true,
+        panelId: `medalConfigForm-${e.detail.id}`,
+      }),
+    );
     this.medalConfigs = this.medalConfigs.map((c, i) => (i === index ? e.detail : c));
+  }
+
+  isPanelOpen(id: number): boolean {
+    if (!id) {
+      return true;
+    }
+
+    return this.appState.collapsablePanelState[`medalConfigForm-${id}`] || false;
   }
 
   render(): TemplateResult {
@@ -91,7 +109,7 @@ export class MedalConfigList extends ViewElement {
                   icon=${config.icon}
                   .criteria=${config.criteria}
                   .factRequests=${config.factRequests}
-                  ?open=${!config.id}
+                  ?open=${this.isPanelOpen(config.id)}
                   @medal-config-deleted=${this.handleMedalConfigDeleted}
                   @medal-config-updated=${(e: MedalConfigUpdatedEvent): void =>
                     this.handleMedalConfigUpdated(e, index)}
