@@ -476,10 +476,7 @@ export class ListConfig extends MobxLitElement {
 
     addToast(translate('listConfigSaved'), NotificationType.SUCCESS);
     this.state.setListConfigs(await storage.getListConfigs());
-    this.state.setListConfigId(this.id);
-    this.navigationIndex = this.state.listConfigs.findIndex(
-      config => config.id === this.id,
-    );
+    this.sync();
 
     this.isSaving = false;
   }
