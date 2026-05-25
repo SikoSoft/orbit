@@ -214,7 +214,7 @@ export class EntityList extends ViewElement {
   private handleSuggestionAdded(e: EntitySuggestionAddedEvent): void {
     const updatedList = this.state.listEntities.map(item =>
       item.id === e.detail.id
-        ? { ...item, suggestion: false, published: true }
+        ? { ...item, suggested: false, published: true }
         : item,
     );
     this.state.setListEntities(updatedList);
@@ -329,7 +329,7 @@ export class EntityList extends ViewElement {
                   viewAccessPolicyId=${item.viewAccessPolicyId}
                   editAccessPolicyId=${item.editAccessPolicyId}
                   ?published=${item.published}
-                  ?suggestion=${item.suggestion}
+                  ?suggestion=${item.suggested}
                   @pointer-long-press=${this.handlePointerLongPress}
                   @pointer-up=${this.handlePointerUp}
                   @entity-item-deleted=${this.handleItemDeleted}

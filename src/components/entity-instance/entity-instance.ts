@@ -77,7 +77,7 @@ export class EntityInstance extends MobxLitElement {
           viewAccessPolicyId=${this.entity.viewAccessPolicyId}
           editAccessPolicyId=${this.entity.editAccessPolicyId}
           ?published=${this.entity.published}
-          ?suggestion=${this.entity.suggestion}
+          ?suggestion=${this.entity.suggested}
         ></entity-list-item>
       </div>
     `;

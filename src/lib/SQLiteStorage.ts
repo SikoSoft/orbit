@@ -476,7 +476,8 @@ export class SQLiteStorage implements StorageSchema {
         viewAccessPolicyId: 0,
         editAccessPolicyId: 0,
         published: Boolean(row['published']),
-        suggestion: false,
+        suggested: false,
+        identified: false,
         tags: tagRows
           .filter(t => t['entity_id'] === id)
           .map(t => t['tag'] as string),

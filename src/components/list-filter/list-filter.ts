@@ -94,7 +94,8 @@ export class ListFilter extends MobxLitElement {
   @state() text: TextContext[] = [];
   @state() properties: FilterProperty[] = [];
   @state() published: boolean | null = null;
-  @state() suggestion: boolean | null = null;
+  @state() suggested: boolean | null = null;
+  @state() identified: boolean | null = null;
 
   @state() savedFilters: SavedListFilter[] = [];
   @state() saveMode: boolean = false;
@@ -154,7 +155,8 @@ export class ListFilter extends MobxLitElement {
       time: this.time,
       properties: this.properties,
       ...(this.published !== null && { published: this.published }),
-      ...(this.suggestion !== null && { suggestion: this.suggestion }),
+      ...(this.suggested !== null && { suggested: this.suggested }),
+      ...(this.identified !== null && { identified: this.identified }),
     };
   }
 
@@ -190,8 +192,10 @@ export class ListFilter extends MobxLitElement {
     }
     this.published =
       listFilter.published !== undefined ? listFilter.published : null;
-    this.suggestion =
-      listFilter.suggestion !== undefined ? listFilter.suggestion : null;
+    this.suggested =
+      listFilter.suggested !== undefined ? listFilter.suggested : null;
+    this.identified =
+      listFilter.identified !== undefined ? listFilter.identified : null;
   }
 
   private handleIncludeUntaggedChanged(): void {
@@ -270,16 +274,29 @@ export class ListFilter extends MobxLitElement {
     }
   }
 
-  private handleSuggestionChanged(e: OptionSelectorChangedEvent): void {
+  private handleSuggestedChanged(e: OptionSelectorChangedEvent): void {
     const { selected } = e.detail;
     if (selected.includes('true') && selected.includes('false')) {
-      this.suggestion = null;
+      this.suggested = null;
     } else if (selected.includes('true')) {
-      this.suggestion = true;
+      this.suggested = true;
     } else if (selected.includes('false')) {
-      this.suggestion = false;
+      this.suggested = false;
     } else {
-      this.suggestion = null;
+      this.suggested = null;
+    }
+  }
+
+  private handleIdentifiedChanged(e: OptionSelectorChangedEvent): void {
+    const { selected } = e.detail;
+    if (selected.includes('true') && selected.includes('false')) {
+      this.identified = null;
+    } else if (selected.includes('true')) {
+      this.identified = true;
+    } else if (selected.includes('false')) {
+      this.identified = false;
+    } else {
+      this.identified = null;
     }
   }
 
@@ -290,11 +307,18 @@ export class ListFilter extends MobxLitElement {
     return [String(this.published)];
   }
 
-  private suggestionToSelected(): string[] {
-    if (this.suggestion === null) {
+  private suggestedToSelected(): string[] {
+    if (this.suggested === null) {
       return ['true', 'false'];
     }
-    return [String(this.suggestion)];
+    return [String(this.suggested)];
+  }
+
+  private identifiedToSelected(): string[] {
+    if (this.identified === null) {
+      return ['true', 'false'];
+    }
+    return [String(this.identified)];
   }
 
   render(): TemplateResult {
@@ -352,18 +376,34 @@ export class ListFilter extends MobxLitElement {
           </fieldset>
 
           <fieldset>
-            <legend>${translate('suggestion')}</legend>
+            <legend>${translate('suggested')}</legend>
             <option-selector
               multiple
               required
               .options=${[
-                { name: translate('suggestion'), value: 'true' },
-                { name: translate('nonSuggestion'), value: 'false' },
+                { name: translate('suggested'), value: 'true' },
+                { name: translate('nonSuggested'), value: 'false' },
               ]}
-              .selected=${this.suggestionToSelected()}
+              .selected=${this.suggestedToSelected()}
               @option-selector-changed=${(
                 e: OptionSelectorChangedEvent,
-              ): void => this.handleSuggestionChanged(e)}
+              ): void => this.handleSuggestedChanged(e)}
+            ></option-selector>
+          </fieldset>
+
+          <fieldset>
+            <legend>${translate('identified')}</legend>
+            <option-selector
+              multiple
+              required
+              .options=${[
+                { name: translate('identified'), value: 'true' },
+                { name: translate('nonIdentified'), value: 'false' },
+              ]}
+              .selected=${this.identifiedToSelected()}
+              @option-selector-changed=${(
+                e: OptionSelectorChangedEvent,
+              ): void => this.handleIdentifiedChanged(e)}
             ></option-selector>
           </fieldset>
 

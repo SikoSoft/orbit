@@ -41,7 +41,7 @@ export class EntitySuggestion extends MobxLitElement {
         viewAccessPolicyId=${this.entity.viewAccessPolicyId ?? 0}
         editAccessPolicyId=${this.entity.editAccessPolicyId ?? 0}
         ?published=${this.entity.published}
-        ?suggestion=${this.entity.suggestion}
+        ?suggestion=${this.entity.suggested}
       ></entity-list-item>
     `;
   }

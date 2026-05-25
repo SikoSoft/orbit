@@ -770,7 +770,7 @@ export class NetworkStorage implements StorageSchema {
   }
 
   async getEntitySuggestions(filter: ListFilter): Promise<Entity.Entity[]> {
-    const suggestionFilter = { ...filter, suggestion: true, published: null };
+    const suggestionFilter = { ...filter, suggested: true, published: undefined };
     const queryParams = new URLSearchParams({
       filter: JSON.stringify(suggestionFilter),
     });
@@ -786,9 +786,9 @@ export class NetworkStorage implements StorageSchema {
 
   async addEntitySuggestion(id: number): Promise<boolean> {
     const result = await api.put<
-      { published: boolean; suggestion: boolean },
+      { published: boolean; suggested: boolean },
       Entity.Entity
-    >(`entity/${id}`, { published: true, suggestion: false });
+    >(`entity/${id}`, { published: true, suggested: false });
 
     if (result && result.isOk) {
       return true;
