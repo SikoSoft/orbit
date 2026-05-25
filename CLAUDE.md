@@ -145,7 +145,7 @@ When adding a collapsable panel (via `ss-collapsable`) inside a list component, 
    - Otherwise return `this.state.collapsablePanelState[\`<panelKey>-${id}\`] || false`.
 2. **Bind the open attribute** — use `?open=${this.isPanelOpen(item.id)}` on the form element.
 3. **After a successful save** — dispatch a `CollapsableToggledEvent` with `isOpen: true` and the matching `panelId` so the panel stays open after the item gets its server-assigned id.
-4. **In the form component** — set `panelId={\`<panelKey>-${this.localConfig.id}\`}` on `ss-collapsable` so the event the collapsable emits carries the correct id for `app-container` to persist.
+4. **In the form component** — set `panelId={\`<panelKey>-${this.localConfig.id}\`}`on`ss-collapsable`so the event the collapsable emits carries the correct id for`app-container` to persist.
 
 The `app-container` already listens for `collapsable-toggled` events that bubble up and calls `state.setCollapsablePanelState(panelId, isOpen)`. No extra wiring is needed there.
 
@@ -155,3 +155,4 @@ See `medal-config-list` / `medal-config-form` and `entity-config-list` / `entity
 
 - Keep all edits, reads and and shell commands confined to this projects root directory or its subdirectories. Do not traverse into directories outside of this projects root
 - When the user references a type from `api-spec` that isn't in the currently installed version, do not define it locally. First check whether the type exists in the local `api-spec` source at `/Users/aaron/projects/api-spec` and, if so, ask the user to update the `api-spec` version in `package.json` (or do so yourself if instructed). If the type doesn't exist there either, flag this to the user and ask for clarification before proceeding.
+- Whenever an <img> tag is used, use crossorigin="anonymous" if the image src is not hard coded (if the image comes from user generated data for example, because the server may be external then)
