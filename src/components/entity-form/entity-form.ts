@@ -1029,46 +1029,47 @@ export class EntityForm extends ViewElement {
             </div>
           </tag-manager>`
         : nothing}
+      ${this.entityConfig?.id
+        ? html` <div class="published">
+              <label>${translate('published')}</label>
+              <ss-toggle
+                ?on=${this.published}
+                @toggle-changed=${this.handlePublishedChanged}
+              ></ss-toggle>
+            </div>
 
-      <div class="published">
-        <label>${translate('published')}</label>
-        <ss-toggle
-          ?on=${this.published}
-          @toggle-changed=${this.handlePublishedChanged}
-        ></ss-toggle>
-      </div>
-
-      <div class="buttons">
-        <ss-button
-          class="save-button"
-          ?positive=${!this.entityId || this.hasChanged}
-          @click=${this.handleSaveClick}
-          text=${this.entityId
-            ? this.hasChanged
-              ? translate('update')
-              : translate('cancel')
-            : translate('add')}
-          ?loading=${this.loading}
-        ></ss-button>
-
-        ${this.entityId
-          ? html`
+            <div class="buttons">
               <ss-button
-                negative
-                @click=${this.handleDeleteClick}
-                text=${translate('delete')}
+                class="save-button"
+                ?positive=${!this.entityId || this.hasChanged}
+                @click=${this.handleSaveClick}
+                text=${this.entityId
+                  ? this.hasChanged
+                    ? translate('update')
+                    : translate('cancel')
+                  : translate('add')}
+                ?loading=${this.loading}
               ></ss-button>
 
-              <confirmation-modal
-                @confirmation-accepted=${this.deleteEntity}
-                @confirmation-declined=${(): void => {
-                  this.confirmModalShown = false;
-                }}
-                ?open=${this.confirmModalShown}
-              ></confirmation-modal>
-            `
-          : nothing}
-      </div>
+              ${this.entityId
+                ? html`
+                    <ss-button
+                      negative
+                      @click=${this.handleDeleteClick}
+                      text=${translate('delete')}
+                    ></ss-button>
+
+                    <confirmation-modal
+                      @confirmation-accepted=${this.deleteEntity}
+                      @confirmation-declined=${(): void => {
+                        this.confirmModalShown = false;
+                      }}
+                      ?open=${this.confirmModalShown}
+                    ></confirmation-modal>
+                  `
+                : nothing}
+            </div>`
+        : nothing}
     `;
   }
 
