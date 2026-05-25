@@ -315,14 +315,20 @@ export class UserMedalList extends ViewElement {
 
     if (this.filterPrestige.length > 0) {
       result = result.filter(medal => {
-        const config = this.medalConfigs.find(c => c.id === medal.medalConfigId);
-        return config !== undefined && this.filterPrestige.includes(config.prestige);
+        const config = this.medalConfigs.find(
+          c => c.id === medal.medalConfigId,
+        );
+        return (
+          config !== undefined && this.filterPrestige.includes(config.prestige)
+        );
       });
     }
 
     if (this.filterSeries) {
       result = result.filter(medal => {
-        const config = this.medalConfigs.find(c => c.id === medal.medalConfigId);
+        const config = this.medalConfigs.find(
+          c => c.id === medal.medalConfigId,
+        );
         return config?.series === this.filterSeries;
       });
     }
@@ -336,8 +342,7 @@ export class UserMedalList extends ViewElement {
       } else if (this.sortBy === 'prestige') {
         cmp = (configA?.prestige ?? 0) - (configB?.prestige ?? 0);
       } else {
-        cmp =
-          new Date(a.awardedAt).getTime() - new Date(b.awardedAt).getTime();
+        cmp = new Date(a.awardedAt).getTime() - new Date(b.awardedAt).getTime();
       }
       return this.sortDir === 'asc' ? cmp : -cmp;
     });
@@ -380,7 +385,11 @@ export class UserMedalList extends ViewElement {
       <div class="medal-frame" style=${styleMap(getRingStyles(prestige))}>
         <div class="medal-icon-inner">
           ${config?.icon
-            ? html`<img src=${config.icon} alt=${config.name ?? ''} />`
+            ? html`<img
+                src=${config.icon}
+                alt=${config.name ?? ''}
+                crossorigin="anonymous"
+              />`
             : nothing}
         </div>
       </div>
@@ -398,7 +407,9 @@ export class UserMedalList extends ViewElement {
             p => p,
             p => html`
               <button
-                class="prestige-btn ${this.filterPrestige.includes(p) ? 'active' : ''}"
+                class="prestige-btn ${this.filterPrestige.includes(p)
+                  ? 'active'
+                  : ''}"
                 title="${translate('prestige')} ${p}"
                 @click=${(): void => {
                   this.togglePrestige(p);
@@ -468,9 +479,7 @@ export class UserMedalList extends ViewElement {
     return html`
       ${this.renderControls()}
       ${medals.length === 0
-        ? html`<div class="no-medals">
-            ${translate('noMedalsMatchFilter')}
-          </div>`
+        ? html`<div class="no-medals">${translate('noMedalsMatchFilter')}</div>`
         : html`
             <div class="medal-grid">
               ${repeat(
