@@ -89,6 +89,7 @@
       ],
       "revisionOf": null,
       "allowPropertyOrdering": true,
+      "allowTags": true,
       "aiEnabled": false,
       "aiIdentifyPrompt": "",
       "public": false
@@ -182,6 +183,7 @@
       ],
       "revisionOf": null,
       "allowPropertyOrdering": true,
+      "allowTags": true,
       "aiEnabled": false,
       "aiIdentifyPrompt": "",
       "public": false
@@ -275,6 +277,7 @@
       ],
       "revisionOf": null,
       "allowPropertyOrdering": true,
+      "allowTags": true,
       "aiEnabled": false,
       "aiIdentifyPrompt": "",
       "public": false
@@ -400,6 +403,7 @@
       ],
       "revisionOf": null,
       "allowPropertyOrdering": true,
+      "allowTags": true,
       "aiEnabled": false,
       "aiIdentifyPrompt": "",
       "public": false
@@ -493,6 +497,7 @@
       ],
       "revisionOf": null,
       "allowPropertyOrdering": true,
+      "allowTags": true,
       "aiEnabled": false,
       "aiIdentifyPrompt": "",
       "public": false
@@ -617,6 +622,7 @@
       ],
       "revisionOf": null,
       "allowPropertyOrdering": true,
+      "allowTags": true,
       "aiEnabled": false,
       "aiIdentifyPrompt": "",
       "public": false
@@ -710,6 +716,7 @@
       ],
       "revisionOf": null,
       "allowPropertyOrdering": true,
+      "allowTags": true,
       "aiEnabled": false,
       "aiIdentifyPrompt": "",
       "public": false
@@ -803,6 +810,7 @@
       ],
       "revisionOf": null,
       "allowPropertyOrdering": true,
+      "allowTags": true,
       "aiEnabled": false,
       "aiIdentifyPrompt": "",
       "public": false
@@ -896,6 +904,7 @@
       ],
       "revisionOf": null,
       "allowPropertyOrdering": true,
+      "allowTags": true,
       "aiEnabled": false,
       "aiIdentifyPrompt": "",
       "public": false
@@ -989,6 +998,7 @@
       ],
       "revisionOf": null,
       "allowPropertyOrdering": true,
+      "allowTags": true,
       "aiEnabled": false,
       "aiIdentifyPrompt": "",
       "public": false

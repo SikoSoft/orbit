@@ -160,6 +160,7 @@ describe('AppState', () => {
         description: '',
         revisionOf: null,
         allowPropertyOrdering: false,
+        allowTags: true,
         aiEnabled: false,
         aiIdentifyPrompt: '',
         public: false,

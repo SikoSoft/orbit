@@ -170,6 +170,10 @@ export class EntityConfigForm extends MobxLitElement {
     entityConfigFormProps[EntityConfigFormProp.ALLOW_PROPERTY_ORDERING].default;
 
   @property({ type: Boolean })
+  [EntityConfigFormProp.ALLOW_TAGS]: EntityConfigFormProps[EntityConfigFormProp.ALLOW_TAGS] =
+    entityConfigFormProps[EntityConfigFormProp.ALLOW_TAGS].default;
+
+  @property({ type: Boolean })
   [EntityConfigFormProp.AI_ENABLED]: EntityConfigFormProps[EntityConfigFormProp.AI_ENABLED] =
     entityConfigFormProps[EntityConfigFormProp.AI_ENABLED].default;
 
@@ -217,6 +221,7 @@ export class EntityConfigForm extends MobxLitElement {
         JSON.stringify(this[EntityConfigFormProp.PROPERTIES]) &&
       this.entityConfig.allowPropertyOrdering ===
         this[EntityConfigFormProp.ALLOW_PROPERTY_ORDERING] &&
+      this.entityConfig.allowTags === this[EntityConfigFormProp.ALLOW_TAGS] &&
       this.entityConfig.aiEnabled === this[EntityConfigFormProp.AI_ENABLED] &&
       this.entityConfig.aiIdentifyPrompt ===
         this[EntityConfigFormProp.AI_IDENTIFY_PROMPT] &&
@@ -241,6 +246,7 @@ export class EntityConfigForm extends MobxLitElement {
       properties: this[EntityConfigFormProp.PROPERTIES],
       revisionOf: null,
       allowPropertyOrdering: this[EntityConfigFormProp.ALLOW_PROPERTY_ORDERING],
+      allowTags: this[EntityConfigFormProp.ALLOW_TAGS],
       aiEnabled: this[EntityConfigFormProp.AI_ENABLED],
       aiIdentifyPrompt: this[EntityConfigFormProp.AI_IDENTIFY_PROMPT],
       viewAccessPolicy: this[EntityConfigFormProp.VIEW_ACCESS_POLICY],
@@ -405,6 +411,10 @@ export class EntityConfigForm extends MobxLitElement {
     this.entityConfig = { ...this.entityConfig, allowPropertyOrdering: allow };
   }
 
+  updateAllowTags(allow: boolean): void {
+    this.entityConfig = { ...this.entityConfig, allowTags: allow };
+  }
+
   updateAIEnabled(enabled: boolean): void {
     this.entityConfig = { ...this.entityConfig, aiEnabled: enabled };
   }
@@ -534,6 +544,17 @@ export class EntityConfigForm extends MobxLitElement {
             ?on=${this[EntityConfigFormProp.ALLOW_PROPERTY_ORDERING]}
             @toggle-changed=${(e: ToggleChangedEvent): void => {
               this.updateAllowPropertyOrdering(e.detail.on);
+            }}
+          ></ss-toggle>
+        </div>
+
+        <div class="field">
+          <label for="allow-tags">${translate('allowTags')}</label>
+
+          <ss-toggle
+            ?on=${this[EntityConfigFormProp.ALLOW_TAGS]}
+            @toggle-changed=${(e: ToggleChangedEvent): void => {
+              this.updateAllowTags(e.detail.on);
             }}
           ></ss-toggle>
         </div>

@@ -3,7 +3,7 @@ import {
   EntityProperty,
   PropertyDataValue,
 } from 'api-spec/models/Entity';
-import { TemplateResult } from 'lit';
+import { nothing, TemplateResult } from 'lit';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
 import { ControlType } from '@/models/Control';
 
@@ -125,7 +125,7 @@ export const entityFormProps: PropConfigMap<EntityFormProps> = {
 
 export interface TabEntry {
   heading: string;
-  content: () => TemplateResult;
+  content: () => TemplateResult | typeof nothing;
   shouldShow: () => boolean;
 }
 

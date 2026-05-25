@@ -169,6 +169,7 @@ export class CollectionWizard extends MobxLitElement {
           description: entityConfig.description,
           revisionOf: entityConfig.revisionOf,
           allowPropertyOrdering: entityConfig.allowPropertyOrdering,
+          allowTags: entityConfig.allowTags,
           aiEnabled: entityConfig.aiEnabled,
           aiIdentifyPrompt: entityConfig.aiIdentifyPrompt,
           public: entityConfig.public ?? false,

@@ -165,6 +165,7 @@
   "public": "Public",
   "youAreNowLoggedOut": "You are now logged out.",
   "allowPropertyOrdering": "Allow Property Ordering",
+  "allowTags": "Allow Tags",
   "dateField.useNow": "Use the current time at creation",
   "dateField.useCustom": "Use Custom Date",
   "dataManager": "Data Manager",

@@ -22,6 +22,7 @@ export enum EntityConfigFormProp {
   DESCRIPTION = 'description',
   PROPERTIES = 'properties',
   ALLOW_PROPERTY_ORDERING = 'allowPropertyOrdering',
+  ALLOW_TAGS = 'allowTags',
   AI_ENABLED = 'aiEnabled',
   AI_IDENTIFY_PROMPT = 'aiIdentifyPrompt',
   VIEW_ACCESS_POLICY = 'viewAccessPolicy',
@@ -38,6 +39,7 @@ export interface EntityConfigFormProps extends PropTypes {
   [EntityConfigFormProp.DESCRIPTION]: string;
   [EntityConfigFormProp.PROPERTIES]: EntityPropertyConfig[];
   [EntityConfigFormProp.ALLOW_PROPERTY_ORDERING]: boolean;
+  [EntityConfigFormProp.ALLOW_TAGS]: boolean;
   [EntityConfigFormProp.AI_ENABLED]: boolean;
   [EntityConfigFormProp.AI_IDENTIFY_PROMPT]: string;
   [EntityConfigFormProp.VIEW_ACCESS_POLICY]: AccessPolicy | null;
@@ -71,6 +73,11 @@ export const entityConfigFormProps: PropConfigMap<EntityConfigFormProps> = {
     default: false,
     control: { type: ControlType.BOOLEAN },
     description: 'Whether property ordering is allowed for this entity',
+  },
+  [EntityConfigFormProp.ALLOW_TAGS]: {
+    default: true,
+    control: { type: ControlType.BOOLEAN },
+    description: 'Whether tags are enabled for this entity',
   },
   [EntityConfigFormProp.AI_ENABLED]: {
     default: false,

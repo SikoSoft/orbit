@@ -928,7 +928,7 @@ export class EntityForm extends ViewElement {
     return this.tabRegistry.filter(tab => tab.shouldShow());
   }
 
-  renderPropertiesTab(): TemplateResult {
+  renderPropertiesTab(): TemplateResult | typeof nothing {
     return html`
       ${!this.entityId
         ? html`<entity-suggestions></entity-suggestions>`
@@ -1005,28 +1005,30 @@ export class EntityForm extends ViewElement {
         </pop-up>
       </div>
 
-      <tag-manager
-        ?enableSuggestions=${this.tagSuggestionsEnabled}
-        value=${this.tagValue}
-        @tags-updated=${this.handleTagsUpdated}
-        @tag-suggestions-requested=${this.handleTagSuggestionsRequested}
-      >
-        <div slot="tags">
-          ${repeat(
-            this.tagsAndSuggestions,
-            tag => tag,
-            tag => html`<data-item>${tag}</data-item>`,
-          )}
-        </div>
+      ${this.entityConfig?.allowTags
+        ? html` <tag-manager
+            ?enableSuggestions=${this.tagSuggestionsEnabled}
+            value=${this.tagValue}
+            @tags-updated=${this.handleTagsUpdated}
+            @tag-suggestions-requested=${this.handleTagSuggestionsRequested}
+          >
+            <div slot="tags">
+              ${repeat(
+                this.tagsAndSuggestions,
+                tag => tag,
+                tag => html`<data-item>${tag}</data-item>`,
+              )}
+            </div>
 
-        <div slot="suggestions">
-          ${repeat(
-            this.tagSuggestions,
-            suggestion => suggestion,
-            suggestion => html`<data-item>${suggestion}</data-item>`,
-          )}
-        </div>
-      </tag-manager>
+            <div slot="suggestions">
+              ${repeat(
+                this.tagSuggestions,
+                suggestion => suggestion,
+                suggestion => html`<data-item>${suggestion}</data-item>`,
+              )}
+            </div>
+          </tag-manager>`
+        : nothing}
 
       <div class="published">
         <label>${translate('published')}</label>

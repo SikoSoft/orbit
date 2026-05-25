@@ -106,6 +106,7 @@ export class EntityConfigList extends ViewElement {
                   description=${config.description}
                   .properties=${toJS(config.properties)}
                   ?allowPropertyOrdering=${config.allowPropertyOrdering}
+                  ?allowTags=${config.allowTags}
                   ?open=${this.isPanelOpen(config.id)}
                   @entity-config-deleted=${this.handleEntityConfigDeleted}
                   @entity-config-updated=${(
