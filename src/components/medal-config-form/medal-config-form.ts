@@ -18,11 +18,16 @@ import '@ss/ui/components/ss-collapsable';
 import '@ss/ui/components/confirmation-modal';
 import '@ss/ui/components/ss-button';
 import '@ss/ui/components/ss-input';
+import '@ss/ui/components/file-upload';
+import '@ss/ui/components/pop-up';
 import '@/components/medal-config-form/fact-request-editor/fact-request-editor';
 import '@/components/medal-config-form/criteria-editor/criteria-editor';
+import '@/components/svg-icon/svg-icon';
 
 import { MobxLitElement } from '@adobe/lit-mobx';
 import { translate } from '@/lib/Localization';
+import { appState } from '@/state';
+import { FileUploadSuccessEvent } from '@ss/ui/components/file-upload.events';
 import {
   MedalConfigCopiedEvent,
   MedalConfigDeletedEvent,
@@ -63,6 +68,15 @@ export class MedalConfigForm extends MobxLitElement {
       margin-bottom: 1.25rem;
     }
 
+    .icon-field {
+      display: flex;
+      gap: 0.5rem;
+
+      ss-input {
+        flex-grow: 1;
+      }
+    }
+
     .buttons {
       padding: 0.5rem 0;
     }
@@ -90,11 +104,20 @@ export class MedalConfigForm extends MobxLitElement {
     criteria: {} as Criterion | Criteria,
   };
 
+  private state = appState;
+
   @state()
   isSaving: boolean = false;
 
   @state()
   confirmationModalIsOpen: boolean = false;
+
+  @state()
+  iconUploadPopUpIsOpen: boolean = false;
+
+  get uploadUrl(): string {
+    return new URL('file/medals/', import.meta.env.APP_BASE_API_URL).toString();
+  }
 
   @property({ type: Boolean, reflect: true })
   open: boolean = false;
@@ -222,6 +245,16 @@ export class MedalConfigForm extends MobxLitElement {
     this.dispatchEvent(new MedalConfigDeletedEvent({ id: this.localConfig.id }));
   }
 
+  private iconFileUploadSuccess(e: FileUploadSuccessEvent): void {
+    this.localConfig = { ...this.localConfig, icon: e.detail.url };
+    addToast(translate('fileUploadSuccess'), NotificationType.SUCCESS);
+    this.iconUploadPopUpIsOpen = false;
+  }
+
+  private iconFileUploadFailed(): void {
+    addToast(translate('fileUploadFailed'), NotificationType.ERROR);
+  }
+
   private addFactRequest(): void {
     const newRequest: FactRequest = {
       alias: '',
@@ -273,12 +306,36 @@ export class MedalConfigForm extends MobxLitElement {
 
           <div class="field">
             <label>${translate('icon')}</label>
-            <ss-input
-              .value=${this.localConfig.icon}
-              @input-changed=${(e: InputChangedEvent): void => {
-                this.localConfig = { ...this.localConfig, icon: e.detail.value };
+            <div class="icon-field">
+              <ss-input
+                .value=${this.localConfig.icon}
+                @input-changed=${(e: InputChangedEvent): void => {
+                  this.localConfig = { ...this.localConfig, icon: e.detail.value };
+                }}
+              ></ss-input>
+              <ss-button
+                tabindex="-1"
+                @click=${(): void => {
+                  this.iconUploadPopUpIsOpen = !this.iconUploadPopUpIsOpen;
+                }}
+              >
+                <svg-icon name="upload" size="16"></svg-icon>
+              </ss-button>
+            </div>
+            <pop-up
+              closeButton
+              ?open=${this.iconUploadPopUpIsOpen}
+              @pop-up-closed=${(): void => {
+                this.iconUploadPopUpIsOpen = false;
               }}
-            ></ss-input>
+            >
+              <file-upload
+                endpointUrl=${this.uploadUrl}
+                authToken=${this.state.authToken}
+                @file-upload-success=${this.iconFileUploadSuccess}
+                @file-upload-failed=${this.iconFileUploadFailed}
+              ></file-upload>
+            </pop-up>
           </div>
 
           <div class="field">
