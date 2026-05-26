@@ -639,6 +639,7 @@ export class EntityForm extends ViewElement {
             tags: this.tags,
             properties: result.properties,
             published: payload.published,
+            updatedAt: result.updatedAt,
           }),
         );
 
