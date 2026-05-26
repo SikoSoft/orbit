@@ -3,9 +3,12 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
+  DataType,
   defaultEntityConfig,
   defaultEntityPropertyConfig,
+  EntityCalculatedPropertyConfig,
   EntityConfig,
+  EntityPropertyCalculationOperation,
   EntityPropertyConfig,
 } from 'api-spec/models/Entity';
 import { Role } from 'api-spec/models/Identity';
@@ -31,6 +34,7 @@ import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
 import { TabIndexChangedEvent } from '@ss/ui/components/tab-container.events';
 
 import '@/components/property-config-form/property-config-form';
+import '@/components/calculated-property-config-form/calculated-property-config-form';
 import '@ss/ui/components/ss-collapsable';
 import '@ss/ui/components/confirmation-modal';
 import '@ss/ui/components/sortable-list';
@@ -329,6 +333,18 @@ export class EntityConfigForm extends MobxLitElement {
     );
   }
 
+  isCalculatedPropertyConfig(
+    p: EntityPropertyConfig | EntityCalculatedPropertyConfig,
+  ): p is EntityCalculatedPropertyConfig {
+    return 'calculation' in p;
+  }
+
+  get nonCalculatedProperties(): EntityPropertyConfig[] {
+    return this.entityConfig.properties.filter(
+      (p): p is EntityPropertyConfig => !this.isCalculatedPropertyConfig(p),
+    );
+  }
+
   addPropertyToTop(): void {
     this.entityConfig = {
       ...this.entityConfig,
@@ -343,7 +359,34 @@ export class EntityConfigForm extends MobxLitElement {
     };
   }
 
-  updateProperty(index: number, updatedProperty: EntityPropertyConfig): void {
+  addCalculatedPropertyToBottom(): void {
+    const newCalc = {
+      entityConfigId: this.entityConfig.id,
+      id: 0,
+      userId: '',
+      name: '',
+      prefix: '',
+      suffix: '',
+      hidden: false,
+      dataType: DataType.INT,
+      defaultValue: 0,
+      calculation: {
+        value1: 0,
+        value2: 0,
+        operation: '+' as EntityPropertyCalculationOperation,
+      },
+    } as EntityCalculatedPropertyConfig;
+
+    this.entityConfig = {
+      ...this.entityConfig,
+      properties: [...this.entityConfig.properties, newCalc],
+    };
+  }
+
+  updateProperty(
+    index: number,
+    updatedProperty: EntityPropertyConfig | EntityCalculatedPropertyConfig,
+  ): void {
     this.entityConfig = {
       ...this.entityConfig,
       properties: this.entityConfig.properties.map((p, i) =>
@@ -655,53 +698,80 @@ export class EntityConfigForm extends MobxLitElement {
           ${repeat(
             this.entityConfig.properties,
             property => property.id,
-            (property, index) => html`
-              <sortable-item id=${property.id}>
-                <property-config-form
-                  ?open=${this.isPanelOpen(property.id)}
-                  entityConfigId=${this.entityConfig.id}
-                  propertConfigId=${property.id}
-                  dataType=${property.dataType}
-                  propertyConfigId=${property.id}
-                  name=${property.name}
-                  required=${property.required}
-                  repeat=${property.repeat}
-                  allowed=${property.allowed}
-                  prefix=${property.prefix}
-                  suffix=${property.suffix}
-                  ?optionsOnly=${property.optionsOnly}
-                  .options=${property.options}
-                  ?hidden=${property.hidden}
-                  ?performDriftCheck=${this.performDriftCheck}
-                  .defaultValue=${property.defaultValue}
-                  @property-config-updated=${(
-                    e: PropertyConfigUpdatedEvent,
-                  ): void => this.updateProperty(index, e.detail)}
-                  @property-config-added=${(
-                    e: PropertyConfigAddedEvent,
-                  ): void => this.updateProperty(index, e.detail)}
-                  @property-config-deleted=${(): void => {
-                    this.deleteProperty(index);
-                  }}
-                  @property-config-breaking-change-detected=${(
-                    e: PropertyConfigBreakingChangeDetectedEvent,
-                  ): void => {
-                    this.breakingChangeDetected(index, e);
-                  }}
-                  @property-config-breaking-changes-resolved=${(): void => {
-                    this.breakingChangesResolved(index);
-                  }}
-                ></property-config-form>
-              </sortable-item>
-            `,
+            (property, index) =>
+              this.isCalculatedPropertyConfig(property)
+                ? html`
+                    <sortable-item id=${property.id}>
+                      <calculated-property-config-form
+                        ?open=${this.isPanelOpen(property.id)}
+                        entityConfigId=${this.entityConfig.id}
+                        propertyConfigId=${property.id}
+                        name=${property.name}
+                        prefix=${property.prefix}
+                        suffix=${property.suffix}
+                        ?hidden=${property.hidden}
+                        .calculation=${property.calculation}
+                        .allProperties=${this.nonCalculatedProperties}
+                        @property-config-updated=${(
+                          e: PropertyConfigUpdatedEvent,
+                        ): void => this.updateProperty(index, e.detail)}
+                        @property-config-added=${(
+                          e: PropertyConfigAddedEvent,
+                        ): void => this.updateProperty(index, e.detail)}
+                        @property-config-deleted=${(): void => {
+                          this.deleteProperty(index);
+                        }}
+                      ></calculated-property-config-form>
+                    </sortable-item>
+                  `
+                : html`
+                    <sortable-item id=${property.id}>
+                      <property-config-form
+                        ?open=${this.isPanelOpen(property.id)}
+                        entityConfigId=${this.entityConfig.id}
+                        propertConfigId=${property.id}
+                        dataType=${property.dataType}
+                        propertyConfigId=${property.id}
+                        name=${property.name}
+                        required=${property.required}
+                        repeat=${property.repeat}
+                        allowed=${property.allowed}
+                        prefix=${property.prefix}
+                        suffix=${property.suffix}
+                        ?optionsOnly=${property.optionsOnly}
+                        .options=${property.options}
+                        ?hidden=${property.hidden}
+                        ?performDriftCheck=${this.performDriftCheck}
+                        .defaultValue=${property.defaultValue}
+                        @property-config-updated=${(
+                          e: PropertyConfigUpdatedEvent,
+                        ): void => this.updateProperty(index, e.detail)}
+                        @property-config-added=${(
+                          e: PropertyConfigAddedEvent,
+                        ): void => this.updateProperty(index, e.detail)}
+                        @property-config-deleted=${(): void => {
+                          this.deleteProperty(index);
+                        }}
+                        @property-config-breaking-change-detected=${(
+                          e: PropertyConfigBreakingChangeDetectedEvent,
+                        ): void => {
+                          this.breakingChangeDetected(index, e);
+                        }}
+                        @property-config-breaking-changes-resolved=${(): void => {
+                          this.breakingChangesResolved(index);
+                        }}
+                      ></property-config-form>
+                    </sortable-item>
+                  `,
           )}
         </sortable-list>
 
-        ${this.entityConfig.properties.length > 0
-          ? html` <ss-button @click=${this.addPropertyToBottom}
-              >${translate('addProperty')}</ss-button
-            >`
-          : nothing}
+        <ss-button @click=${this.addPropertyToBottom}
+          >${translate('addProperty')}</ss-button
+        >
+        <ss-button @click=${this.addCalculatedPropertyToBottom}
+          >${translate('addCalculatedProperty')}</ss-button
+        >
       </div>
     `;
   }
@@ -716,7 +786,7 @@ export class EntityConfigForm extends MobxLitElement {
             <div class="constraint">
               <div class="constraint-properties">
                 ${repeat(
-                  this.entityConfig.properties,
+                  this.nonCalculatedProperties,
                   p => p.id,
                   property => html`
                     <label class="constraint-property">

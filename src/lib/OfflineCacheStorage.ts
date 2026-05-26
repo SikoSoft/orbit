@@ -1,6 +1,7 @@
 import type { SqlValue } from '@sqlite.org/sqlite-wasm';
 
 import {
+  EntityCalculatedPropertyConfig,
   EntityConfig,
   EntityConfigUniqueConstraint,
   EntityPropertyConfig,
@@ -151,6 +152,9 @@ class CacheSQLiteStorage extends SQLiteStorage {
     let nextPropId = await this.nextTempId('entity_property_config');
     for (const prop of config.properties) {
       propIds.push(nextPropId);
+      if ('calculation' in prop) {
+        continue;
+      }
       await this.run(
         `INSERT OR REPLACE INTO entity_property_config
          (id, entity_config_id, name, data_type, prefix, suffix, required, repeat,
@@ -321,7 +325,8 @@ export class OfflineCacheStorage implements StorageSchema {
         this.db
           .import({
             meta: emptyMeta(),
-            [ExportDataType.ENTITY_CONFIGS]: configs,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            [ExportDataType.ENTITY_CONFIGS]: configs as any,
             [ExportDataType.ENTITIES]: [],
             [ExportDataType.LIST_CONFIGS]: [],
             [ExportDataType.MEDAL_CONFIGS]: [],
@@ -362,7 +367,8 @@ export class OfflineCacheStorage implements StorageSchema {
       if (result) {
         await this.db.import({
           meta: emptyMeta(),
-          [ExportDataType.ENTITY_CONFIGS]: [result],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          [ExportDataType.ENTITY_CONFIGS]: [result] as any,
           [ExportDataType.ENTITIES]: [],
           [ExportDataType.LIST_CONFIGS]: [],
           [ExportDataType.MEDAL_CONFIGS]: [],
@@ -470,6 +476,18 @@ export class OfflineCacheStorage implements StorageSchema {
 
     await this.db.enqueue('deletePropertyConfig', [entityConfigId, id]);
     return true;
+  }
+
+  async addCalculatedPropertyConfig(
+    config: EntityCalculatedPropertyConfig,
+  ): Promise<EntityCalculatedPropertyConfig | null> {
+    return networkStorage.addCalculatedPropertyConfig(config);
+  }
+
+  async updateCalculatedPropertyConfig(
+    config: EntityCalculatedPropertyConfig,
+  ): Promise<EntityCalculatedPropertyConfig | null> {
+    return networkStorage.updateCalculatedPropertyConfig(config);
   }
 
   async setEntityPropertyOrder(

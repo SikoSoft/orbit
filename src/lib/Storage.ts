@@ -27,6 +27,7 @@ import {
 } from '@/models/Storage';
 import { Setting, Settings } from 'api-spec/models/Setting';
 import {
+  EntityCalculatedPropertyConfig,
   EntityConfig,
   EntityConfigUniqueConstraint,
   EntityPropertyConfig,
@@ -514,6 +515,20 @@ export class Storage implements StorageSchema {
     _propertyConfig: EntityPropertyConfig,
     _performDriftCheck: boolean,
   ): Promise<Entity.EntityPropertyConfig | null> {
+    return Promise.resolve(null);
+  }
+
+  @delegateSource()
+  async addCalculatedPropertyConfig(
+    _config: EntityCalculatedPropertyConfig,
+  ): Promise<EntityCalculatedPropertyConfig | null> {
+    return Promise.resolve(null);
+  }
+
+  @delegateSource()
+  async updateCalculatedPropertyConfig(
+    _config: EntityCalculatedPropertyConfig,
+  ): Promise<EntityCalculatedPropertyConfig | null> {
     return Promise.resolve(null);
   }
 

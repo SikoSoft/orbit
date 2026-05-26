@@ -26,6 +26,7 @@ import { Setting, Settings, defaultSettings } from 'api-spec/models/Setting';
 import {
   ExportDataContents,
   ExportDataType,
+  ExportEntityConfigData,
   NukedDataType,
 } from 'api-spec/models/Data';
 
@@ -262,6 +263,9 @@ export class SQLiteStorage implements StorageSchema {
     const id = (await this.execValue('SELECT last_insert_rowid()')) as number;
 
     for (const prop of entityConfig.properties) {
+      if ('calculation' in prop) {
+        continue;
+      }
       await this.run(
         `INSERT INTO entity_property_config
          (id, entity_config_id, name, data_type, prefix, suffix, required, repeat, allowed, hidden, default_value, options_only, options)
@@ -1070,11 +1074,11 @@ export class SQLiteStorage implements StorageSchema {
         [ExportDataType.ENTITY_CONFIGS]: entityConfigs.map(
           ({ userId: _, properties, ...rest }) => ({
             ...rest,
-            properties: properties.map(
-              ({ userId: __, ...propRest }) => propRest,
-            ),
+            properties: properties
+              .filter(p => !('calculation' in p))
+              .map(({ userId: __, ...propRest }) => propRest),
           }),
-        ),
+        ) as ExportEntityConfigData,
         [ExportDataType.ENTITIES]: entities,
         [ExportDataType.LIST_CONFIGS]: listConfigs,
         [ExportDataType.MEDAL_CONFIGS]: [],

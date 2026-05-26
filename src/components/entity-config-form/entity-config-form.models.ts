@@ -1,5 +1,6 @@
 import { ControlType } from '@/models/Control';
 import {
+  EntityCalculatedPropertyConfig,
   EntityConfigUniqueConstraint,
   EntityPropertyConfig,
 } from 'api-spec/models/Entity';
@@ -37,7 +38,7 @@ export interface EntityConfigFormProps extends PropTypes {
   [EntityConfigFormProp.ENTITY_CONFIG_ID]: number;
   [EntityConfigFormProp.NAME]: string;
   [EntityConfigFormProp.DESCRIPTION]: string;
-  [EntityConfigFormProp.PROPERTIES]: EntityPropertyConfig[];
+  [EntityConfigFormProp.PROPERTIES]: (EntityPropertyConfig | EntityCalculatedPropertyConfig)[];
   [EntityConfigFormProp.ALLOW_PROPERTY_ORDERING]: boolean;
   [EntityConfigFormProp.ALLOW_TAGS]: boolean;
   [EntityConfigFormProp.AI_ENABLED]: boolean;

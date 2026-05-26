@@ -10,6 +10,7 @@ import {
   settingsConfig,
 } from 'api-spec/models/Setting';
 import {
+  EntityCalculatedPropertyConfig,
   EntityConfig,
   Entity,
   EntityPropertyConfig,
@@ -78,7 +79,7 @@ export class AppState {
   public entityConfigs: EntityConfig[] = [];
 
   @observable
-  public propertyConfigs: EntityPropertyConfig[] = [];
+  public propertyConfigs: (EntityPropertyConfig | EntityCalculatedPropertyConfig)[] = [];
 
   @observable
   public listEntities: Entity[] = [];

@@ -9,6 +9,7 @@ import { api } from './Api';
 import { StorageResult, StorageSchema, StorageSource } from '@/models/Storage';
 import { Setting, Settings } from 'api-spec/models/Setting';
 import {
+  EntityCalculatedPropertyConfig,
   EntityConfig,
   EntityConfigUniqueConstraint,
   EntityPropertyConfig,
@@ -263,6 +264,52 @@ export class NetworkStorage implements StorageSchema {
       ...payload,
       timeZone,
       performDriftCheck,
+    });
+
+    if (result && result.isOk) {
+      return result.response;
+    }
+
+    return null;
+  }
+
+  async addCalculatedPropertyConfig(
+    config: EntityCalculatedPropertyConfig,
+  ): Promise<EntityCalculatedPropertyConfig | null> {
+    const { name, prefix, suffix, hidden, calculation } = config;
+    const result = await api.post<
+      { name: string; prefix: string; suffix: string; hidden: boolean; calculation: EntityCalculatedPropertyConfig['calculation']; timeZone: number },
+      EntityCalculatedPropertyConfig
+    >(`propertyConfig/${config.entityConfigId}`, {
+      name,
+      prefix,
+      suffix,
+      hidden,
+      calculation,
+      timeZone: new Date().getTimezoneOffset(),
+    });
+
+    if (result && result.isOk) {
+      return result.response;
+    }
+
+    return null;
+  }
+
+  async updateCalculatedPropertyConfig(
+    config: EntityCalculatedPropertyConfig,
+  ): Promise<EntityCalculatedPropertyConfig | null> {
+    const { name, prefix, suffix, hidden, calculation } = config;
+    const result = await api.put<
+      { name: string; prefix: string; suffix: string; hidden: boolean; calculation: EntityCalculatedPropertyConfig['calculation']; timeZone: number },
+      EntityCalculatedPropertyConfig
+    >(`propertyConfig/${config.entityConfigId}/${config.id}`, {
+      name,
+      prefix,
+      suffix,
+      hidden,
+      calculation,
+      timeZone: new Date().getTimezoneOffset(),
     });
 
     if (result && result.isOk) {

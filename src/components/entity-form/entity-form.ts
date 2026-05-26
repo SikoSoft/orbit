@@ -287,9 +287,9 @@ export class EntityForm extends ViewElement {
       return [];
     }
 
-    return this.entityConfig.properties.filter(
-      propertyConfig => !this.propertyAtMax(propertyConfig.id),
-    );
+    return this.entityConfig.properties
+      .filter((p): p is EntityPropertyConfig => !('calculation' in p))
+      .filter(propertyConfig => !this.propertyAtMax(propertyConfig.id));
   }
 
   connectedCallback(): void {
@@ -452,7 +452,7 @@ export class EntityForm extends ViewElement {
       prop => prop.id === propertyId,
     );
 
-    if (!propertyConfig) {
+    if (!propertyConfig || 'calculation' in propertyConfig) {
       return true;
     }
 
@@ -528,6 +528,10 @@ export class EntityForm extends ViewElement {
     }
 
     this.entityConfig.properties.forEach(propertyConfig => {
+      if ('calculation' in propertyConfig) {
+        return;
+      }
+
       const count = this.numberOfPropertiesWithType(
         propertyConfig.dataType,
         propertyConfig.id,

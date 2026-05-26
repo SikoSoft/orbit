@@ -708,7 +708,8 @@ describe('SQLiteStorage', () => {
 
       await db.import({
         meta: { version: '1', date: new Date().toISOString() },
-        [ExportDataType.ENTITY_CONFIGS]: configs,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        [ExportDataType.ENTITY_CONFIGS]: configs as any,
         [ExportDataType.ENTITIES]: entities,
         [ExportDataType.LIST_CONFIGS]: [],
         [ExportDataType.MEDAL_CONFIGS]: [],

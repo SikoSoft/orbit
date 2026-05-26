@@ -9,6 +9,7 @@ import { NotificationType } from '@ss/ui/components/notification-provider.models
 
 import {
   DataType,
+  EntityCalculatedPropertyConfig,
   EntityConfig,
   EntityProperty,
   EntityPropertyConfig,
@@ -314,7 +315,7 @@ export class EntityListItem extends MobxLitElement {
   }
 
   @state()
-  get propertyConfigs(): EntityPropertyConfig[] | undefined {
+  get propertyConfigs(): (EntityPropertyConfig | EntityCalculatedPropertyConfig)[] | undefined {
     if (!this.entityConfig) {
       return undefined;
     }
@@ -596,7 +597,7 @@ export class EntityListItem extends MobxLitElement {
 
   getPropertyConfig(
     propertyConfigId: number,
-  ): EntityPropertyConfig | undefined {
+  ): EntityPropertyConfig | EntityCalculatedPropertyConfig | undefined {
     if (!this.propertyConfigs) {
       return undefined;
     }

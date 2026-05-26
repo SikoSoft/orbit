@@ -1,9 +1,9 @@
-import { EntityPropertyConfig } from 'api-spec/models/Entity';
+import { EntityCalculatedPropertyConfig, EntityPropertyConfig } from 'api-spec/models/Entity';
 import { RevisionProblems } from 'api-spec/models/Revision';
 
 export const propertyConfigUpdatedEventName = 'property-config-updated';
 
-export type PropertyConfigUpdatedPayload = EntityPropertyConfig;
+export type PropertyConfigUpdatedPayload = EntityPropertyConfig | EntityCalculatedPropertyConfig;
 
 export class PropertyConfigUpdatedEvent extends CustomEvent<PropertyConfigUpdatedPayload> {
   constructor(detail: PropertyConfigUpdatedPayload) {
@@ -17,7 +17,7 @@ export class PropertyConfigUpdatedEvent extends CustomEvent<PropertyConfigUpdate
 
 export const propertyConfigAddedEventName = 'property-config-added';
 
-export type PropertyConfigAddedPayload = EntityPropertyConfig;
+export type PropertyConfigAddedPayload = EntityPropertyConfig | EntityCalculatedPropertyConfig;
 
 export class PropertyConfigAddedEvent extends CustomEvent<PropertyConfigAddedPayload> {
   constructor(detail: PropertyConfigAddedPayload) {

@@ -74,17 +74,19 @@ export class ShortTextField extends MobxLitElement {
 
   @state()
   get propertyConfig(): EntityPropertyConfig {
-    let propertyConfig = defaultEntityPropertyConfig;
+    let propertyConfig: EntityPropertyConfig = defaultEntityPropertyConfig;
 
     const entityConfig = this.state.entityConfigs.find(
       config => config.id === this[PropertyFieldProp.ENTITY_CONFIG_ID],
     );
 
     if (entityConfig) {
-      propertyConfig =
-        entityConfig.properties.find(
-          prop => prop.id === this[PropertyFieldProp.PROPERTY_CONFIG_ID],
-        ) || defaultEntityPropertyConfig;
+      const found = entityConfig.properties.find(
+        prop => prop.id === this[PropertyFieldProp.PROPERTY_CONFIG_ID],
+      );
+      if (found && !('calculation' in found)) {
+        propertyConfig = found;
+      }
     }
 
     return propertyConfig;

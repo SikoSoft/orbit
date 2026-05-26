@@ -6,6 +6,7 @@ import {
   BooleanDataValue,
   DataType,
   DateDataValue,
+  EntityCalculatedPropertyConfig,
   EntityPropertyConfig,
   ImageDataValue,
   IntDataValue,
@@ -109,7 +110,7 @@ export class FilterPropertyElement extends MobxLitElement {
   }
 
   @state()
-  get selectedPropertyConfig(): EntityPropertyConfig | null {
+  get selectedPropertyConfig(): EntityPropertyConfig | EntityCalculatedPropertyConfig | null {
     if (!this.propertyConfigId) {
       return null;
     }

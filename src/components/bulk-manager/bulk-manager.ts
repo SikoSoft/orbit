@@ -142,6 +142,9 @@ export class BulkManager extends MobxLitElement {
       );
       if (entityConfig) {
         for (const propConfig of entityConfig.properties) {
+          if ('calculation' in propConfig) {
+            continue;
+          }
           if (!seen.has(propConfig.id)) {
             seen.add(propConfig.id);
             result.push(propConfig);

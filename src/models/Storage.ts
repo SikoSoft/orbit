@@ -2,6 +2,7 @@ import { Setting, Settings } from 'api-spec/models/Setting';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { ListConfig, ListSort, ListFilter } from 'api-spec/models/List';
 import {
+  EntityCalculatedPropertyConfig,
   EntityConfig,
   EntityConfigUniqueConstraint,
   EntityPropertyConfig,
@@ -103,6 +104,12 @@ export interface StorageSchema {
     propertyConfig: EntityPropertyConfig,
     performDriftCheck: boolean,
   ): Promise<Entity.EntityPropertyConfig | null>;
+  addCalculatedPropertyConfig?(
+    config: EntityCalculatedPropertyConfig,
+  ): Promise<EntityCalculatedPropertyConfig | null>;
+  updateCalculatedPropertyConfig?(
+    config: EntityCalculatedPropertyConfig,
+  ): Promise<EntityCalculatedPropertyConfig | null>;
   setWindowScrollPosition?(x: number, y: number): void;
   getWindowScrollPosition?(): { x: number; y: number };
   setEntityPropertyOrder?(

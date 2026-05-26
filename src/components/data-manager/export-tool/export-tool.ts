@@ -11,6 +11,7 @@ import {
   ExportDataContents,
   ExportDataSet,
   ExportDataType,
+  ExportPropertyConfig,
 } from 'api-spec/models/Data';
 import { addToast } from '@/lib/Util';
 import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
@@ -121,10 +122,12 @@ export class ExportTool extends MobxLitElement {
       if (this.dataSetIsSelected(config.id, ExportDataType.ENTITY_CONFIGS)) {
         configData.push({
           ...rest,
-          properties: properties.map(prop => {
-            const { userId: __, ...propRest } = prop;
-            return propRest;
-          }),
+          properties: properties
+            .filter(prop => !('calculation' in prop))
+            .map(prop => {
+              const { userId: __, ...propRest } = prop;
+              return propRest;
+            }) as ExportPropertyConfig[],
         });
       }
     }
