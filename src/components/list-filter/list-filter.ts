@@ -1,4 +1,4 @@
-import { html, css, PropertyValues, TemplateResult } from 'lit';
+import { html, css, nothing, PropertyValues, TemplateResult } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -83,6 +83,38 @@ export class ListFilter extends MobxLitElement {
   [ListFilterProp.LIST_FILTER]: ListFilterProps[ListFilterProp.LIST_FILTER] =
     listFilterProps[ListFilterProp.LIST_FILTER].default;
 
+  @property({ type: Boolean })
+  [ListFilterProp.ALL]: ListFilterProps[ListFilterProp.ALL] =
+    listFilterProps[ListFilterProp.ALL].default;
+
+  @property({ type: Boolean })
+  [ListFilterProp.TYPES]: ListFilterProps[ListFilterProp.TYPES] =
+    listFilterProps[ListFilterProp.TYPES].default;
+
+  @property({ type: Boolean })
+  [ListFilterProp.PROPERTIES]: ListFilterProps[ListFilterProp.PROPERTIES] =
+    listFilterProps[ListFilterProp.PROPERTIES].default;
+
+  @property({ type: Boolean })
+  [ListFilterProp.PUBLISHED]: ListFilterProps[ListFilterProp.PUBLISHED] =
+    listFilterProps[ListFilterProp.PUBLISHED].default;
+
+  @property({ type: Boolean })
+  [ListFilterProp.SUGGESTED]: ListFilterProps[ListFilterProp.SUGGESTED] =
+    listFilterProps[ListFilterProp.SUGGESTED].default;
+
+  @property({ type: Boolean })
+  [ListFilterProp.IDENTIFIED]: ListFilterProps[ListFilterProp.IDENTIFIED] =
+    listFilterProps[ListFilterProp.IDENTIFIED].default;
+
+  @property({ type: Boolean })
+  [ListFilterProp.TAGGING]: ListFilterProps[ListFilterProp.TAGGING] =
+    listFilterProps[ListFilterProp.TAGGING].default;
+
+  @property({ type: Boolean })
+  [ListFilterProp.TIME]: ListFilterProps[ListFilterProp.TIME] =
+    listFilterProps[ListFilterProp.TIME].default;
+
   @state() [ListFilterType.CONTAINS_ONE_OF]: string[] = [];
   @state() [ListFilterType.CONTAINS_ALL_OF]: string[] = [];
   @state() userIds: string[] = [];
@@ -90,12 +122,12 @@ export class ListFilter extends MobxLitElement {
   @state() includeUntagged: boolean = false;
   @state() includeAll: boolean = true;
   @state() includeAllTagging: boolean = false;
-  @state() time: TimeContext = { type: ListFilterTimeType.ALL_TIME };
+  @state() timeContext: TimeContext = { type: ListFilterTimeType.ALL_TIME };
   @state() text: TextContext[] = [];
-  @state() properties: FilterProperty[] = [];
-  @state() published: boolean | null = null;
-  @state() suggested: boolean | null = null;
-  @state() identified: boolean | null = null;
+  @state() filterProperties: FilterProperty[] = [];
+  @state() publishedFilter: boolean | null = null;
+  @state() suggestedFilter: boolean | null = null;
+  @state() identifiedFilter: boolean | null = null;
 
   @state() savedFilters: SavedListFilter[] = [];
   @state() saveMode: boolean = false;
@@ -152,11 +184,13 @@ export class ListFilter extends MobxLitElement {
         containsOneOf: this.containsOneOf,
         containsAllOf: this.containsAllOf,
       },
-      time: this.time,
-      properties: this.properties,
-      ...(this.published !== null && { published: this.published }),
-      ...(this.suggested !== null && { suggested: this.suggested }),
-      ...(this.identified !== null && { identified: this.identified }),
+      time: this.timeContext,
+      properties: this.filterProperties,
+      ...(this.publishedFilter !== null && { published: this.publishedFilter }),
+      ...(this.suggestedFilter !== null && { suggested: this.suggestedFilter }),
+      ...(this.identifiedFilter !== null && {
+        identified: this.identifiedFilter,
+      }),
     };
   }
 
@@ -185,16 +219,16 @@ export class ListFilter extends MobxLitElement {
     this.includeAll = listFilter.includeAll ?? true;
     this.includeAllTagging = listFilter.includeAllTagging ?? true;
     if (listFilter.time) {
-      this.time = listFilter.time;
+      this.timeContext = listFilter.time;
     }
     if (listFilter.properties) {
-      this.properties = listFilter.properties;
+      this.filterProperties = listFilter.properties;
     }
-    this.published =
+    this.publishedFilter =
       listFilter.published !== undefined ? listFilter.published : null;
-    this.suggested =
+    this.suggestedFilter =
       listFilter.suggested !== undefined ? listFilter.suggested : null;
-    this.identified =
+    this.identifiedFilter =
       listFilter.identified !== undefined ? listFilter.identified : null;
   }
 
@@ -215,11 +249,11 @@ export class ListFilter extends MobxLitElement {
   }
 
   private handleTimeChanged(e: TimeFiltersUpdatedEvent): void {
-    this.time = e.detail;
+    this.timeContext = e.detail;
   }
 
   private handlePropertiesChanged(e: FilterPropertiesUpdatedEvent): void {
-    this.properties = e.detail.filters;
+    this.filterProperties = e.detail.filters;
   }
 
   private updateTags(type: ListFilterType, tags: string[]): void {
@@ -264,61 +298,65 @@ export class ListFilter extends MobxLitElement {
   private handlePublishedChanged(e: OptionSelectorChangedEvent): void {
     const { selected } = e.detail;
     if (selected.includes('true') && selected.includes('false')) {
-      this.published = null;
+      this.publishedFilter = null;
     } else if (selected.includes('true')) {
-      this.published = true;
+      this.publishedFilter = true;
     } else if (selected.includes('false')) {
-      this.published = false;
+      this.publishedFilter = false;
     } else {
-      this.published = null;
+      this.publishedFilter = null;
     }
   }
 
   private handleSuggestedChanged(e: OptionSelectorChangedEvent): void {
     const { selected } = e.detail;
     if (selected.includes('true') && selected.includes('false')) {
-      this.suggested = null;
+      this.suggestedFilter = null;
     } else if (selected.includes('true')) {
-      this.suggested = true;
+      this.suggestedFilter = true;
     } else if (selected.includes('false')) {
-      this.suggested = false;
+      this.suggestedFilter = false;
     } else {
-      this.suggested = null;
+      this.suggestedFilter = null;
     }
   }
 
   private handleIdentifiedChanged(e: OptionSelectorChangedEvent): void {
     const { selected } = e.detail;
     if (selected.includes('true') && selected.includes('false')) {
-      this.identified = null;
+      this.identifiedFilter = null;
     } else if (selected.includes('true')) {
-      this.identified = true;
+      this.identifiedFilter = true;
     } else if (selected.includes('false')) {
-      this.identified = false;
+      this.identifiedFilter = false;
     } else {
-      this.identified = null;
+      this.identifiedFilter = null;
     }
   }
 
   private publishedToSelected(): string[] {
-    if (this.published === null) {
+    if (this.publishedFilter === null) {
       return ['true', 'false'];
     }
-    return [String(this.published)];
+    return [String(this.publishedFilter)];
   }
 
   private suggestedToSelected(): string[] {
-    if (this.suggested === null) {
+    if (this.suggestedFilter === null) {
       return ['true', 'false'];
     }
-    return [String(this.suggested)];
+    return [String(this.suggestedFilter)];
   }
 
   private identifiedToSelected(): string[] {
-    if (this.identified === null) {
+    if (this.identifiedFilter === null) {
       return ['true', 'false'];
     }
-    return [String(this.identified)];
+    return [String(this.identifiedFilter)];
+  }
+
+  private isVisible(section: ListFilterProp): boolean {
+    return this[ListFilterProp.ALL] || (this[section as keyof this] as boolean);
   }
 
   render(): TemplateResult {
@@ -336,158 +374,180 @@ export class ListFilter extends MobxLitElement {
         </div>
 
         <div class="filters">
-          <fieldset>
-            <legend>${translate('includedTypes')}</legend>
-            <div class="types">
-              <ss-select
-                multiple
-                @select-changed=${this.handleTypesChanged}
-                .selected=${this.includeTypes.map(String)}
-                .options=${this.state.entityConfigs.map(config => ({
-                  label: config.name,
-                  value: config.id,
-                }))}
-              ></ss-select>
-            </div>
-          </fieldset>
+          ${this.isVisible(ListFilterProp.TYPES)
+            ? html`
+                <fieldset>
+                  <legend>${translate('includedTypes')}</legend>
+                  <div class="types">
+                    <ss-select
+                      multiple
+                      @select-changed=${this.handleTypesChanged}
+                      .selected=${this.includeTypes.map(String)}
+                      .options=${this.state.entityConfigs.map(config => ({
+                        label: config.name,
+                        value: config.id,
+                      }))}
+                    ></ss-select>
+                  </div>
+                </fieldset>
+              `
+            : nothing}
+          ${this.isVisible(ListFilterProp.PROPERTIES)
+            ? html`
+                <filter-properties
+                  .includeTypes=${this.includeTypes}
+                  .filters=${this.filterProperties}
+                  @filter-properties-updated=${(
+                    e: FilterPropertiesUpdatedEvent,
+                  ): void => this.handlePropertiesChanged(e)}
+                ></filter-properties>
+              `
+            : nothing}
+          ${this.isVisible(ListFilterProp.PUBLISHED)
+            ? html`
+                <fieldset>
+                  <legend>${translate('published')}</legend>
+                  <option-selector
+                    multiple
+                    required
+                    .options=${[
+                      { name: translate('published'), value: 'true' },
+                      { name: translate('unpublished'), value: 'false' },
+                    ]}
+                    .selected=${this.publishedToSelected()}
+                    @option-selector-changed=${(
+                      e: OptionSelectorChangedEvent,
+                    ): void => this.handlePublishedChanged(e)}
+                  ></option-selector>
+                </fieldset>
+              `
+            : nothing}
+          ${this.isVisible(ListFilterProp.SUGGESTED)
+            ? html`
+                <fieldset>
+                  <legend>${translate('suggested')}</legend>
+                  <option-selector
+                    multiple
+                    required
+                    .options=${[
+                      { name: translate('suggested'), value: 'true' },
+                      { name: translate('nonSuggested'), value: 'false' },
+                    ]}
+                    .selected=${this.suggestedToSelected()}
+                    @option-selector-changed=${(
+                      e: OptionSelectorChangedEvent,
+                    ): void => this.handleSuggestedChanged(e)}
+                  ></option-selector>
+                </fieldset>
+              `
+            : nothing}
+          ${this.isVisible(ListFilterProp.IDENTIFIED)
+            ? html`
+                <fieldset>
+                  <legend>${translate('identified')}</legend>
+                  <option-selector
+                    multiple
+                    required
+                    .options=${[
+                      { name: translate('identified'), value: 'true' },
+                      { name: translate('nonIdentified'), value: 'false' },
+                    ]}
+                    .selected=${this.identifiedToSelected()}
+                    @option-selector-changed=${(
+                      e: OptionSelectorChangedEvent,
+                    ): void => this.handleIdentifiedChanged(e)}
+                  ></option-selector>
+                </fieldset>
+              `
+            : nothing}
+          ${this.isVisible(ListFilterProp.TAGGING)
+            ? html`
+                <fieldset class=${classMap(this.taggingClasses)}>
+                  <legend>${translate('tagging')}</legend>
 
-          <filter-properties
-            .includeTypes=${this.includeTypes}
-            .filters=${this.properties}
-            @filter-properties-updated=${(
-              e: FilterPropertiesUpdatedEvent,
-            ): void => this.handlePropertiesChanged(e)}
-          ></filter-properties>
+                  <div class="all">
+                    <input
+                      id="include-all-tagging"
+                      type="checkbox"
+                      ?checked=${this.includeAllTagging}
+                      @change=${this.handleIncludeAllTaggingChanged}
+                    />
 
-          <fieldset>
-            <legend>${translate('published')}</legend>
-            <option-selector
-              multiple
-              required
-              .options=${[
-                { name: translate('published'), value: 'true' },
-                { name: translate('unpublished'), value: 'false' },
-              ]}
-              .selected=${this.publishedToSelected()}
-              @option-selector-changed=${(
-                e: OptionSelectorChangedEvent,
-              ): void => this.handlePublishedChanged(e)}
-            ></option-selector>
-          </fieldset>
-
-          <fieldset>
-            <legend>${translate('suggested')}</legend>
-            <option-selector
-              multiple
-              required
-              .options=${[
-                { name: translate('suggested'), value: 'true' },
-                { name: translate('nonSuggested'), value: 'false' },
-              ]}
-              .selected=${this.suggestedToSelected()}
-              @option-selector-changed=${(
-                e: OptionSelectorChangedEvent,
-              ): void => this.handleSuggestedChanged(e)}
-            ></option-selector>
-          </fieldset>
-
-          <fieldset>
-            <legend>${translate('identified')}</legend>
-            <option-selector
-              multiple
-              required
-              .options=${[
-                { name: translate('identified'), value: 'true' },
-                { name: translate('nonIdentified'), value: 'false' },
-              ]}
-              .selected=${this.identifiedToSelected()}
-              @option-selector-changed=${(
-                e: OptionSelectorChangedEvent,
-              ): void => this.handleIdentifiedChanged(e)}
-            ></option-selector>
-          </fieldset>
-
-          <fieldset class=${classMap(this.taggingClasses)}>
-            <legend>${translate('tagging')}</legend>
-
-            <div class="all">
-              <input
-                id="include-all-tagging"
-                type="checkbox"
-                ?checked=${this.includeAllTagging}
-                @change=${this.handleIncludeAllTaggingChanged}
-              />
-
-              <label for="include-all-tagging"
-                >${translate('includeAll')}</label
-              >
-            </div>
-
-            <div class="tag-rules">
-              ${repeat(
-                Object.values(ListFilterType),
-                type => type,
-                type => html`
-                  <fieldset>
-                    <legend>${translate(`filterType.${type}`)}</legend>
-
-                    <tag-manager
-                      ?enableSuggestions=${this.tagSuggestionsEnabled}
-                      @tags-updated=${(e: TagsUpdatedEvent): void => {
-                        this.updateTags(type, e.detail.tags);
-                      }}
-                      @tag-suggestions-requested=${this
-                        .handleTagSuggestionsRequested}
+                    <label for="include-all-tagging"
+                      >${translate('includeAll')}</label
                     >
-                      <div slot="tags">
-                        ${repeat(
-                          this[type],
-                          tag => tag,
-                          tag => html`<data-item>${tag}</data-item>`,
-                        )}
-                      </div>
+                  </div>
 
-                      <div slot="suggestions">
-                        ${repeat(
-                          this.tagSuggestions,
-                          suggestion => suggestion,
-                          suggestion =>
-                            html`<data-item>${suggestion}</data-item>`,
-                        )}
-                      </div>
-                    </tag-manager>
-                  </fieldset>
-                `,
-              )}
-              <div>
-                <input
-                  id="include-untagged"
-                  type="checkbox"
-                  ?checked=${this.includeUntagged}
-                  @change=${this.handleIncludeUntaggedChanged}
-                />
+                  <div class="tag-rules">
+                    ${repeat(
+                      Object.values(ListFilterType),
+                      type => type,
+                      type => html`
+                        <fieldset>
+                          <legend>${translate(`filterType.${type}`)}</legend>
 
-                <label for="include-untagged"
-                  >${translate('includeItemsWithoutTags')}</label
-                >
-              </div>
-            </div>
-          </fieldset>
+                          <tag-manager
+                            ?enableSuggestions=${this.tagSuggestionsEnabled}
+                            @tags-updated=${(e: TagsUpdatedEvent): void => {
+                              this.updateTags(type, e.detail.tags);
+                            }}
+                            @tag-suggestions-requested=${this
+                              .handleTagSuggestionsRequested}
+                          >
+                            <div slot="tags">
+                              ${repeat(
+                                this[type],
+                                tag => tag,
+                                tag => html`<data-item>${tag}</data-item>`,
+                              )}
+                            </div>
 
-          <time-filters
-            type=${this.time.type}
-            date=${this.time.type === ListFilterTimeType.EXACT_DATE
-              ? this.time.date
-              : ''}
-            start=${this.time.type === ListFilterTimeType.RANGE
-              ? this.time.start
-              : ''}
-            end=${this.time.type === ListFilterTimeType.RANGE
-              ? this.time.end
-              : ''}
-            @time-filters-updated=${(e: TimeFiltersUpdatedEvent): void =>
-              this.handleTimeChanged(e)}
-          ></time-filters>
+                            <div slot="suggestions">
+                              ${repeat(
+                                this.tagSuggestions,
+                                suggestion => suggestion,
+                                suggestion =>
+                                  html`<data-item>${suggestion}</data-item>`,
+                              )}
+                            </div>
+                          </tag-manager>
+                        </fieldset>
+                      `,
+                    )}
+                    <div>
+                      <input
+                        id="include-untagged"
+                        type="checkbox"
+                        ?checked=${this.includeUntagged}
+                        @change=${this.handleIncludeUntaggedChanged}
+                      />
+
+                      <label for="include-untagged"
+                        >${translate('includeItemsWithoutTags')}</label
+                      >
+                    </div>
+                  </div>
+                </fieldset>
+              `
+            : nothing}
+          ${this.isVisible(ListFilterProp.TIME)
+            ? html`
+                <time-filters
+                  type=${this.timeContext.type}
+                  date=${this.timeContext.type === ListFilterTimeType.EXACT_DATE
+                    ? this.timeContext.date
+                    : ''}
+                  start=${this.timeContext.type === ListFilterTimeType.RANGE
+                    ? this.timeContext.start
+                    : ''}
+                  end=${this.timeContext.type === ListFilterTimeType.RANGE
+                    ? this.timeContext.end
+                    : ''}
+                  @time-filters-updated=${(e: TimeFiltersUpdatedEvent): void =>
+                    this.handleTimeChanged(e)}
+                ></time-filters>
+              `
+            : nothing}
         </div>
 
         <ss-button
