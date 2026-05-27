@@ -803,7 +803,7 @@ export class ListConfig extends MobxLitElement {
         >
           <div class="filter-body">
             <list-filter
-              all
+              showAll
               .listFilter=${this.state.listFilter}
               @list-filter-updated=${this.handleFilterUpdated}
             ></list-filter>

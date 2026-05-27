@@ -4,26 +4,26 @@ import { ListFilter as ListFilterSpec } from 'api-spec/models/List';
 
 export enum ListFilterProp {
   LIST_FILTER = 'listFilter',
-  ALL = 'all',
-  TYPES = 'types',
-  PROPERTIES = 'properties',
-  PUBLISHED = 'published',
-  SUGGESTED = 'suggested',
-  IDENTIFIED = 'identified',
-  TAGGING = 'tagging',
-  TIME = 'time',
+  SHOW_ALL = 'showAll',
+  SHOW_TYPES = 'showTypes',
+  SHOW_PROPERTIES = 'showProperties',
+  SHOW_PUBLISHED = 'showPublished',
+  SHOW_SUGGESTED = 'showSuggested',
+  SHOW_IDENTIFIED = 'showIdentified',
+  SHOW_TAGGING = 'showTagging',
+  SHOW_TIME = 'showTime',
 }
 
 export interface ListFilterProps extends PropTypes {
   [ListFilterProp.LIST_FILTER]: ListFilterSpec | undefined;
-  [ListFilterProp.ALL]: boolean;
-  [ListFilterProp.TYPES]: boolean;
-  [ListFilterProp.PROPERTIES]: boolean;
-  [ListFilterProp.PUBLISHED]: boolean;
-  [ListFilterProp.SUGGESTED]: boolean;
-  [ListFilterProp.IDENTIFIED]: boolean;
-  [ListFilterProp.TAGGING]: boolean;
-  [ListFilterProp.TIME]: boolean;
+  [ListFilterProp.SHOW_ALL]: boolean;
+  [ListFilterProp.SHOW_TYPES]: boolean;
+  [ListFilterProp.SHOW_PROPERTIES]: boolean;
+  [ListFilterProp.SHOW_PUBLISHED]: boolean;
+  [ListFilterProp.SHOW_SUGGESTED]: boolean;
+  [ListFilterProp.SHOW_IDENTIFIED]: boolean;
+  [ListFilterProp.SHOW_TAGGING]: boolean;
+  [ListFilterProp.SHOW_TIME]: boolean;
 }
 
 export const listFilterProps: PropConfigMap<ListFilterProps> = {
@@ -32,42 +32,42 @@ export const listFilterProps: PropConfigMap<ListFilterProps> = {
     control: { type: ControlType.HIDDEN },
     description: 'Filter value passed in from outside',
   },
-  [ListFilterProp.ALL]: {
+  [ListFilterProp.SHOW_ALL]: {
     default: false,
     control: { type: ControlType.BOOLEAN },
     description: 'Show all filter sections',
   },
-  [ListFilterProp.TYPES]: {
+  [ListFilterProp.SHOW_TYPES]: {
     default: false,
     control: { type: ControlType.BOOLEAN },
     description: 'Show the types filter section',
   },
-  [ListFilterProp.PROPERTIES]: {
+  [ListFilterProp.SHOW_PROPERTIES]: {
     default: false,
     control: { type: ControlType.BOOLEAN },
     description: 'Show the properties filter section',
   },
-  [ListFilterProp.PUBLISHED]: {
+  [ListFilterProp.SHOW_PUBLISHED]: {
     default: false,
     control: { type: ControlType.BOOLEAN },
     description: 'Show the published filter section',
   },
-  [ListFilterProp.SUGGESTED]: {
+  [ListFilterProp.SHOW_SUGGESTED]: {
     default: false,
     control: { type: ControlType.BOOLEAN },
     description: 'Show the suggested filter section',
   },
-  [ListFilterProp.IDENTIFIED]: {
+  [ListFilterProp.SHOW_IDENTIFIED]: {
     default: false,
     control: { type: ControlType.BOOLEAN },
     description: 'Show the identified filter section',
   },
-  [ListFilterProp.TAGGING]: {
+  [ListFilterProp.SHOW_TAGGING]: {
     default: false,
     control: { type: ControlType.BOOLEAN },
     description: 'Show the tagging filter section',
   },
-  [ListFilterProp.TIME]: {
+  [ListFilterProp.SHOW_TIME]: {
     default: false,
     control: { type: ControlType.BOOLEAN },
     description: 'Show the time filter section',

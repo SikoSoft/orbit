@@ -84,36 +84,36 @@ export class ListFilter extends MobxLitElement {
     listFilterProps[ListFilterProp.LIST_FILTER].default;
 
   @property({ type: Boolean })
-  [ListFilterProp.ALL]: ListFilterProps[ListFilterProp.ALL] =
-    listFilterProps[ListFilterProp.ALL].default;
+  [ListFilterProp.SHOW_ALL]: ListFilterProps[ListFilterProp.SHOW_ALL] =
+    listFilterProps[ListFilterProp.SHOW_ALL].default;
 
   @property({ type: Boolean })
-  [ListFilterProp.TYPES]: ListFilterProps[ListFilterProp.TYPES] =
-    listFilterProps[ListFilterProp.TYPES].default;
+  [ListFilterProp.SHOW_TYPES]: ListFilterProps[ListFilterProp.SHOW_TYPES] =
+    listFilterProps[ListFilterProp.SHOW_TYPES].default;
 
   @property({ type: Boolean })
-  [ListFilterProp.PROPERTIES]: ListFilterProps[ListFilterProp.PROPERTIES] =
-    listFilterProps[ListFilterProp.PROPERTIES].default;
+  [ListFilterProp.SHOW_PROPERTIES]: ListFilterProps[ListFilterProp.SHOW_PROPERTIES] =
+    listFilterProps[ListFilterProp.SHOW_PROPERTIES].default;
 
   @property({ type: Boolean })
-  [ListFilterProp.PUBLISHED]: ListFilterProps[ListFilterProp.PUBLISHED] =
-    listFilterProps[ListFilterProp.PUBLISHED].default;
+  [ListFilterProp.SHOW_PUBLISHED]: ListFilterProps[ListFilterProp.SHOW_PUBLISHED] =
+    listFilterProps[ListFilterProp.SHOW_PUBLISHED].default;
 
   @property({ type: Boolean })
-  [ListFilterProp.SUGGESTED]: ListFilterProps[ListFilterProp.SUGGESTED] =
-    listFilterProps[ListFilterProp.SUGGESTED].default;
+  [ListFilterProp.SHOW_SUGGESTED]: ListFilterProps[ListFilterProp.SHOW_SUGGESTED] =
+    listFilterProps[ListFilterProp.SHOW_SUGGESTED].default;
 
   @property({ type: Boolean })
-  [ListFilterProp.IDENTIFIED]: ListFilterProps[ListFilterProp.IDENTIFIED] =
-    listFilterProps[ListFilterProp.IDENTIFIED].default;
+  [ListFilterProp.SHOW_IDENTIFIED]: ListFilterProps[ListFilterProp.SHOW_IDENTIFIED] =
+    listFilterProps[ListFilterProp.SHOW_IDENTIFIED].default;
 
   @property({ type: Boolean })
-  [ListFilterProp.TAGGING]: ListFilterProps[ListFilterProp.TAGGING] =
-    listFilterProps[ListFilterProp.TAGGING].default;
+  [ListFilterProp.SHOW_TAGGING]: ListFilterProps[ListFilterProp.SHOW_TAGGING] =
+    listFilterProps[ListFilterProp.SHOW_TAGGING].default;
 
   @property({ type: Boolean })
-  [ListFilterProp.TIME]: ListFilterProps[ListFilterProp.TIME] =
-    listFilterProps[ListFilterProp.TIME].default;
+  [ListFilterProp.SHOW_TIME]: ListFilterProps[ListFilterProp.SHOW_TIME] =
+    listFilterProps[ListFilterProp.SHOW_TIME].default;
 
   @state() [ListFilterType.CONTAINS_ONE_OF]: string[] = [];
   @state() [ListFilterType.CONTAINS_ALL_OF]: string[] = [];
@@ -122,12 +122,12 @@ export class ListFilter extends MobxLitElement {
   @state() includeUntagged: boolean = false;
   @state() includeAll: boolean = true;
   @state() includeAllTagging: boolean = false;
-  @state() timeContext: TimeContext = { type: ListFilterTimeType.ALL_TIME };
+  @state() time: TimeContext = { type: ListFilterTimeType.ALL_TIME };
   @state() text: TextContext[] = [];
-  @state() filterProperties: FilterProperty[] = [];
-  @state() publishedFilter: boolean | null = null;
-  @state() suggestedFilter: boolean | null = null;
-  @state() identifiedFilter: boolean | null = null;
+  @state() properties: FilterProperty[] = [];
+  @state() published: boolean | null = null;
+  @state() suggested: boolean | null = null;
+  @state() identified: boolean | null = null;
 
   @state() savedFilters: SavedListFilter[] = [];
   @state() saveMode: boolean = false;
@@ -184,13 +184,11 @@ export class ListFilter extends MobxLitElement {
         containsOneOf: this.containsOneOf,
         containsAllOf: this.containsAllOf,
       },
-      time: this.timeContext,
-      properties: this.filterProperties,
-      ...(this.publishedFilter !== null && { published: this.publishedFilter }),
-      ...(this.suggestedFilter !== null && { suggested: this.suggestedFilter }),
-      ...(this.identifiedFilter !== null && {
-        identified: this.identifiedFilter,
-      }),
+      time: this.time,
+      properties: this.properties,
+      ...(this.published !== null && { published: this.published }),
+      ...(this.suggested !== null && { suggested: this.suggested }),
+      ...(this.identified !== null && { identified: this.identified }),
     };
   }
 
@@ -219,16 +217,16 @@ export class ListFilter extends MobxLitElement {
     this.includeAll = listFilter.includeAll ?? true;
     this.includeAllTagging = listFilter.includeAllTagging ?? true;
     if (listFilter.time) {
-      this.timeContext = listFilter.time;
+      this.time = listFilter.time;
     }
     if (listFilter.properties) {
-      this.filterProperties = listFilter.properties;
+      this.properties = listFilter.properties;
     }
-    this.publishedFilter =
+    this.published =
       listFilter.published !== undefined ? listFilter.published : null;
-    this.suggestedFilter =
+    this.suggested =
       listFilter.suggested !== undefined ? listFilter.suggested : null;
-    this.identifiedFilter =
+    this.identified =
       listFilter.identified !== undefined ? listFilter.identified : null;
   }
 
@@ -249,11 +247,11 @@ export class ListFilter extends MobxLitElement {
   }
 
   private handleTimeChanged(e: TimeFiltersUpdatedEvent): void {
-    this.timeContext = e.detail;
+    this.time = e.detail;
   }
 
   private handlePropertiesChanged(e: FilterPropertiesUpdatedEvent): void {
-    this.filterProperties = e.detail.filters;
+    this.properties = e.detail.filters;
   }
 
   private updateTags(type: ListFilterType, tags: string[]): void {
@@ -298,65 +296,67 @@ export class ListFilter extends MobxLitElement {
   private handlePublishedChanged(e: OptionSelectorChangedEvent): void {
     const { selected } = e.detail;
     if (selected.includes('true') && selected.includes('false')) {
-      this.publishedFilter = null;
+      this.published = null;
     } else if (selected.includes('true')) {
-      this.publishedFilter = true;
+      this.published = true;
     } else if (selected.includes('false')) {
-      this.publishedFilter = false;
+      this.published = false;
     } else {
-      this.publishedFilter = null;
+      this.published = null;
     }
   }
 
   private handleSuggestedChanged(e: OptionSelectorChangedEvent): void {
     const { selected } = e.detail;
     if (selected.includes('true') && selected.includes('false')) {
-      this.suggestedFilter = null;
+      this.suggested = null;
     } else if (selected.includes('true')) {
-      this.suggestedFilter = true;
+      this.suggested = true;
     } else if (selected.includes('false')) {
-      this.suggestedFilter = false;
+      this.suggested = false;
     } else {
-      this.suggestedFilter = null;
+      this.suggested = null;
     }
   }
 
   private handleIdentifiedChanged(e: OptionSelectorChangedEvent): void {
     const { selected } = e.detail;
     if (selected.includes('true') && selected.includes('false')) {
-      this.identifiedFilter = null;
+      this.identified = null;
     } else if (selected.includes('true')) {
-      this.identifiedFilter = true;
+      this.identified = true;
     } else if (selected.includes('false')) {
-      this.identifiedFilter = false;
+      this.identified = false;
     } else {
-      this.identifiedFilter = null;
+      this.identified = null;
     }
   }
 
   private publishedToSelected(): string[] {
-    if (this.publishedFilter === null) {
+    if (this.published === null) {
       return ['true', 'false'];
     }
-    return [String(this.publishedFilter)];
+    return [String(this.published)];
   }
 
   private suggestedToSelected(): string[] {
-    if (this.suggestedFilter === null) {
+    if (this.suggested === null) {
       return ['true', 'false'];
     }
-    return [String(this.suggestedFilter)];
+    return [String(this.suggested)];
   }
 
   private identifiedToSelected(): string[] {
-    if (this.identifiedFilter === null) {
+    if (this.identified === null) {
       return ['true', 'false'];
     }
-    return [String(this.identifiedFilter)];
+    return [String(this.identified)];
   }
 
   private isVisible(section: ListFilterProp): boolean {
-    return this[ListFilterProp.ALL] || (this[section as keyof this] as boolean);
+    return (
+      this[ListFilterProp.SHOW_ALL] || (this[section as keyof this] as boolean)
+    );
   }
 
   render(): TemplateResult {
@@ -374,7 +374,7 @@ export class ListFilter extends MobxLitElement {
         </div>
 
         <div class="filters">
-          ${this.isVisible(ListFilterProp.TYPES)
+          ${this.isVisible(ListFilterProp.SHOW_TYPES)
             ? html`
                 <fieldset>
                   <legend>${translate('includedTypes')}</legend>
@@ -392,18 +392,18 @@ export class ListFilter extends MobxLitElement {
                 </fieldset>
               `
             : nothing}
-          ${this.isVisible(ListFilterProp.PROPERTIES)
+          ${this.isVisible(ListFilterProp.SHOW_PROPERTIES)
             ? html`
                 <filter-properties
                   .includeTypes=${this.includeTypes}
-                  .filters=${this.filterProperties}
+                  .filters=${this.properties}
                   @filter-properties-updated=${(
                     e: FilterPropertiesUpdatedEvent,
                   ): void => this.handlePropertiesChanged(e)}
                 ></filter-properties>
               `
             : nothing}
-          ${this.isVisible(ListFilterProp.PUBLISHED)
+          ${this.isVisible(ListFilterProp.SHOW_PUBLISHED)
             ? html`
                 <fieldset>
                   <legend>${translate('published')}</legend>
@@ -422,7 +422,7 @@ export class ListFilter extends MobxLitElement {
                 </fieldset>
               `
             : nothing}
-          ${this.isVisible(ListFilterProp.SUGGESTED)
+          ${this.isVisible(ListFilterProp.SHOW_SUGGESTED)
             ? html`
                 <fieldset>
                   <legend>${translate('suggested')}</legend>
@@ -441,7 +441,7 @@ export class ListFilter extends MobxLitElement {
                 </fieldset>
               `
             : nothing}
-          ${this.isVisible(ListFilterProp.IDENTIFIED)
+          ${this.isVisible(ListFilterProp.SHOW_IDENTIFIED)
             ? html`
                 <fieldset>
                   <legend>${translate('identified')}</legend>
@@ -460,7 +460,7 @@ export class ListFilter extends MobxLitElement {
                 </fieldset>
               `
             : nothing}
-          ${this.isVisible(ListFilterProp.TAGGING)
+          ${this.isVisible(ListFilterProp.SHOW_TAGGING)
             ? html`
                 <fieldset class=${classMap(this.taggingClasses)}>
                   <legend>${translate('tagging')}</legend>
@@ -530,18 +530,18 @@ export class ListFilter extends MobxLitElement {
                 </fieldset>
               `
             : nothing}
-          ${this.isVisible(ListFilterProp.TIME)
+          ${this.isVisible(ListFilterProp.SHOW_TIME)
             ? html`
                 <time-filters
-                  type=${this.timeContext.type}
-                  date=${this.timeContext.type === ListFilterTimeType.EXACT_DATE
-                    ? this.timeContext.date
+                  type=${this.time.type}
+                  date=${this.time.type === ListFilterTimeType.EXACT_DATE
+                    ? this.time.date
                     : ''}
-                  start=${this.timeContext.type === ListFilterTimeType.RANGE
-                    ? this.timeContext.start
+                  start=${this.time.type === ListFilterTimeType.RANGE
+                    ? this.time.start
                     : ''}
-                  end=${this.timeContext.type === ListFilterTimeType.RANGE
-                    ? this.timeContext.end
+                  end=${this.time.type === ListFilterTimeType.RANGE
+                    ? this.time.end
                     : ''}
                   @time-filters-updated=${(e: TimeFiltersUpdatedEvent): void =>
                     this.handleTimeChanged(e)}
