@@ -415,6 +415,7 @@ export class EntityForm extends ViewElement {
               uiId: uuidv4(),
               value,
               valueIsSet:
+                'calculation' in propertyConfig ||
                 propertyConfig.dataType === DataType.DATE ||
                 (propertyConfig.dataType === DataType.INT &&
                   value !== propertyConfig.defaultValue)
