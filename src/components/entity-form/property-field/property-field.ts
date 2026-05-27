@@ -8,6 +8,9 @@ import {
   DataType,
   DateDataValue,
   defaultEntityPropertyConfig,
+  EntityCalculatedPropertyConfig,
+  EntityPropertyCalculation,
+  EntityPropertyCalculationReference,
   EntityPropertyConfig,
   ImageDataValue,
   IntDataValue,
@@ -106,6 +109,15 @@ export class PropertyField extends MobxLitElement {
         filter: brightness(2.5) drop-shadow(0 0 3px currentColor);
       }
     }
+
+    .formula-display {
+      font-family: monospace;
+      background: var(--surface-color, #f5f5f5);
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.9rem;
+      color: var(--text-color-secondary, #555);
+    }
   `;
 
   private state = appState;
@@ -175,8 +187,9 @@ export class PropertyField extends MobxLitElement {
   }
 
   @state()
-  get propertyConfig(): EntityPropertyConfig {
-    let propertyConfig: EntityPropertyConfig = defaultEntityPropertyConfig;
+  get propertyConfig(): EntityPropertyConfig | EntityCalculatedPropertyConfig {
+    let propertyConfig: EntityPropertyConfig | EntityCalculatedPropertyConfig =
+      defaultEntityPropertyConfig;
 
     const entityConfig = this.state.entityConfigs.find(
       config => config.id === this[PropertyFieldProp.ENTITY_CONFIG_ID],
@@ -186,7 +199,7 @@ export class PropertyField extends MobxLitElement {
       const found = entityConfig.properties.find(
         prop => prop.id === this[PropertyFieldProp.PROPERTY_CONFIG_ID],
       );
-      if (found && !('calculation' in found)) {
+      if (found) {
         propertyConfig = found;
       }
     }
@@ -201,6 +214,9 @@ export class PropertyField extends MobxLitElement {
 
   @state()
   get canDelete(): boolean {
+    if ('calculation' in this.propertyConfig) {
+      return true;
+    }
     if (this.usedInstancesOfThisProperty < this.propertyConfig.required + 1) {
       return false;
     }
@@ -209,11 +225,29 @@ export class PropertyField extends MobxLitElement {
 
   @state()
   get canClone(): boolean {
+    if ('calculation' in this.propertyConfig) {
+      return false;
+    }
     if (this.usedInstancesOfThisProperty < this.propertyConfig.allowed) {
       return true;
     }
-
     return false;
+  }
+
+  formatFormula(calc: EntityPropertyCalculation): string {
+    const entityConfig = this.state.entityConfigs.find(
+      config => config.id === this[PropertyFieldProp.ENTITY_CONFIG_ID],
+    );
+    const fmtOperand = (
+      v: EntityPropertyCalculationReference | number,
+    ): string => {
+      if (typeof v === 'number') {
+        return String(v);
+      }
+      const prop = entityConfig?.properties.find(p => p.id === v.propertyConfigId);
+      return prop ? `[${prop.name}]` : `[#${v.propertyConfigId}]`;
+    };
+    return `${fmtOperand(calc.value1)} ${calc.operation} ${fmtOperand(calc.value2)}`;
   }
 
   delete(): void {
@@ -264,6 +298,13 @@ export class PropertyField extends MobxLitElement {
   }
 
   renderField(): TemplateResult | typeof nothing {
+    if ('calculation' in this.propertyConfig) {
+      return html`<div class="formula-display">
+        ${translate('calculatedPropertyConfig.formula')}:
+        ${this.formatFormula(this.propertyConfig.calculation)}
+      </div>`;
+    }
+
     let value: PropertyDataValue;
     switch (this.propertyConfig.dataType) {
       case DataType.BOOLEAN:
