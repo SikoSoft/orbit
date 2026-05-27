@@ -94,6 +94,7 @@ export class CalculatedPropertyConfigForm extends LitElement {
 
     .buttons {
       padding: 0.5rem 0;
+      touch-action: manipulation;
 
       ss-button {
         display: block;
