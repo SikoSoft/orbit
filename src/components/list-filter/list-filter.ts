@@ -1,4 +1,4 @@
-import { html, css, PropertyValues, TemplateResult } from 'lit';
+import { html, css, nothing, PropertyValues, TemplateResult } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -82,6 +82,38 @@ export class ListFilter extends MobxLitElement {
   @property({ type: Object })
   [ListFilterProp.LIST_FILTER]: ListFilterProps[ListFilterProp.LIST_FILTER] =
     listFilterProps[ListFilterProp.LIST_FILTER].default;
+
+  @property({ type: Boolean })
+  [ListFilterProp.SHOW_ALL]: ListFilterProps[ListFilterProp.SHOW_ALL] =
+    listFilterProps[ListFilterProp.SHOW_ALL].default;
+
+  @property({ type: Boolean })
+  [ListFilterProp.SHOW_TYPES]: ListFilterProps[ListFilterProp.SHOW_TYPES] =
+    listFilterProps[ListFilterProp.SHOW_TYPES].default;
+
+  @property({ type: Boolean })
+  [ListFilterProp.SHOW_PROPERTIES]: ListFilterProps[ListFilterProp.SHOW_PROPERTIES] =
+    listFilterProps[ListFilterProp.SHOW_PROPERTIES].default;
+
+  @property({ type: Boolean })
+  [ListFilterProp.SHOW_PUBLISHED]: ListFilterProps[ListFilterProp.SHOW_PUBLISHED] =
+    listFilterProps[ListFilterProp.SHOW_PUBLISHED].default;
+
+  @property({ type: Boolean })
+  [ListFilterProp.SHOW_SUGGESTED]: ListFilterProps[ListFilterProp.SHOW_SUGGESTED] =
+    listFilterProps[ListFilterProp.SHOW_SUGGESTED].default;
+
+  @property({ type: Boolean })
+  [ListFilterProp.SHOW_IDENTIFIED]: ListFilterProps[ListFilterProp.SHOW_IDENTIFIED] =
+    listFilterProps[ListFilterProp.SHOW_IDENTIFIED].default;
+
+  @property({ type: Boolean })
+  [ListFilterProp.SHOW_TAGGING]: ListFilterProps[ListFilterProp.SHOW_TAGGING] =
+    listFilterProps[ListFilterProp.SHOW_TAGGING].default;
+
+  @property({ type: Boolean })
+  [ListFilterProp.SHOW_TIME]: ListFilterProps[ListFilterProp.SHOW_TIME] =
+    listFilterProps[ListFilterProp.SHOW_TIME].default;
 
   @state() [ListFilterType.CONTAINS_ONE_OF]: string[] = [];
   @state() [ListFilterType.CONTAINS_ALL_OF]: string[] = [];
@@ -321,6 +353,12 @@ export class ListFilter extends MobxLitElement {
     return [String(this.identified)];
   }
 
+  private isVisible(section: ListFilterProp): boolean {
+    return (
+      this[ListFilterProp.SHOW_ALL] || (this[section as keyof this] as boolean)
+    );
+  }
+
   render(): TemplateResult {
     return html`
       <div class=${classMap(this.classes)}>
@@ -336,158 +374,180 @@ export class ListFilter extends MobxLitElement {
         </div>
 
         <div class="filters">
-          <fieldset>
-            <legend>${translate('includedTypes')}</legend>
-            <div class="types">
-              <ss-select
-                multiple
-                @select-changed=${this.handleTypesChanged}
-                .selected=${this.includeTypes.map(String)}
-                .options=${this.state.entityConfigs.map(config => ({
-                  label: config.name,
-                  value: config.id,
-                }))}
-              ></ss-select>
-            </div>
-          </fieldset>
+          ${this.isVisible(ListFilterProp.SHOW_TYPES)
+            ? html`
+                <fieldset>
+                  <legend>${translate('includedTypes')}</legend>
+                  <div class="types">
+                    <ss-select
+                      multiple
+                      @select-changed=${this.handleTypesChanged}
+                      .selected=${this.includeTypes.map(String)}
+                      .options=${this.state.entityConfigs.map(config => ({
+                        label: config.name,
+                        value: config.id,
+                      }))}
+                    ></ss-select>
+                  </div>
+                </fieldset>
+              `
+            : nothing}
+          ${this.isVisible(ListFilterProp.SHOW_PROPERTIES)
+            ? html`
+                <filter-properties
+                  .includeTypes=${this.includeTypes}
+                  .filters=${this.properties}
+                  @filter-properties-updated=${(
+                    e: FilterPropertiesUpdatedEvent,
+                  ): void => this.handlePropertiesChanged(e)}
+                ></filter-properties>
+              `
+            : nothing}
+          ${this.isVisible(ListFilterProp.SHOW_PUBLISHED)
+            ? html`
+                <fieldset>
+                  <legend>${translate('published')}</legend>
+                  <option-selector
+                    multiple
+                    required
+                    .options=${[
+                      { name: translate('published'), value: 'true' },
+                      { name: translate('unpublished'), value: 'false' },
+                    ]}
+                    .selected=${this.publishedToSelected()}
+                    @option-selector-changed=${(
+                      e: OptionSelectorChangedEvent,
+                    ): void => this.handlePublishedChanged(e)}
+                  ></option-selector>
+                </fieldset>
+              `
+            : nothing}
+          ${this.isVisible(ListFilterProp.SHOW_SUGGESTED)
+            ? html`
+                <fieldset>
+                  <legend>${translate('suggested')}</legend>
+                  <option-selector
+                    multiple
+                    required
+                    .options=${[
+                      { name: translate('suggested'), value: 'true' },
+                      { name: translate('nonSuggested'), value: 'false' },
+                    ]}
+                    .selected=${this.suggestedToSelected()}
+                    @option-selector-changed=${(
+                      e: OptionSelectorChangedEvent,
+                    ): void => this.handleSuggestedChanged(e)}
+                  ></option-selector>
+                </fieldset>
+              `
+            : nothing}
+          ${this.isVisible(ListFilterProp.SHOW_IDENTIFIED)
+            ? html`
+                <fieldset>
+                  <legend>${translate('identified')}</legend>
+                  <option-selector
+                    multiple
+                    required
+                    .options=${[
+                      { name: translate('identified'), value: 'true' },
+                      { name: translate('nonIdentified'), value: 'false' },
+                    ]}
+                    .selected=${this.identifiedToSelected()}
+                    @option-selector-changed=${(
+                      e: OptionSelectorChangedEvent,
+                    ): void => this.handleIdentifiedChanged(e)}
+                  ></option-selector>
+                </fieldset>
+              `
+            : nothing}
+          ${this.isVisible(ListFilterProp.SHOW_TAGGING)
+            ? html`
+                <fieldset class=${classMap(this.taggingClasses)}>
+                  <legend>${translate('tagging')}</legend>
 
-          <filter-properties
-            .includeTypes=${this.includeTypes}
-            .filters=${this.properties}
-            @filter-properties-updated=${(
-              e: FilterPropertiesUpdatedEvent,
-            ): void => this.handlePropertiesChanged(e)}
-          ></filter-properties>
+                  <div class="all">
+                    <input
+                      id="include-all-tagging"
+                      type="checkbox"
+                      ?checked=${this.includeAllTagging}
+                      @change=${this.handleIncludeAllTaggingChanged}
+                    />
 
-          <fieldset>
-            <legend>${translate('published')}</legend>
-            <option-selector
-              multiple
-              required
-              .options=${[
-                { name: translate('published'), value: 'true' },
-                { name: translate('unpublished'), value: 'false' },
-              ]}
-              .selected=${this.publishedToSelected()}
-              @option-selector-changed=${(
-                e: OptionSelectorChangedEvent,
-              ): void => this.handlePublishedChanged(e)}
-            ></option-selector>
-          </fieldset>
-
-          <fieldset>
-            <legend>${translate('suggested')}</legend>
-            <option-selector
-              multiple
-              required
-              .options=${[
-                { name: translate('suggested'), value: 'true' },
-                { name: translate('nonSuggested'), value: 'false' },
-              ]}
-              .selected=${this.suggestedToSelected()}
-              @option-selector-changed=${(
-                e: OptionSelectorChangedEvent,
-              ): void => this.handleSuggestedChanged(e)}
-            ></option-selector>
-          </fieldset>
-
-          <fieldset>
-            <legend>${translate('identified')}</legend>
-            <option-selector
-              multiple
-              required
-              .options=${[
-                { name: translate('identified'), value: 'true' },
-                { name: translate('nonIdentified'), value: 'false' },
-              ]}
-              .selected=${this.identifiedToSelected()}
-              @option-selector-changed=${(
-                e: OptionSelectorChangedEvent,
-              ): void => this.handleIdentifiedChanged(e)}
-            ></option-selector>
-          </fieldset>
-
-          <fieldset class=${classMap(this.taggingClasses)}>
-            <legend>${translate('tagging')}</legend>
-
-            <div class="all">
-              <input
-                id="include-all-tagging"
-                type="checkbox"
-                ?checked=${this.includeAllTagging}
-                @change=${this.handleIncludeAllTaggingChanged}
-              />
-
-              <label for="include-all-tagging"
-                >${translate('includeAll')}</label
-              >
-            </div>
-
-            <div class="tag-rules">
-              ${repeat(
-                Object.values(ListFilterType),
-                type => type,
-                type => html`
-                  <fieldset>
-                    <legend>${translate(`filterType.${type}`)}</legend>
-
-                    <tag-manager
-                      ?enableSuggestions=${this.tagSuggestionsEnabled}
-                      @tags-updated=${(e: TagsUpdatedEvent): void => {
-                        this.updateTags(type, e.detail.tags);
-                      }}
-                      @tag-suggestions-requested=${this
-                        .handleTagSuggestionsRequested}
+                    <label for="include-all-tagging"
+                      >${translate('includeAll')}</label
                     >
-                      <div slot="tags">
-                        ${repeat(
-                          this[type],
-                          tag => tag,
-                          tag => html`<data-item>${tag}</data-item>`,
-                        )}
-                      </div>
+                  </div>
 
-                      <div slot="suggestions">
-                        ${repeat(
-                          this.tagSuggestions,
-                          suggestion => suggestion,
-                          suggestion =>
-                            html`<data-item>${suggestion}</data-item>`,
-                        )}
-                      </div>
-                    </tag-manager>
-                  </fieldset>
-                `,
-              )}
-              <div>
-                <input
-                  id="include-untagged"
-                  type="checkbox"
-                  ?checked=${this.includeUntagged}
-                  @change=${this.handleIncludeUntaggedChanged}
-                />
+                  <div class="tag-rules">
+                    ${repeat(
+                      Object.values(ListFilterType),
+                      type => type,
+                      type => html`
+                        <fieldset>
+                          <legend>${translate(`filterType.${type}`)}</legend>
 
-                <label for="include-untagged"
-                  >${translate('includeItemsWithoutTags')}</label
-                >
-              </div>
-            </div>
-          </fieldset>
+                          <tag-manager
+                            ?enableSuggestions=${this.tagSuggestionsEnabled}
+                            @tags-updated=${(e: TagsUpdatedEvent): void => {
+                              this.updateTags(type, e.detail.tags);
+                            }}
+                            @tag-suggestions-requested=${this
+                              .handleTagSuggestionsRequested}
+                          >
+                            <div slot="tags">
+                              ${repeat(
+                                this[type],
+                                tag => tag,
+                                tag => html`<data-item>${tag}</data-item>`,
+                              )}
+                            </div>
 
-          <time-filters
-            type=${this.time.type}
-            date=${this.time.type === ListFilterTimeType.EXACT_DATE
-              ? this.time.date
-              : ''}
-            start=${this.time.type === ListFilterTimeType.RANGE
-              ? this.time.start
-              : ''}
-            end=${this.time.type === ListFilterTimeType.RANGE
-              ? this.time.end
-              : ''}
-            @time-filters-updated=${(e: TimeFiltersUpdatedEvent): void =>
-              this.handleTimeChanged(e)}
-          ></time-filters>
+                            <div slot="suggestions">
+                              ${repeat(
+                                this.tagSuggestions,
+                                suggestion => suggestion,
+                                suggestion =>
+                                  html`<data-item>${suggestion}</data-item>`,
+                              )}
+                            </div>
+                          </tag-manager>
+                        </fieldset>
+                      `,
+                    )}
+                    <div>
+                      <input
+                        id="include-untagged"
+                        type="checkbox"
+                        ?checked=${this.includeUntagged}
+                        @change=${this.handleIncludeUntaggedChanged}
+                      />
+
+                      <label for="include-untagged"
+                        >${translate('includeItemsWithoutTags')}</label
+                      >
+                    </div>
+                  </div>
+                </fieldset>
+              `
+            : nothing}
+          ${this.isVisible(ListFilterProp.SHOW_TIME)
+            ? html`
+                <time-filters
+                  type=${this.time.type}
+                  date=${this.time.type === ListFilterTimeType.EXACT_DATE
+                    ? this.time.date
+                    : ''}
+                  start=${this.time.type === ListFilterTimeType.RANGE
+                    ? this.time.start
+                    : ''}
+                  end=${this.time.type === ListFilterTimeType.RANGE
+                    ? this.time.end
+                    : ''}
+                  @time-filters-updated=${(e: TimeFiltersUpdatedEvent): void =>
+                    this.handleTimeChanged(e)}
+                ></time-filters>
+              `
+            : nothing}
         </div>
 
         <ss-button

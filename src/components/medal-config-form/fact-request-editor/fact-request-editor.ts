@@ -142,6 +142,7 @@ export class FactRequestEditor extends MobxLitElement {
           }}
         >
           <list-filter
+            showAll
             .listFilter=${context.filter}
             @list-filter-updated=${(e: ListFilterUpdatedEvent): void => {
               this.handleFilterUpdated(e, context, fr);
