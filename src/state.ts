@@ -31,6 +31,7 @@ import {
 import { defaultTheme, ThemeName } from './models/Page';
 import { StorageItemKey, StorageSource } from './models/Storage';
 import { User } from 'api-spec/models/Identity';
+import { Workspace } from 'api-spec/models/Workspace';
 import {
   subscribe,
   unsubscribe,
@@ -157,6 +158,12 @@ export class AppState {
 
   @observable
   public hasFetchedListConfigs: boolean = false;
+
+  @observable
+  public workspaces: Workspace[] = [];
+
+  @observable
+  public hasFetchedWorkspaces: boolean = false;
 
   @observable
   public listContextMode: boolean = false;
@@ -308,6 +315,25 @@ export class AppState {
   setListConfigs(listConfigs: ListConfig[]): void {
     this.listConfigs = listConfigs;
     this.hasFetchedListConfigs = true;
+  }
+
+  @action
+  setWorkspaces(workspaces: Workspace[]): void {
+    this.workspaces = workspaces;
+    this.hasFetchedWorkspaces = true;
+  }
+
+  @action
+  upsertWorkspace(workspace: Workspace): void {
+    this.workspaces = [
+      ...this.workspaces.filter(w => w.id !== workspace.id),
+      workspace,
+    ];
+  }
+
+  @action
+  removeWorkspace(id: string): void {
+    this.workspaces = this.workspaces.filter(w => w.id !== id);
   }
 
   @action

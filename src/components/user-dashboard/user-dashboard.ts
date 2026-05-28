@@ -87,6 +87,11 @@ export class UserDashboard extends MobxLitElement {
         icon: IconName.SETTINGS,
         url: 'settings',
       },
+      {
+        label: translate('workspaces'),
+        icon: IconName.FOLDER,
+        url: 'workspace',
+      },
       { label: translate('admin'), icon: IconName.ADMIN, url: '/admin' },
     ];
   }

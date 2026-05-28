@@ -31,6 +31,7 @@ import {
 } from 'api-spec/models/Data';
 
 import { StorageResult, StorageSchema, StorageSource } from '@/models/Storage';
+import { Workspace } from 'api-spec/models/Workspace';
 import { RequestBody } from '@/components/entity-form/entity-form.models';
 import { BulkOperationPayload } from '@/components/bulk-manager/bulk-manager.models';
 import {
@@ -1308,6 +1309,47 @@ export class SQLiteStorage implements StorageSchema {
     _editAccessPolicyId: number,
   ): Promise<boolean> {
     return false;
+  }
+
+  // ─── Workspaces ──────────────────────────────────────────────────────────────
+
+  async getWorkspaces(): Promise<Workspace[]> {
+    const rows = await this.execRows('SELECT * FROM workspace');
+    return rows.map(row => ({
+      id: row['id'] as string,
+      name: row['name'] as string,
+      userId: row['user_id'] as string,
+      listConfigs: JSON.parse(row['list_configs'] as string) as string[],
+      createdAt: new Date(row['created_at'] as string),
+      updatedAt: new Date(row['updated_at'] as string),
+    }));
+  }
+
+  async saveWorkspace(workspace: Workspace): Promise<StorageResult<Workspace>> {
+    const now = new Date().toISOString();
+    await this.run(
+      `INSERT INTO workspace (id, name, user_id, list_configs, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?)
+       ON CONFLICT(id) DO UPDATE SET
+         name         = excluded.name,
+         user_id      = excluded.user_id,
+         list_configs = excluded.list_configs,
+         updated_at   = excluded.updated_at`,
+      [
+        workspace.id,
+        workspace.name,
+        workspace.userId,
+        JSON.stringify(workspace.listConfigs),
+        workspace.createdAt ? new Date(workspace.createdAt).toISOString() : now,
+        now,
+      ],
+    );
+    return { isOk: true, value: workspace };
+  }
+
+  async deleteWorkspace(id: string): Promise<boolean> {
+    await this.run('DELETE FROM workspace WHERE id = ?', [id]);
+    return true;
   }
 }
 

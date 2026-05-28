@@ -40,6 +40,7 @@ import {
   MfaVerifySetupRequestBody,
 } from '@/models/Identity';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
+import { Workspace } from 'api-spec/models/Workspace';
 
 export class NetworkStorage implements StorageSchema {
   isActive = true;
@@ -926,6 +927,58 @@ export class NetworkStorage implements StorageSchema {
 
   async deleteMedalConfig(id: number): Promise<boolean> {
     const result = await api.delete<null>(`medalConfig/${id}`);
+
+    if (result && result.isOk) {
+      return true;
+    }
+
+    return false;
+  }
+
+  async getWorkspaces(): Promise<Workspace[]> {
+    const result = await api.get<{ workspaces: Workspace[] }>('workspace');
+
+    if (result && result.isOk) {
+      return Promise.resolve(result.response.workspaces);
+    }
+
+    return Promise.reject();
+  }
+
+  async createWorkspace(
+    name: string,
+    listConfigs: string[],
+  ): Promise<StorageResult<Workspace>> {
+    const result = await api.post<
+      { name: string; listConfigs: string[] },
+      Workspace
+    >('workspace', { name, listConfigs });
+
+    if (result && result.isOk) {
+      return { isOk: true, value: result.response };
+    }
+
+    return { isOk: false, error: new Error('Failed to create workspace') };
+  }
+
+  async saveWorkspace(workspace: Workspace): Promise<StorageResult<Workspace>> {
+    const result = await api.put<
+      { name: string; listConfigs: string[] },
+      Workspace
+    >(`workspace/${workspace.id}`, {
+      name: workspace.name,
+      listConfigs: workspace.listConfigs,
+    });
+
+    if (result && result.isOk) {
+      return { isOk: true, value: result.response };
+    }
+
+    return { isOk: false, error: new Error('Failed to save workspace') };
+  }
+
+  async deleteWorkspace(id: string): Promise<boolean> {
+    const result = await api.delete<null>(`workspace/${id}`);
 
     if (result && result.isOk) {
       return true;

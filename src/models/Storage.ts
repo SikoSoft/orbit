@@ -1,5 +1,6 @@
 import { Setting, Settings } from 'api-spec/models/Setting';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
+import { Workspace } from 'api-spec/models/Workspace';
 import { ListConfig, ListSort, ListFilter } from 'api-spec/models/List';
 import {
   EntityCalculatedPropertyConfig,
@@ -211,4 +212,8 @@ export interface StorageSchema {
     entityConfigId: number,
     constraints: EntityConfigUniqueConstraint[],
   ): Promise<boolean>;
+  getWorkspaces?(): Promise<Workspace[]>;
+  createWorkspace?(name: string, listConfigs: string[]): Promise<StorageResult<Workspace>>;
+  saveWorkspace?(workspace: Workspace): Promise<StorageResult<Workspace>>;
+  deleteWorkspace?(id: string): Promise<boolean>;
 }

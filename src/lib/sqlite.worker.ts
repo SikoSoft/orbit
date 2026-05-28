@@ -67,6 +67,15 @@ const SCHEMA = `
     themes  TEXT NOT NULL DEFAULT '[]'
   );
 
+  CREATE TABLE IF NOT EXISTS workspace (
+    id          TEXT PRIMARY KEY,
+    name        TEXT NOT NULL DEFAULT '',
+    user_id     TEXT NOT NULL DEFAULT '',
+    list_configs TEXT NOT NULL DEFAULT '[]',
+    created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+    updated_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+  );
+
   CREATE TABLE IF NOT EXISTS pending_sync (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     operation  TEXT    NOT NULL,

@@ -37,6 +37,7 @@ import {
   MfaVerifySetupRequestBody,
 } from '@/models/Identity';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
+import { Workspace } from 'api-spec/models/Workspace';
 
 import { SQLiteStorage, serializePropertyValue } from './SQLiteStorage';
 import { networkStorage } from './NetworkStorage';
@@ -1268,6 +1269,25 @@ export class OfflineCacheStorage implements StorageSchema {
 
   async deleteMedalConfig(id: number): Promise<boolean> {
     return networkStorage.deleteMedalConfig(id);
+  }
+
+  async getWorkspaces(): Promise<Workspace[]> {
+    return networkStorage.getWorkspaces();
+  }
+
+  async createWorkspace(
+    name: string,
+    listConfigs: string[],
+  ): Promise<StorageResult<Workspace>> {
+    return networkStorage.createWorkspace(name, listConfigs);
+  }
+
+  async saveWorkspace(workspace: Workspace): Promise<StorageResult<Workspace>> {
+    return networkStorage.saveWorkspace(workspace);
+  }
+
+  async deleteWorkspace(id: string): Promise<boolean> {
+    return networkStorage.deleteWorkspace(id);
   }
 }
 

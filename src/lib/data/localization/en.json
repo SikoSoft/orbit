@@ -423,5 +423,19 @@
   "calculatedPropertyConfig.requiredFieldMissing": "'{field}' is required.",
   "calculatedPropertyConfig.addedSuccessfully": "Calculated property config added successfully.",
   "calculatedPropertyConfig.updatedSuccessfully": "Calculated property config updated successfully.",
-  "calculatedPropertyConfig.deletedSuccessfully": "Calculated property config deleted successfully."
+  "calculatedPropertyConfig.deletedSuccessfully": "Calculated property config deleted successfully.",
+  "workspaces": "Workspaces",
+  "workspace": "Workspace",
+  "workspaceName": "Workspace Name",
+  "newWorkspace": "New Workspace",
+  "addWorkspace": "Add Workspace",
+  "noWorkspaces": "No workspaces yet.",
+  "workspaceSaved": "Workspace saved.",
+  "failedToSaveWorkspace": "Failed to save workspace.",
+  "workspaceDeleted": "Workspace deleted.",
+  "failedToDeleteWorkspace": "Failed to delete workspace.",
+  "failedToLoadWorkspaces": "Failed to load workspaces.",
+  "workspaceNameRequired": "Workspace name is required.",
+  "confirmDeleteWorkspace": "Are you sure you want to delete this workspace?",
+  "listConfigs": "List Configs"
 }

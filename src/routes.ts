@@ -17,24 +17,24 @@ export const routes: Route[] = [
   {
     path: '/admin/data',
     component: 'admin-data-view',
-    action: async () =>
-      await import('@/views/admin-data-view/admin-data-view'),
+    action: async () => await import('@/views/admin-data-view/admin-data-view'),
   },
   {
     path: '/admin/entityConfig',
     component: 'admin-entity-config-view',
     action: async () =>
-      await import(
-        '@/views/admin-entity-config-view/admin-entity-config-view'
-      ),
+      await import('@/views/admin-entity-config-view/admin-entity-config-view'),
   },
   {
     path: '/admin/medalConfig',
     component: 'admin-medal-config-view',
     action: async () =>
-      await import(
-        '@/views/admin-medal-config-view/admin-medal-config-view'
-      ),
+      await import('@/views/admin-medal-config-view/admin-medal-config-view'),
+  },
+  {
+    path: '/workspace',
+    component: 'workspace-view',
+    action: async () => await import('@/views/workspace-view/workspace-view'),
   },
   {
     path: '/entity/:id',

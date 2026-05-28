@@ -56,6 +56,7 @@ import {
   MfaVerifySetupRequestBody,
 } from '@/models/Identity';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
+import { Workspace } from 'api-spec/models/Workspace';
 
 export interface SavedListFilter {
   filter: ListFilter;
@@ -883,6 +884,29 @@ export class Storage implements StorageSchema {
 
   @delegateSource()
   async deleteMedalConfig(_id: number): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
+  @delegateSource()
+  async getWorkspaces(): Promise<Workspace[]> {
+    return Promise.resolve([]);
+  }
+
+  @delegateSource()
+  async createWorkspace(
+    _name: string,
+    _listConfigs: string[],
+  ): Promise<StorageResult<Workspace>> {
+    return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
+  }
+
+  @delegateSource()
+  async saveWorkspace(_workspace: Workspace): Promise<StorageResult<Workspace>> {
+    return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
+  }
+
+  @delegateSource()
+  async deleteWorkspace(_id: string): Promise<boolean> {
     return Promise.resolve(false);
   }
 }
