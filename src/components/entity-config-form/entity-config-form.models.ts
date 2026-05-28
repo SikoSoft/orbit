@@ -38,7 +38,10 @@ export interface EntityConfigFormProps extends PropTypes {
   [EntityConfigFormProp.ENTITY_CONFIG_ID]: number;
   [EntityConfigFormProp.NAME]: string;
   [EntityConfigFormProp.DESCRIPTION]: string;
-  [EntityConfigFormProp.PROPERTIES]: (EntityPropertyConfig | EntityCalculatedPropertyConfig)[];
+  [EntityConfigFormProp.PROPERTIES]: (
+    | EntityPropertyConfig
+    | EntityCalculatedPropertyConfig
+  )[];
   [EntityConfigFormProp.ALLOW_PROPERTY_ORDERING]: boolean;
   [EntityConfigFormProp.ALLOW_TAGS]: boolean;
   [EntityConfigFormProp.AI_ENABLED]: boolean;
@@ -76,7 +79,7 @@ export const entityConfigFormProps: PropConfigMap<EntityConfigFormProps> = {
     description: 'Whether property ordering is allowed for this entity',
   },
   [EntityConfigFormProp.ALLOW_TAGS]: {
-    default: true,
+    default: false,
     control: { type: ControlType.BOOLEAN },
     description: 'Whether tags are enabled for this entity',
   },
