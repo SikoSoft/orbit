@@ -65,6 +65,33 @@ export class LongTextField extends LitElement {
     this.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  protected handleKeyDown(e: KeyboardEvent): void {
+    if (e.key !== 'Enter' || !this.textareaElement) {
+      return;
+    }
+
+    const textarea = this.textareaElement;
+    const cursorPos = textarea.selectionStart;
+    const textBefore = textarea.value.substring(0, cursorPos);
+    const lastNewlineIndex = textBefore.lastIndexOf('\n');
+    const currentLine = textBefore.substring(lastNewlineIndex + 1);
+
+    if (!currentLine.startsWith('- ')) {
+      return;
+    }
+
+    e.preventDefault();
+
+    const textAfter = textarea.value.substring(cursorPos);
+    const insertion = '\n- ';
+    textarea.value = textBefore + insertion + textAfter;
+
+    const newCursorPos = cursorPos + insertion.length;
+    textarea.setSelectionRange(newCursorPos, newCursorPos);
+
+    this.handleInputChanged();
+  }
+
   protected handleInputChanged(): void {
     if (!this.textareaElement) {
       return;
@@ -92,6 +119,7 @@ export class LongTextField extends LitElement {
     return html`
       <textarea
         @focus=${this.handleFocus}
+        @keydown=${this.handleKeyDown}
         @input=${this.handleInputChanged}
         .value=${this[LongTextFieldProp.VALUE]}
       ></textarea>
