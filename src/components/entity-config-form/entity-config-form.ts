@@ -8,7 +8,6 @@ import {
   defaultEntityPropertyConfig,
   EntityCalculatedPropertyConfig,
   EntityConfig,
-  EntityPropertyCalculationOperation,
   EntityPropertyConfig,
 } from 'api-spec/models/Entity';
 import { Role } from 'api-spec/models/Identity';
@@ -34,7 +33,6 @@ import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
 import { TabIndexChangedEvent } from '@ss/ui/components/tab-container.events';
 
 import '@/components/property-config-form/property-config-form';
-import '@/components/calculated-property-config-form/calculated-property-config-form';
 import '@ss/ui/components/ss-collapsable';
 import '@ss/ui/components/confirmation-modal';
 import '@ss/ui/components/sortable-list';
@@ -359,30 +357,6 @@ export class EntityConfigForm extends MobxLitElement {
     };
   }
 
-  addCalculatedPropertyToBottom(): void {
-    const newCalc = {
-      entityConfigId: this.entityConfig.id,
-      id: 0,
-      userId: '',
-      name: '',
-      prefix: '',
-      suffix: '',
-      hidden: false,
-      dataType: DataType.INT,
-      defaultValue: 0,
-      calculation: {
-        value1: 0,
-        value2: 0,
-        operation: '+' as EntityPropertyCalculationOperation,
-      },
-    } as EntityCalculatedPropertyConfig;
-
-    this.entityConfig = {
-      ...this.entityConfig,
-      properties: [...this.entityConfig.properties, newCalc],
-    };
-  }
-
   updateProperty(
     index: number,
     updatedProperty: EntityPropertyConfig | EntityCalculatedPropertyConfig,
@@ -687,6 +661,49 @@ export class EntityConfigForm extends MobxLitElement {
     `;
   }
 
+  renderPropertyForm(
+    property: EntityPropertyConfig | EntityCalculatedPropertyConfig,
+    index: number,
+  ): TemplateResult {
+    const isCalc = this.isCalculatedPropertyConfig(property);
+    const calcProp = isCalc
+      ? (property as EntityCalculatedPropertyConfig)
+      : null;
+    const stdProp = isCalc ? null : (property as EntityPropertyConfig);
+
+    return html`
+      <property-config-form
+        ?open=${this.isPanelOpen(property.id)}
+        entityConfigId=${this.entityConfig.id}
+        propertyConfigId=${property.id}
+        name=${property.name}
+        prefix=${property.prefix}
+        suffix=${property.suffix}
+        ?hidden=${property.hidden}
+        dataType=${stdProp?.dataType ?? DataType.INT}
+        required=${stdProp?.required ?? 0}
+        repeat=${stdProp?.repeat ?? 0}
+        allowed=${stdProp?.allowed ?? 0}
+        ?optionsOnly=${stdProp?.optionsOnly ?? false}
+        .options=${stdProp?.options ?? []}
+        .defaultValue=${stdProp?.defaultValue ?? 0}
+        ?performDriftCheck=${this.performDriftCheck}
+        .calculation=${calcProp?.calculation ?? null}
+        .allProperties=${this.nonCalculatedProperties}
+        @property-config-updated=${(e: PropertyConfigUpdatedEvent): void =>
+          this.updateProperty(index, e.detail)}
+        @property-config-added=${(e: PropertyConfigAddedEvent): void =>
+          this.updateProperty(index, e.detail)}
+        @property-config-deleted=${(): void => this.deleteProperty(index)}
+        @property-config-breaking-change-detected=${(
+          e: PropertyConfigBreakingChangeDetectedEvent,
+        ): void => this.breakingChangeDetected(index, e)}
+        @property-config-breaking-changes-resolved=${(): void =>
+          this.breakingChangesResolved(index)}
+      ></property-config-form>
+    `;
+  }
+
   renderPropertiesTab(): TemplateResult {
     return html`
       <div class="properties">
@@ -699,78 +716,14 @@ export class EntityConfigForm extends MobxLitElement {
             this.entityConfig.properties,
             property => property.id,
             (property, index) =>
-              this.isCalculatedPropertyConfig(property)
-                ? html`
-                    <sortable-item id=${property.id}>
-                      <calculated-property-config-form
-                        ?open=${this.isPanelOpen(property.id)}
-                        entityConfigId=${this.entityConfig.id}
-                        propertyConfigId=${property.id}
-                        name=${property.name}
-                        prefix=${property.prefix}
-                        suffix=${property.suffix}
-                        ?hidden=${property.hidden}
-                        .calculation=${property.calculation}
-                        .allProperties=${this.nonCalculatedProperties}
-                        @property-config-updated=${(
-                          e: PropertyConfigUpdatedEvent,
-                        ): void => this.updateProperty(index, e.detail)}
-                        @property-config-added=${(
-                          e: PropertyConfigAddedEvent,
-                        ): void => this.updateProperty(index, e.detail)}
-                        @property-config-deleted=${(): void => {
-                          this.deleteProperty(index);
-                        }}
-                      ></calculated-property-config-form>
-                    </sortable-item>
-                  `
-                : html`
-                    <sortable-item id=${property.id}>
-                      <property-config-form
-                        ?open=${this.isPanelOpen(property.id)}
-                        entityConfigId=${this.entityConfig.id}
-                        propertConfigId=${property.id}
-                        dataType=${property.dataType}
-                        propertyConfigId=${property.id}
-                        name=${property.name}
-                        required=${property.required}
-                        repeat=${property.repeat}
-                        allowed=${property.allowed}
-                        prefix=${property.prefix}
-                        suffix=${property.suffix}
-                        ?optionsOnly=${property.optionsOnly}
-                        .options=${property.options}
-                        ?hidden=${property.hidden}
-                        ?performDriftCheck=${this.performDriftCheck}
-                        .defaultValue=${property.defaultValue}
-                        @property-config-updated=${(
-                          e: PropertyConfigUpdatedEvent,
-                        ): void => this.updateProperty(index, e.detail)}
-                        @property-config-added=${(
-                          e: PropertyConfigAddedEvent,
-                        ): void => this.updateProperty(index, e.detail)}
-                        @property-config-deleted=${(): void => {
-                          this.deleteProperty(index);
-                        }}
-                        @property-config-breaking-change-detected=${(
-                          e: PropertyConfigBreakingChangeDetectedEvent,
-                        ): void => {
-                          this.breakingChangeDetected(index, e);
-                        }}
-                        @property-config-breaking-changes-resolved=${(): void => {
-                          this.breakingChangesResolved(index);
-                        }}
-                      ></property-config-form>
-                    </sortable-item>
-                  `,
+              html`<sortable-item id=${property.id}>
+                ${this.renderPropertyForm(property, index)}
+              </sortable-item>`,
           )}
         </sortable-list>
 
         <ss-button @click=${this.addPropertyToBottom}
           >${translate('addProperty')}</ss-button
-        >
-        <ss-button @click=${this.addCalculatedPropertyToBottom}
-          >${translate('addCalculatedProperty')}</ss-button
         >
       </div>
     `;
