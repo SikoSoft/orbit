@@ -8,6 +8,7 @@ import { ListFilterType } from 'api-spec/models/List';
 import { SettingName, TagSuggestions } from 'api-spec/models/Setting';
 import {
   DataType,
+  EntityCalculatedPropertyConfig,
   EntityConfig,
   EntityProperty,
   PropertyDataValue,
@@ -130,6 +131,16 @@ export class EntityForm extends ViewElement {
       &:hover {
         background-color: var(--background-hover-color);
       }
+    }
+
+    .property-group-label {
+      font-size: 0.75rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: var(--text-secondary-color, #666);
+      padding: 0.5rem 0.5rem 0.25rem;
+      margin-top: 0.25rem;
+      border-top: 1px solid var(--border-color, #ddd);
     }
 
     .no-entity-configs {
@@ -256,9 +267,10 @@ export class EntityForm extends ViewElement {
       return false;
     }
 
-    return this.entityConfig.properties.some(propertyConfig => {
-      return !this.propertyAtMax(propertyConfig.id);
-    });
+    return (
+      this.allowedPropertiesToAdd.length > 0 ||
+      this.allowedCalculatedPropertiesToAdd.length > 0
+    );
   }
 
   @state()
@@ -290,6 +302,24 @@ export class EntityForm extends ViewElement {
     return this.entityConfig.properties
       .filter((p): p is EntityPropertyConfig => !('calculation' in p))
       .filter(propertyConfig => !this.propertyAtMax(propertyConfig.id));
+  }
+
+  @state()
+  get allowedCalculatedPropertiesToAdd(): EntityCalculatedPropertyConfig[] {
+    if (!this.entityConfig) {
+      return [];
+    }
+
+    return this.entityConfig.properties
+      .filter(
+        (p): p is EntityCalculatedPropertyConfig => 'calculation' in p,
+      )
+      .filter(
+        propertyConfig =>
+          !this.propertyInstances.some(
+            instance => instance.propertyConfigId === propertyConfig.id,
+          ),
+      );
   }
 
   connectedCallback(): void {
@@ -848,7 +878,9 @@ export class EntityForm extends ViewElement {
     this.setSortedIds(e.detail.sortedIds);
   }
 
-  addProperty(propertyConfig: EntityPropertyConfig): void {
+  addProperty(
+    propertyConfig: EntityPropertyConfig | EntityCalculatedPropertyConfig,
+  ): void {
     if (!propertyConfig) {
       return;
     }
@@ -1008,6 +1040,28 @@ export class EntityForm extends ViewElement {
                 </div>
               </div>`,
           )}
+          ${this.allowedCalculatedPropertiesToAdd.length > 0
+            ? html`
+                <div class="property-group-label">
+                  ${translate('calculatedPropertyConfig.calculated')}
+                </div>
+                ${repeat(
+                  this.allowedCalculatedPropertiesToAdd,
+                  propertyConfig => propertyConfig.id,
+                  propertyConfig =>
+                    html`<div class="property-option">
+                      <div
+                        @click=${(): void => {
+                          this.addProperty(propertyConfig);
+                          this.propertyPopUpIsOpen = false;
+                        }}
+                      >
+                        ${propertyConfig.name}
+                      </div>
+                    </div>`,
+                )}
+              `
+            : nothing}
         </pop-up>
       </div>
 
