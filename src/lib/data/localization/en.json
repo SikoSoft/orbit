@@ -19,6 +19,8 @@
   "imageAltText": "Image Alt Text",
   "propertyName": "Property Name",
   "propertyType": "Property Type",
+  "propertyType.standard": "Standard Property",
+  "propertyType.calculated": "Calculated Property",
   "propertyValue": "Property Value",
   "selectPropertyType": "Select a property type",
   "text": "Text",

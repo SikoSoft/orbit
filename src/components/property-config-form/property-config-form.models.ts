@@ -1,5 +1,10 @@
 import { ControlType } from '@/models/Control';
-import { DataType, PropertyDataValue } from 'api-spec/models/Entity';
+import {
+  DataType,
+  EntityPropertyCalculation,
+  EntityPropertyConfig,
+  PropertyDataValue,
+} from 'api-spec/models/Entity';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
 
 export enum PropertyConfigFormProp {
@@ -19,6 +24,8 @@ export enum PropertyConfigFormProp {
   OPTIONS_ONLY = 'optionsOnly',
   OPTIONS = 'options',
   PERFORM_DRIFT_CHECK = 'performDriftCheck',
+  CALCULATION = 'calculation',
+  ALL_PROPERTIES = 'allProperties',
 }
 
 export const propertyConfigFormRequiredProps: PropertyConfigFormProp[] = [
@@ -42,6 +49,8 @@ export interface PropertyConfigFormProps extends PropTypes {
   [PropertyConfigFormProp.OPTIONS_ONLY]: boolean;
   [PropertyConfigFormProp.OPTIONS]: PropertyDataValue[];
   [PropertyConfigFormProp.PERFORM_DRIFT_CHECK]: boolean;
+  [PropertyConfigFormProp.CALCULATION]: EntityPropertyCalculation | null;
+  [PropertyConfigFormProp.ALL_PROPERTIES]: EntityPropertyConfig[];
 }
 
 export const propertyConfigFormProps: PropConfigMap<PropertyConfigFormProps> = {
@@ -124,5 +133,15 @@ export const propertyConfigFormProps: PropConfigMap<PropertyConfigFormProps> = {
     default: [],
     control: { type: ControlType.TEXT },
     description: 'The predefined options for the property',
+  },
+  [PropertyConfigFormProp.CALCULATION]: {
+    default: null,
+    control: { type: ControlType.HIDDEN },
+    description: 'The calculation formula for calculated properties',
+  },
+  [PropertyConfigFormProp.ALL_PROPERTIES]: {
+    default: [],
+    control: { type: ControlType.HIDDEN },
+    description: 'All non-calculated properties for the operand picker',
   },
 };
