@@ -325,10 +325,12 @@ export class AppState {
 
   @action
   upsertWorkspace(workspace: Workspace): void {
-    this.workspaces = [
-      ...this.workspaces.filter(w => w.id !== workspace.id),
-      workspace,
-    ];
+    const rest = this.workspaces.filter(w => w.id !== workspace.id);
+    const named = [...rest.filter(w => w.id), workspace].sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
+    const placeholders = rest.filter(w => !w.id);
+    this.workspaces = [...placeholders, ...named];
   }
 
   @action

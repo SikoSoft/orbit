@@ -75,6 +75,9 @@ export class WorkspaceList extends MobxLitElement {
         panelId: `workspaceForm-${e.detail.id}`,
       }),
     );
+    if (e.detail.id) {
+      this.state.removeWorkspace('');
+    }
     this.state.upsertWorkspace(e.detail);
   }
 
