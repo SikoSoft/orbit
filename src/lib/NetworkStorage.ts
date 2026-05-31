@@ -949,11 +949,12 @@ export class NetworkStorage implements StorageSchema {
     name: string,
     listConfigs: string[],
     color: string,
+    showEverything: boolean,
   ): Promise<StorageResult<Workspace>> {
     const result = await api.post<
-      { name: string; listConfigs: string[]; color: string },
+      { name: string; listConfigs: string[]; color: string; showEverything: boolean },
       Workspace
-    >('workspace', { name, listConfigs, color });
+    >('workspace', { name, listConfigs, color, showEverything });
 
     if (result && result.isOk) {
       return { isOk: true, value: result.response };
@@ -964,12 +965,13 @@ export class NetworkStorage implements StorageSchema {
 
   async saveWorkspace(workspace: Workspace): Promise<StorageResult<Workspace>> {
     const result = await api.put<
-      { name: string; listConfigs: string[]; color: string },
+      { name: string; listConfigs: string[]; color: string; showEverything: boolean },
       Workspace
     >(`workspace/${workspace.id}`, {
       name: workspace.name,
       listConfigs: workspace.listConfigs,
       color: workspace.color,
+      showEverything: workspace.showEverything,
     });
 
     if (result && result.isOk) {

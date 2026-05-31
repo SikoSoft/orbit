@@ -1319,6 +1319,7 @@ export class SQLiteStorage implements StorageSchema {
       id: row['id'] as string,
       name: row['name'] as string,
       color: (row['color'] as string) ?? '',
+      showEverything: row['show_everything'] === 1,
       userId: row['user_id'] as string,
       listConfigs: JSON.parse(row['list_configs'] as string) as string[],
       createdAt: new Date(row['created_at'] as string),
@@ -1329,18 +1330,22 @@ export class SQLiteStorage implements StorageSchema {
   async saveWorkspace(workspace: Workspace): Promise<StorageResult<Workspace>> {
     const now = new Date().toISOString();
     await this.run(
-      `INSERT INTO workspace (id, name, user_id, list_configs, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?)
+      `INSERT INTO workspace (id, name, user_id, list_configs, color, show_everything, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
-         name         = excluded.name,
-         user_id      = excluded.user_id,
-         list_configs = excluded.list_configs,
-         updated_at   = excluded.updated_at`,
+         name           = excluded.name,
+         user_id        = excluded.user_id,
+         list_configs   = excluded.list_configs,
+         color          = excluded.color,
+         show_everything = excluded.show_everything,
+         updated_at     = excluded.updated_at`,
       [
         workspace.id,
         workspace.name,
         workspace.userId,
         JSON.stringify(workspace.listConfigs),
+        workspace.color ?? '',
+        workspace.showEverything ? 1 : 0,
         workspace.createdAt ? new Date(workspace.createdAt).toISOString() : now,
         now,
       ],

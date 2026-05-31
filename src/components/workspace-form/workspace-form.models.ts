@@ -5,6 +5,7 @@ export enum WorkspaceFormProp {
   WORKSPACE_ID = 'workspaceId',
   NAME = 'name',
   COLOR = 'color',
+  SHOW_EVERYTHING = 'showEverything',
   LIST_CONFIGS = 'listConfigs',
   OPEN = 'open',
 }
@@ -13,6 +14,7 @@ export interface WorkspaceFormProps extends PropTypes {
   [WorkspaceFormProp.WORKSPACE_ID]: string;
   [WorkspaceFormProp.NAME]: string;
   [WorkspaceFormProp.COLOR]: string;
+  [WorkspaceFormProp.SHOW_EVERYTHING]: boolean;
   [WorkspaceFormProp.LIST_CONFIGS]: string[];
   [WorkspaceFormProp.OPEN]: boolean;
 }
@@ -32,6 +34,11 @@ export const workspaceFormProps: PropConfigMap<WorkspaceFormProps> = {
     default: '',
     description: 'The workspace color as a hex string',
     control: { type: ControlType.TEXT },
+  },
+  [WorkspaceFormProp.SHOW_EVERYTHING]: {
+    default: false,
+    description: 'Whether this workspace shows all entities regardless of list config filters',
+    control: { type: ControlType.BOOLEAN },
   },
   [WorkspaceFormProp.LIST_CONFIGS]: {
     default: [],

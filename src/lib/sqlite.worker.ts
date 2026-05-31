@@ -166,6 +166,8 @@ async function initDb(dbPath: string): Promise<void> {
     `ALTER TABLE entity_config ADD COLUMN public INTEGER NOT NULL DEFAULT 0`,
     `ALTER TABLE entity ADD COLUMN published INTEGER NOT NULL DEFAULT 0`,
     `ALTER TABLE entity_config ADD COLUMN allow_tags INTEGER NOT NULL DEFAULT 1`,
+    `ALTER TABLE workspace ADD COLUMN color TEXT NOT NULL DEFAULT ''`,
+    `ALTER TABLE workspace ADD COLUMN show_everything INTEGER NOT NULL DEFAULT 0`,
   ];
   for (const migration of migrations) {
     try {

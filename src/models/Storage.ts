@@ -215,7 +215,7 @@ export interface StorageSchema {
     constraints: EntityConfigUniqueConstraint[],
   ): Promise<boolean>;
   getWorkspaces?(): Promise<Workspace[]>;
-  createWorkspace?(name: string, listConfigs: string[], color: string): Promise<StorageResult<Workspace>>;
+  createWorkspace?(name: string, listConfigs: string[], color: string, showEverything: boolean): Promise<StorageResult<Workspace>>;
   saveWorkspace?(workspace: Workspace): Promise<StorageResult<Workspace>>;
   deleteWorkspace?(id: string): Promise<boolean>;
   getActiveWorkspaceId?(): string;

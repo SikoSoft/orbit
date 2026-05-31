@@ -897,6 +897,7 @@ export class Storage implements StorageSchema {
     _name: string,
     _listConfigs: string[],
     _color: string,
+    _showEverything: boolean,
   ): Promise<StorageResult<Workspace>> {
     return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
   }

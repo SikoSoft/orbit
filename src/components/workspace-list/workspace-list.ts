@@ -61,6 +61,7 @@ export class WorkspaceList extends MobxLitElement {
       id: '',
       name: '',
       color: '',
+      showEverything: false,
       userId: '',
       listConfigs: [],
       createdAt: new Date(),
@@ -107,6 +108,7 @@ export class WorkspaceList extends MobxLitElement {
                   workspaceId=${workspace.id}
                   name=${workspace.name}
                   color=${workspace.color}
+                  ?showEverything=${workspace.showEverything}
                   .listConfigs=${workspace.listConfigs}
                   ?open=${this.isPanelOpen(workspace.id)}
                   @workspace-saved=${this.handleWorkspaceSaved}

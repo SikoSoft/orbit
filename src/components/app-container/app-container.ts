@@ -264,6 +264,7 @@ export class AppContainer extends MobxLitElement {
             translate('workspace'),
             listConfigs.map(c => c.id),
             CURATED_COLORS[0],
+            false,
           );
           if (defaultResult.isOk) {
             this.state.setWorkspaces([defaultResult.value]);

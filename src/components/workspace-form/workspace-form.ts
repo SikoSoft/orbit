@@ -75,6 +75,7 @@ export class WorkspaceForm extends MobxLitElement {
     id: '',
     name: '',
     color: '',
+    showEverything: false,
     listConfigs: [],
   };
 
@@ -100,6 +101,10 @@ export class WorkspaceForm extends MobxLitElement {
   [WorkspaceFormProp.COLOR]: WorkspaceFormProps[WorkspaceFormProp.COLOR] =
     workspaceFormProps[WorkspaceFormProp.COLOR].default;
 
+  @property({ type: Boolean })
+  [WorkspaceFormProp.SHOW_EVERYTHING]: WorkspaceFormProps[WorkspaceFormProp.SHOW_EVERYTHING] =
+    workspaceFormProps[WorkspaceFormProp.SHOW_EVERYTHING].default;
+
   @property({ type: Array })
   [WorkspaceFormProp.LIST_CONFIGS]: WorkspaceFormProps[WorkspaceFormProp.LIST_CONFIGS] =
     workspaceFormProps[WorkspaceFormProp.LIST_CONFIGS].default;
@@ -110,6 +115,7 @@ export class WorkspaceForm extends MobxLitElement {
       id: this[WorkspaceFormProp.WORKSPACE_ID],
       name: this[WorkspaceFormProp.NAME],
       color: this[WorkspaceFormProp.COLOR],
+      showEverything: this[WorkspaceFormProp.SHOW_EVERYTHING],
       listConfigs: [...this[WorkspaceFormProp.LIST_CONFIGS]],
     };
   }
@@ -144,6 +150,7 @@ export class WorkspaceForm extends MobxLitElement {
         ...existing,
         name: this.localWorkspace.name,
         color: this.localWorkspace.color,
+        showEverything: this.localWorkspace.showEverything,
         listConfigs: this.localWorkspace.listConfigs,
       });
     } else {
@@ -151,6 +158,7 @@ export class WorkspaceForm extends MobxLitElement {
         this.localWorkspace.name,
         this.localWorkspace.listConfigs,
         this.localWorkspace.color,
+        this.localWorkspace.showEverything,
       );
     }
 
@@ -165,6 +173,7 @@ export class WorkspaceForm extends MobxLitElement {
       id: result.value.id,
       name: result.value.name,
       color: result.value.color,
+      showEverything: result.value.showEverything,
       listConfigs: result.value.listConfigs,
     };
 
@@ -217,6 +226,22 @@ export class WorkspaceForm extends MobxLitElement {
               };
             }}
           ></color-selector>
+        </div>
+
+        <div class="field">
+          <label class="list-config-option">
+            <input
+              type="checkbox"
+              ?checked=${this.localWorkspace.showEverything}
+              @change=${(): void => {
+                this.localWorkspace = {
+                  ...this.localWorkspace,
+                  showEverything: !this.localWorkspace.showEverything,
+                };
+              }}
+            />
+            ${translate('showEverything')}
+          </label>
         </div>
 
         ${availableListConfigs.length > 0
