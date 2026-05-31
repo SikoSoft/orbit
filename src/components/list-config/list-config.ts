@@ -405,7 +405,7 @@ export class ListConfig extends MobxLitElement {
   }
 
   async setup(): Promise<void> {
-    const listConfigs = this.state.listConfigs;
+    const listConfigs = this.state.filteredListConfigs;
     if (this.state.hasFetchedListConfigs && !listConfigs.length) {
       await this.addConfig();
     }
@@ -515,7 +515,7 @@ export class ListConfig extends MobxLitElement {
       return;
     }
 
-    const config = this.state.listConfigs.find(
+    const config = this.state.filteredListConfigs.find(
       c => c.id === this.state.listConfigId,
     );
     if (!config) {
@@ -526,7 +526,7 @@ export class ListConfig extends MobxLitElement {
     this.id = config.id;
     this.name = config.name;
     this.navigationIndex =
-      this.state.listConfigs.findIndex(c => c.id === this.id) +
+      this.state.filteredListConfigs.findIndex(c => c.id === this.id) +
       (this[ListConfigProp.VIEW_ONLY] ? 0 : 1);
   }
 
@@ -549,7 +549,7 @@ export class ListConfig extends MobxLitElement {
         return;
       }
       const newListConfigId =
-        this.state.listConfigs[e.detail.slideIndex - 1]?.id;
+        this.state.filteredListConfigs[e.detail.slideIndex - 1]?.id;
       if (!newListConfigId || newListConfigId === this.state.listConfigId) {
         return;
       }
@@ -560,7 +560,7 @@ export class ListConfig extends MobxLitElement {
       return;
     }
 
-    const newListConfigId = this.state.listConfigs[e.detail.slideIndex]?.id;
+    const newListConfigId = this.state.filteredListConfigs[e.detail.slideIndex]?.id;
     if (!newListConfigId || newListConfigId === this.state.listConfigId) {
       return;
     }
@@ -664,7 +664,7 @@ export class ListConfig extends MobxLitElement {
                     </div>`
                   : nothing}
                 ${repeat(
-                  this.state.listConfigs,
+                  this.state.filteredListConfigs,
                   config => config.id,
                   config =>
                     html`<div class="config-slide">

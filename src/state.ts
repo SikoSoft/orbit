@@ -229,6 +229,21 @@ export class AppState {
     );
   }
 
+  get filteredListConfigs(): ListConfig[] {
+    if (!this.activeWorkspaceId || !this.workspaces.length) {
+      return this.listConfigs;
+    }
+    const activeWorkspace = this.workspaces.find(
+      w => w.id === this.activeWorkspaceId,
+    );
+    if (!activeWorkspace) {
+      return this.listConfigs;
+    }
+    return this.listConfigs.filter(c =>
+      activeWorkspace.listConfigs.includes(c.id),
+    );
+  }
+
   @action
   public setActionSuggestions(suggestions: string[]): void {
     this.actionSuggestions = suggestions;
