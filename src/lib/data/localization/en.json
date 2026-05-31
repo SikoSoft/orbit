@@ -439,5 +439,8 @@
   "failedToLoadWorkspaces": "Failed to load workspaces.",
   "workspaceNameRequired": "Workspace name is required.",
   "confirmDeleteWorkspace": "Are you sure you want to delete this workspace?",
+  "workspaceColor": "Workspace Color",
+  "selectWorkspace": "Select Workspace",
+  "workspaceCreatedAutomatically": "A default workspace was created for you.",
   "listConfigs": "List Configs"
 }

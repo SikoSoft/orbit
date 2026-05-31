@@ -26,6 +26,7 @@ import { AppReadyEvent } from '@/components/app-container/app-container.events';
 import { translate } from '@/lib/Localization';
 
 import '@/components/svg-icon/svg/svg-spinner';
+import '@/components/workspace-selector/workspace-selector';
 import { Introspection } from 'api-spec/models/Introspection';
 import { SettingName } from 'api-spec/models/Setting';
 import { StorageSource } from '@/models/Storage';
@@ -34,6 +35,13 @@ import {
   registerServiceWorker,
   getSubscription,
 } from '@/lib/push-subscription';
+import {
+  WorkspaceChangedEvent,
+  workspaceChangedEventName,
+} from '@/events/workspace-changed';
+import { addToast } from '@/lib/Util';
+import { NotificationType } from '@ss/ui/components/notification-provider.models';
+import { CURATED_COLORS } from '@/components/color-selector/color-selector.models';
 
 export interface ViewChangedEvent extends CustomEvent {
   detail: PageView;
@@ -43,6 +51,10 @@ export interface ViewChangedEvent extends CustomEvent {
 @customElement('app-container')
 export class AppContainer extends MobxLitElement {
   static styles = css`
+    .app-container {
+      padding-top: 36px;
+    }
+
     .loading {
       display: flex;
       justify-content: center;
@@ -96,6 +108,10 @@ export class AppContainer extends MobxLitElement {
       networkApiRequestSucceededEventName,
       this.handleNetworkApiRequestSucceeded,
     );
+    window.addEventListener(
+      workspaceChangedEventName,
+      this.handleWorkspaceChanged as EventListener,
+    );
 
     this.addEventListener('view-changed', (e: Event) => {
       this.handleViewChanged(e);
@@ -147,6 +163,10 @@ export class AppContainer extends MobxLitElement {
       networkApiRequestSucceededEventName,
       this.handleNetworkApiRequestSucceeded,
     );
+    window.removeEventListener(
+      workspaceChangedEventName,
+      this.handleWorkspaceChanged as EventListener,
+    );
   }
 
   private handleOnline = (): void => {
@@ -161,6 +181,11 @@ export class AppContainer extends MobxLitElement {
 
   private handleOffline = (): void => {
     this.state.setOnline(false);
+  };
+
+  private handleWorkspaceChanged = (e: WorkspaceChangedEvent): void => {
+    this.state.setActiveWorkspaceId(e.detail.workspaceId);
+    this.state.setWorkspaceSelectorVisible(false);
   };
 
   private handleNetworkApiRequestFailed = (e: Event): void => {
@@ -211,16 +236,19 @@ export class AppContainer extends MobxLitElement {
         this.state.authToken
       ) {
         console.time('[orbit] restoreState:fetchConfigs');
-        const [listConfigs, entityConfigs, settings] = await Promise.all([
-          storage.getListConfigs(),
-          storage.getEntityConfigs(),
-          storage.getSettings().catch(() => null),
-        ]);
+        const [listConfigs, entityConfigs, settings, workspaces] =
+          await Promise.all([
+            storage.getListConfigs(),
+            storage.getEntityConfigs(),
+            storage.getSettings().catch(() => null),
+            storage.getWorkspaces().catch(() => [] as typeof this.state.workspaces),
+          ]);
         console.timeEnd('[orbit] restoreState:fetchConfigs');
         console.log(
-          '[orbit] restoreState: got %d listConfigs, %d entityConfigs',
+          '[orbit] restoreState: got %d listConfigs, %d entityConfigs, %d workspaces',
           listConfigs.length,
           entityConfigs.length,
+          workspaces.length,
         );
 
         this.state.setListConfigs(listConfigs);
@@ -229,6 +257,36 @@ export class AppContainer extends MobxLitElement {
         if (settings) {
           this.state.setUserSettings(settings.user);
           this.state.setSystemSettings(settings.system);
+        }
+
+        if (workspaces.length === 0) {
+          const defaultResult = await storage.createWorkspace(
+            translate('workspace'),
+            listConfigs.map(c => c.id),
+            CURATED_COLORS[0],
+          );
+          if (defaultResult.isOk) {
+            this.state.setWorkspaces([defaultResult.value]);
+            addToast(
+              translate('workspaceCreatedAutomatically'),
+              NotificationType.SUCCESS,
+            );
+          }
+        } else {
+          this.state.setWorkspaces(workspaces);
+        }
+
+        const activeWorkspaceId = storage.getActiveWorkspaceId();
+        if (activeWorkspaceId) {
+          this.state.setActiveWorkspaceId(activeWorkspaceId);
+          const activeWorkspace = this.state.workspaces.find(
+            w => w.id === activeWorkspaceId,
+          );
+          if (activeWorkspace?.color) {
+            storage.setActiveWorkspaceColor(activeWorkspace.color);
+          }
+        } else if (this.state.workspaces.length > 0) {
+          this.state.setWorkspaceSelectorVisible(true);
         }
 
         const listConfigId = storage.getActiveListConfigId();
@@ -376,6 +434,10 @@ export class AppContainer extends MobxLitElement {
 
   render(): TemplateResult {
     return html`
+      <workspace-selector
+        ?forceOpen=${this.state.workspaceSelectorVisible}
+      ></workspace-selector>
+
       <div
         class="app-container"
         @tab-index-changed=${this.handleTabChanged}

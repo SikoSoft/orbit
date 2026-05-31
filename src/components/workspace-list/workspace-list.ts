@@ -60,6 +60,7 @@ export class WorkspaceList extends MobxLitElement {
     const newWorkspace: Workspace = {
       id: '',
       name: '',
+      color: '',
       userId: '',
       listConfigs: [],
       createdAt: new Date(),
@@ -105,6 +106,7 @@ export class WorkspaceList extends MobxLitElement {
                 <workspace-form
                   workspaceId=${workspace.id}
                   name=${workspace.name}
+                  color=${workspace.color}
                   .listConfigs=${workspace.listConfigs}
                   ?open=${this.isPanelOpen(workspace.id)}
                   @workspace-saved=${this.handleWorkspaceSaved}

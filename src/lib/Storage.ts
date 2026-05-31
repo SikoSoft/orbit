@@ -896,6 +896,7 @@ export class Storage implements StorageSchema {
   async createWorkspace(
     _name: string,
     _listConfigs: string[],
+    _color: string,
   ): Promise<StorageResult<Workspace>> {
     return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
   }
@@ -908,6 +909,22 @@ export class Storage implements StorageSchema {
   @delegateSource()
   async deleteWorkspace(_id: string): Promise<boolean> {
     return Promise.resolve(false);
+  }
+
+  getActiveWorkspaceId(): string {
+    return localStorage.getItem(StorageItemKey.ACTIVE_WORKSPACE_ID) ?? '';
+  }
+
+  setActiveWorkspaceId(id: string): void {
+    localStorage.setItem(StorageItemKey.ACTIVE_WORKSPACE_ID, id);
+  }
+
+  getActiveWorkspaceColor(): string {
+    return localStorage.getItem(StorageItemKey.ACTIVE_WORKSPACE_COLOR) ?? '';
+  }
+
+  setActiveWorkspaceColor(color: string): void {
+    localStorage.setItem(StorageItemKey.ACTIVE_WORKSPACE_COLOR, color);
   }
 }
 

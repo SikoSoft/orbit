@@ -17,12 +17,14 @@ import '@ss/ui/components/ss-collapsable';
 import '@ss/ui/components/ss-button';
 import '@ss/ui/components/ss-input';
 import '@ss/ui/components/confirmation-modal';
+import '@/components/color-selector/color-selector';
 
 import {
   WorkspaceFormProp,
   workspaceFormProps,
   WorkspaceFormProps,
 } from './workspace-form.models';
+import { ColorChangedEvent } from '@/components/color-selector/color-selector.events';
 import { WorkspaceDeletedEvent, WorkspaceSavedEvent } from './workspace-form.events';
 
 @themed()
@@ -72,6 +74,7 @@ export class WorkspaceForm extends MobxLitElement {
   localWorkspace: Omit<Workspace, 'userId' | 'createdAt' | 'updatedAt'> = {
     id: '',
     name: '',
+    color: '',
     listConfigs: [],
   };
 
@@ -93,6 +96,10 @@ export class WorkspaceForm extends MobxLitElement {
   [WorkspaceFormProp.NAME]: WorkspaceFormProps[WorkspaceFormProp.NAME] =
     workspaceFormProps[WorkspaceFormProp.NAME].default;
 
+  @property({ type: String })
+  [WorkspaceFormProp.COLOR]: WorkspaceFormProps[WorkspaceFormProp.COLOR] =
+    workspaceFormProps[WorkspaceFormProp.COLOR].default;
+
   @property({ type: Array })
   [WorkspaceFormProp.LIST_CONFIGS]: WorkspaceFormProps[WorkspaceFormProp.LIST_CONFIGS] =
     workspaceFormProps[WorkspaceFormProp.LIST_CONFIGS].default;
@@ -102,6 +109,7 @@ export class WorkspaceForm extends MobxLitElement {
     this.localWorkspace = {
       id: this[WorkspaceFormProp.WORKSPACE_ID],
       name: this[WorkspaceFormProp.NAME],
+      color: this[WorkspaceFormProp.COLOR],
       listConfigs: [...this[WorkspaceFormProp.LIST_CONFIGS]],
     };
   }
@@ -135,12 +143,14 @@ export class WorkspaceForm extends MobxLitElement {
       result = await storage.saveWorkspace({
         ...existing,
         name: this.localWorkspace.name,
+        color: this.localWorkspace.color,
         listConfigs: this.localWorkspace.listConfigs,
       });
     } else {
       result = await storage.createWorkspace(
         this.localWorkspace.name,
         this.localWorkspace.listConfigs,
+        this.localWorkspace.color,
       );
     }
 
@@ -154,6 +164,7 @@ export class WorkspaceForm extends MobxLitElement {
     this.localWorkspace = {
       id: result.value.id,
       name: result.value.name,
+      color: result.value.color,
       listConfigs: result.value.listConfigs,
     };
 
@@ -193,6 +204,19 @@ export class WorkspaceForm extends MobxLitElement {
               };
             }}
           ></ss-input>
+        </div>
+
+        <div class="field">
+          <label>${translate('workspaceColor')}</label>
+          <color-selector
+            value=${this.localWorkspace.color}
+            @color-changed=${(e: ColorChangedEvent): void => {
+              this.localWorkspace = {
+                ...this.localWorkspace,
+                color: e.detail.value,
+              };
+            }}
+          ></color-selector>
         </div>
 
         ${availableListConfigs.length > 0

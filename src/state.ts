@@ -166,6 +166,12 @@ export class AppState {
   public hasFetchedWorkspaces: boolean = false;
 
   @observable
+  public activeWorkspaceId: string = '';
+
+  @observable
+  public workspaceSelectorVisible: boolean = false;
+
+  @observable
   public listContextMode: boolean = false;
 
   @observable
@@ -321,6 +327,16 @@ export class AppState {
   setWorkspaces(workspaces: Workspace[]): void {
     this.workspaces = workspaces;
     this.hasFetchedWorkspaces = true;
+  }
+
+  @action
+  setActiveWorkspaceId(id: string): void {
+    this.activeWorkspaceId = id;
+  }
+
+  @action
+  setWorkspaceSelectorVisible(visible: boolean): void {
+    this.workspaceSelectorVisible = visible;
   }
 
   @action

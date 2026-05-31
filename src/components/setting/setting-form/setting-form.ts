@@ -91,6 +91,8 @@ export class SettingForm extends MobxLitElement {
           .options=${setting.control.options}
           @setting-updated=${this.handleSettingUpdated}
         ></select-setting>`;
+      default:
+        return html``;
     }
   }
 

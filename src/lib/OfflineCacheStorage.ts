@@ -1278,8 +1278,9 @@ export class OfflineCacheStorage implements StorageSchema {
   async createWorkspace(
     name: string,
     listConfigs: string[],
+    color: string,
   ): Promise<StorageResult<Workspace>> {
-    return networkStorage.createWorkspace(name, listConfigs);
+    return networkStorage.createWorkspace(name, listConfigs, color);
   }
 
   async saveWorkspace(workspace: Workspace): Promise<StorageResult<Workspace>> {

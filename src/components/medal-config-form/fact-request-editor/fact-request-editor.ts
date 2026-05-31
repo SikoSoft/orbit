@@ -2,13 +2,14 @@ import { html, css, nothing, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 
+import { FactRequest } from 'api-spec/models/Medal';
 import {
-  FactRequest,
   FactOperation,
   EntityCountFactContext,
   UniqueTagCountFactContext,
   MedalCountFactContext,
-} from 'api-spec/models/Medal';
+  AnalysisClassificationType,
+} from 'api-spec/models/Fact';
 import { defaultListFilter } from 'api-spec/models/List';
 
 import { translate } from '@/lib/Localization';
@@ -207,6 +208,8 @@ export class FactRequestEditor extends MobxLitElement {
               let newContext;
               if (op === FactOperation.MEDAL_COUNT) {
                 newContext = { operation: op, medalConfigId: 0, series: '' };
+              } else if (op === FactOperation.ANALYSIS_CLASSIFICATION) {
+                newContext = { operation: op, filter: { ...defaultListFilter }, analysisType: AnalysisClassificationType.MORNING_FASTING };
               } else {
                 newContext = { operation: op, filter: { ...defaultListFilter } };
               }

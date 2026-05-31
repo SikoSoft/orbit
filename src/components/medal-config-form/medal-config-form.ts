@@ -2,7 +2,8 @@ import { html, css, nothing, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { MedalConfig, Criterion, Criteria, FactRequest, FactOperation } from 'api-spec/models/Medal';
+import { MedalConfig, Criterion, Criteria, FactRequest } from 'api-spec/models/Medal';
+import { FactOperation } from 'api-spec/models/Fact';
 import { defaultListFilter } from 'api-spec/models/List';
 import { addToast } from '@/lib/Util';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';

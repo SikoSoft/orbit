@@ -76,7 +76,7 @@ export class FloatingWidget extends MobxLitElement {
       }
 
       &.top {
-        top: 0;
+        top: 2rem;
         display: flex;
         flex-direction: column-reverse;
         transform: translateY(-93%);

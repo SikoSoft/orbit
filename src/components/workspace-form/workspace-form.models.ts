@@ -4,6 +4,7 @@ import { ControlType } from '@/models/Control';
 export enum WorkspaceFormProp {
   WORKSPACE_ID = 'workspaceId',
   NAME = 'name',
+  COLOR = 'color',
   LIST_CONFIGS = 'listConfigs',
   OPEN = 'open',
 }
@@ -11,6 +12,7 @@ export enum WorkspaceFormProp {
 export interface WorkspaceFormProps extends PropTypes {
   [WorkspaceFormProp.WORKSPACE_ID]: string;
   [WorkspaceFormProp.NAME]: string;
+  [WorkspaceFormProp.COLOR]: string;
   [WorkspaceFormProp.LIST_CONFIGS]: string[];
   [WorkspaceFormProp.OPEN]: boolean;
 }
@@ -24,6 +26,11 @@ export const workspaceFormProps: PropConfigMap<WorkspaceFormProps> = {
   [WorkspaceFormProp.NAME]: {
     default: '',
     description: 'The workspace name',
+    control: { type: ControlType.TEXT },
+  },
+  [WorkspaceFormProp.COLOR]: {
+    default: '',
+    description: 'The workspace color as a hex string',
     control: { type: ControlType.TEXT },
   },
   [WorkspaceFormProp.LIST_CONFIGS]: {

@@ -1318,6 +1318,7 @@ export class SQLiteStorage implements StorageSchema {
     return rows.map(row => ({
       id: row['id'] as string,
       name: row['name'] as string,
+      color: (row['color'] as string) ?? '',
       userId: row['user_id'] as string,
       listConfigs: JSON.parse(row['list_configs'] as string) as string[],
       createdAt: new Date(row['created_at'] as string),

@@ -47,6 +47,8 @@ export enum StorageItemKey {
   THEME = 'theme',
   STORAGE_SOURCE = 'storageSource',
   ASSIST_SAVE_IMAGE = 'assistSaveImage',
+  ACTIVE_WORKSPACE_ID = 'activeWorkspaceId',
+  ACTIVE_WORKSPACE_COLOR = 'activeWorkspaceColor',
 }
 
 export const delegatedStorageItemKeys: StorageItemKey[] = [
@@ -213,7 +215,9 @@ export interface StorageSchema {
     constraints: EntityConfigUniqueConstraint[],
   ): Promise<boolean>;
   getWorkspaces?(): Promise<Workspace[]>;
-  createWorkspace?(name: string, listConfigs: string[]): Promise<StorageResult<Workspace>>;
+  createWorkspace?(name: string, listConfigs: string[], color: string): Promise<StorageResult<Workspace>>;
   saveWorkspace?(workspace: Workspace): Promise<StorageResult<Workspace>>;
   deleteWorkspace?(id: string): Promise<boolean>;
+  getActiveWorkspaceId?(): string;
+  setActiveWorkspaceId?(id: string): void;
 }
