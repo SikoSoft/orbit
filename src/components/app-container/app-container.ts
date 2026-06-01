@@ -186,6 +186,16 @@ export class AppContainer extends MobxLitElement {
   private handleWorkspaceChanged = (e: WorkspaceChangedEvent): void => {
     this.state.setActiveWorkspaceId(e.detail.workspaceId);
     this.state.setWorkspaceSelectorVisible(false);
+
+    const filtered = this.state.filteredListConfigs;
+    const currentInWorkspace = filtered.some(
+      c => c.id === this.state.listConfigId,
+    );
+    if (!currentInWorkspace) {
+      const newId = filtered.length ? filtered[0].id : '';
+      this.state.setListConfigId(newId);
+      storage.saveActiveListConfigId(newId);
+    }
   };
 
   private handleNetworkApiRequestFailed = (e: Event): void => {

@@ -435,7 +435,7 @@ export class ListConfig extends MobxLitElement {
   }
 
   async setup(): Promise<void> {
-    const listConfigs = this.state.listConfigs;
+    const listConfigs = this.state.filteredListConfigs;
     if (this.state.hasFetchedListConfigs && !listConfigs.length) {
       await this.addConfig();
     }
@@ -512,7 +512,10 @@ export class ListConfig extends MobxLitElement {
   }
 
   async deleteConfig(): Promise<void> {
-    const result = await storage.deleteListConfig(this.id, this.deleteItemsChecked);
+    const result = await storage.deleteListConfig(
+      this.id,
+      this.deleteItemsChecked,
+    );
     if (!result) {
       addToast(translate('failedToDeleteListConfig'), NotificationType.ERROR);
       return;
@@ -545,7 +548,7 @@ export class ListConfig extends MobxLitElement {
       return;
     }
 
-    const config = this.state.listConfigs.find(
+    const config = this.state.filteredListConfigs.find(
       c => c.id === this.state.listConfigId,
     );
     if (!config) {
@@ -556,8 +559,8 @@ export class ListConfig extends MobxLitElement {
     this.id = config.id;
     this.name = config.name;
     this.navigationIndex =
-      this.state.listConfigs.findIndex(c => c.id === this.id) +
-      (this.showEverythingSlide ? 1 : 0);
+      this.state.filteredListConfigs.findIndex(c => c.id === this.id) +
+      (this[ListConfigProp.VIEW_ONLY] ? 0 : 1);
   }
 
   setListConfigId(listConfigId: string): void {
@@ -580,7 +583,7 @@ export class ListConfig extends MobxLitElement {
       }
       const offset = this.showEverythingSlide ? 1 : 0;
       const newListConfigId =
-        this.state.listConfigs[e.detail.slideIndex - offset]?.id;
+        this.state.filteredListConfigs[e.detail.slideIndex - offset]?.id;
       if (!newListConfigId || newListConfigId === this.state.listConfigId) {
         return;
       }
@@ -591,7 +594,8 @@ export class ListConfig extends MobxLitElement {
       return;
     }
 
-    const newListConfigId = this.state.listConfigs[e.detail.slideIndex]?.id;
+    const newListConfigId =
+      this.state.filteredListConfigs[e.detail.slideIndex]?.id;
     if (!newListConfigId || newListConfigId === this.state.listConfigId) {
       return;
     }
@@ -695,70 +699,72 @@ export class ListConfig extends MobxLitElement {
                     </div>`
                   : nothing}
                 ${repeat(
-                  this.state.listConfigs,
+                  this.state.filteredListConfigs,
                   config => config.id,
                   config =>
                     html`<div class="config-slide">
-                    <div
-                      class="close"
-                      @click=${(e: MouseEvent): void => {
-                        this.state.setSelectListConfigMode(false);
-                        this.state.setEditListConfigMode(false);
-                        e.stopPropagation();
-                      }}
-                    ></div>
+                      <div
+                        class="close"
+                        @click=${(e: MouseEvent): void => {
+                          this.state.setSelectListConfigMode(false);
+                          this.state.setEditListConfigMode(false);
+                          e.stopPropagation();
+                        }}
+                      ></div>
 
-                    <div class="name">
-                      <ss-input
-                        ?unsaved=${!this.inSync}
-                        @input-changed=${this.handleNameChanged}
-                        @input-focused=${this.handleNameFocused}
-                        @input-blurred=${this.handleNameBlurred}
-                        @input-submitted=${this.handleNameSubmitted}
-                        type=${InputType.TEXT}
-                        value=${config.name}
-                        @click=${this.enableEditMode}
-                      ></ss-input>
-                    </div>
-
-                    ${this.state.user?.id && config.userId && config.userId !== this.state.user.id
-                      ? html`<div class="managed-indicator">
-                          ${translate('managedByExternalParty')}
-                        </div>`
-                      : nothing}
-
-                    <div class="buttons">
-                      <div class="buttons-inner">
-                        <button @click=${this.addConfig}>
-                          <ss-icon
-                            name="add"
-                            color="var(--input-text-color)"
-                            size="16"
-                          ></ss-icon>
-                        </button>
-
-                        <button @click=${this.showThemeManager}>
-                          <ss-icon
-                            name="theme"
-                            color="var(--input-text-color)"
-                            size="16"
-                          ></ss-icon>
-                        </button>
-
-                        ${this.canDelete
-                          ? html`
-                              <button @click=${this.showConfigDeleteConfirm}>
-                                <ss-icon
-                                  name="trash"
-                                  color="var(--input-text-color)"
-                                  size="16"
-                                ></ss-icon>
-                              </button>
-                            `
-                          : nothing}
+                      <div class="name">
+                        <ss-input
+                          ?unsaved=${!this.inSync}
+                          @input-changed=${this.handleNameChanged}
+                          @input-focused=${this.handleNameFocused}
+                          @input-blurred=${this.handleNameBlurred}
+                          @input-submitted=${this.handleNameSubmitted}
+                          type=${InputType.TEXT}
+                          value=${config.name}
+                          @click=${this.enableEditMode}
+                        ></ss-input>
                       </div>
-                    </div>
-                  </div>`,
+
+                      ${this.state.user?.id &&
+                      config.userId &&
+                      config.userId !== this.state.user.id
+                        ? html`<div class="managed-indicator">
+                            ${translate('managedByExternalParty')}
+                          </div>`
+                        : nothing}
+
+                      <div class="buttons">
+                        <div class="buttons-inner">
+                          <button @click=${this.addConfig}>
+                            <ss-icon
+                              name="add"
+                              color="var(--input-text-color)"
+                              size="16"
+                            ></ss-icon>
+                          </button>
+
+                          <button @click=${this.showThemeManager}>
+                            <ss-icon
+                              name="theme"
+                              color="var(--input-text-color)"
+                              size="16"
+                            ></ss-icon>
+                          </button>
+
+                          ${this.canDelete
+                            ? html`
+                                <button @click=${this.showConfigDeleteConfirm}>
+                                  <ss-icon
+                                    name="trash"
+                                    color="var(--input-text-color)"
+                                    size="16"
+                                  ></ss-icon>
+                                </button>
+                              `
+                            : nothing}
+                        </div>
+                      </div>
+                    </div>`,
                 )}
               `
             : nothing}
@@ -867,7 +873,9 @@ export class ListConfig extends MobxLitElement {
               type="checkbox"
               ?checked=${this.deleteItemsChecked}
               @change=${(e: Event): void => {
-                this.deleteItemsChecked = (e.target as HTMLInputElement).checked;
+                this.deleteItemsChecked = (
+                  e.target as HTMLInputElement
+                ).checked;
               }}
             />
             ${translate('deleteItemsInList')}
@@ -879,13 +887,15 @@ export class ListConfig extends MobxLitElement {
                 this.confirmDeleteIsOpen = false;
                 this.deleteItemsChecked = false;
               }}
-            >${translate('delete')}</ss-button>
+              >${translate('delete')}</ss-button
+            >
             <ss-button
               @click=${(): void => {
                 this.confirmDeleteIsOpen = false;
                 this.deleteItemsChecked = false;
               }}
-            >${translate('cancel')}</ss-button>
+              >${translate('cancel')}</ss-button
+            >
           </div>
         </div>
       </pop-up>
