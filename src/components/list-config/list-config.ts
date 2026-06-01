@@ -560,7 +560,7 @@ export class ListConfig extends MobxLitElement {
     this.name = config.name;
     this.navigationIndex =
       this.state.filteredListConfigs.findIndex(c => c.id === this.id) +
-      (this[ListConfigProp.VIEW_ONLY] ? 0 : 1);
+      (this.showEverythingSlide ? 1 : 0);
   }
 
   setListConfigId(listConfigId: string): void {
