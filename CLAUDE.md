@@ -125,6 +125,8 @@ Keep `api-spec` version in sync when making API contract changes. Internal packa
 - SVG icons should never be inserted inline. Create new component for icon if it doesn't exist in `components/svg-icon/svg`
 - Every custom event must have its own class extending `CustomEvent<TPayload>`, a named export for the event name string, and a payload type — never dispatch a bare `new CustomEvent(...)`. Events with no payload use `Record<string, never>` as the type. See `src/events/` for examples.
 
+See [docs/code-hygeine.md](docs/code-hygeine.md) for further details on code hygeine and cleanup routines.
+
 ## Storage layer
 
 `OFFLINE_CACHE_ENABLED = true` in `src/lib/Storage.ts`, so the active delegate is `OfflineCacheStorage`, not `NetworkStorage`. The `@delegateSource()` decorator routes calls to the first active delegate that has the method.
