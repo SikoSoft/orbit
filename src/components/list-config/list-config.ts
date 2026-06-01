@@ -344,6 +344,23 @@ export class ListConfig extends MobxLitElement {
     return this.state.listConfig.userId !== this.state.user.id;
   }
 
+  @state()
+  get showEverythingSlide(): boolean {
+    if (this[ListConfigProp.VIEW_ONLY]) {
+      return false;
+    }
+    if (!this.state.workspaces.length) {
+      return true;
+    }
+    if (!this.state.activeWorkspaceId) {
+      return true;
+    }
+    const activeWorkspace = this.state.workspaces.find(
+      w => w.id === this.state.activeWorkspaceId,
+    );
+    return !activeWorkspace || activeWorkspace.showEverything;
+  }
+
   @state() get classes(): Record<string, boolean> {
     return {
       'list-config': true,
@@ -372,6 +389,19 @@ export class ListConfig extends MobxLitElement {
     reaction(
       () => this.state.listConfigId,
       () => {
+        this.sync();
+      },
+    );
+
+    reaction(
+      () => this.showEverythingSlide,
+      showEverythingSlide => {
+        if (!showEverythingSlide && !this.state.listConfigId) {
+          const firstConfig = this.state.listConfigs[0];
+          if (firstConfig) {
+            this.setListConfigId(firstConfig.id);
+          }
+        }
         this.sync();
       },
     );
@@ -527,7 +557,7 @@ export class ListConfig extends MobxLitElement {
     this.name = config.name;
     this.navigationIndex =
       this.state.listConfigs.findIndex(c => c.id === this.id) +
-      (this[ListConfigProp.VIEW_ONLY] ? 0 : 1);
+      (this.showEverythingSlide ? 1 : 0);
   }
 
   setListConfigId(listConfigId: string): void {
@@ -538,7 +568,7 @@ export class ListConfig extends MobxLitElement {
 
   carouselSlideChanged(e: CarouselSlideChangedEvent): void {
     if (!this[ListConfigProp.VIEW_ONLY]) {
-      if (e.detail.slideIndex === 0) {
+      if (this.showEverythingSlide && e.detail.slideIndex === 0) {
         if (this.state.listConfigId === '') {
           return;
         }
@@ -548,8 +578,9 @@ export class ListConfig extends MobxLitElement {
         this.setListConfigId('');
         return;
       }
+      const offset = this.showEverythingSlide ? 1 : 0;
       const newListConfigId =
-        this.state.listConfigs[e.detail.slideIndex - 1]?.id;
+        this.state.listConfigs[e.detail.slideIndex - offset]?.id;
       if (!newListConfigId || newListConfigId === this.state.listConfigId) {
         return;
       }
@@ -653,7 +684,7 @@ export class ListConfig extends MobxLitElement {
         >
           ${this.ready
             ? html`
-                ${!this[ListConfigProp.VIEW_ONLY]
+                ${this.showEverythingSlide
                   ? html`<div class="config-slide everything-slide">
                       <div class="name">
                         <ss-input
