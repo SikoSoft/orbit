@@ -535,6 +535,23 @@ export class ListConfig extends MobxLitElement {
     addToast(translate('configAdded'), NotificationType.SUCCESS);
     const listConfigs = await storage.getListConfigs();
     this.state.setListConfigs(listConfigs);
+
+    if (this.state.activeWorkspaceId) {
+      const activeWorkspace = this.state.workspaces.find(
+        w => w.id === this.state.activeWorkspaceId,
+      );
+      if (activeWorkspace && !activeWorkspace.listConfigs.includes(id)) {
+        const updatedWorkspace = {
+          ...activeWorkspace,
+          listConfigs: [...activeWorkspace.listConfigs, id],
+        };
+        const result = await storage.saveWorkspace(updatedWorkspace);
+        if (result.isOk) {
+          this.state.upsertWorkspace(result.value);
+        }
+      }
+    }
+
     this.setListConfigId(id);
     this.sync();
   }
