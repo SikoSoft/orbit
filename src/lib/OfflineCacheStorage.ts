@@ -38,6 +38,7 @@ import {
 } from '@/models/Identity';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { Workspace } from 'api-spec/models/Workspace';
+import { ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
 
 import { SQLiteStorage, serializePropertyValue } from './SQLiteStorage';
 import { networkStorage } from './NetworkStorage';
@@ -1290,6 +1291,12 @@ export class OfflineCacheStorage implements StorageSchema {
 
   async deleteWorkspace(id: string): Promise<boolean> {
     return networkStorage.deleteWorkspace(id);
+  }
+
+  async createChart(
+    request: ChartRequest,
+  ): Promise<StorageResult<ChartResponse>> {
+    return networkStorage.createChart(request);
   }
 }
 

@@ -41,6 +41,7 @@ import {
 } from '@/models/Identity';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { Workspace } from 'api-spec/models/Workspace';
+import { ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
 
 export class NetworkStorage implements StorageSchema {
   isActive = true;
@@ -989,6 +990,18 @@ export class NetworkStorage implements StorageSchema {
     }
 
     return false;
+  }
+
+  async createChart(
+    request: ChartRequest,
+  ): Promise<StorageResult<ChartResponse>> {
+    const result = await api.post<ChartRequest, ChartResponse>('chart', request);
+
+    if (result && result.isOk) {
+      return { isOk: true, value: result.response };
+    }
+
+    return { isOk: false, error: new Error('Failed to create chart') };
   }
 }
 

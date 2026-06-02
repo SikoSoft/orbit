@@ -1,0 +1,15 @@
+import { ChartResponse } from 'api-spec/models/Statistic';
+
+export const chartBuiltEventName = 'chart-built';
+
+export type ChartBuiltPayload = ChartResponse;
+
+export class ChartBuiltEvent extends CustomEvent<ChartBuiltPayload> {
+  constructor(payload: ChartBuiltPayload) {
+    super(chartBuiltEventName, {
+      bubbles: true,
+      composed: true,
+      detail: payload,
+    });
+  }
+}

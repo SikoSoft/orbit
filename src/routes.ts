@@ -107,4 +107,9 @@ export const routes: Route[] = [
     component: 'debug-view',
     action: async () => await import('@/views/debug-view/debug-view'),
   },
+  {
+    path: '/chart',
+    component: 'chart-view',
+    action: async () => await import('@/views/chart-view/chart-view'),
+  },
 ];
