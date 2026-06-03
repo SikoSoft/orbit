@@ -6,6 +6,7 @@ import { MobxLitElement } from '@adobe/lit-mobx';
 import {
   ChartRequest,
   DataWindow,
+  DataWindowType,
   SegmentationType,
   SegmentationTimeUnit,
 } from 'api-spec/models/Statistic';
@@ -16,28 +17,20 @@ import { storage } from '@/lib/Storage';
 import { defaultListFilter } from '@/state';
 import { SelectChangedEvent } from '@ss/ui/components/ss-select.events';
 import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
+import { ToggleChangedEvent } from '@ss/ui/components/ss-toggle.events';
 import { DataPointUpdatedEvent } from '@/components/data-point-builder/data-point-builder.events';
 
 import { ChartBuiltEvent } from './chart-builder.events';
 
 import '@ss/ui/components/ss-select';
 import '@ss/ui/components/ss-input';
+import '@ss/ui/components/ss-toggle';
 import '@/components/data-point-builder/data-point-builder';
-
-export enum DataWindowPreset {
-  YEAR_TO_DATE = 'yearToDate',
-  MONTH_TO_DATE = 'monthToDate',
-  WEEK_TO_DATE = 'weekToDate',
-  LAST_365_DAYS = 'last365Days',
-  LAST_30_DAYS = 'last30Days',
-  LAST_7_DAYS = 'last7Days',
-  CUSTOM = 'custom',
-}
 
 @customElement('chart-builder')
 export class ChartBuilder extends MobxLitElement {
-  @state() private dataWindowPreset: DataWindowPreset =
-    DataWindowPreset.LAST_30_DAYS;
+  @state() private dataWindowType: DataWindowType = DataWindowType.LAST_30_DAYS;
+  @state() private useRollingTime = false;
   @state() private customStart = '';
   @state() private customEnd = '';
   @state() private segmentationType: SegmentationType = SegmentationType.TIME;
@@ -70,6 +63,14 @@ export class ChartBuilder extends MobxLitElement {
     .field label {
       display: block;
       margin-bottom: 0.25rem;
+      font-size: 0.875rem;
+    }
+
+    .toggle-field {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
       font-size: 0.875rem;
     }
 
@@ -138,43 +139,55 @@ export class ChartBuilder extends MobxLitElement {
   `;
 
   private getDataWindow(): DataWindow {
-    const now = new Date();
+    if (this.useRollingTime && this.dataWindowType !== DataWindowType.CUSTOM) {
+      return { type: this.dataWindowType };
+    }
 
-    switch (this.dataWindowPreset) {
-      case DataWindowPreset.YEAR_TO_DATE: {
-        return { start: new Date(now.getFullYear(), 0, 1), end: now };
+    if (this.dataWindowType === DataWindowType.CUSTOM) {
+      return {
+        type: DataWindowType.CUSTOM,
+        start: new Date(this.customStart),
+        end: new Date(this.customEnd),
+      };
+    }
+
+    const now = new Date();
+    let start: Date;
+
+    switch (this.dataWindowType) {
+      case DataWindowType.YEAR_TO_DATE: {
+        start = new Date(now.getFullYear(), 0, 1);
+        break;
       }
-      case DataWindowPreset.MONTH_TO_DATE: {
-        return { start: new Date(now.getFullYear(), now.getMonth(), 1), end: now };
+      case DataWindowType.MONTH_TO_DATE: {
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
       }
-      case DataWindowPreset.WEEK_TO_DATE: {
+      case DataWindowType.WEEK_TO_DATE: {
         const daysToMonday = now.getDay() === 0 ? 6 : now.getDay() - 1;
-        const start = new Date(now);
+        start = new Date(now);
         start.setDate(now.getDate() - daysToMonday);
         start.setHours(0, 0, 0, 0);
-        return { start, end: now };
+        break;
       }
-      case DataWindowPreset.LAST_365_DAYS: {
-        const start = new Date(now);
+      case DataWindowType.LAST_365_DAYS: {
+        start = new Date(now);
         start.setDate(now.getDate() - 365);
-        return { start, end: now };
+        break;
       }
-      case DataWindowPreset.LAST_30_DAYS: {
-        const start = new Date(now);
+      case DataWindowType.LAST_30_DAYS: {
+        start = new Date(now);
         start.setDate(now.getDate() - 30);
-        return { start, end: now };
+        break;
       }
-      case DataWindowPreset.LAST_7_DAYS: {
-        const start = new Date(now);
+      case DataWindowType.LAST_7_DAYS: {
+        start = new Date(now);
         start.setDate(now.getDate() - 7);
-        return { start, end: now };
+        break;
       }
-      case DataWindowPreset.CUSTOM:
-        return {
-          start: new Date(this.customStart),
-          end: new Date(this.customEnd),
-        };
     }
+
+    return { type: DataWindowType.CUSTOM, start: start!, end: now };
   }
 
   private addDataPoint(): void {
@@ -225,7 +238,7 @@ export class ChartBuilder extends MobxLitElement {
   }
 
   private renderCustomDates(): TemplateResult {
-    if (this.dataWindowPreset !== DataWindowPreset.CUSTOM) {
+    if (this.dataWindowType !== DataWindowType.CUSTOM) {
       return html`${nothing}`;
     }
 
@@ -262,15 +275,24 @@ export class ChartBuilder extends MobxLitElement {
           <h3>${translate('dataWindow')}</h3>
           <div class="field">
             <ss-select
-              selected=${this.dataWindowPreset}
-              .options=${Object.values(DataWindowPreset).map(v => ({
+              selected=${this.dataWindowType}
+              .options=${Object.values(DataWindowType).map(v => ({
                 value: v,
                 label: translate(`dataWindowPreset.${v}`),
               }))}
               @select-changed=${(e: SelectChangedEvent<string>): void => {
-                this.dataWindowPreset = e.detail.value as DataWindowPreset;
+                this.dataWindowType = e.detail.value as DataWindowType;
               }}
             ></ss-select>
+          </div>
+          <div class="toggle-field">
+            <ss-toggle
+              ?on=${this.useRollingTime}
+              @toggle-changed=${(e: ToggleChangedEvent): void => {
+                this.useRollingTime = e.detail.on;
+              }}
+            ></ss-toggle>
+            <span>${translate('useRollingTime')}</span>
           </div>
           ${this.renderCustomDates()}
         </section>

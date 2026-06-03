@@ -456,6 +456,7 @@
   "dataWindowPreset.last30Days": "Last 30 Days",
   "dataWindowPreset.last7Days": "Last 7 Days",
   "dataWindowPreset.custom": "Custom",
+  "useRollingTime": "Use rolling time",
   "startDate": "Start Date",
   "endDate": "End Date",
   "segmentation": "Segmentation",
