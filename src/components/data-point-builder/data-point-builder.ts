@@ -100,6 +100,7 @@ export class DataPointBuilder extends MobxLitElement {
     return html`
       <div class="field">
         <list-filter
+          showAll
           .list-filter=${this.filter}
           @list-filter-updated=${(e: ListFilterUpdatedEvent): void => {
             e.stopPropagation();
@@ -174,7 +175,8 @@ export class DataPointBuilder extends MobxLitElement {
                 label: translate(`analysisType.${v}`),
               }))}
               @select-changed=${(e: SelectChangedEvent<string>): void => {
-                this.analysisType = e.detail.value as AnalysisClassificationType;
+                this.analysisType = e.detail
+                  .value as AnalysisClassificationType;
                 this.emitUpdate();
               }}
             ></ss-select>
