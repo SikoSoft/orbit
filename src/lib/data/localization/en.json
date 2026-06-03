@@ -457,6 +457,7 @@
   "dataWindowPreset.last7Days": "Last 7 Days",
   "dataWindowPreset.custom": "Custom",
   "useRollingTime": "Use rolling time",
+  "rollingDataWindow": "Rolling data window",
   "startDate": "Start Date",
   "endDate": "End Date",
   "segmentation": "Segmentation",
@@ -480,7 +481,11 @@
   "analysisType.morningFasting": "Morning Fasting",
   "analysisType.afternoonSnacking": "Afternoon Snacking",
   "analysisType.caffeineIntake": "Caffeine Intake",
+  "chartName": "Chart Name",
   "generateChart": "Generate Chart",
   "generating": "Generating...",
-  "failedToGenerateChart": "Failed to generate chart."
+  "failedToGenerateChart": "Failed to generate chart.",
+  "saveChart": "Save Chart",
+  "saving": "Saving...",
+  "failedToSaveChart": "Failed to save chart."
 }

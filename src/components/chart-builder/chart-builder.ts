@@ -4,7 +4,9 @@ import { repeat } from 'lit/directives/repeat.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 
 import {
+  ChartConfig,
   ChartRequest,
+  ChartVersion,
   DataWindow,
   DataWindowType,
   SegmentationType,
@@ -30,7 +32,7 @@ import '@/components/data-point-builder/data-point-builder';
 @customElement('chart-builder')
 export class ChartBuilder extends MobxLitElement {
   @state() private dataWindowType: DataWindowType = DataWindowType.LAST_30_DAYS;
-  @state() private useRollingTime = false;
+  @state() private rollingDataWindow = false;
   @state() private customStart = '';
   @state() private customEnd = '';
   @state() private segmentationType: SegmentationType = SegmentationType.TIME;
@@ -41,6 +43,7 @@ export class ChartBuilder extends MobxLitElement {
   ];
   @state() private isLoading = false;
   @state() private errorMessage = '';
+  @state() private chartName = '';
 
   static styles = css`
     .chart-builder {
@@ -128,6 +131,9 @@ export class ChartBuilder extends MobxLitElement {
     }
 
     .actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
       margin-top: 1rem;
     }
 
@@ -139,7 +145,7 @@ export class ChartBuilder extends MobxLitElement {
   `;
 
   private getDataWindow(): DataWindow {
-    if (this.useRollingTime && this.dataWindowType !== DataWindowType.CUSTOM) {
+    if (this.rollingDataWindow && this.dataWindowType !== DataWindowType.CUSTOM) {
       return { type: this.dataWindowType };
     }
 
@@ -208,7 +214,7 @@ export class ChartBuilder extends MobxLitElement {
     this.dataPoints = updated;
   }
 
-  private async handleGenerateChart(): Promise<void> {
+  private async handleGenerateChart(save = false): Promise<void> {
     if (this.isLoading) {
       return;
     }
@@ -216,7 +222,8 @@ export class ChartBuilder extends MobxLitElement {
     this.errorMessage = '';
     this.isLoading = true;
 
-    const request: ChartRequest = {
+    const config: ChartConfig = {
+      version: ChartVersion.V1,
       dataWindow: this.getDataWindow(),
       segmentation: {
         type: this.segmentationType,
@@ -225,12 +232,19 @@ export class ChartBuilder extends MobxLitElement {
       dataPoints: this.dataPoints,
     };
 
+    const request: ChartRequest = {
+      config,
+      ...(save ? { save: true, name: this.chartName } : {}),
+    };
+
     const result = await storage.createChart?.(request);
 
     this.isLoading = false;
 
     if (!result || !result.isOk) {
-      this.errorMessage = translate('failedToGenerateChart');
+      this.errorMessage = save
+        ? translate('failedToSaveChart')
+        : translate('failedToGenerateChart');
       return;
     }
 
@@ -287,12 +301,12 @@ export class ChartBuilder extends MobxLitElement {
           </div>
           <div class="toggle-field">
             <ss-toggle
-              ?on=${this.useRollingTime}
+              ?on=${this.rollingDataWindow}
               @toggle-changed=${(e: ToggleChangedEvent): void => {
-                this.useRollingTime = e.detail.on;
+                this.rollingDataWindow = e.detail.on;
               }}
             ></ss-toggle>
-            <span>${translate('useRollingTime')}</span>
+            <span>${translate('rollingDataWindow')}</span>
           </div>
           ${this.renderCustomDates()}
         </section>
@@ -357,15 +371,32 @@ export class ChartBuilder extends MobxLitElement {
           </button>
         </section>
 
+        <div class="field">
+          <label>${translate('chartName')}</label>
+          <ss-input
+            value=${this.chartName}
+            @input-changed=${(e: InputChangedEvent): void => {
+              this.chartName = e.detail.value;
+            }}
+          ></ss-input>
+        </div>
+
         <div class="actions">
           <button
             class="btn btn-primary"
             ?disabled=${this.isLoading}
-            @click=${this.handleGenerateChart}
+            @click=${(): Promise<void> => this.handleGenerateChart(false)}
           >
             ${this.isLoading
               ? translate('generating')
               : translate('generateChart')}
+          </button>
+          <button
+            class="btn btn-primary"
+            ?disabled=${this.isLoading}
+            @click=${(): Promise<void> => this.handleGenerateChart(true)}
+          >
+            ${this.isLoading ? translate('saving') : translate('saveChart')}
           </button>
           ${this.errorMessage
             ? html`<div class="error">${this.errorMessage}</div>`
