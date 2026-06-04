@@ -174,6 +174,7 @@ export class ShortTextField extends MobxLitElement {
   handleInputBlurred(_: InputChangedEvent): void {
     if (
       this.propertyConfig.optionsOnly &&
+      this._value.length > 0 &&
       !this.propertyConfig.options.includes(this._value)
     ) {
       addToast(
