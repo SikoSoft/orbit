@@ -165,7 +165,6 @@ export class DataPointBuilder extends MobxLitElement {
         `;
       case FactOperation.ANALYSIS_CLASSIFICATION:
         return html`
-          ${this.renderFilterField()}
           <div class="field">
             <label>${translate('analysisType')}</label>
             <ss-select
@@ -181,6 +180,7 @@ export class DataPointBuilder extends MobxLitElement {
               }}
             ></ss-select>
           </div>
+          ${this.renderFilterField()}
         `;
       default:
         return html`${nothing}`;
