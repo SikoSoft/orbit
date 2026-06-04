@@ -500,6 +500,7 @@
   "savedCharts": "Saved Charts",
   "noSavedCharts": "No saved charts.",
   "deleteChart": "Delete Chart",
+  "confirmDeleteChart": "Are you sure you want to delete this chart? This action cannot be undone.",
   "chartDeleted": "Chart deleted successfully.",
   "failedToDeleteChart": "Failed to delete chart."
 }

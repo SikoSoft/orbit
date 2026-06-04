@@ -18,9 +18,11 @@ import { addToast } from '@/lib/Util';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 import { CollapsableToggledEvent } from '@ss/ui/components/ss-collapsable.events';
 import { ChartBuiltEvent } from '@/components/chart-builder/chart-builder.events';
+import { ConfirmationAcceptedEvent } from '@ss/ui/components/confirmation-modal.events';
 
 import '@ss/ui/components/ss-collapsable';
 import '@ss/ui/components/ss-button';
+import '@ss/ui/components/confirmation-modal';
 import '@/components/user-header/user-header';
 import '@/components/login-form/login-form';
 import '@/components/chart-builder/chart-builder';
@@ -35,6 +37,7 @@ export class ChartView extends ViewElement {
   @state() private hasChart = false;
   @state() private savedCharts: Chart[] = [];
   @state() private savedChartDataMap: Map<number, ChartData> = new Map();
+  @state() private confirmDeleteChartId: number | null = null;
 
   static styles = css`
     .view-content {
@@ -99,7 +102,18 @@ export class ChartView extends ViewElement {
     }
   }
 
-  private async handleDeleteChart(id: number): Promise<void> {
+  private handleDeleteChartRequested(id: number): void {
+    this.confirmDeleteChartId = id;
+  }
+
+  private async handleDeleteChartConfirmed(): Promise<void> {
+    const id = this.confirmDeleteChartId;
+    this.confirmDeleteChartId = null;
+
+    if (id === null) {
+      return;
+    }
+
     const success = await storage.deleteChart(id);
 
     if (!success) {
@@ -139,6 +153,15 @@ export class ChartView extends ViewElement {
 
     return html`
       <user-header></user-header>
+      <confirmation-modal
+        message=${translate('confirmDeleteChart')}
+        ?open=${this.confirmDeleteChartId !== null}
+        @confirmation-accepted=${(_e: ConfirmationAcceptedEvent): Promise<void> =>
+          this.handleDeleteChartConfirmed()}
+        @confirmation-declined=${(): void => {
+          this.confirmDeleteChartId = null;
+        }}
+      ></confirmation-modal>
       <div class="view-content">
         <chart-builder
           @chart-built=${(e: ChartBuiltEvent): void => {
@@ -194,8 +217,8 @@ export class ChartView extends ViewElement {
                       : nothing}
                     <div class="chart-actions">
                       <ss-button
-                        @click=${(): Promise<void> =>
-                          this.handleDeleteChart(chart.id)}
+                        @click=${(): void =>
+                          this.handleDeleteChartRequested(chart.id)}
                         >${translate('deleteChart')}</ss-button
                       >
                     </div>
