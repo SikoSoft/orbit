@@ -41,7 +41,7 @@ import {
 } from '@/models/Identity';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { Workspace } from 'api-spec/models/Workspace';
-import { ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
+import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
 
 export class NetworkStorage implements StorageSchema {
   isActive = true;
@@ -1002,6 +1002,26 @@ export class NetworkStorage implements StorageSchema {
     }
 
     return { isOk: false, error: new Error('Failed to create chart') };
+  }
+
+  async getCharts(): Promise<Chart[]> {
+    const result = await api.get<{ charts: Chart[] }>('chart');
+
+    if (result && result.isOk) {
+      return result.response.charts;
+    }
+
+    return [];
+  }
+
+  async deleteChart(id: number): Promise<boolean> {
+    const result = await api.delete<null>(`chart/${id}`);
+
+    if (result && result.isOk) {
+      return true;
+    }
+
+    return false;
   }
 }
 

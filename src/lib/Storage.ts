@@ -57,7 +57,7 @@ import {
 } from '@/models/Identity';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { Workspace } from 'api-spec/models/Workspace';
-import { ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
+import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
 
 export interface SavedListFilter {
   filter: ListFilter;
@@ -918,6 +918,16 @@ export class Storage implements StorageSchema {
     _request: ChartRequest,
   ): Promise<StorageResult<ChartResponse>> {
     return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
+  }
+
+  @delegateSource()
+  async getCharts(): Promise<Chart[]> {
+    return Promise.resolve([]);
+  }
+
+  @delegateSource()
+  async deleteChart(_id: number): Promise<boolean> {
+    return Promise.resolve(false);
   }
 
   getActiveWorkspaceId(): string {

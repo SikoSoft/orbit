@@ -1,8 +1,10 @@
-import { ChartResponse } from 'api-spec/models/Statistic';
+import { ChartConfigType, ChartResponse } from 'api-spec/models/Statistic';
 
 export const chartBuiltEventName = 'chart-built';
 
-export type ChartBuiltPayload = ChartResponse;
+export type ChartBuiltPayload = ChartResponse & {
+  chartType: `${ChartConfigType}`;
+};
 
 export class ChartBuiltEvent extends CustomEvent<ChartBuiltPayload> {
   constructor(payload: ChartBuiltPayload) {

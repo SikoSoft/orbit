@@ -1,36 +1,27 @@
 import { MobxLitElement } from '@adobe/lit-mobx';
 import { css, html, nothing, TemplateResult } from 'lit';
-import { customElement } from 'lit/decorators.js';
-import type { ChartData, ChartOptions } from 'chart.js';
+import { customElement, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
+import type { ChartData } from 'chart.js';
+
+import { Chart, ChartResponse } from 'api-spec/models/Statistic';
 
 import '@/components/chart-js/chart-js';
 import '@/components/dashboard-cards/dashboard-cards';
 
 import { appState } from '@/state';
 import { translate } from '@/lib/Localization';
+import { storage } from '@/lib/Storage';
 import { StorageSource } from '@/models/Storage';
 import { IconName } from '@/components/svg-icon/svg-icon.models';
 import { DashboardCard } from '@/components/dashboard-cards/dashboard-cards.models';
 
-const CHART_COLORS = [
-  'rgba(54, 162, 235, 0.8)',
-  'rgba(255, 99, 132, 0.8)',
-  'rgba(75, 192, 192, 0.8)',
-  'rgba(255, 205, 86, 0.8)',
-  'rgba(153, 102, 255, 0.8)',
-];
-
-const CHART_BORDERS = [
-  'rgba(54, 162, 235, 1)',
-  'rgba(255, 99, 132, 1)',
-  'rgba(75, 192, 192, 1)',
-  'rgba(255, 205, 86, 1)',
-  'rgba(153, 102, 255, 1)',
-];
-
 @customElement('user-dashboard')
 export class UserDashboard extends MobxLitElement {
   private state = appState;
+
+  @state() private savedCharts: Chart[] = [];
+  @state() private chartDataMap: Map<number, ChartData> = new Map();
 
   static styles = css`
     .user-dashboard {
@@ -109,89 +100,39 @@ export class UserDashboard extends MobxLitElement {
     return fullName || username;
   }
 
-  private get barChartData(): ChartData {
+  connectedCallback(): void {
+    super.connectedCallback();
+    this.loadCharts();
+  }
+
+  private async loadCharts(): Promise<void> {
+    this.savedCharts = await storage.getCharts();
+    await Promise.all(this.savedCharts.map(chart => this.loadChartData(chart)));
+  }
+
+  private async loadChartData(chart: Chart): Promise<void> {
+    const result = await storage.createChart?.({
+      config: chart.config,
+      save: false,
+    });
+    if (result?.isOk) {
+      const newMap = new Map(this.chartDataMap);
+      newMap.set(chart.id, this.convertResponseToChartData(result.value));
+      this.chartDataMap = newMap;
+    }
+  }
+
+  private convertResponseToChartData(response: ChartResponse): ChartData {
     return {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      labels: response.segmentedData.map(d => d.segment),
       datasets: [
         {
-          label: 'Items Added',
-          data: [12, 19, 8, 15, 22, 17],
-          backgroundColor: CHART_COLORS[0],
-          borderColor: CHART_BORDERS[0],
-          borderWidth: 1,
+          label: translate('chartData'),
+          data: response.segmentedData.map(d =>
+            typeof d.value.value === 'number' ? d.value.value : 0,
+          ),
         },
       ],
-    };
-  }
-
-  private get barChartOptions(): ChartOptions<'bar'> {
-    return {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: { stepSize: 5 },
-        },
-      },
-    };
-  }
-
-  private get scatterChartData(): ChartData {
-    return {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-      datasets: [
-        {
-          label: 'Items Added',
-          data: [12, 19, 8, 15, 22, 17],
-          backgroundColor: CHART_COLORS[0],
-          borderColor: CHART_BORDERS[0],
-          borderWidth: 1,
-        },
-      ],
-    };
-  }
-
-  private get scatterChartOptions(): ChartOptions<'bar'> {
-    return {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: { stepSize: 5 },
-        },
-      },
-    };
-  }
-
-  private get pieChartData(): ChartData {
-    return {
-      labels: ['Work', 'Personal', 'Learning', 'Shopping', 'Health'],
-      datasets: [
-        {
-          data: [35, 25, 20, 12, 8],
-          backgroundColor: CHART_COLORS,
-          borderColor: CHART_BORDERS,
-          borderWidth: 1,
-        },
-      ],
-    };
-  }
-
-  private get pieChartOptions(): ChartOptions<'pie'> {
-    return {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'bottom' },
-      },
     };
   }
 
@@ -206,41 +147,26 @@ export class UserDashboard extends MobxLitElement {
         <dashboard-cards .cards=${this.cards}></dashboard-cards>
 
         <div class="charts">
-          <div class="chart-container">
-            <h3 class="chart-title">${translate('dashboard.scatterChart')}</h3>
-            <div class="chart-wrapper">
-              <chart-js
-                type="scatter"
-                .data=${this.scatterChartData}
-                .options=${this.scatterChartOptions}
-                label=${translate('dashboard.scatterChart')}
-              ></chart-js>
-            </div>
-          </div>
-
-          <div class="chart-container">
-            <h3 class="chart-title">${translate('dashboard.activityChart')}</h3>
-            <div class="chart-wrapper">
-              <chart-js
-                type="bar"
-                .data=${this.barChartData}
-                .options=${this.barChartOptions}
-                label=${translate('dashboard.activityChart')}
-              ></chart-js>
-            </div>
-          </div>
-
-          <div class="chart-container">
-            <h3 class="chart-title">${translate('dashboard.categoryChart')}</h3>
-            <div class="chart-wrapper">
-              <chart-js
-                type="pie"
-                .data=${this.pieChartData}
-                .options=${this.pieChartOptions}
-                label=${translate('dashboard.categoryChart')}
-              ></chart-js>
-            </div>
-          </div>
+          ${repeat(
+            this.savedCharts,
+            chart => chart.id,
+            chart => html`
+              <div class="chart-container">
+                <h3 class="chart-title">${chart.name}</h3>
+                ${this.chartDataMap.has(chart.id)
+                  ? html`
+                      <div class="chart-wrapper">
+                        <chart-js
+                          type="line"
+                          .data=${this.chartDataMap.get(chart.id)!}
+                          label=${chart.name}
+                        ></chart-js>
+                      </div>
+                    `
+                  : nothing}
+              </div>
+            `,
+          )}
         </div>
       </div>
     `;

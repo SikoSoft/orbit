@@ -38,7 +38,7 @@ import {
 } from '@/models/Identity';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { Workspace } from 'api-spec/models/Workspace';
-import { ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
+import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
 
 import { SQLiteStorage, serializePropertyValue } from './SQLiteStorage';
 import { networkStorage } from './NetworkStorage';
@@ -1297,6 +1297,14 @@ export class OfflineCacheStorage implements StorageSchema {
     request: ChartRequest,
   ): Promise<StorageResult<ChartResponse>> {
     return networkStorage.createChart(request);
+  }
+
+  async getCharts(): Promise<Chart[]> {
+    return networkStorage.getCharts();
+  }
+
+  async deleteChart(id: number): Promise<boolean> {
+    return networkStorage.deleteChart(id);
   }
 }
 

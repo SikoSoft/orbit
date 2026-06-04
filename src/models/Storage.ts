@@ -1,7 +1,7 @@
 import { Setting, Settings } from 'api-spec/models/Setting';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { Workspace } from 'api-spec/models/Workspace';
-import { ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
+import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
 import { ListConfig, ListSort, ListFilter } from 'api-spec/models/List';
 import {
   EntityCalculatedPropertyConfig,
@@ -222,4 +222,6 @@ export interface StorageSchema {
   getActiveWorkspaceId?(): string;
   setActiveWorkspaceId?(id: string): void;
   createChart?(request: ChartRequest): Promise<StorageResult<ChartResponse>>;
+  getCharts?(): Promise<Chart[]>;
+  deleteChart?(id: number): Promise<boolean>;
 }

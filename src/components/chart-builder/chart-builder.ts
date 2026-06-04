@@ -5,6 +5,7 @@ import { MobxLitElement } from '@adobe/lit-mobx';
 
 import {
   ChartConfig,
+  ChartConfigType,
   ChartRequest,
   ChartVersion,
   DataWindow,
@@ -31,6 +32,7 @@ import '@/components/data-point-builder/data-point-builder';
 
 @customElement('chart-builder')
 export class ChartBuilder extends MobxLitElement {
+  @state() private chartType: ChartConfigType = ChartConfigType.LINE;
   @state() private dataWindowType: DataWindowType = DataWindowType.LAST_30_DAYS;
   @state() private rollingDataWindow = false;
   @state() private customStart = '';
@@ -223,7 +225,8 @@ export class ChartBuilder extends MobxLitElement {
     this.isLoading = true;
 
     const config: ChartConfig = {
-      version: ChartVersion.V1,
+      version: ChartVersion.V2,
+      type: this.chartType,
       dataWindow: this.getDataWindow(),
       segmentation: {
         type: this.segmentationType,
@@ -248,7 +251,7 @@ export class ChartBuilder extends MobxLitElement {
       return;
     }
 
-    this.dispatchEvent(new ChartBuiltEvent(result.value));
+    this.dispatchEvent(new ChartBuiltEvent({ ...result.value, chartType: this.chartType }));
   }
 
   private renderCustomDates(): TemplateResult {
@@ -285,6 +288,22 @@ export class ChartBuilder extends MobxLitElement {
   render(): TemplateResult {
     return html`
       <div class="chart-builder">
+        <section class="section">
+          <h3>${translate('chartType')}</h3>
+          <div class="field">
+            <ss-select
+              selected=${this.chartType}
+              .options=${Object.values(ChartConfigType).map(v => ({
+                value: v,
+                label: translate(`chartType.${v}`),
+              }))}
+              @select-changed=${(e: SelectChangedEvent<string>): void => {
+                this.chartType = e.detail.value as ChartConfigType;
+              }}
+            ></ss-select>
+          </div>
+        </section>
+
         <section class="section">
           <h3>${translate('dataWindow')}</h3>
           <div class="field">
