@@ -251,7 +251,9 @@ export class ChartBuilder extends MobxLitElement {
       return;
     }
 
-    this.dispatchEvent(new ChartBuiltEvent({ ...result.value, chartType: this.chartType }));
+    this.dispatchEvent(
+      new ChartBuiltEvent({ ...result.value, chartType: this.chartType, saved: save }),
+    );
   }
 
   private renderCustomDates(): TemplateResult {

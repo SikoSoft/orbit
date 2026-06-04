@@ -4,7 +4,12 @@ import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { ChartData } from 'chart.js';
 
-import { Chart, ChartResponse } from 'api-spec/models/Statistic';
+import {
+  Chart,
+  ChartConfigType,
+  ChartResponse,
+  ChartVersion,
+} from 'api-spec/models/Statistic';
 
 import '@/components/chart-js/chart-js';
 import '@/components/dashboard-cards/dashboard-cards';
@@ -157,7 +162,9 @@ export class UserDashboard extends MobxLitElement {
                   ? html`
                       <div class="chart-wrapper">
                         <chart-js
-                          type="line"
+                          type=${chart.config.version === ChartVersion.V2
+                            ? chart.config.type
+                            : ChartConfigType.LINE}
                           .data=${this.chartDataMap.get(chart.id)!}
                           label=${chart.name}
                         ></chart-js>

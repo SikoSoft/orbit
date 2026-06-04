@@ -4,6 +4,7 @@ export const chartBuiltEventName = 'chart-built';
 
 export type ChartBuiltPayload = ChartResponse & {
   chartType: `${ChartConfigType}`;
+  saved?: boolean;
 };
 
 export class ChartBuiltEvent extends CustomEvent<ChartBuiltPayload> {
