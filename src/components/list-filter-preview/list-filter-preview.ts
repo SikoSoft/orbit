@@ -96,6 +96,28 @@ export class ListFilterPreview extends MobxLitElement {
       }
     }
 
+    for (const propertyFilter of filter.properties ?? []) {
+      if (!propertyFilter.propertyId) {
+        continue;
+      }
+      const propertyConfig = this.state.propertyConfigs.find(
+        c => c.id === propertyFilter.propertyId,
+      );
+      if (!propertyConfig) {
+        continue;
+      }
+      const value = propertyFilter.value;
+      if (value === null || value === undefined || value === '') {
+        continue;
+      }
+      const operationLabel = translate(`textType.${propertyFilter.operation}`);
+      const displayValue =
+        typeof value === 'object'
+          ? translate('image')
+          : String(value);
+      parts.push(`${propertyConfig.name} ${operationLabel} ${displayValue}`);
+    }
+
     return parts;
   }
 
