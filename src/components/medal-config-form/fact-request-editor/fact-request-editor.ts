@@ -8,6 +8,7 @@ import {
   EntityCountFactContext,
   UniqueTagCountFactContext,
   MedalCountFactContext,
+  AnalysisClassificationFactContext,
   AnalysisClassificationType,
 } from 'api-spec/models/Fact';
 import { defaultListFilter } from 'api-spec/models/List';
@@ -31,9 +32,10 @@ import '@ss/ui/components/ss-button';
 import '@/components/list-filter-control/list-filter-control';
 
 const operationOptions = [
-  { value: FactOperation.ENTITY_COUNT, label: 'Entity Count' },
-  { value: FactOperation.UNIQUE_TAG_COUNT, label: 'Unique Tag Count' },
-  { value: FactOperation.MEDAL_COUNT, label: 'Medal Count' },
+  { value: FactOperation.ENTITY_COUNT, label: translate('factOperation.entityCount') },
+  { value: FactOperation.UNIQUE_TAG_COUNT, label: translate('factOperation.uniqueTagCount') },
+  { value: FactOperation.MEDAL_COUNT, label: translate('factOperation.medalCount') },
+  { value: FactOperation.ANALYSIS_CLASSIFICATION, label: translate('factOperation.analysisClassification') },
 ];
 
 @themed()
@@ -102,7 +104,7 @@ export class FactRequestEditor extends MobxLitElement {
   }
 
   private renderFilterButton(
-    context: EntityCountFactContext | UniqueTagCountFactContext,
+    context: EntityCountFactContext | UniqueTagCountFactContext | AnalysisClassificationFactContext,
     fr: FactRequest,
   ): TemplateResult {
     return html`
@@ -116,6 +118,35 @@ export class FactRequestEditor extends MobxLitElement {
           }}
         ></list-filter-control>
       </div>
+    `;
+  }
+
+  private renderAnalysisClassificationFields(
+    context: AnalysisClassificationFactContext,
+    fr: FactRequest,
+  ): TemplateResult {
+    return html`
+      <div class="context-fields">
+        <div class="row">
+          <div class="field">
+            <label>${translate('analysisType')}</label>
+            <ss-select
+              .options=${Object.values(AnalysisClassificationType).map(v => ({
+                value: v,
+                label: translate(`analysisType.${v}`),
+              }))}
+              .selected=${context.analysisType}
+              @select-changed=${(e: SelectChangedEvent<string>): void => {
+                this.emit({
+                  ...fr,
+                  context: { ...context, analysisType: e.detail.value as AnalysisClassificationType },
+                });
+              }}
+            ></ss-select>
+          </div>
+        </div>
+      </div>
+      ${this.renderFilterButton(context, fr)}
     `;
   }
 
@@ -197,6 +228,12 @@ export class FactRequestEditor extends MobxLitElement {
         : nothing}
       ${operation === FactOperation.MEDAL_COUNT
         ? this.renderMedalCountFields(fr.context as MedalCountFactContext, fr)
+        : nothing}
+      ${operation === FactOperation.ANALYSIS_CLASSIFICATION
+        ? this.renderAnalysisClassificationFields(
+            fr.context as AnalysisClassificationFactContext,
+            fr,
+          )
         : nothing}
     `;
   }
