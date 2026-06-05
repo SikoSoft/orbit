@@ -6,6 +6,7 @@ import { themed } from '@/lib/Theme';
 import './svg/svg-account';
 import './svg/svg-admin';
 import './svg/svg-camera';
+import './svg/svg-charts';
 import './svg/svg-cloud';
 import './svg/svg-database';
 import './svg/svg-device';
@@ -80,6 +81,8 @@ export class SvgIcon extends LitElement {
         return html`<svg-admin></svg-admin>`;
       case IconName.CAMERA:
         return html`<svg-camera></svg-camera>`;
+      case IconName.CHARTS:
+        return html`<svg-charts></svg-charts>`;
       case IconName.CLOUD:
         return html`<svg-cloud></svg-cloud>`;
       case IconName.DATABASE:

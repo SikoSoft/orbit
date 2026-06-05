@@ -5,6 +5,7 @@ export enum IconName {
   ACCOUNT = 'account',
   ADMIN = 'admin',
   CAMERA = 'camera',
+  CHARTS = 'charts',
   CLOUD = 'cloud',
   DATABASE = 'database',
   DEVICE = 'device',

@@ -89,6 +89,7 @@ export class UserDashboard extends MobxLitElement {
         url: 'workspace',
       },
       { label: translate('admin'), icon: IconName.ADMIN, url: '/admin' },
+      { label: translate('charts'), icon: IconName.CHARTS, url: '/chart' },
     ];
   }
 
