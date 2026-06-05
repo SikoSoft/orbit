@@ -1,4 +1,4 @@
-import { html, css, nothing, TemplateResult } from 'lit';
+import { html, css, nothing, PropertyValues, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 
@@ -41,6 +41,35 @@ export class DataPointBuilder extends MobxLitElement {
   @state() private medalEnd = '';
   @state() private analysisType: AnalysisClassificationType =
     AnalysisClassificationType.MORNING_FASTING;
+
+  updated(changedProperties: PropertyValues): void {
+    if (changedProperties.has(DataPointBuilderProp.DATA_POINT)) {
+      this.initFromDataPoint();
+    }
+  }
+
+  private initFromDataPoint(): void {
+    const dp = this[DataPointBuilderProp.DATA_POINT];
+    if (!dp) {
+      return;
+    }
+    this.operation = dp.operation;
+    if (dp.operation === FactOperation.MEDAL_COUNT) {
+      const ctx = dp as MedalCountFactContext;
+      this.medalConfigId = ctx.medalConfigId;
+      this.series = ctx.series;
+      this.medalStart = ctx.start ?? '';
+      this.medalEnd = ctx.end ?? '';
+    } else if (
+      dp.operation === FactOperation.ENTITY_COUNT ||
+      dp.operation === FactOperation.UNIQUE_TAG_COUNT
+    ) {
+      this.filter = structuredClone(dp.filter);
+    } else if (dp.operation === FactOperation.ANALYSIS_CLASSIFICATION) {
+      this.analysisType = dp.analysisType;
+      this.filter = structuredClone(dp.filter);
+    }
+  }
 
   static styles = css`
     .data-point-builder {

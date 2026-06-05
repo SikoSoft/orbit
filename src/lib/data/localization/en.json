@@ -516,5 +516,11 @@
   "deleteChart": "Delete Chart",
   "confirmDeleteChart": "Are you sure you want to delete this chart? This action cannot be undone.",
   "chartDeleted": "Chart deleted successfully.",
-  "failedToDeleteChart": "Failed to delete chart."
+  "failedToDeleteChart": "Failed to delete chart.",
+  "editChart": "Edit Chart",
+  "updateChart": "Update Chart",
+  "updating": "Updating...",
+  "failedToUpdateChart": "Failed to update chart.",
+  "chartUpdated": "Chart updated successfully.",
+  "cancelEdit": "Cancel"
 }

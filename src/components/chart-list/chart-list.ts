@@ -18,11 +18,13 @@ import { convertResponseToChartData } from '@/lib/ChartUtil';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 import { CollapsableToggledEvent } from '@ss/ui/components/ss-collapsable.events';
 import { ConfirmationAcceptedEvent } from '@ss/ui/components/confirmation-modal.events';
+import { ChartBuiltEvent } from '@/components/chart-builder/chart-builder.events';
 
 import '@ss/ui/components/ss-collapsable';
 import '@ss/ui/components/ss-button';
 import '@ss/ui/components/confirmation-modal';
 import '@/components/chart-js/chart-js';
+import '@/components/chart-builder/chart-builder';
 
 @customElement('chart-list')
 export class ChartList extends MobxLitElement {
@@ -31,6 +33,7 @@ export class ChartList extends MobxLitElement {
   @state() private savedCharts: Chart[] = [];
   @state() private savedChartDataMap: Map<number, ChartData> = new Map();
   @state() private confirmDeleteChartId: number | null = null;
+  @state() private editingChartId: number | null = null;
 
   static styles = css`
     .saved-charts {
@@ -49,6 +52,8 @@ export class ChartList extends MobxLitElement {
     }
 
     .chart-actions {
+      display: flex;
+      gap: 0.5rem;
       padding: 0.75rem 0;
     }
 
@@ -112,8 +117,68 @@ export class ChartList extends MobxLitElement {
     addToast(translate('chartDeleted'), NotificationType.SUCCESS);
   }
 
+  private handleEditChart(id: number): void {
+    this.editingChartId = id;
+  }
+
+  private handleCancelEdit(): void {
+    this.editingChartId = null;
+  }
+
+  private async handleChartBuilt(e: ChartBuiltEvent): Promise<void> {
+    e.stopPropagation();
+    if (e.detail.updated) {
+      addToast(translate('chartUpdated'), NotificationType.SUCCESS);
+      this.editingChartId = null;
+      await this.loadCharts();
+    }
+  }
+
   private isPanelOpen(id: number): boolean {
     return this.appState.collapsablePanelState[`savedChart-${id}`] || false;
+  }
+
+  private renderChartView(chart: Chart): TemplateResult {
+    return html`
+      <div class="saved-chart-name">${chart.name}</div>
+      ${this.savedChartDataMap.has(chart.id)
+        ? html`
+            <div class="saved-chart-container">
+              <chart-js
+                type=${chart.config.version === ChartVersion.V2
+                  ? chart.config.type
+                  : ChartConfigType.LINE}
+                .data=${this.savedChartDataMap.get(chart.id)!}
+                label=${chart.name}
+              ></chart-js>
+            </div>
+          `
+        : nothing}
+      <div class="chart-actions">
+        <ss-button
+          @click=${(): void => this.handleEditChart(chart.id)}
+          >${translate('editChart')}</ss-button
+        >
+        <ss-button
+          @click=${(): void => this.handleDeleteChartRequested(chart.id)}
+          >${translate('deleteChart')}</ss-button
+        >
+      </div>
+    `;
+  }
+
+  private renderChartEdit(chart: Chart): TemplateResult {
+    return html`
+      <chart-builder
+        .chart=${chart}
+        @chart-built=${(e: ChartBuiltEvent): Promise<void> => this.handleChartBuilt(e)}
+      ></chart-builder>
+      <div class="chart-actions">
+        <ss-button @click=${(): void => this.handleCancelEdit()}
+          >${translate('cancelEdit')}</ss-button
+        >
+      </div>
+    `;
   }
 
   render(): TemplateResult {
@@ -145,27 +210,9 @@ export class ChartList extends MobxLitElement {
                     this.dispatchEvent(new CollapsableToggledEvent(e.detail));
                   }}
                 >
-                  <div class="saved-chart-name">${chart.name}</div>
-                  ${this.savedChartDataMap.has(chart.id)
-                    ? html`
-                        <div class="saved-chart-container">
-                          <chart-js
-                            type=${chart.config.version === ChartVersion.V2
-                              ? chart.config.type
-                              : ChartConfigType.LINE}
-                            .data=${this.savedChartDataMap.get(chart.id)!}
-                            label=${chart.name}
-                          ></chart-js>
-                        </div>
-                      `
-                    : nothing}
-                  <div class="chart-actions">
-                    <ss-button
-                      @click=${(): void =>
-                        this.handleDeleteChartRequested(chart.id)}
-                      >${translate('deleteChart')}</ss-button
-                    >
-                  </div>
+                  ${this.editingChartId === chart.id
+                    ? this.renderChartEdit(chart)
+                    : this.renderChartView(chart)}
                 </ss-collapsable>
               `,
             )}
