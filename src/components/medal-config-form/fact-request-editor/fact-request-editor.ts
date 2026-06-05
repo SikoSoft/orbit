@@ -1,5 +1,5 @@
 import { html, css, nothing, TemplateResult } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 
 import { FactRequest } from 'api-spec/models/Medal';
@@ -28,8 +28,7 @@ import { ListFilterUpdatedEvent } from '@/components/list-filter/list-filter.eve
 import '@ss/ui/components/ss-input';
 import '@ss/ui/components/ss-select';
 import '@ss/ui/components/ss-button';
-import '@ss/ui/components/pop-up';
-import '@/components/list-filter/list-filter';
+import '@/components/list-filter-control/list-filter-control';
 
 const operationOptions = [
   { value: FactOperation.ENTITY_COUNT, label: 'Entity Count' },
@@ -83,12 +82,6 @@ export class FactRequestEditor extends MobxLitElement {
       opacity: 0.7;
     }
 
-    .filter-row {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
   `;
 
   @property({ type: Object })
@@ -99,8 +92,6 @@ export class FactRequestEditor extends MobxLitElement {
   [FactRequestEditorProp.INDEX]: FactRequestEditorProps[FactRequestEditorProp.INDEX] =
     factRequestEditorProps[FactRequestEditorProp.INDEX].default;
 
-  @state() private filterPopupOpen: boolean = false;
-
   private emit(factRequest: FactRequest): void {
     this.dispatchEvent(
       new FactRequestChangedEvent({
@@ -110,15 +101,6 @@ export class FactRequestEditor extends MobxLitElement {
     );
   }
 
-  private handleFilterUpdated(
-    e: ListFilterUpdatedEvent,
-    context: EntityCountFactContext | UniqueTagCountFactContext,
-    fr: FactRequest,
-  ): void {
-    this.emit({ ...fr, context: { ...context, filter: e.detail } });
-    this.filterPopupOpen = false;
-  }
-
   private renderFilterButton(
     context: EntityCountFactContext | UniqueTagCountFactContext,
     fr: FactRequest,
@@ -126,30 +108,13 @@ export class FactRequestEditor extends MobxLitElement {
     return html`
       <div class="context-fields">
         <div class="section-label">${translate('filterSettings')}</div>
-        <div class="filter-row">
-          <ss-button
-            @click=${(): void => {
-              this.filterPopupOpen = true;
-            }}
-          >${translate('configureFilter')}</ss-button>
-        </div>
-        <pop-up
-          ?open=${this.filterPopupOpen}
-          closeButton
-          closeOnOutsideClick
-          closeOnEsc
-          @pop-up-closed=${(): void => {
-            this.filterPopupOpen = false;
+        <list-filter-control
+          showAll
+          .listFilter=${context.filter}
+          @list-filter-updated=${(e: ListFilterUpdatedEvent): void => {
+            this.emit({ ...fr, context: { ...context, filter: e.detail } });
           }}
-        >
-          <list-filter
-            showAll
-            .listFilter=${context.filter}
-            @list-filter-updated=${(e: ListFilterUpdatedEvent): void => {
-              this.handleFilterUpdated(e, context, fr);
-            }}
-          ></list-filter>
-        </pop-up>
+        ></list-filter-control>
       </div>
     `;
   }
@@ -203,7 +168,6 @@ export class FactRequestEditor extends MobxLitElement {
             .options=${operationOptions}
             .selected=${operation}
             @select-changed=${(e: SelectChangedEvent<FactOperation>): void => {
-              this.filterPopupOpen = false;
               const op = e.detail.value;
               let newContext;
               if (op === FactOperation.MEDAL_COUNT) {
