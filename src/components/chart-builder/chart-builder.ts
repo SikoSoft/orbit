@@ -1,11 +1,13 @@
-import { html, css, nothing, TemplateResult } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { html, css, nothing, PropertyValues, TemplateResult } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 
 import {
+  Chart,
   ChartConfig,
   ChartConfigType,
+  ChartConfigV2,
   ChartRequest,
   ChartVersion,
   DataWindow,
@@ -32,6 +34,8 @@ import '@/components/data-point-builder/data-point-builder';
 
 @customElement('chart-builder')
 export class ChartBuilder extends MobxLitElement {
+  @property({ type: Object, attribute: false }) chart?: Chart;
+
   @state() private chartType: ChartConfigType = ChartConfigType.LINE;
   @state() private dataWindowType: DataWindowType = DataWindowType.LAST_30_DAYS;
   @state() private rollingDataWindow = false;
@@ -46,6 +50,32 @@ export class ChartBuilder extends MobxLitElement {
   @state() private isLoading = false;
   @state() private errorMessage = '';
   @state() private chartName = '';
+
+  updated(changedProperties: PropertyValues): void {
+    if (changedProperties.has('chart') && this.chart) {
+      this.initFromChart(this.chart);
+    }
+  }
+
+  private initFromChart(chart: Chart): void {
+    this.chartName = chart.name;
+    const config = chart.config;
+    if (config.version === ChartVersion.V2) {
+      this.chartType = (config as ChartConfigV2).type as ChartConfigType;
+    }
+    this.segmentationType = config.segmentation.type;
+    this.segmentationUnit = config.segmentation.unit;
+    this.dataPoints = structuredClone(config.dataPoints) as FactContext[];
+    if (config.dataWindow.type === DataWindowType.CUSTOM) {
+      this.dataWindowType = DataWindowType.CUSTOM;
+      this.rollingDataWindow = false;
+      this.customStart = new Date(config.dataWindow.start).toISOString().slice(0, 16);
+      this.customEnd = new Date(config.dataWindow.end).toISOString().slice(0, 16);
+    } else {
+      this.dataWindowType = config.dataWindow.type;
+      this.rollingDataWindow = true;
+    }
+  }
 
   static styles = css`
     .chart-builder {
@@ -240,19 +270,33 @@ export class ChartBuilder extends MobxLitElement {
       ...(save ? { save: true, name: this.chartName } : {}),
     };
 
-    const result = await storage.createChart?.(request);
+    let result;
+    if (save && this.chart) {
+      result = await storage.updateChart?.(this.chart.id, request);
+    } else {
+      result = await storage.createChart?.(request);
+    }
 
     this.isLoading = false;
 
     if (!result || !result.isOk) {
-      this.errorMessage = save
-        ? translate('failedToSaveChart')
-        : translate('failedToGenerateChart');
+      if (save && this.chart) {
+        this.errorMessage = translate('failedToUpdateChart');
+      } else if (save) {
+        this.errorMessage = translate('failedToSaveChart');
+      } else {
+        this.errorMessage = translate('failedToGenerateChart');
+      }
       return;
     }
 
     this.dispatchEvent(
-      new ChartBuiltEvent({ ...result.value, chartType: this.chartType, saved: save }),
+      new ChartBuiltEvent({
+        ...result.value,
+        chartType: this.chartType,
+        saved: save,
+        updated: save && !!this.chart,
+      }),
     );
   }
 
@@ -417,7 +461,13 @@ export class ChartBuilder extends MobxLitElement {
             ?disabled=${this.isLoading}
             @click=${(): Promise<void> => this.handleGenerateChart(true)}
           >
-            ${this.isLoading ? translate('saving') : translate('saveChart')}
+            ${this.isLoading
+              ? this.chart
+                ? translate('updating')
+                : translate('saving')
+              : this.chart
+                ? translate('updateChart')
+                : translate('saveChart')}
           </button>
           ${this.errorMessage
             ? html`<div class="error">${this.errorMessage}</div>`

@@ -1299,6 +1299,13 @@ export class OfflineCacheStorage implements StorageSchema {
     return networkStorage.createChart(request);
   }
 
+  async updateChart(
+    id: number,
+    request: ChartRequest,
+  ): Promise<StorageResult<ChartResponse>> {
+    return networkStorage.updateChart(id, request);
+  }
+
   async getCharts(): Promise<Chart[]> {
     return networkStorage.getCharts();
   }

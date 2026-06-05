@@ -1014,6 +1014,19 @@ export class NetworkStorage implements StorageSchema {
     return [];
   }
 
+  async updateChart(
+    id: number,
+    request: ChartRequest,
+  ): Promise<StorageResult<ChartResponse>> {
+    const result = await api.put<ChartRequest, ChartResponse>(`chart/${id}`, request);
+
+    if (result && result.isOk) {
+      return { isOk: true, value: result.response };
+    }
+
+    return { isOk: false, error: new Error('Failed to update chart') };
+  }
+
   async deleteChart(id: number): Promise<boolean> {
     const result = await api.delete<null>(`chart/${id}`);
 

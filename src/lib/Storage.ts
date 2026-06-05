@@ -921,6 +921,14 @@ export class Storage implements StorageSchema {
   }
 
   @delegateSource()
+  async updateChart(
+    _id: number,
+    _request: ChartRequest,
+  ): Promise<StorageResult<ChartResponse>> {
+    return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
+  }
+
+  @delegateSource()
   async getCharts(): Promise<Chart[]> {
     return Promise.resolve([]);
   }
