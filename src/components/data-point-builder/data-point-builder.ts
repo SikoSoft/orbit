@@ -25,7 +25,7 @@ import { DataPointUpdatedEvent } from './data-point-builder.events';
 
 import '@ss/ui/components/ss-select';
 import '@ss/ui/components/ss-input';
-import '@/components/list-filter/list-filter';
+import '@/components/list-filter-control/list-filter-control';
 
 @customElement('data-point-builder')
 export class DataPointBuilder extends MobxLitElement {
@@ -99,15 +99,15 @@ export class DataPointBuilder extends MobxLitElement {
   private renderFilterField(): TemplateResult {
     return html`
       <div class="field">
-        <list-filter
+        <list-filter-control
           showAll
-          .list-filter=${this.filter}
+          .listFilter=${this.filter}
           @list-filter-updated=${(e: ListFilterUpdatedEvent): void => {
             e.stopPropagation();
             this.filter = e.detail;
             this.emitUpdate();
           }}
-        ></list-filter>
+        ></list-filter-control>
       </div>
     `;
   }

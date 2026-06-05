@@ -1,5 +1,13 @@
 {
   "initializing": "Initializing...",
+  "listFilter": "List Filter",
+  "filterPreview.allItems": "all items",
+  "filterPreview.items": "items",
+  "filterPreview.publishedOrUnpublished": "published or unpublished",
+  "filterPreview.on": "on",
+  "filterPreview.from": "from",
+  "filterPreview.to": "to",
+  "filterPreview.noFilter": "No filter applied",
   "add": "Add",
   "published": "Published",
   "unpublished": "Unpublished",
