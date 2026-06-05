@@ -3,7 +3,12 @@ import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { Medal, MedalConfig } from 'api-spec/models/Medal';
+import {
+  Medal,
+  MedalConfig,
+  Criterion,
+  Criteria,
+} from 'api-spec/models/Medal';
 import { translate } from '@/lib/Localization';
 import { storage } from '@/lib/Storage';
 import { ViewElement } from '@/lib/ViewElement';
@@ -11,12 +16,28 @@ import { themed } from '@/lib/Theme';
 
 import '@/components/prestige-gem/prestige-gem';
 
+interface CriteriaProgress {
+  alias: string;
+  value: string | number | boolean;
+}
+
+interface MedalConfigWithProgress extends MedalConfig {
+  criteriaProgress?: CriteriaProgress[];
+}
+
+interface MedalDisplayItem {
+  config: MedalConfigWithProgress;
+  medal: Medal | undefined;
+}
+
 type RingStyles = Record<string, string>;
 type SortField = 'name' | 'prestige' | 'dateAwarded';
 type SortDir = 'asc' | 'desc';
+type StatusFilter = 'all' | 'earned' | 'inProgress';
 
 const PRESTIGE_LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const SORT_FIELDS: SortField[] = ['name', 'prestige', 'dateAwarded'];
+const STATUS_FILTERS: StatusFilter[] = ['all', 'earned', 'inProgress'];
 
 function getRingStyles(prestige: number): RingStyles {
   if (prestige <= 2) {
@@ -57,6 +78,48 @@ function getRingStyles(prestige: number): RingStyles {
     '--ring-c': '#b8a0d8',
     '--ring-glow': 'rgba(110,90,180,0.55)',
   };
+}
+
+function flattenCriteria(criteria: Criterion | Criteria): Criterion[] {
+  if ('fact' in criteria) {
+    return [criteria as Criterion];
+  }
+  const c = criteria as Criteria;
+  const children = [...(c.all ?? []), ...(c.any ?? [])];
+  return children.flatMap(flattenCriteria);
+}
+
+function calculateProgress(config: MedalConfigWithProgress): number {
+  if (!config.criteriaProgress || config.criteriaProgress.length === 0) {
+    return 0;
+  }
+
+  const criteria = flattenCriteria(config.criteria);
+  if (criteria.length === 0) {
+    return 0;
+  }
+
+  let totalProgress = 0;
+  let count = 0;
+
+  for (const criterion of criteria) {
+    const progressEntry = config.criteriaProgress.find(
+      p => p.alias === criterion.fact,
+    );
+    if (!progressEntry) {
+      continue;
+    }
+    const current =
+      typeof progressEntry.value === 'number' ? progressEntry.value : 0;
+    const target =
+      typeof criterion.value === 'number' && criterion.value > 0
+        ? criterion.value
+        : 1;
+    totalProgress += Math.min(1, current / target);
+    count++;
+  }
+
+  return count > 0 ? totalProgress / count : 0;
 }
 
 @themed()
@@ -147,6 +210,29 @@ export class UserMedalList extends ViewElement {
       border-color: var(--primary-color, #888);
     }
 
+    .status-btn {
+      font-size: 0.78rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      background: none;
+      color: inherit;
+      cursor: pointer;
+      opacity: 0.5;
+      transition:
+        opacity 0.15s,
+        border-color 0.15s;
+    }
+
+    .status-btn:hover {
+      opacity: 0.85;
+    }
+
+    .status-btn.active {
+      opacity: 1;
+      border-color: var(--primary-color, #888);
+    }
+
     .medal-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -162,6 +248,10 @@ export class UserMedalList extends ViewElement {
       position: relative;
       border-radius: 12px;
       overflow: hidden;
+    }
+
+    .medal-card.unearned {
+      opacity: 0.8;
     }
 
     .medal-frame {
@@ -202,6 +292,7 @@ export class UserMedalList extends ViewElement {
     }
 
     .medal-icon-inner {
+      position: relative;
       width: 100%;
       height: 100%;
       border-radius: 50%;
@@ -216,6 +307,30 @@ export class UserMedalList extends ViewElement {
       width: 78%;
       height: 78%;
       object-fit: contain;
+    }
+
+    .medal-progress-fill {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.3);
+      pointer-events: none;
+      transition: height 0.4s ease;
+    }
+
+    .medal-progress-label {
+      position: absolute;
+      bottom: 6px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+      pointer-events: none;
+      line-height: 1;
     }
 
     .medal-content {
@@ -270,13 +385,16 @@ export class UserMedalList extends ViewElement {
   medals: Medal[] = [];
 
   @state()
-  medalConfigs: MedalConfig[] = [];
+  medalConfigs: MedalConfigWithProgress[] = [];
 
   @state()
   filterPrestige: number[] = [];
 
   @state()
   filterSeries: string = '';
+
+  @state()
+  filterStatus: StatusFilter = 'all';
 
   @state()
   sortBy: SortField = 'name';
@@ -295,54 +413,56 @@ export class UserMedalList extends ViewElement {
       storage.getMedalConfigs(),
     ]);
     this.medals = medals;
-    this.medalConfigs = configs;
+    this.medalConfigs = configs as MedalConfigWithProgress[];
     this.ready = true;
+  }
+
+  get allEntries(): MedalDisplayItem[] {
+    return this.medalConfigs.map(config => ({
+      config,
+      medal: this.medals.find(m => m.medalConfigId === config.id),
+    }));
   }
 
   get availableSeries(): string[] {
     const seriesSet = new Set<string>();
-    this.medals.forEach(medal => {
-      const config = this.medalConfigs.find(c => c.id === medal.medalConfigId);
-      if (config?.series) {
+    this.medalConfigs.forEach(config => {
+      if (config.series) {
         seriesSet.add(config.series);
       }
     });
     return Array.from(seriesSet).sort();
   }
 
-  get filteredAndSortedMedals(): Medal[] {
-    let result = this.medals;
+  get filteredAndSortedEntries(): MedalDisplayItem[] {
+    let result = this.allEntries;
+
+    if (this.filterStatus === 'earned') {
+      result = result.filter(item => item.medal !== undefined);
+    } else if (this.filterStatus === 'inProgress') {
+      result = result.filter(item => item.medal === undefined);
+    }
 
     if (this.filterPrestige.length > 0) {
-      result = result.filter(medal => {
-        const config = this.medalConfigs.find(
-          c => c.id === medal.medalConfigId,
-        );
-        return (
-          config !== undefined && this.filterPrestige.includes(config.prestige)
-        );
-      });
+      result = result.filter(item =>
+        this.filterPrestige.includes(item.config.prestige),
+      );
     }
 
     if (this.filterSeries) {
-      result = result.filter(medal => {
-        const config = this.medalConfigs.find(
-          c => c.id === medal.medalConfigId,
-        );
-        return config?.series === this.filterSeries;
-      });
+      result = result.filter(item => item.config.series === this.filterSeries);
     }
 
     return [...result].sort((a, b) => {
-      const configA = this.medalConfigs.find(c => c.id === a.medalConfigId);
-      const configB = this.medalConfigs.find(c => c.id === b.medalConfigId);
       let cmp = 0;
       if (this.sortBy === 'name') {
-        cmp = (configA?.name ?? '').localeCompare(configB?.name ?? '');
+        cmp = (a.config.name ?? '').localeCompare(b.config.name ?? '');
       } else if (this.sortBy === 'prestige') {
-        cmp = (configA?.prestige ?? 0) - (configB?.prestige ?? 0);
+        cmp = (a.config.prestige ?? 0) - (b.config.prestige ?? 0);
       } else {
-        cmp = new Date(a.awardedAt).getTime() - new Date(b.awardedAt).getTime();
+        const timeA = a.medal ? new Date(a.medal.awardedAt).getTime() : -1;
+        const timeB = b.medal ? new Date(b.medal.awardedAt).getTime() : -1;
+        cmp = timeA - timeB;
       }
       return this.sortDir === 'asc' ? cmp : -cmp;
     });
@@ -379,8 +499,24 @@ export class UserMedalList extends ViewElement {
     return translate('dateAwarded');
   }
 
-  renderFrame(config: MedalConfig | undefined): TemplateResult {
+  private getStatusFilterLabel(status: StatusFilter): string {
+    if (status === 'earned') {
+      return translate('earned');
+    }
+    if (status === 'inProgress') {
+      return translate('inProgress');
+    }
+    return translate('allStatuses');
+  }
+
+  renderFrame(
+    config: MedalConfigWithProgress,
+    isEarned: boolean,
+  ): TemplateResult {
     const prestige = config?.prestige ?? 1;
+    const progress = isEarned ? 1 : calculateProgress(config);
+    const progressPct = Math.round(progress * 100);
+
     return html`
       <div class="medal-frame" style=${styleMap(getRingStyles(prestige))}>
         <div class="medal-icon-inner">
@@ -391,6 +527,15 @@ export class UserMedalList extends ViewElement {
                 crossorigin="anonymous"
               />`
             : nothing}
+          ${!isEarned
+            ? html`
+                <div
+                  class="medal-progress-fill"
+                  style="height: ${progressPct}%"
+                ></div>
+                <div class="medal-progress-label">${progressPct}%</div>
+              `
+            : nothing}
         </div>
       </div>
     `;
@@ -400,6 +545,23 @@ export class UserMedalList extends ViewElement {
     const series = this.availableSeries;
     return html`
       <div class="controls">
+        <div class="filter-row">
+          <span class="row-label">${translate('status')}</span>
+          ${repeat(
+            STATUS_FILTERS,
+            s => s,
+            s => html`
+              <button
+                class="status-btn ${this.filterStatus === s ? 'active' : ''}"
+                @click=${(): void => {
+                  this.filterStatus = s;
+                }}
+              >
+                ${this.getStatusFilterLabel(s)}
+              </button>
+            `,
+          )}
+        </div>
         <div class="filter-row">
           <span class="row-label">${translate('prestige')}</span>
           ${repeat(
@@ -470,42 +632,50 @@ export class UserMedalList extends ViewElement {
   }
 
   render(): TemplateResult {
-    if (this.medals.length === 0) {
-      return html`<div class="no-medals">${translate('noMedals')}</div>`;
+    if (this.medalConfigs.length === 0) {
+      return html`<div class="no-medals">
+        ${translate('noMedalsAvailable')}
+      </div>`;
     }
 
-    const medals = this.filteredAndSortedMedals;
+    const entries = this.filteredAndSortedEntries;
 
     return html`
       ${this.renderControls()}
-      ${medals.length === 0
+      ${entries.length === 0
         ? html`<div class="no-medals">${translate('noMedalsMatchFilter')}</div>`
         : html`
             <div class="medal-grid">
               ${repeat(
-                medals,
-                medal => medal.id,
-                medal => {
-                  const config = this.medalConfigs.find(
-                    c => c.id === medal.medalConfigId,
-                  );
-                  const prestige = config?.prestige ?? 1;
+                entries,
+                item => item.config.id,
+                item => {
+                  const { config, medal } = item;
+                  const isEarned = medal !== undefined;
+                  const prestige = config.prestige ?? 1;
                   return html`
-                    <div class="medal-card box">
-                      ${this.renderFrame(config)}
+                    <div
+                      class="medal-card box ${isEarned ? '' : 'unearned'}"
+                    >
+                      ${this.renderFrame(config, isEarned)}
                       <div class="medal-content">
-                        ${config?.series
+                        ${config.series
                           ? html`<div class="medal-series">
                               ${config.series}
                             </div>`
                           : nothing}
-                        <div class="medal-name">${config?.name ?? ''}</div>
+                        <div class="medal-name">${config.name ?? ''}</div>
                         <div class="medal-description">
-                          ${config?.description ?? ''}
+                          ${config.description ?? ''}
                         </div>
                         <div class="medal-meta">
-                          ${translate('prestige')} ${prestige} &bull;
-                          ${new Date(medal.awardedAt).toLocaleDateString()}
+                          ${translate('prestige')} ${prestige}
+                          ${isEarned
+                            ? html` &bull;
+                                ${new Date(
+                                  medal.awardedAt,
+                                ).toLocaleDateString()}`
+                            : nothing}
                         </div>
                       </div>
                       <div class="medal-gem">
