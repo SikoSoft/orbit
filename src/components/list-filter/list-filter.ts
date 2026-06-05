@@ -383,7 +383,7 @@ export class ListFilter extends MobxLitElement {
                       multiple
                       @select-changed=${this.handleTypesChanged}
                       .selected=${this.includeTypes.map(String)}
-                      .options=${this.state.entityConfigs.map(config => ({
+                      .options=${this.state.workspaceEntityConfigs.map(config => ({
                         label: config.name,
                         value: config.id,
                       }))}

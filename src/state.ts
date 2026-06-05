@@ -244,6 +244,26 @@ export class AppState {
     );
   }
 
+  get workspaceEntityConfigs(): EntityConfig[] {
+    if (!this.activeWorkspaceId || !this.workspaces.length) {
+      return this.entityConfigs;
+    }
+    const activeWorkspace = this.workspaces.find(
+      w => w.id === this.activeWorkspaceId,
+    );
+    if (!activeWorkspace || activeWorkspace.showEverything) {
+      return this.entityConfigs;
+    }
+    const typeIds = new Set<number>();
+    for (const listConfig of this.filteredListConfigs) {
+      if (!listConfig.filter.includeTypes?.length) {
+        return this.entityConfigs;
+      }
+      listConfig.filter.includeTypes.forEach(id => typeIds.add(id));
+    }
+    return this.entityConfigs.filter(config => typeIds.has(config.id));
+  }
+
   @action
   public setActionSuggestions(suggestions: string[]): void {
     this.actionSuggestions = suggestions;

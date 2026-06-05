@@ -286,7 +286,7 @@ export class EntityForm extends ViewElement {
 
   @state()
   get availableEntityConfigs(): EntityConfig[] {
-    return this.state.entityConfigs.filter(
+    return this.state.workspaceEntityConfigs.filter(
       config =>
         (this.state.listFilter.includeTypes?.length ?? 0) === 0 ||
         this.state.listFilter.includeTypes?.includes(config.id),
