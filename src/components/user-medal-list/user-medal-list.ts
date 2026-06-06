@@ -242,8 +242,7 @@ export class UserMedalList extends ViewElement {
 
     .medal-card {
       display: flex;
-      align-items: center;
-      gap: 1rem;
+      flex-direction: column;
       padding: 1rem;
       position: relative;
       border-radius: 12px;
@@ -379,6 +378,74 @@ export class UserMedalList extends ViewElement {
       width: 100%;
       height: 100%;
     }
+
+    .medal-card-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .progress-toggle {
+      display: inline-block;
+      font-size: 0.75rem;
+      color: var(--primary-color, #888);
+      background: none;
+      border: none;
+      padding: 0;
+      margin-top: 0.35rem;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      opacity: 0.85;
+    }
+
+    .progress-toggle:hover {
+      opacity: 1;
+    }
+
+    .progress-breakdown {
+      margin-top: 0.75rem;
+      padding-top: 0.65rem;
+      border-top: 1px solid rgba(128, 128, 128, 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .criterion-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.2rem 0.5rem;
+      align-items: center;
+    }
+
+    .criterion-label {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      grid-column: 1;
+    }
+
+    .criterion-values {
+      font-size: 0.72rem;
+      opacity: 0.65;
+      text-align: right;
+      grid-column: 2;
+      white-space: nowrap;
+    }
+
+    .criterion-bar-wrap {
+      grid-column: 1 / -1;
+      height: 4px;
+      background: rgba(128, 128, 128, 0.18);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .criterion-bar {
+      height: 100%;
+      background: var(--primary-color, #888);
+      border-radius: 2px;
+    }
   `;
 
   @state()
@@ -401,6 +468,9 @@ export class UserMedalList extends ViewElement {
 
   @state()
   sortDir: SortDir = 'asc';
+
+  @state()
+  progressOpenIds: Set<number> = new Set();
 
   connectedCallback(): void {
     super.connectedCallback();
@@ -507,6 +577,54 @@ export class UserMedalList extends ViewElement {
       return translate('inProgress');
     }
     return translate('allStatuses');
+  }
+
+  private toggleProgress(id: number): void {
+    const next = new Set(this.progressOpenIds);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    this.progressOpenIds = next;
+  }
+
+  private renderProgressBreakdown(
+    config: MedalConfigWithProgress,
+  ): TemplateResult {
+    const criteria = flattenCriteria(config.criteria);
+    return html`
+      <div class="progress-breakdown">
+        ${repeat(
+          criteria,
+          c => c.fact,
+          c => {
+            const progress = config.criteriaProgress?.find(
+              p => p.alias === c.fact,
+            );
+            const current =
+              typeof progress?.value === 'number' ? progress.value : 0;
+            const target =
+              typeof c.value === 'number' && c.value > 0 ? c.value : 1;
+            const pct = Math.min(100, Math.round((current / target) * 100));
+            return html`
+              <div class="criterion-row">
+                <span class="criterion-label">${c.fact}</span>
+                <span class="criterion-values"
+                  >${current} / ${target} (${pct}%)</span
+                >
+                <div class="criterion-bar-wrap">
+                  <div
+                    class="criterion-bar"
+                    style="width: ${pct}%"
+                  ></div>
+                </div>
+              </div>
+            `;
+          },
+        )}
+      </div>
+    `;
   }
 
   renderFrame(
@@ -653,34 +771,54 @@ export class UserMedalList extends ViewElement {
                   const { config, medal } = item;
                   const isEarned = medal !== undefined;
                   const prestige = config.prestige ?? 1;
+                  const isProgressOpen = this.progressOpenIds.has(config.id);
                   return html`
                     <div
                       class="medal-card box ${isEarned ? '' : 'unearned'}"
                     >
-                      ${this.renderFrame(config, isEarned)}
-                      <div class="medal-content">
-                        ${config.series
-                          ? html`<div class="medal-series">
-                              ${config.series}
-                            </div>`
-                          : nothing}
-                        <div class="medal-name">${config.name ?? ''}</div>
-                        <div class="medal-description">
-                          ${config.description ?? ''}
-                        </div>
-                        <div class="medal-meta">
-                          ${translate('prestige')} ${prestige}
-                          ${isEarned
-                            ? html` &bull;
-                                ${new Date(
-                                  medal.awardedAt,
-                                ).toLocaleDateString()}`
+                      <div class="medal-card-row">
+                        ${this.renderFrame(config, isEarned)}
+                        <div class="medal-content">
+                          ${config.series
+                            ? html`<div class="medal-series">
+                                ${config.series}
+                              </div>`
+                            : nothing}
+                          <div class="medal-name">${config.name ?? ''}</div>
+                          <div class="medal-description">
+                            ${config.description ?? ''}
+                          </div>
+                          <div class="medal-meta">
+                            ${translate('prestige')} ${prestige}
+                            ${isEarned
+                              ? html` &bull;
+                                  ${new Date(
+                                    medal.awardedAt,
+                                  ).toLocaleDateString()}`
+                              : nothing}
+                          </div>
+                          ${!isEarned
+                            ? html`
+                                <button
+                                  class="progress-toggle"
+                                  @click=${(): void => {
+                                    this.toggleProgress(config.id);
+                                  }}
+                                >
+                                  ${isProgressOpen
+                                    ? translate('hideProgress')
+                                    : translate('showProgress')}
+                                </button>
+                              `
                             : nothing}
                         </div>
+                        <div class="medal-gem">
+                          <prestige-gem prestige=${prestige}></prestige-gem>
+                        </div>
                       </div>
-                      <div class="medal-gem">
-                        <prestige-gem prestige=${prestige}></prestige-gem>
-                      </div>
+                      ${!isEarned && isProgressOpen
+                        ? this.renderProgressBreakdown(config)
+                        : nothing}
                     </div>
                   `;
                 },

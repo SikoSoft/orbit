@@ -416,6 +416,8 @@
   "allSeries": "All Series",
   "noMedalsMatchFilter": "No medals match the current filter.",
   "noMedalsAvailable": "No medals are available.",
+  "showProgress": "Show progress",
+  "hideProgress": "Hide progress",
   "dateAwarded": "Date Awarded",
   "status": "Status",
   "allStatuses": "All",
