@@ -222,6 +222,7 @@ export interface StorageSchema {
   getActiveWorkspaceId?(): string;
   setActiveWorkspaceId?(id: string): void;
   createChart?(request: ChartRequest): Promise<StorageResult<ChartResponse>>;
+  updateChart?(id: number, request: ChartRequest): Promise<StorageResult<ChartResponse>>;
   getCharts?(): Promise<Chart[]>;
   deleteChart?(id: number): Promise<boolean>;
 }
