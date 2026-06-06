@@ -14,7 +14,8 @@
     "start": "vite",
     "prepare": "husky",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "fetch-spec": "az storage blob download --account-name $GAPI_SPEC_STORAGE_ACCOUNT --container-name gapi-spec --name openapi.latest.json --file docs/openapi.latest.json --auth-mode key --account-key $GAPI_SPEC_STORAGE_KEY"
   },
   "dependencies": {
     "@adobe/lit-mobx": "^2.2.2",

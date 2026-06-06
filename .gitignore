@@ -39,6 +39,9 @@ yarn-error.log*
 .env.production
 __azurite_db_*
 
+# API spec (fetched at dev/CI time)
+docs/openapi.latest.json
+
 # Temporary files
 *.tmp
 .cache/

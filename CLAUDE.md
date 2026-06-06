@@ -108,6 +108,10 @@ Path alias: `@/` → `src/`
 
 Keep `api-spec` version in sync when making API contract changes. Internal packages are referenced via GitHub npm registry URLs with version pinning in `package.json`.
 
+## API Spec
+
+The OpenAPI spec for `gapi` lives at `docs/openapi.latest.json` (not committed — fetched at dev/CI time via `npm run fetch-spec`, which requires `GAPI_SPEC_STORAGE_ACCOUNT` and `GAPI_SPEC_STORAGE_KEY` env vars). Read it when adding or modifying methods in `NetworkStorage` or any code that calls the backend API. If the file doesn't exist, tell the user to run `npm run fetch-spec` before proceeding.
+
 ## Local Backend
 
 `gapi` runs locally on port 9999 (`npm start` in `projects/gapi`). Set `APP_BASE_API_URL=http://localhost:7071/api/action` to point orbit at the local backend instead of production.
