@@ -35,6 +35,10 @@ import { SettingName } from 'api-spec/models/Setting';
 
 const minLengthForSuggestion = 1;
 
+// Mirrors the delay ss-input uses before clearing focus state on blur, giving
+// a click on an autocomplete suggestion time to update the value first.
+const blurValidationDelay = 200;
+
 @customElement('short-text-field')
 export class ShortTextField extends MobxLitElement {
   public state = appState;
@@ -172,20 +176,22 @@ export class ShortTextField extends MobxLitElement {
   }
 
   handleInputBlurred(_: InputChangedEvent): void {
-    if (
-      this.propertyConfig.optionsOnly &&
-      this._value.length > 0 &&
-      !this.propertyConfig.options.includes(this._value)
-    ) {
-      addToast(
-        translate('propertyValueNotAllowed', {
-          value: this._value,
-          name: this.propertyConfig.name,
-        }),
-        NotificationType.ERROR,
-      );
-      this.syncValue('');
-    }
+    setTimeout(() => {
+      if (
+        this.propertyConfig.optionsOnly &&
+        this._value.length > 0 &&
+        !this.propertyConfig.options.includes(this._value)
+      ) {
+        addToast(
+          translate('propertyValueNotAllowed', {
+            value: this._value,
+            name: this.propertyConfig.name,
+          }),
+          NotificationType.ERROR,
+        );
+        this.syncValue('');
+      }
+    }, blurValidationDelay);
   }
 
   async focus(): Promise<void> {
