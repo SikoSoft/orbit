@@ -34,7 +34,7 @@ jobs:
         run: |
           az storage blob download \
             --account-name $GAPI_SPEC_STORAGE_ACCOUNT \
-            --container-name specs \
+            --container-name gapi-spec \
             --name openapi.latest.json \
             --file docs/openapi.latest.json \
             --auth-mode key \
