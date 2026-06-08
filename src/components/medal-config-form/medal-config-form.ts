@@ -2,8 +2,9 @@ import { html, css, nothing, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { MedalConfig, Criterion, Criteria, FactRequest } from 'api-spec/models/Medal';
-import { FactOperation } from 'api-spec/models/Fact';
+import { MedalConfig, Criterion, Criteria, FactRequest, StreakRequest } from 'api-spec/models/Medal';
+import { FactOperation, AnalysisClassificationType } from 'api-spec/models/Fact';
+import { SegmentationTimeUnit } from 'api-spec/models/Statistic';
 import { defaultListFilter } from 'api-spec/models/List';
 import { addToast } from '@/lib/Util';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
@@ -22,6 +23,7 @@ import '@ss/ui/components/ss-input';
 import '@ss/ui/components/file-upload';
 import '@ss/ui/components/pop-up';
 import '@/components/medal-config-form/fact-request-editor/fact-request-editor';
+import '@/components/medal-config-form/streak-request-editor/streak-request-editor';
 import '@/components/medal-config-form/criteria-editor/criteria-editor';
 import '@/components/svg-icon/svg-icon';
 
@@ -39,6 +41,10 @@ import {
   FactRequestChangedEvent,
   FactRequestRemovedEvent,
 } from './fact-request-editor/fact-request-editor.events';
+import {
+  StreakRequestChangedEvent,
+  StreakRequestRemovedEvent,
+} from './streak-request-editor/streak-request-editor.events';
 import { CriteriaChangedEvent } from './criteria-editor/criteria-editor.events';
 
 @themed()
@@ -102,6 +108,7 @@ export class MedalConfigForm extends MobxLitElement {
     prestige: 0,
     icon: '',
     factRequests: [],
+    streakRequests: [],
     criteria: {} as Criterion | Criteria,
   };
 
@@ -159,6 +166,10 @@ export class MedalConfigForm extends MobxLitElement {
   [MedalConfigFormProp.FACT_REQUESTS]: MedalConfigFormProps[MedalConfigFormProp.FACT_REQUESTS] =
     medalConfigFormProps[MedalConfigFormProp.FACT_REQUESTS].default;
 
+  @property({ type: Array })
+  [MedalConfigFormProp.STREAK_REQUESTS]: MedalConfigFormProps[MedalConfigFormProp.STREAK_REQUESTS] =
+    medalConfigFormProps[MedalConfigFormProp.STREAK_REQUESTS].default;
+
   connectedCallback(): void {
     super.connectedCallback();
     this.localConfig = {
@@ -170,14 +181,15 @@ export class MedalConfigForm extends MobxLitElement {
       prestige: this[MedalConfigFormProp.PRESTIGE],
       icon: this[MedalConfigFormProp.ICON],
       factRequests: this[MedalConfigFormProp.FACT_REQUESTS],
+      streakRequests: this[MedalConfigFormProp.STREAK_REQUESTS],
       criteria: this[MedalConfigFormProp.CRITERIA],
     };
   }
 
   private get factAliases(): string[] {
-    return this.localConfig.factRequests
-      .map(fr => fr.alias)
-      .filter(a => a.trim() !== '');
+    const fromFacts = this.localConfig.factRequests.map(fr => fr.alias);
+    const fromStreaks = this.localConfig.streakRequests.map(sr => sr.alias);
+    return [...fromFacts, ...fromStreaks].filter(a => a.trim() !== '');
   }
 
   validate(): string[] {
@@ -205,6 +217,7 @@ export class MedalConfigForm extends MobxLitElement {
       prestige: this.localConfig.prestige,
       icon: this.localConfig.icon,
       factRequests: this.localConfig.factRequests,
+      streakRequests: this.localConfig.streakRequests,
       criteria: this.localConfig.criteria,
     };
 
@@ -228,9 +241,9 @@ export class MedalConfigForm extends MobxLitElement {
   }
 
   copy(): void {
-    const { name, description, series, recurrence, prestige, icon, factRequests, criteria } = this.localConfig;
+    const { name, description, series, recurrence, prestige, icon, factRequests, streakRequests, criteria } = this.localConfig;
     this.dispatchEvent(
-      new MedalConfigCopiedEvent({ name, description, series, recurrence, prestige, icon, factRequests, criteria }),
+      new MedalConfigCopiedEvent({ name, description, series, recurrence, prestige, icon, factRequests, streakRequests, criteria }),
     );
   }
 
@@ -264,6 +277,25 @@ export class MedalConfigForm extends MobxLitElement {
     this.localConfig = {
       ...this.localConfig,
       factRequests: [...this.localConfig.factRequests, newRequest],
+    };
+  }
+
+  private addStreakRequest(): void {
+    const newRequest: StreakRequest = {
+      alias: '',
+      segmentUnit: SegmentationTimeUnit.DAY,
+      length: 1,
+      innerContext: {
+        operation: FactOperation.ANALYSIS_CLASSIFICATION,
+        filter: { ...defaultListFilter },
+        analysisType: AnalysisClassificationType.MORNING_FASTING,
+      },
+      innerOperator: '==',
+      innerValue: true,
+    };
+    this.localConfig = {
+      ...this.localConfig,
+      streakRequests: [...this.localConfig.streakRequests, newRequest],
     };
   }
 
@@ -385,6 +417,33 @@ export class MedalConfigForm extends MobxLitElement {
             `,
           )}
           <ss-button @click=${this.addFactRequest}>${translate('addFactRequest')}</ss-button>
+        </div>
+
+        <div class="section">
+          <div class="section-title">${translate('streakRequests')}</div>
+          ${this.localConfig.streakRequests.length === 0
+            ? html`<div style="font-style:italic;opacity:0.6;margin-bottom:0.5rem;">${translate('noStreakRequests')}</div>`
+            : nothing}
+          ${repeat(
+            this.localConfig.streakRequests,
+            (_, i) => i,
+            (sr, i) => html`
+              <streak-request-editor
+                .streakRequest=${sr}
+                .index=${i}
+                @streak-request-changed=${(e: StreakRequestChangedEvent): void => {
+                  const updated = [...this.localConfig.streakRequests];
+                  updated[e.detail.index] = e.detail.streakRequest;
+                  this.localConfig = { ...this.localConfig, streakRequests: updated };
+                }}
+                @streak-request-removed=${(e: StreakRequestRemovedEvent): void => {
+                  const updated = this.localConfig.streakRequests.filter((_, idx) => idx !== e.detail.index);
+                  this.localConfig = { ...this.localConfig, streakRequests: updated };
+                }}
+              ></streak-request-editor>
+            `,
+          )}
+          <ss-button @click=${this.addStreakRequest}>${translate('addStreakRequest')}</ss-button>
         </div>
 
         <div class="section">

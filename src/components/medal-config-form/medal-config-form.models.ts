@@ -1,5 +1,5 @@
 import { ControlType } from '@/models/Control';
-import { Criterion, Criteria, FactRequest } from 'api-spec/models/Medal';
+import { Criterion, Criteria, FactRequest, StreakRequest } from 'api-spec/models/Medal';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
 
 export enum MedalConfigFormProp {
@@ -12,6 +12,7 @@ export enum MedalConfigFormProp {
   ICON = 'icon',
   CRITERIA = 'criteria',
   FACT_REQUESTS = 'factRequests',
+  STREAK_REQUESTS = 'streakRequests',
 }
 
 export interface MedalConfigFormProps extends PropTypes {
@@ -24,6 +25,7 @@ export interface MedalConfigFormProps extends PropTypes {
   [MedalConfigFormProp.ICON]: string;
   [MedalConfigFormProp.CRITERIA]: Criterion | Criteria;
   [MedalConfigFormProp.FACT_REQUESTS]: FactRequest[];
+  [MedalConfigFormProp.STREAK_REQUESTS]: StreakRequest[];
 }
 
 export const medalConfigFormProps: PropConfigMap<MedalConfigFormProps> = {
@@ -71,5 +73,10 @@ export const medalConfigFormProps: PropConfigMap<MedalConfigFormProps> = {
     default: [],
     control: { type: ControlType.HIDDEN },
     description: 'The fact requests defining data sources for criteria',
+  },
+  [MedalConfigFormProp.STREAK_REQUESTS]: {
+    default: [],
+    control: { type: ControlType.HIDDEN },
+    description: 'The streak requests defining consecutive segment patterns for criteria',
   },
 };

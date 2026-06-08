@@ -32,6 +32,7 @@ const defaultMedalConfig: MedalConfig = {
   createdAt: '',
   updatedAt: '',
   factRequests: [],
+  streakRequests: [],
   criteria: {},
 };
 
@@ -151,6 +152,7 @@ export class MedalConfigList extends ViewElement {
                   icon=${config.icon}
                   .criteria=${config.criteria}
                   .factRequests=${config.factRequests}
+                  .streakRequests=${config.streakRequests ?? []}
                   ?open=${this.isPanelOpen(config.id)}
                   @medal-config-copied=${this.handleMedalConfigCopied}
                   @medal-config-deleted=${this.handleMedalConfigDeleted}
