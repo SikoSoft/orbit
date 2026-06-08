@@ -40,7 +40,8 @@ import {
   MfaVerifySetupRequestBody,
 } from '@/models/Identity';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
-import { Theme, Workspace } from 'api-spec/models/Workspace';
+import { Workspace } from 'api-spec/models/Workspace';
+import { ThemeName } from '@/models/Page';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
 
 export class NetworkStorage implements StorageSchema {
@@ -951,10 +952,10 @@ export class NetworkStorage implements StorageSchema {
     listConfigs: string[],
     color: string,
     showEverything: boolean,
-    theme: Theme,
+    theme: ThemeName,
   ): Promise<StorageResult<Workspace>> {
     const result = await api.post<
-      { name: string; listConfigs: string[]; color: string; showEverything: boolean; theme: Theme },
+      { name: string; listConfigs: string[]; color: string; showEverything: boolean; theme: ThemeName },
       Workspace
     >('workspace', { name, listConfigs, color, showEverything, theme });
 
@@ -967,7 +968,7 @@ export class NetworkStorage implements StorageSchema {
 
   async saveWorkspace(workspace: Workspace): Promise<StorageResult<Workspace>> {
     const result = await api.put<
-      { name: string; listConfigs: string[]; color: string; showEverything: boolean; theme: Theme },
+      { name: string; listConfigs: string[]; color: string; showEverything: boolean; theme: string },
       Workspace
     >(`workspace/${workspace.id}`, {
       name: workspace.name,

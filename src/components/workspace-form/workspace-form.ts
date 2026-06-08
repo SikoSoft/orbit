@@ -2,8 +2,9 @@ import { html, css, nothing, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { Theme, Workspace } from 'api-spec/models/Workspace';
+import { Workspace } from 'api-spec/models/Workspace';
 import { SelectChangedEvent } from '@ss/ui/components/ss-select.events';
+import { ThemeName, defaultTheme } from '@/models/Page';
 import { addToast } from '@/lib/Util';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 import { translate } from '@/lib/Localization';
@@ -79,7 +80,7 @@ export class WorkspaceForm extends MobxLitElement {
     color: '',
     showEverything: false,
     listConfigs: [],
-    theme: Theme.SYSTEM,
+    theme: defaultTheme,
   };
 
   @state()
@@ -168,7 +169,7 @@ export class WorkspaceForm extends MobxLitElement {
         this.localWorkspace.listConfigs,
         this.localWorkspace.color,
         this.localWorkspace.showEverything,
-        this.localWorkspace.theme,
+        this.localWorkspace.theme as ThemeName,
       );
     }
 
@@ -259,11 +260,11 @@ export class WorkspaceForm extends MobxLitElement {
           <label>${translate('workspaceTheme')}</label>
           <ss-select
             selected=${this.localWorkspace.theme}
-            .options=${Object.values(Theme).map(v => ({
+            .options=${Object.values(ThemeName).map(v => ({
               value: v,
               label: translate(`themeOption.${v}`),
             }))}
-            @select-changed=${(e: SelectChangedEvent<Theme>): void => {
+            @select-changed=${(e: SelectChangedEvent<ThemeName>): void => {
               this.localWorkspace = {
                 ...this.localWorkspace,
                 theme: e.detail.value,

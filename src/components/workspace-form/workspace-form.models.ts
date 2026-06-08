@@ -1,4 +1,4 @@
-import { Theme } from 'api-spec/models/Workspace';
+import { ThemeName, defaultTheme } from '@/models/Page';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
 import { ControlType } from '@/models/Control';
 
@@ -18,7 +18,7 @@ export interface WorkspaceFormProps extends PropTypes {
   [WorkspaceFormProp.COLOR]: string;
   [WorkspaceFormProp.SHOW_EVERYTHING]: boolean;
   [WorkspaceFormProp.LIST_CONFIGS]: string[];
-  [WorkspaceFormProp.THEME]: Theme;
+  [WorkspaceFormProp.THEME]: ThemeName;
   [WorkspaceFormProp.OPEN]: boolean;
 }
 
@@ -49,11 +49,11 @@ export const workspaceFormProps: PropConfigMap<WorkspaceFormProps> = {
     control: { type: ControlType.HIDDEN },
   },
   [WorkspaceFormProp.THEME]: {
-    default: Theme.SYSTEM,
+    default: defaultTheme,
     description: 'The theme applied when this workspace is active',
     control: {
       type: ControlType.SELECT,
-      options: Object.values(Theme),
+      options: Object.values(ThemeName),
     },
   },
   [WorkspaceFormProp.OPEN]: {

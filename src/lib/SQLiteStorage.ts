@@ -31,7 +31,8 @@ import {
 } from 'api-spec/models/Data';
 
 import { StorageResult, StorageSchema, StorageSource } from '@/models/Storage';
-import { Theme, Workspace } from 'api-spec/models/Workspace';
+import { Workspace } from 'api-spec/models/Workspace';
+import { ThemeName, defaultTheme } from '@/models/Page';
 import { RequestBody } from '@/components/entity-form/entity-form.models';
 import { BulkOperationPayload } from '@/components/bulk-manager/bulk-manager.models';
 import {
@@ -1322,7 +1323,7 @@ export class SQLiteStorage implements StorageSchema {
       showEverything: row['show_everything'] === 1,
       userId: row['user_id'] as string,
       listConfigs: JSON.parse(row['list_configs'] as string) as string[],
-      theme: (row['theme'] as Theme) ?? Theme.SYSTEM,
+      theme: (row['theme'] as ThemeName) ?? defaultTheme,
       createdAt: new Date(row['created_at'] as string),
       updatedAt: new Date(row['updated_at'] as string),
     }));

@@ -1,6 +1,6 @@
 import { Setting, Settings } from 'api-spec/models/Setting';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
-import { Theme, Workspace } from 'api-spec/models/Workspace';
+import { Workspace } from 'api-spec/models/Workspace';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
 import { ListConfig, ListSort, ListFilter } from 'api-spec/models/List';
 import {
@@ -217,13 +217,13 @@ export interface StorageSchema {
     constraints: EntityConfigUniqueConstraint[],
   ): Promise<boolean>;
   getWorkspaces?(): Promise<Workspace[]>;
-  createWorkspace?(name: string, listConfigs: string[], color: string, showEverything: boolean, theme: Theme): Promise<StorageResult<Workspace>>;
+  createWorkspace?(name: string, listConfigs: string[], color: string, showEverything: boolean, theme: ThemeName): Promise<StorageResult<Workspace>>;
   saveWorkspace?(workspace: Workspace): Promise<StorageResult<Workspace>>;
   deleteWorkspace?(id: string): Promise<boolean>;
   getActiveWorkspaceId?(): string;
   setActiveWorkspaceId?(id: string): void;
-  getActiveWorkspaceTheme?(): Theme;
-  setActiveWorkspaceTheme?(theme: Theme): void;
+  getActiveWorkspaceTheme?(): ThemeName;
+  setActiveWorkspaceTheme?(theme: ThemeName): void;
   createChart?(request: ChartRequest): Promise<StorageResult<ChartResponse>>;
   updateChart?(id: number, request: ChartRequest): Promise<StorageResult<ChartResponse>>;
   getCharts?(): Promise<Chart[]>;

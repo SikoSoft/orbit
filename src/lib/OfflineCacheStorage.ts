@@ -37,7 +37,8 @@ import {
   MfaVerifySetupRequestBody,
 } from '@/models/Identity';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
-import { Theme, Workspace } from 'api-spec/models/Workspace';
+import { Workspace } from 'api-spec/models/Workspace';
+import { ThemeName } from '@/models/Page';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
 
 import { SQLiteStorage, serializePropertyValue } from './SQLiteStorage';
@@ -1281,7 +1282,7 @@ export class OfflineCacheStorage implements StorageSchema {
     listConfigs: string[],
     color: string,
     showEverything: boolean,
-    theme: Theme,
+    theme: ThemeName,
   ): Promise<StorageResult<Workspace>> {
     return networkStorage.createWorkspace(name, listConfigs, color, showEverything, theme);
   }

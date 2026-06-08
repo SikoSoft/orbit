@@ -6,6 +6,7 @@ import { MobxLitElement } from '@adobe/lit-mobx';
 import { Workspace } from 'api-spec/models/Workspace';
 import { appState } from '@/state';
 import { storage } from '@/lib/Storage';
+import { ThemeName } from '@/models/Page';
 import { Color } from '@/lib/Color';
 import { translate } from '@/lib/Localization';
 import { WorkspaceChangedEvent } from '@/events/workspace-changed';
@@ -205,7 +206,7 @@ export class WorkspaceSelector extends MobxLitElement {
     this.selectedIndex = index;
     storage.setActiveWorkspaceId(workspace.id);
     storage.setActiveWorkspaceColor(workspace.color);
-    storage.setActiveWorkspaceTheme(workspace.theme);
+    storage.setActiveWorkspaceTheme(workspace.theme as ThemeName);
     this.appState.setActiveWorkspaceId(workspace.id);
     this.appState.setWorkspaceSelectorVisible(false);
     this.isExpanded = false;
