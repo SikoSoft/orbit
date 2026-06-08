@@ -3,7 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { MedalConfig, Criterion, Criteria, FactRequest, StreakRequest } from 'api-spec/models/Medal';
-import { FactOperation, AnalysisClassificationType } from 'api-spec/models/Fact';
+import { FactOperation } from 'api-spec/models/Fact';
 import { SegmentationTimeUnit } from 'api-spec/models/Statistic';
 import { defaultListFilter } from 'api-spec/models/List';
 import { addToast } from '@/lib/Util';
@@ -286,12 +286,11 @@ export class MedalConfigForm extends MobxLitElement {
       segmentUnit: SegmentationTimeUnit.DAY,
       length: 1,
       innerContext: {
-        operation: FactOperation.ANALYSIS_CLASSIFICATION,
+        operation: FactOperation.ENTITY_COUNT,
         filter: { ...defaultListFilter },
-        analysisType: AnalysisClassificationType.MORNING_FASTING,
       },
       innerOperator: '==',
-      innerValue: true,
+      innerValue: 0,
     };
     this.localConfig = {
       ...this.localConfig,

@@ -1,7 +1,6 @@
 import { ControlType } from '@/models/Control';
 import { StreakRequest } from 'api-spec/models/Medal';
 import { FactOperation } from 'api-spec/models/Fact';
-import { AnalysisClassificationType } from 'api-spec/models/Fact';
 import { SegmentationTimeUnit } from 'api-spec/models/Statistic';
 import { defaultListFilter } from 'api-spec/models/List';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
@@ -23,12 +22,11 @@ export const streakRequestEditorProps: PropConfigMap<StreakRequestEditorProps> =
       segmentUnit: SegmentationTimeUnit.DAY,
       length: 1,
       innerContext: {
-        operation: FactOperation.ANALYSIS_CLASSIFICATION,
+        operation: FactOperation.ENTITY_COUNT,
         filter: { ...defaultListFilter },
-        analysisType: AnalysisClassificationType.MORNING_FASTING,
       },
       innerOperator: '==',
-      innerValue: true,
+      innerValue: 0,
     },
     control: { type: ControlType.HIDDEN },
     description: 'The streak request being edited',
