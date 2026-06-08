@@ -2,7 +2,8 @@ import { html, css, nothing, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { Workspace } from 'api-spec/models/Workspace';
+import { Theme, Workspace } from 'api-spec/models/Workspace';
+import { SelectChangedEvent } from '@ss/ui/components/ss-select.events';
 import { addToast } from '@/lib/Util';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 import { translate } from '@/lib/Localization';
@@ -16,6 +17,7 @@ import { themed } from '@/lib/Theme';
 import '@ss/ui/components/ss-collapsable';
 import '@ss/ui/components/ss-button';
 import '@ss/ui/components/ss-input';
+import '@ss/ui/components/ss-select';
 import '@ss/ui/components/confirmation-modal';
 import '@/components/color-selector/color-selector';
 
@@ -77,6 +79,7 @@ export class WorkspaceForm extends MobxLitElement {
     color: '',
     showEverything: false,
     listConfigs: [],
+    theme: Theme.SYSTEM,
   };
 
   @state()
@@ -109,6 +112,10 @@ export class WorkspaceForm extends MobxLitElement {
   [WorkspaceFormProp.LIST_CONFIGS]: WorkspaceFormProps[WorkspaceFormProp.LIST_CONFIGS] =
     workspaceFormProps[WorkspaceFormProp.LIST_CONFIGS].default;
 
+  @property({ type: String })
+  [WorkspaceFormProp.THEME]: WorkspaceFormProps[WorkspaceFormProp.THEME] =
+    workspaceFormProps[WorkspaceFormProp.THEME].default;
+
   connectedCallback(): void {
     super.connectedCallback();
     this.localWorkspace = {
@@ -117,6 +124,7 @@ export class WorkspaceForm extends MobxLitElement {
       color: this[WorkspaceFormProp.COLOR],
       showEverything: this[WorkspaceFormProp.SHOW_EVERYTHING],
       listConfigs: [...this[WorkspaceFormProp.LIST_CONFIGS]],
+      theme: this[WorkspaceFormProp.THEME],
     };
   }
 
@@ -152,6 +160,7 @@ export class WorkspaceForm extends MobxLitElement {
         color: this.localWorkspace.color,
         showEverything: this.localWorkspace.showEverything,
         listConfigs: this.localWorkspace.listConfigs,
+        theme: this.localWorkspace.theme,
       });
     } else {
       result = await storage.createWorkspace(
@@ -159,6 +168,7 @@ export class WorkspaceForm extends MobxLitElement {
         this.localWorkspace.listConfigs,
         this.localWorkspace.color,
         this.localWorkspace.showEverything,
+        this.localWorkspace.theme,
       );
     }
 
@@ -175,6 +185,7 @@ export class WorkspaceForm extends MobxLitElement {
       color: result.value.color,
       showEverything: result.value.showEverything,
       listConfigs: result.value.listConfigs,
+      theme: result.value.theme,
     };
 
     this.dispatchEvent(new WorkspaceSavedEvent(result.value));
@@ -242,6 +253,23 @@ export class WorkspaceForm extends MobxLitElement {
             />
             ${translate('showEverything')}
           </label>
+        </div>
+
+        <div class="field">
+          <label>${translate('workspaceTheme')}</label>
+          <ss-select
+            selected=${this.localWorkspace.theme}
+            .options=${Object.values(Theme).map(v => ({
+              value: v,
+              label: translate(`themeOption.${v}`),
+            }))}
+            @select-changed=${(e: SelectChangedEvent<Theme>): void => {
+              this.localWorkspace = {
+                ...this.localWorkspace,
+                theme: e.detail.value,
+              };
+            }}
+          ></ss-select>
         </div>
 
         ${availableListConfigs.length > 0

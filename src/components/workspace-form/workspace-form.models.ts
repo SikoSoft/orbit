@@ -1,3 +1,4 @@
+import { Theme } from 'api-spec/models/Workspace';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
 import { ControlType } from '@/models/Control';
 
@@ -7,6 +8,7 @@ export enum WorkspaceFormProp {
   COLOR = 'color',
   SHOW_EVERYTHING = 'showEverything',
   LIST_CONFIGS = 'listConfigs',
+  THEME = 'theme',
   OPEN = 'open',
 }
 
@@ -16,6 +18,7 @@ export interface WorkspaceFormProps extends PropTypes {
   [WorkspaceFormProp.COLOR]: string;
   [WorkspaceFormProp.SHOW_EVERYTHING]: boolean;
   [WorkspaceFormProp.LIST_CONFIGS]: string[];
+  [WorkspaceFormProp.THEME]: Theme;
   [WorkspaceFormProp.OPEN]: boolean;
 }
 
@@ -44,6 +47,14 @@ export const workspaceFormProps: PropConfigMap<WorkspaceFormProps> = {
     default: [],
     description: 'List config IDs assigned to this workspace',
     control: { type: ControlType.HIDDEN },
+  },
+  [WorkspaceFormProp.THEME]: {
+    default: Theme.SYSTEM,
+    description: 'The theme applied when this workspace is active',
+    control: {
+      type: ControlType.SELECT,
+      options: Object.values(Theme),
+    },
   },
   [WorkspaceFormProp.OPEN]: {
     default: false,

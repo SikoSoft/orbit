@@ -205,6 +205,7 @@ export class WorkspaceSelector extends MobxLitElement {
     this.selectedIndex = index;
     storage.setActiveWorkspaceId(workspace.id);
     storage.setActiveWorkspaceColor(workspace.color);
+    storage.setActiveWorkspaceTheme(workspace.theme);
     this.appState.setActiveWorkspaceId(workspace.id);
     this.appState.setWorkspaceSelectorVisible(false);
     this.isExpanded = false;

@@ -2,7 +2,7 @@ import { html, css, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { Workspace } from 'api-spec/models/Workspace';
+import { Theme, Workspace } from 'api-spec/models/Workspace';
 import { addToast } from '@/lib/Util';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 import { translate } from '@/lib/Localization';
@@ -64,6 +64,7 @@ export class WorkspaceList extends MobxLitElement {
       showEverything: false,
       userId: '',
       listConfigs: [],
+      theme: Theme.SYSTEM,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -110,6 +111,7 @@ export class WorkspaceList extends MobxLitElement {
                   color=${workspace.color}
                   ?showEverything=${workspace.showEverything}
                   .listConfigs=${workspace.listConfigs}
+                  theme=${workspace.theme}
                   ?open=${this.isPanelOpen(workspace.id)}
                   @workspace-saved=${this.handleWorkspaceSaved}
                   @workspace-deleted=${this.handleWorkspaceDeleted}

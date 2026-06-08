@@ -56,7 +56,7 @@ import {
   MfaVerifySetupRequestBody,
 } from '@/models/Identity';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
-import { Workspace } from 'api-spec/models/Workspace';
+import { Theme, Workspace } from 'api-spec/models/Workspace';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
 
 export interface SavedListFilter {
@@ -899,6 +899,7 @@ export class Storage implements StorageSchema {
     _listConfigs: string[],
     _color: string,
     _showEverything: boolean,
+    _theme: Theme,
   ): Promise<StorageResult<Workspace>> {
     return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
   }
@@ -952,6 +953,14 @@ export class Storage implements StorageSchema {
 
   setActiveWorkspaceColor(color: string): void {
     localStorage.setItem(StorageItemKey.ACTIVE_WORKSPACE_COLOR, color);
+  }
+
+  getActiveWorkspaceTheme(): Theme {
+    return (localStorage.getItem(StorageItemKey.ACTIVE_WORKSPACE_THEME) as Theme) ?? Theme.SYSTEM;
+  }
+
+  setActiveWorkspaceTheme(theme: Theme): void {
+    localStorage.setItem(StorageItemKey.ACTIVE_WORKSPACE_THEME, theme);
   }
 }
 

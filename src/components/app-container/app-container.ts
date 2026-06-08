@@ -29,6 +29,7 @@ import '@/components/svg-icon/svg/svg-spinner';
 import '@/components/workspace-selector/workspace-selector';
 import { Introspection } from 'api-spec/models/Introspection';
 import { SettingName } from 'api-spec/models/Setting';
+import { Theme } from 'api-spec/models/Workspace';
 import { StorageSource } from '@/models/Storage';
 import { AssistEntityAddedEvent } from '../add-entity-widget/add-entity-widget.events';
 import {
@@ -275,6 +276,7 @@ export class AppContainer extends MobxLitElement {
             listConfigs.map(c => c.id),
             CURATED_COLORS[0],
             false,
+            Theme.SYSTEM,
           );
           if (defaultResult.isOk) {
             this.state.setWorkspaces([defaultResult.value]);
@@ -295,6 +297,9 @@ export class AppContainer extends MobxLitElement {
           );
           if (activeWorkspace?.color) {
             storage.setActiveWorkspaceColor(activeWorkspace.color);
+          }
+          if (activeWorkspace?.theme) {
+            storage.setActiveWorkspaceTheme(activeWorkspace.theme);
           }
         } else if (this.state.workspaces.length > 0) {
           this.state.setWorkspaceSelectorVisible(true);

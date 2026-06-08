@@ -40,7 +40,7 @@ import {
   MfaVerifySetupRequestBody,
 } from '@/models/Identity';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
-import { Workspace } from 'api-spec/models/Workspace';
+import { Theme, Workspace } from 'api-spec/models/Workspace';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
 
 export class NetworkStorage implements StorageSchema {
@@ -951,11 +951,12 @@ export class NetworkStorage implements StorageSchema {
     listConfigs: string[],
     color: string,
     showEverything: boolean,
+    theme: Theme,
   ): Promise<StorageResult<Workspace>> {
     const result = await api.post<
-      { name: string; listConfigs: string[]; color: string; showEverything: boolean },
+      { name: string; listConfigs: string[]; color: string; showEverything: boolean; theme: Theme },
       Workspace
-    >('workspace', { name, listConfigs, color, showEverything });
+    >('workspace', { name, listConfigs, color, showEverything, theme });
 
     if (result && result.isOk) {
       return { isOk: true, value: result.response };
@@ -966,13 +967,14 @@ export class NetworkStorage implements StorageSchema {
 
   async saveWorkspace(workspace: Workspace): Promise<StorageResult<Workspace>> {
     const result = await api.put<
-      { name: string; listConfigs: string[]; color: string; showEverything: boolean },
+      { name: string; listConfigs: string[]; color: string; showEverything: boolean; theme: Theme },
       Workspace
     >(`workspace/${workspace.id}`, {
       name: workspace.name,
       listConfigs: workspace.listConfigs,
       color: workspace.color,
       showEverything: workspace.showEverything,
+      theme: workspace.theme,
     });
 
     if (result && result.isOk) {
