@@ -25,7 +25,7 @@ import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
 import { ToggleChangedEvent } from '@ss/ui/components/ss-toggle.events';
 import { DataPointUpdatedEvent } from '@/components/data-point-builder/data-point-builder.events';
 
-import { ChartBuiltEvent } from './chart-builder.events';
+import { ChartBuiltEvent, ChartGeneratingEvent } from './chart-builder.events';
 
 import '@ss/ui/components/ss-select';
 import '@ss/ui/components/ss-input';
@@ -253,6 +253,7 @@ export class ChartBuilder extends MobxLitElement {
 
     this.errorMessage = '';
     this.isLoading = true;
+    this.dispatchEvent(new ChartGeneratingEvent());
 
     const config: ChartConfig = {
       version: ChartVersion.V2,

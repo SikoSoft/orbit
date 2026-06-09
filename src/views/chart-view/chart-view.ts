@@ -8,7 +8,10 @@ import { translate } from '@/lib/Localization';
 import { ViewElement } from '@/lib/ViewElement';
 import { appState } from '@/state';
 import { convertResponseToChartData } from '@/lib/ChartUtil';
-import { ChartBuiltEvent } from '@/components/chart-builder/chart-builder.events';
+import {
+  ChartBuiltEvent,
+  ChartGeneratingEvent,
+} from '@/components/chart-builder/chart-builder.events';
 import { ChartList } from '@/components/chart-list/chart-list';
 
 import '@/components/user-header/user-header';
@@ -24,6 +27,7 @@ export class ChartView extends ViewElement {
   @state() private chartData: ChartData = { labels: [], datasets: [] };
   @state() private chartType: `${ChartConfigType}` = ChartConfigType.LINE;
   @state() private hasChart = false;
+  @state() private isChartLoading = false;
 
   @query('chart-list') private chartList: ChartList | undefined;
 
@@ -51,7 +55,11 @@ export class ChartView extends ViewElement {
       <user-header></user-header>
       <div class="view-content">
         <chart-builder
+          @chart-generating=${(_e: ChartGeneratingEvent): void => {
+            this.isChartLoading = true;
+          }}
           @chart-built=${(e: ChartBuiltEvent): void => {
+            this.isChartLoading = false;
             this.chartData = convertResponseToChartData(e.detail);
             this.chartType = e.detail.chartType;
             this.hasChart = true;
@@ -60,12 +68,13 @@ export class ChartView extends ViewElement {
             }
           }}
         ></chart-builder>
-        ${this.hasChart
+        ${this.isChartLoading || this.hasChart
           ? html`
               <div class="chart-container">
                 <chart-js
                   type=${this.chartType}
                   .data=${this.chartData}
+                  ?loading=${this.isChartLoading}
                   label=${translate('chartLabel')}
                 ></chart-js>
               </div>
