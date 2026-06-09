@@ -526,6 +526,7 @@
   "chartType.radar": "Radar",
   "generateChart": "Generate Chart",
   "generating": "Generating...",
+  "loadingChart": "Loading chart...",
   "failedToGenerateChart": "Failed to generate chart.",
   "saveChart": "Save Chart",
   "saving": "Saving...",

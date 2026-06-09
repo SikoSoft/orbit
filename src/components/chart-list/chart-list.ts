@@ -25,6 +25,7 @@ import '@ss/ui/components/ss-button';
 import '@ss/ui/components/confirmation-modal';
 import '@/components/chart-js/chart-js';
 import '@/components/chart-builder/chart-builder';
+import '@/components/svg-icon/svg/svg-spinner';
 
 @customElement('chart-list')
 export class ChartList extends MobxLitElement {
@@ -32,6 +33,7 @@ export class ChartList extends MobxLitElement {
 
   @state() private savedCharts: Chart[] = [];
   @state() private savedChartDataMap: Map<number, ChartData> = new Map();
+  @state() private loadingChartIds: Set<number> = new Set();
   @state() private confirmDeleteChartId: number | null = null;
   @state() private editingChartId: number | null = null;
 
@@ -49,6 +51,20 @@ export class ChartList extends MobxLitElement {
     .no-saved-charts {
       font-style: italic;
       padding: 0.5rem 0;
+    }
+
+    .chart-loader {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 300px;
+      margin-bottom: 0.75rem;
+    }
+
+    svg-spinner {
+      width: 36px;
+      height: 36px;
+      color: var(--text-color, #333);
     }
 
     .chart-actions {
@@ -83,10 +99,14 @@ export class ChartList extends MobxLitElement {
   }
 
   private async loadChartData(chart: Chart): Promise<void> {
+    this.loadingChartIds = new Set([...this.loadingChartIds, chart.id]);
     const result = await storage.createChart?.({
       config: chart.config,
       save: false,
     });
+    const newIds = new Set(this.loadingChartIds);
+    newIds.delete(chart.id);
+    this.loadingChartIds = newIds;
     if (result?.isOk) {
       const newMap = new Map(this.savedChartDataMap);
       newMap.set(chart.id, convertResponseToChartData(result.value));
@@ -141,19 +161,26 @@ export class ChartList extends MobxLitElement {
   private renderChartView(chart: Chart): TemplateResult {
     return html`
       <div class="saved-chart-name">${chart.name}</div>
-      ${this.savedChartDataMap.has(chart.id)
-        ? html`
-            <div class="saved-chart-container">
-              <chart-js
-                type=${chart.config.version === ChartVersion.V2
-                  ? chart.config.type
-                  : ChartConfigType.LINE}
-                .data=${this.savedChartDataMap.get(chart.id)!}
-                label=${chart.name}
-              ></chart-js>
-            </div>
-          `
-        : nothing}
+      ${this.loadingChartIds.has(chart.id)
+        ? html`<div
+            class="chart-loader"
+            aria-label=${translate('loadingChart')}
+          >
+            <svg-spinner></svg-spinner>
+          </div>`
+        : this.savedChartDataMap.has(chart.id)
+          ? html`
+              <div class="saved-chart-container">
+                <chart-js
+                  type=${chart.config.version === ChartVersion.V2
+                    ? chart.config.type
+                    : ChartConfigType.LINE}
+                  .data=${this.savedChartDataMap.get(chart.id)!}
+                  label=${chart.name}
+                ></chart-js>
+              </div>
+            `
+          : nothing}
       <div class="chart-actions">
         <ss-button
           @click=${(): void => this.handleEditChart(chart.id)}
