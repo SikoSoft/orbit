@@ -19,7 +19,6 @@ import '@/components/login-form/login-form';
 import '@/components/chart-builder/chart-builder';
 import '@/components/chart-js/chart-js';
 import '@/components/chart-list/chart-list';
-import '@/components/svg-icon/svg/svg-spinner';
 
 @customElement('chart-view')
 export class ChartView extends ViewElement {
@@ -41,20 +40,6 @@ export class ChartView extends ViewElement {
     .chart-container {
       margin-top: 1.5rem;
       height: 400px;
-    }
-
-    .chart-loader {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: 1.5rem;
-      height: 400px;
-    }
-
-    svg-spinner {
-      width: 36px;
-      height: 36px;
-      color: var(--text-color, #333);
     }
   `;
 
@@ -83,24 +68,18 @@ export class ChartView extends ViewElement {
             }
           }}
         ></chart-builder>
-        ${this.isChartLoading
-          ? html`<div
-              class="chart-loader"
-              aria-label=${translate('loadingChart')}
-            >
-              <svg-spinner></svg-spinner>
-            </div>`
-          : this.hasChart
-            ? html`
-                <div class="chart-container">
-                  <chart-js
-                    type=${this.chartType}
-                    .data=${this.chartData}
-                    label=${translate('chartLabel')}
-                  ></chart-js>
-                </div>
-              `
-            : nothing}
+        ${this.isChartLoading || this.hasChart
+          ? html`
+              <div class="chart-container">
+                <chart-js
+                  type=${this.chartType}
+                  .data=${this.chartData}
+                  ?loading=${this.isChartLoading}
+                  label=${translate('chartLabel')}
+                ></chart-js>
+              </div>
+            `
+          : nothing}
         <chart-list></chart-list>
       </div>
     `;

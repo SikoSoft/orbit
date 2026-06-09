@@ -9,6 +9,9 @@ import {
   ChartInitializedEvent,
   ChartUpdatedEvent,
 } from './chart-js.events';
+import { translate } from '@/lib/Localization';
+
+import '@/components/svg-icon/svg/svg-spinner';
 
 @customElement('chart-js')
 export class ChartJsElement extends LitElement {
@@ -28,6 +31,10 @@ export class ChartJsElement extends LitElement {
   [ChartJsProp.LABEL]: ChartJsProps[ChartJsProp.LABEL] =
     chartJsProps[ChartJsProp.LABEL].default;
 
+  @property({ type: Boolean })
+  [ChartJsProp.LOADING]: ChartJsProps[ChartJsProp.LOADING] =
+    chartJsProps[ChartJsProp.LOADING].default;
+
   @query('canvas')
   private canvas!: HTMLCanvasElement;
 
@@ -45,6 +52,20 @@ export class ChartJsElement extends LitElement {
     canvas {
       display: block;
     }
+
+    .chart-loader {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    svg-spinner {
+      width: 36px;
+      height: 36px;
+      color: var(--text-color, #333);
+    }
   `;
 
   firstUpdated(): void {
@@ -57,7 +78,19 @@ export class ChartJsElement extends LitElement {
       return;
     }
 
-    if (!this.chart) {
+    if (changedProperties.has(ChartJsProp.LOADING)) {
+      const prevLoading = changedProperties.get(ChartJsProp.LOADING) as
+        | boolean
+        | undefined;
+      if (prevLoading && !this.loading) {
+        this.initChart();
+      } else if (!prevLoading && this.loading) {
+        this.destroyChart();
+      }
+      return;
+    }
+
+    if (this.loading || !this.chart) {
       return;
     }
 
@@ -115,6 +148,14 @@ export class ChartJsElement extends LitElement {
   }
 
   render(): TemplateResult {
+    if (this.loading) {
+      return html`<div
+        class="chart-loader"
+        aria-label=${translate('loadingChart')}
+      >
+        <svg-spinner></svg-spinner>
+      </div>`;
+    }
     return html`<canvas aria-label=${this.label} role="img"></canvas>`;
   }
 }

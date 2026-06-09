@@ -27,6 +27,7 @@ export class UserDashboard extends MobxLitElement {
 
   @state() private savedCharts: Chart[] = [];
   @state() private chartDataMap: Map<number, ChartData> = new Map();
+  @state() private loadingChartIds: Set<number> = new Set();
 
   static styles = css`
     .user-dashboard {
@@ -117,10 +118,14 @@ export class UserDashboard extends MobxLitElement {
   }
 
   private async loadChartData(chart: Chart): Promise<void> {
+    this.loadingChartIds = new Set([...this.loadingChartIds, chart.id]);
     const result = await storage.createChart?.({
       config: chart.config,
       save: false,
     });
+    const newIds = new Set(this.loadingChartIds);
+    newIds.delete(chart.id);
+    this.loadingChartIds = newIds;
     if (result?.isOk) {
       const newMap = new Map(this.chartDataMap);
       newMap.set(chart.id, this.convertResponseToChartData(result.value));
@@ -156,24 +161,29 @@ export class UserDashboard extends MobxLitElement {
           ${repeat(
             this.savedCharts,
             chart => chart.id,
-            chart => html`
-              <div class="chart-container">
-                <h3 class="chart-title">${chart.name}</h3>
-                ${this.chartDataMap.has(chart.id)
-                  ? html`
-                      <div class="chart-wrapper">
-                        <chart-js
-                          type=${chart.config.version === ChartVersion.V2
-                            ? chart.config.type
-                            : ChartConfigType.LINE}
-                          .data=${this.chartDataMap.get(chart.id)!}
-                          label=${chart.name}
-                        ></chart-js>
-                      </div>
-                    `
-                  : nothing}
-              </div>
-            `,
+            chart => {
+              const isLoading = this.loadingChartIds.has(chart.id);
+              return html`
+                <div class="chart-container">
+                  <h3 class="chart-title">${chart.name}</h3>
+                  ${isLoading || this.chartDataMap.has(chart.id)
+                    ? html`
+                        <div class="chart-wrapper">
+                          <chart-js
+                            type=${chart.config.version === ChartVersion.V2
+                              ? chart.config.type
+                              : ChartConfigType.LINE}
+                            .data=${this.chartDataMap.get(chart.id) ??
+                            { labels: [], datasets: [] }}
+                            ?loading=${isLoading}
+                            label=${chart.name}
+                          ></chart-js>
+                        </div>
+                      `
+                    : nothing}
+                </div>
+              `;
+            },
           )}
         </div>
       </div>

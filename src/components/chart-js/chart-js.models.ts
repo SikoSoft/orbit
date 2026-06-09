@@ -8,6 +8,7 @@ export enum ChartJsProp {
   DATA = 'data',
   OPTIONS = 'options',
   LABEL = 'label',
+  LOADING = 'loading',
 }
 
 export interface ChartJsProps extends PropTypes {
@@ -15,6 +16,7 @@ export interface ChartJsProps extends PropTypes {
   [ChartJsProp.DATA]: ChartData;
   [ChartJsProp.OPTIONS]: ChartOptions;
   [ChartJsProp.LABEL]: string;
+  [ChartJsProp.LOADING]: boolean;
 }
 
 export const chartJsProps: PropConfigMap<ChartJsProps> = {
@@ -49,5 +51,10 @@ export const chartJsProps: PropConfigMap<ChartJsProps> = {
     default: '',
     control: { type: ControlType.TEXT },
     description: 'Accessible aria-label for the chart canvas',
+  },
+  [ChartJsProp.LOADING]: {
+    default: false,
+    control: { type: ControlType.BOOLEAN },
+    description: 'Shows a loading spinner in place of the chart canvas',
   },
 };
