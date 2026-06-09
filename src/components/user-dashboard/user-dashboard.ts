@@ -89,8 +89,8 @@ export class UserDashboard extends MobxLitElement {
         icon: IconName.FOLDER,
         url: 'workspace',
       },
-      { label: translate('admin'), icon: IconName.ADMIN, url: '/admin' },
       { label: translate('charts'), icon: IconName.CHARTS, url: '/chart' },
+      { label: translate('admin'), icon: IconName.ADMIN, url: '/admin' },
     ];
   }
 
@@ -173,8 +173,10 @@ export class UserDashboard extends MobxLitElement {
                             type=${chart.config.version === ChartVersion.V2
                               ? chart.config.type
                               : ChartConfigType.LINE}
-                            .data=${this.chartDataMap.get(chart.id) ??
-                            { labels: [], datasets: [] }}
+                            .data=${this.chartDataMap.get(chart.id) ?? {
+                              labels: [],
+                              datasets: [],
+                            }}
                             ?loading=${isLoading}
                             label=${chart.name}
                           ></chart-js>
