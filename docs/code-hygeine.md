@@ -42,3 +42,36 @@ Reserve `logged-in`/`logged-out` with `<template>` **only for fully static conte
 
 - Identify the key areas dealing with custom business logic that is crucial to the operation of this program
 - Ensure these crucial areas have unit tests
+
+## 6. Circular Dependencies
+
+Circular dependencies occur when module A imports from module B, which (directly or transitively) imports back from module A. They cause hard-to-debug runtime errors, unpredictable initialization order, and bundler issues.
+
+**Rule: no module may directly or transitively depend on itself.**
+
+### Common scenarios and solutions
+
+**Shared types between two modules**
+
+If A and B both need a type that currently lives in A, extract it to a dedicated `*.models.ts` file that neither A nor B own:
+
+```
+Before: A ←→ B
+After:  A → models ← B
+```
+
+**Sibling components that reference each other**
+
+If a parent component imports a child, the child must never import the parent. If the child needs to communicate upward, use a custom DOM event (see `src/events/`) rather than a direct import.
+
+**Stores / state that imports components**
+
+State and store modules (`src/lib/`) must never import from `src/components/`. If a store needs a type that is currently defined in a component file, move that type to the component's `.models.ts` file and import from there.
+
+**Detecting circular dependencies**
+
+Run the build (`npm run build`) — Rollup/Vite will warn about circular imports. You can also use [`madge`](https://github.com/pahen/madge) for a visual dependency graph:
+
+```bash
+npx madge --circular src/
+```
