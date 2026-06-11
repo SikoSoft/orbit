@@ -50,6 +50,7 @@ export class ChartBuilder extends MobxLitElement {
   @state() private isLoading = false;
   @state() private errorMessage = '';
   @state() private chartName = '';
+  @state() private resync = false;
 
   updated(changedProperties: PropertyValues): void {
     if (changedProperties.has('chart') && this.chart) {
@@ -269,6 +270,7 @@ export class ChartBuilder extends MobxLitElement {
     const request: ChartRequest = {
       config,
       ...(save ? { save: true, name: this.chartName } : {}),
+      ...(this.resync ? { resync: true } : {}),
     };
 
     let result;
@@ -445,6 +447,16 @@ export class ChartBuilder extends MobxLitElement {
               this.chartName = e.detail.value;
             }}
           ></ss-input>
+        </div>
+
+        <div class="toggle-field">
+          <ss-toggle
+            ?on=${this.resync}
+            @toggle-changed=${(e: ToggleChangedEvent): void => {
+              this.resync = e.detail.on;
+            }}
+          ></ss-toggle>
+          <span>${translate('forceUpdateFreshData')}</span>
         </div>
 
         <div class="actions">

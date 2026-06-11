@@ -526,6 +526,7 @@
   "chartType.doughnut": "Doughnut",
   "chartType.polarArea": "Polar Area",
   "chartType.radar": "Radar",
+  "forceUpdateFreshData": "Force update of fresh data",
   "generateChart": "Generate Chart",
   "generating": "Generating...",
   "loadingChart": "Loading chart...",
