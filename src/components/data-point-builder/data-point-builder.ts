@@ -7,11 +7,13 @@ import {
   FactContext,
   FactOperation,
   MedalCountFactContext,
+  PropertySumFactContext,
 } from 'api-spec/models/Fact';
+import { DataType } from 'api-spec/models/Entity';
 import { ListFilter as ListFilterSpec } from 'api-spec/models/List';
 
 import { translate } from '@/lib/Localization';
-import { defaultListFilter } from '@/state';
+import { appState, defaultListFilter } from '@/state';
 import { SelectChangedEvent } from '@ss/ui/components/ss-select.events';
 import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
 import { ListFilterUpdatedEvent } from '@/components/list-filter/list-filter.events';
@@ -41,6 +43,7 @@ export class DataPointBuilder extends MobxLitElement {
   @state() private medalEnd = '';
   @state() private analysisType: AnalysisClassificationType =
     AnalysisClassificationType.MORNING_FASTING;
+  @state() private propertyConfigId = 0;
 
   updated(changedProperties: PropertyValues): void {
     if (changedProperties.has(DataPointBuilderProp.DATA_POINT)) {
@@ -68,6 +71,10 @@ export class DataPointBuilder extends MobxLitElement {
     } else if (dp.operation === FactOperation.ANALYSIS_CLASSIFICATION) {
       this.analysisType = dp.analysisType;
       this.filter = structuredClone(dp.filter);
+    } else if (dp.operation === FactOperation.PROPERTY_SUM) {
+      const ctx = dp as PropertySumFactContext;
+      this.filter = structuredClone(ctx.filter);
+      this.propertyConfigId = ctx.propertyConfigId;
     }
   }
 
@@ -118,11 +125,36 @@ export class DataPointBuilder extends MobxLitElement {
           filter: this.filter,
           analysisType: this.analysisType,
         };
+      case FactOperation.PROPERTY_SUM:
+        return {
+          operation: FactOperation.PROPERTY_SUM,
+          filter: this.filter,
+          propertyConfigId: this.propertyConfigId,
+        };
     }
   }
 
   private emitUpdate(): void {
     this.dispatchEvent(new DataPointUpdatedEvent(this.buildFactContext()));
+  }
+
+  private getIntPropertyOptions(): { value: string; label: string }[] {
+    const types = this.filter.includeTypes ?? [];
+    const configs =
+      types.length > 0
+        ? appState.entityConfigs.filter(c => types.includes(c.id))
+        : appState.entityConfigs;
+    const seen = new Set<number>();
+    const options: { value: string; label: string }[] = [];
+    for (const config of configs) {
+      for (const property of config.properties) {
+        if (property.dataType === DataType.INT && !seen.has(property.id)) {
+          seen.add(property.id);
+          options.push({ value: String(property.id), label: property.name });
+        }
+      }
+    }
+    return options;
   }
 
   private renderFilterField(): TemplateResult {
@@ -210,6 +242,21 @@ export class DataPointBuilder extends MobxLitElement {
             ></ss-select>
           </div>
           ${this.renderFilterField()}
+        `;
+      case FactOperation.PROPERTY_SUM:
+        return html`
+          ${this.renderFilterField()}
+          <div class="field">
+            <label>${translate('propertyConfigId')}</label>
+            <ss-select
+              selected=${String(this.propertyConfigId)}
+              .options=${this.getIntPropertyOptions()}
+              @select-changed=${(e: SelectChangedEvent<string>): void => {
+                this.propertyConfigId = parseInt(e.detail.value) || 0;
+                this.emitUpdate();
+              }}
+            ></ss-select>
+          </div>
         `;
       default:
         return html`${nothing}`;

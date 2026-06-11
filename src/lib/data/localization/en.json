@@ -510,6 +510,8 @@
   "factOperation.uniqueTagCount": "Unique Tag Count",
   "factOperation.medalCount": "Medal Count",
   "factOperation.analysisClassification": "Analysis Classification",
+  "factOperation.propertySum": "Property Sum",
+  "propertyConfigId": "Property",
   "analysisType": "Analysis Type",
   "analysisType.morningFasting": "Morning Fasting",
   "analysisType.afternoonSnacking": "Afternoon Snacking",

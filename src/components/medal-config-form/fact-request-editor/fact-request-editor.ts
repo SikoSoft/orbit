@@ -10,10 +10,13 @@ import {
   MedalCountFactContext,
   AnalysisClassificationFactContext,
   AnalysisClassificationType,
+  PropertySumFactContext,
 } from 'api-spec/models/Fact';
+import { DataType } from 'api-spec/models/Entity';
 import { defaultListFilter } from 'api-spec/models/List';
 
 import { translate } from '@/lib/Localization';
+import { appState } from '@/state';
 import { SelectChangedEvent } from '@ss/ui/components/ss-select.events';
 import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
 import { themed } from '@/lib/Theme';
@@ -36,6 +39,7 @@ const operationOptions = [
   { value: FactOperation.UNIQUE_TAG_COUNT, label: translate('factOperation.uniqueTagCount') },
   { value: FactOperation.MEDAL_COUNT, label: translate('factOperation.medalCount') },
   { value: FactOperation.ANALYSIS_CLASSIFICATION, label: translate('factOperation.analysisClassification') },
+  { value: FactOperation.PROPERTY_SUM, label: translate('factOperation.propertySum') },
 ];
 
 @themed()
@@ -103,8 +107,28 @@ export class FactRequestEditor extends MobxLitElement {
     );
   }
 
+  private getIntPropertyOptions(
+    includeTypes: number[],
+  ): { value: string; label: string }[] {
+    const configs =
+      includeTypes.length > 0
+        ? appState.entityConfigs.filter(c => includeTypes.includes(c.id))
+        : appState.entityConfigs;
+    const seen = new Set<number>();
+    const options: { value: string; label: string }[] = [];
+    for (const config of configs) {
+      for (const property of config.properties) {
+        if (property.dataType === DataType.INT && !seen.has(property.id)) {
+          seen.add(property.id);
+          options.push({ value: String(property.id), label: property.name });
+        }
+      }
+    }
+    return options;
+  }
+
   private renderFilterButton(
-    context: EntityCountFactContext | UniqueTagCountFactContext | AnalysisClassificationFactContext,
+    context: EntityCountFactContext | UniqueTagCountFactContext | AnalysisClassificationFactContext | PropertySumFactContext,
     fr: FactRequest,
   ): TemplateResult {
     return html`
@@ -140,6 +164,35 @@ export class FactRequestEditor extends MobxLitElement {
                 this.emit({
                   ...fr,
                   context: { ...context, analysisType: e.detail.value as AnalysisClassificationType },
+                });
+              }}
+            ></ss-select>
+          </div>
+        </div>
+      </div>
+      ${this.renderFilterButton(context, fr)}
+    `;
+  }
+
+  private renderPropertySumFields(
+    context: PropertySumFactContext,
+    fr: FactRequest,
+  ): TemplateResult {
+    return html`
+      <div class="context-fields">
+        <div class="row">
+          <div class="field">
+            <label>${translate('propertyConfigId')}</label>
+            <ss-select
+              .options=${this.getIntPropertyOptions(context.filter.includeTypes ?? [])}
+              .selected=${String(context.propertyConfigId)}
+              @select-changed=${(e: SelectChangedEvent<string>): void => {
+                this.emit({
+                  ...fr,
+                  context: {
+                    ...context,
+                    propertyConfigId: Number(e.detail.value),
+                  },
                 });
               }}
             ></ss-select>
@@ -205,6 +258,8 @@ export class FactRequestEditor extends MobxLitElement {
                 newContext = { operation: op, medalConfigId: 0, series: '' };
               } else if (op === FactOperation.ANALYSIS_CLASSIFICATION) {
                 newContext = { operation: op, filter: { ...defaultListFilter }, analysisType: AnalysisClassificationType.MORNING_FASTING };
+              } else if (op === FactOperation.PROPERTY_SUM) {
+                newContext = { operation: op, filter: { ...defaultListFilter }, propertyConfigId: 0 };
               } else {
                 newContext = { operation: op, filter: { ...defaultListFilter } };
               }
@@ -234,6 +289,9 @@ export class FactRequestEditor extends MobxLitElement {
             fr.context as AnalysisClassificationFactContext,
             fr,
           )
+        : nothing}
+      ${operation === FactOperation.PROPERTY_SUM
+        ? this.renderPropertySumFields(fr.context as PropertySumFactContext, fr)
         : nothing}
     `;
   }
