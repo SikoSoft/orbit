@@ -100,6 +100,7 @@ function rowToEntityConfig(row: Record<string, unknown>): EntityConfig {
     allowPropertyOrdering: row['allow_property_ordering'] === 1,
     allowTags: row['allow_tags'] === 1,
     aiEnabled: row['ai_enabled'] === 1,
+    aiClassifyEnabled: row['ai_classify_enabled'] === 1,
     aiIdentifyPrompt: (row['ai_identify_prompt'] as string | null) ?? '',
     public: row['public'] === 1,
     viewAccessPolicy: null,

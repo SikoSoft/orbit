@@ -250,6 +250,7 @@ export class EntityConfigForm extends MobxLitElement {
       allowPropertyOrdering: this[EntityConfigFormProp.ALLOW_PROPERTY_ORDERING],
       allowTags: this[EntityConfigFormProp.ALLOW_TAGS],
       aiEnabled: this[EntityConfigFormProp.AI_ENABLED],
+      aiClassifyEnabled: false,
       aiIdentifyPrompt: this[EntityConfigFormProp.AI_IDENTIFY_PROMPT],
       viewAccessPolicy: this[EntityConfigFormProp.VIEW_ACCESS_POLICY],
       editAccessPolicy: this[EntityConfigFormProp.EDIT_ACCESS_POLICY],

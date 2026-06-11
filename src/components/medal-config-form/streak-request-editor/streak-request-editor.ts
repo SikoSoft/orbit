@@ -291,6 +291,8 @@ export class StreakRequestEditor extends MobxLitElement {
                   newInnerContext = { operation: op, medalConfigId: 0, series: '' };
                 } else if (op === FactOperation.ANALYSIS_CLASSIFICATION) {
                   newInnerContext = { operation: op, filter: { ...defaultListFilter }, analysisType: AnalysisClassificationType.MORNING_FASTING };
+                } else if (op === FactOperation.PROPERTY_SUM) {
+                  newInnerContext = { operation: op, filter: { ...defaultListFilter }, propertyConfigId: 0 };
                 } else {
                   newInnerContext = { operation: op, filter: { ...defaultListFilter } };
                 }

@@ -162,6 +162,7 @@ describe('AppState', () => {
         allowPropertyOrdering: false,
         allowTags: true,
         aiEnabled: false,
+        aiClassifyEnabled: false,
         aiIdentifyPrompt: '',
         public: false,
         viewAccessPolicy: null,
