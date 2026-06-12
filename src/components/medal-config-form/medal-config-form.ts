@@ -2,7 +2,8 @@ import { html, css, nothing, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { MedalConfig, Criterion, Criteria, FactRequest, StreakRequest } from 'api-spec/models/Medal';
+import { MedalConfig, Criterion, Criteria } from 'api-spec/models/Medal';
+import { FactRequest, StreakRequest } from 'api-spec/models/Fact';
 import { FactOperation } from 'api-spec/models/Fact';
 import { SegmentationTimeUnit } from 'api-spec/models/Statistic';
 import { defaultListFilter } from 'api-spec/models/List';
@@ -283,14 +284,16 @@ export class MedalConfigForm extends MobxLitElement {
   private addStreakRequest(): void {
     const newRequest: StreakRequest = {
       alias: '',
-      segmentUnit: SegmentationTimeUnit.DAY,
-      length: 1,
-      innerContext: {
-        operation: FactOperation.ENTITY_COUNT,
-        filter: { ...defaultListFilter },
+      context: {
+        segmentUnit: SegmentationTimeUnit.DAY,
+        length: 1,
+        innerContext: {
+          operation: FactOperation.ENTITY_COUNT,
+          filter: { ...defaultListFilter },
+        },
+        innerOperator: '==',
+        innerValue: 0,
       },
-      innerOperator: '==',
-      innerValue: 0,
     };
     this.localConfig = {
       ...this.localConfig,

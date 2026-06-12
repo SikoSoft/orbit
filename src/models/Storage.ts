@@ -2,6 +2,7 @@ import { Setting, Settings } from 'api-spec/models/Setting';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { Workspace } from 'api-spec/models/Workspace';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
+import { Streak, StreakContext, StreakResult } from 'api-spec/models/Fact';
 import { ListConfig, ListSort, ListFilter } from 'api-spec/models/List';
 import {
   EntityCalculatedPropertyConfig,
@@ -228,4 +229,8 @@ export interface StorageSchema {
   updateChart?(id: number, request: ChartRequest): Promise<StorageResult<ChartResponse>>;
   getCharts?(): Promise<Chart[]>;
   deleteChart?(id: number): Promise<boolean>;
+  getStreaks?(): Promise<{ streaks: Streak[]; results: StreakResult[] }>;
+  createStreak?(name: string, context: StreakContext): Promise<StorageResult<Streak>>;
+  updateStreak?(id: number, name: string | undefined, context: StreakContext | undefined): Promise<StorageResult<Streak>>;
+  deleteStreak?(id: number): Promise<boolean>;
 }

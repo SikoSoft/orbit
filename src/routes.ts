@@ -112,4 +112,9 @@ export const routes: Route[] = [
     component: 'chart-view',
     action: async () => await import('@/views/chart-view/chart-view'),
   },
+  {
+    path: '/streaks',
+    component: 'streaks-view',
+    action: async () => await import('@/views/streaks-view/streaks-view'),
+  },
 ];

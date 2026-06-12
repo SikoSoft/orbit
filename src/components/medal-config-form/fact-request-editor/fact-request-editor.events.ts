@@ -1,4 +1,4 @@
-import { FactRequest } from 'api-spec/models/Medal';
+import { FactRequest } from 'api-spec/models/Fact';
 
 export const factRequestChangedEventName = 'fact-request-changed';
 

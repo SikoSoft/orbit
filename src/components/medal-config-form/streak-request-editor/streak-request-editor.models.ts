@@ -1,5 +1,5 @@
 import { ControlType } from '@/models/Control';
-import { StreakRequest } from 'api-spec/models/Medal';
+import { StreakRequest } from 'api-spec/models/Fact';
 import { FactOperation } from 'api-spec/models/Fact';
 import { SegmentationTimeUnit } from 'api-spec/models/Statistic';
 import { defaultListFilter } from 'api-spec/models/List';
@@ -19,14 +19,16 @@ export const streakRequestEditorProps: PropConfigMap<StreakRequestEditorProps> =
   [StreakRequestEditorProp.STREAK_REQUEST]: {
     default: {
       alias: '',
-      segmentUnit: SegmentationTimeUnit.DAY,
-      length: 1,
-      innerContext: {
-        operation: FactOperation.ENTITY_COUNT,
-        filter: { ...defaultListFilter },
+      context: {
+        segmentUnit: SegmentationTimeUnit.DAY,
+        length: 1,
+        innerContext: {
+          operation: FactOperation.ENTITY_COUNT,
+          filter: { ...defaultListFilter },
+        },
+        innerOperator: '==',
+        innerValue: 0,
       },
-      innerOperator: '==',
-      innerValue: 0,
     },
     control: { type: ControlType.HIDDEN },
     description: 'The streak request being edited',

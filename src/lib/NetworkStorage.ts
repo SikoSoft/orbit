@@ -43,6 +43,7 @@ import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { Workspace } from 'api-spec/models/Workspace';
 import { ThemeName } from '@/models/Page';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
+import { Streak, StreakContext, StreakResult } from 'api-spec/models/Fact';
 
 export class NetworkStorage implements StorageSchema {
   isActive = true;
@@ -1032,6 +1033,56 @@ export class NetworkStorage implements StorageSchema {
 
   async deleteChart(id: number): Promise<boolean> {
     const result = await api.delete<null>(`chart/${id}`);
+
+    if (result && result.isOk) {
+      return true;
+    }
+
+    return false;
+  }
+
+  async getStreaks(): Promise<{ streaks: Streak[]; results: StreakResult[] }> {
+    const result = await api.get<{ streaks: Streak[]; results: StreakResult[] }>('streakRequest');
+
+    if (result && result.isOk) {
+      return result.response;
+    }
+
+    return { streaks: [], results: [] };
+  }
+
+  async createStreak(name: string, context: StreakContext): Promise<StorageResult<Streak>> {
+    const result = await api.post<{ name: string; context: StreakContext }, { streak: Streak }>(
+      'streakRequest',
+      { name, context },
+    );
+
+    if (result && result.isOk) {
+      return { isOk: true, value: result.response.streak };
+    }
+
+    return { isOk: false, error: new Error('Failed to create streak') };
+  }
+
+  async updateStreak(
+    id: number,
+    name: string | undefined,
+    context: StreakContext | undefined,
+  ): Promise<StorageResult<Streak>> {
+    const result = await api.put<
+      { name?: string; context?: StreakContext },
+      { streak: Streak }
+    >(`streakRequest/${id}`, { name, context });
+
+    if (result && result.isOk) {
+      return { isOk: true, value: result.response.streak };
+    }
+
+    return { isOk: false, error: new Error('Failed to update streak') };
+  }
+
+  async deleteStreak(id: number): Promise<boolean> {
+    const result = await api.delete<null>(`streakRequest/${id}`);
 
     if (result && result.isOk) {
       return true;

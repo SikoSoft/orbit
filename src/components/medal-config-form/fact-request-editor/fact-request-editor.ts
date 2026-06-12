@@ -2,7 +2,7 @@ import { html, css, nothing, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 
-import { FactRequest } from 'api-spec/models/Medal';
+import { FactRequest } from 'api-spec/models/Fact';
 import {
   FactOperation,
   EntityCountFactContext,

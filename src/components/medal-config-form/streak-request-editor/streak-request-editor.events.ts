@@ -1,4 +1,4 @@
-import { StreakRequest } from 'api-spec/models/Medal';
+import { StreakRequest } from 'api-spec/models/Fact';
 
 export const streakRequestChangedEventName = 'streak-request-changed';
 

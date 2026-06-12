@@ -1,10 +1,9 @@
 import { html, css, nothing, TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 
-import { StreakRequest } from 'api-spec/models/Fact';
-import { EvalOperator } from 'api-spec/models/Medal';
 import {
+  StreakContext,
   FactOperation,
   AnalysisClassificationType,
   EntityCountFactContext,
@@ -12,21 +11,25 @@ import {
   MedalCountFactContext,
   AnalysisClassificationFactContext,
 } from 'api-spec/models/Fact';
+import { EvalOperator } from 'api-spec/models/Medal';
 import { SegmentationTimeUnit } from 'api-spec/models/Statistic';
 import { defaultListFilter } from 'api-spec/models/List';
+import { NotificationType } from '@ss/ui/components/notification-provider.models';
 
 import { translate } from '@/lib/Localization';
+import { storage } from '@/lib/Storage';
+import { addToast } from '@/lib/Util';
 import { SelectChangedEvent } from '@ss/ui/components/ss-select.events';
 import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
+import { ListFilterUpdatedEvent } from '@/components/list-filter/list-filter.events';
 import { themed } from '@/lib/Theme';
 
 import {
-  StreakRequestEditorProp,
-  streakRequestEditorProps,
-  StreakRequestEditorProps,
-} from './streak-request-editor.models';
-import { StreakRequestChangedEvent, StreakRequestRemovedEvent } from './streak-request-editor.events';
-import { ListFilterUpdatedEvent } from '@/components/list-filter/list-filter.events';
+  StreakConfigFormProp,
+  streakConfigFormProps,
+  StreakConfigFormProps,
+} from './streak-config-form.models';
+import { StreakSavedEvent } from './streak-config-form.events';
 
 import '@ss/ui/components/ss-input';
 import '@ss/ui/components/ss-select';
@@ -65,16 +68,25 @@ const booleanOptions = [
   { value: 'false', label: translate('false') },
 ];
 
+function defaultContext(): StreakContext {
+  return {
+    segmentUnit: SegmentationTimeUnit.DAY,
+    length: 1,
+    innerContext: {
+      operation: FactOperation.ENTITY_COUNT,
+      filter: { ...defaultListFilter },
+    },
+    innerOperator: '==',
+    innerValue: 0,
+  };
+}
+
 @themed()
-@customElement('streak-request-editor')
-export class StreakRequestEditor extends MobxLitElement {
+@customElement('streak-config-form')
+export class StreakConfigForm extends MobxLitElement {
   static styles = css`
     :host {
       display: block;
-      border: 1px solid var(--color-border, #ccc);
-      border-radius: 4px;
-      padding: 0.75rem;
-      margin-bottom: 0.5rem;
     }
 
     .row {
@@ -102,6 +114,7 @@ export class StreakRequestEditor extends MobxLitElement {
       border-top: 1px solid var(--color-border, #eee);
       padding-top: 0.75rem;
       margin-top: 0.25rem;
+      margin-bottom: 0.75rem;
     }
 
     .section-label {
@@ -116,35 +129,43 @@ export class StreakRequestEditor extends MobxLitElement {
       padding-top: 0.75rem;
       margin-top: 0.25rem;
     }
+
+    .buttons {
+      margin-top: 0.75rem;
+    }
   `;
 
   @property({ type: Object })
-  [StreakRequestEditorProp.STREAK_REQUEST]: StreakRequestEditorProps[StreakRequestEditorProp.STREAK_REQUEST] =
-    streakRequestEditorProps[StreakRequestEditorProp.STREAK_REQUEST].default;
+  [StreakConfigFormProp.STREAK]: StreakConfigFormProps[StreakConfigFormProp.STREAK] =
+    streakConfigFormProps[StreakConfigFormProp.STREAK].default;
 
-  @property({ type: Number })
-  [StreakRequestEditorProp.INDEX]: StreakRequestEditorProps[StreakRequestEditorProp.INDEX] =
-    streakRequestEditorProps[StreakRequestEditorProp.INDEX].default;
+  @state() private streakName = '';
+  @state() private localContext: StreakContext = defaultContext();
+  @state() private isSaving = false;
 
-  private emit(streakRequest: StreakRequest): void {
-    this.dispatchEvent(
-      new StreakRequestChangedEvent({
-        index: this[StreakRequestEditorProp.INDEX],
-        streakRequest,
-      }),
-    );
+  connectedCallback(): void {
+    super.connectedCallback();
+    const streak = this[StreakConfigFormProp.STREAK];
+    if (streak) {
+      this.streakName = streak.name;
+      this.localContext = { ...streak.context };
+    }
   }
 
-  private renderInnerValue(sr: StreakRequest): TemplateResult {
-    if (sr.context.innerContext.operation === FactOperation.ANALYSIS_CLASSIFICATION) {
+  private updateContext(partial: Partial<StreakContext>): void {
+    this.localContext = { ...this.localContext, ...partial };
+  }
+
+  private renderInnerValue(): TemplateResult {
+    if (this.localContext.innerContext.operation === FactOperation.ANALYSIS_CLASSIFICATION) {
       return html`
         <div class="field">
           <label>${translate('innerValue')}</label>
           <ss-select
             .options=${booleanOptions}
-            .selected=${String(sr.context.innerValue)}
+            .selected=${String(this.localContext.innerValue)}
             @select-changed=${(e: SelectChangedEvent<string>): void => {
-              this.emit({ ...sr, context: { ...sr.context, innerValue: e.detail.value === 'true' } });
+              this.updateContext({ innerValue: e.detail.value === 'true' });
             }}
           ></ss-select>
         </div>
@@ -154,11 +175,11 @@ export class StreakRequestEditor extends MobxLitElement {
       <div class="field">
         <label>${translate('innerValue')}</label>
         <ss-input
-          .value=${String(sr.context.innerValue)}
+          .value=${String(this.localContext.innerValue)}
           @input-changed=${(e: InputChangedEvent): void => {
             const raw = e.detail.value;
             const value: string | number = raw !== '' && !isNaN(Number(raw)) ? Number(raw) : raw;
-            this.emit({ ...sr, context: { ...sr.context, innerValue: value } });
+            this.updateContext({ innerValue: value });
           }}
         ></ss-input>
       </div>
@@ -167,7 +188,6 @@ export class StreakRequestEditor extends MobxLitElement {
 
   private renderFilterSection(
     context: EntityCountFactContext | UniqueTagCountFactContext | AnalysisClassificationFactContext,
-    sr: StreakRequest,
   ): TemplateResult {
     return html`
       <div class="context-fields">
@@ -176,14 +196,14 @@ export class StreakRequestEditor extends MobxLitElement {
           showAll
           .listFilter=${context.filter}
           @list-filter-updated=${(e: ListFilterUpdatedEvent): void => {
-            this.emit({ ...sr, context: { ...sr.context, innerContext: { ...context, filter: e.detail } } });
+            this.updateContext({ innerContext: { ...context, filter: e.detail } });
           }}
         ></list-filter-control>
       </div>
     `;
   }
 
-  private renderMedalCountFields(context: MedalCountFactContext, sr: StreakRequest): TemplateResult {
+  private renderMedalCountFields(context: MedalCountFactContext): TemplateResult {
     return html`
       <div class="context-fields">
         <div class="row">
@@ -192,7 +212,7 @@ export class StreakRequestEditor extends MobxLitElement {
             <ss-input
               .value=${String(context.medalConfigId)}
               @input-changed=${(e: InputChangedEvent): void => {
-                this.emit({ ...sr, context: { ...sr.context, innerContext: { ...context, medalConfigId: Number(e.detail.value) } } });
+                this.updateContext({ innerContext: { ...context, medalConfigId: Number(e.detail.value) } });
               }}
             ></ss-input>
           </div>
@@ -201,7 +221,7 @@ export class StreakRequestEditor extends MobxLitElement {
             <ss-input
               .value=${context.series}
               @input-changed=${(e: InputChangedEvent): void => {
-                this.emit({ ...sr, context: { ...sr.context, innerContext: { ...context, series: e.detail.value } } });
+                this.updateContext({ innerContext: { ...context, series: e.detail.value } });
               }}
             ></ss-input>
           </div>
@@ -210,10 +230,7 @@ export class StreakRequestEditor extends MobxLitElement {
     `;
   }
 
-  private renderAnalysisClassificationFields(
-    context: AnalysisClassificationFactContext,
-    sr: StreakRequest,
-  ): TemplateResult {
+  private renderAnalysisClassificationFields(context: AnalysisClassificationFactContext): TemplateResult {
     return html`
       <div class="context-fields">
         <div class="row">
@@ -224,57 +241,85 @@ export class StreakRequestEditor extends MobxLitElement {
               .selected=${context.analysisType}
               @select-changed=${(e: SelectChangedEvent<AnalysisClassificationType>): void => {
                 const updated: AnalysisClassificationFactContext = { ...context, analysisType: e.detail.value };
-                this.emit({ ...sr, context: { ...sr.context, innerContext: updated } });
+                this.updateContext({ innerContext: updated });
               }}
             ></ss-select>
           </div>
         </div>
       </div>
-      ${this.renderFilterSection(context, sr)}
+      ${this.renderFilterSection(context)}
     `;
   }
 
+  private async handleSave(): Promise<void> {
+    if (!this.streakName.trim()) {
+      addToast(translate('streakNameRequired'), NotificationType.ERROR);
+      return;
+    }
+
+    this.isSaving = true;
+
+    const streak = this[StreakConfigFormProp.STREAK];
+    let result;
+
+    if (streak) {
+      result = await storage.updateStreak?.(streak.id, this.streakName, this.localContext);
+    } else {
+      result = await storage.createStreak?.(this.streakName, this.localContext);
+    }
+
+    this.isSaving = false;
+
+    if (!result || !result.isOk) {
+      addToast(translate('failedToSaveStreak'), NotificationType.ERROR);
+      return;
+    }
+
+    addToast(translate('streakSaved'), NotificationType.SUCCESS);
+    this.dispatchEvent(new StreakSavedEvent({ streak: result.value }));
+
+    if (!streak) {
+      this.streakName = '';
+      this.localContext = defaultContext();
+    }
+  }
+
   render(): TemplateResult {
-    const sr = this[StreakRequestEditorProp.STREAK_REQUEST];
-    const idx = this[StreakRequestEditorProp.INDEX];
-    const { operation } = sr.context.innerContext;
+    const { operation } = this.localContext.innerContext;
 
     return html`
       <div class="row">
         <div class="field">
-          <label>${translate('alias')}</label>
+          <label>${translate('name')}</label>
           <ss-input
-            .value=${sr.alias}
+            .value=${this.streakName}
             @input-changed=${(e: InputChangedEvent): void => {
-              this.emit({ ...sr, alias: e.detail.value });
+              this.streakName = e.detail.value;
             }}
           ></ss-input>
         </div>
+      </div>
+
+      <div class="row">
         <div class="field">
           <label>${translate('segmentUnit')}</label>
           <ss-select
             .options=${segmentUnitOptions}
-            .selected=${sr.context.segmentUnit}
+            .selected=${this.localContext.segmentUnit}
             @select-changed=${(e: SelectChangedEvent<SegmentationTimeUnit>): void => {
-              this.emit({ ...sr, context: { ...sr.context, segmentUnit: e.detail.value } });
+              this.updateContext({ segmentUnit: e.detail.value });
             }}
           ></ss-select>
         </div>
         <div class="field">
           <label>${translate('streakLength')}</label>
           <ss-input
-            .value=${String(sr.context.length)}
+            .value=${String(this.localContext.length)}
             @input-changed=${(e: InputChangedEvent): void => {
-              this.emit({ ...sr, context: { ...sr.context, length: Math.max(1, Number(e.detail.value) || 1) } });
+              this.updateContext({ length: Math.max(1, Number(e.detail.value) || 1) });
             }}
           ></ss-input>
         </div>
-        <ss-button
-          negative
-          @click=${(): void => {
-            this.dispatchEvent(new StreakRequestRemovedEvent({ index: idx }));
-          }}
-        >${translate('remove')}</ss-button>
       </div>
 
       <div class="inner-context">
@@ -298,7 +343,7 @@ export class StreakRequestEditor extends MobxLitElement {
                   newInnerContext = { operation: op, filter: { ...defaultListFilter } };
                 }
                 const newInnerValue = op === FactOperation.ANALYSIS_CLASSIFICATION ? true : 0;
-                this.emit({ ...sr, context: { ...sr.context, innerContext: newInnerContext, innerValue: newInnerValue } });
+                this.updateContext({ innerContext: newInnerContext, innerValue: newInnerValue });
               }}
             ></ss-select>
           </div>
@@ -306,27 +351,38 @@ export class StreakRequestEditor extends MobxLitElement {
             <label>${translate('innerOperator')}</label>
             <ss-select
               .options=${evalOperatorOptions}
-              .selected=${sr.context.innerOperator}
+              .selected=${this.localContext.innerOperator}
               @select-changed=${(e: SelectChangedEvent<EvalOperator>): void => {
-                this.emit({ ...sr, context: { ...sr.context, innerOperator: e.detail.value } });
+                this.updateContext({ innerOperator: e.detail.value });
               }}
             ></ss-select>
           </div>
-          ${this.renderInnerValue(sr)}
+          ${this.renderInnerValue()}
         </div>
 
         ${operation === FactOperation.ENTITY_COUNT || operation === FactOperation.UNIQUE_TAG_COUNT
           ? this.renderFilterSection(
-              sr.context.innerContext as EntityCountFactContext | UniqueTagCountFactContext,
-              sr,
+              this.localContext.innerContext as EntityCountFactContext | UniqueTagCountFactContext,
             )
           : nothing}
         ${operation === FactOperation.MEDAL_COUNT
-          ? this.renderMedalCountFields(sr.context.innerContext as MedalCountFactContext, sr)
+          ? this.renderMedalCountFields(this.localContext.innerContext as MedalCountFactContext)
           : nothing}
         ${operation === FactOperation.ANALYSIS_CLASSIFICATION
-          ? this.renderAnalysisClassificationFields(sr.context.innerContext as AnalysisClassificationFactContext, sr)
+          ? this.renderAnalysisClassificationFields(
+              this.localContext.innerContext as AnalysisClassificationFactContext,
+            )
           : nothing}
+      </div>
+
+      <div class="buttons">
+        <ss-button
+          positive
+          ?disabled=${this.isSaving}
+          @click=${this.handleSave}
+        >
+          ${translate(this[StreakConfigFormProp.STREAK] ? 'update' : 'create')}
+        </ss-button>
       </div>
     `;
   }

@@ -1,5 +1,6 @@
 import { ControlType } from '@/models/Control';
-import { Criterion, Criteria, FactRequest, StreakRequest } from 'api-spec/models/Medal';
+import { Criterion, Criteria } from 'api-spec/models/Medal';
+import { FactRequest, StreakRequest } from 'api-spec/models/Fact';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
 
 export enum MedalConfigFormProp {

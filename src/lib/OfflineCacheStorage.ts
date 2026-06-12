@@ -40,6 +40,7 @@ import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { Workspace } from 'api-spec/models/Workspace';
 import { ThemeName } from '@/models/Page';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
+import { Streak, StreakContext, StreakResult } from 'api-spec/models/Fact';
 
 import { SQLiteStorage, serializePropertyValue } from './SQLiteStorage';
 import { networkStorage } from './NetworkStorage';
@@ -1314,6 +1315,26 @@ export class OfflineCacheStorage implements StorageSchema {
 
   async deleteChart(id: number): Promise<boolean> {
     return networkStorage.deleteChart(id);
+  }
+
+  async getStreaks(): Promise<{ streaks: Streak[]; results: StreakResult[] }> {
+    return networkStorage.getStreaks();
+  }
+
+  async createStreak(name: string, context: StreakContext): Promise<StorageResult<Streak>> {
+    return networkStorage.createStreak(name, context);
+  }
+
+  async updateStreak(
+    id: number,
+    name: string | undefined,
+    context: StreakContext | undefined,
+  ): Promise<StorageResult<Streak>> {
+    return networkStorage.updateStreak(id, name, context);
+  }
+
+  async deleteStreak(id: number): Promise<boolean> {
+    return networkStorage.deleteStreak(id);
   }
 }
 

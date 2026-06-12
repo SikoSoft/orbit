@@ -1,5 +1,5 @@
 import { ControlType } from '@/models/Control';
-import { FactRequest } from 'api-spec/models/Medal';
+import { FactRequest } from 'api-spec/models/Fact';
 import { FactOperation } from 'api-spec/models/Fact';
 import { defaultListFilter } from 'api-spec/models/List';
 import { PropConfigMap, PropTypes } from '@/models/Prop';

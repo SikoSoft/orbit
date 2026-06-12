@@ -545,5 +545,18 @@
   "updating": "Updating...",
   "failedToUpdateChart": "Failed to update chart.",
   "chartUpdated": "Chart updated successfully.",
-  "cancelEdit": "Cancel"
+  "cancelEdit": "Cancel",
+  "streaks": "Streaks",
+  "savedStreaks": "Saved Streaks",
+  "noSavedStreaks": "No saved streaks.",
+  "editStreak": "Edit Streak",
+  "deleteStreak": "Delete Streak",
+  "confirmDeleteStreak": "Are you sure you want to delete this streak? This action cannot be undone.",
+  "streakDeleted": "Streak deleted successfully.",
+  "failedToDeleteStreak": "Failed to delete streak.",
+  "streakSaved": "Streak saved successfully.",
+  "failedToSaveStreak": "Failed to save streak.",
+  "streakNameRequired": "Streak name is required.",
+  "currentStreak": "Current Streak",
+  "longestStreak": "Longest Streak"
 }
