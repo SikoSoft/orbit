@@ -1,5 +1,5 @@
 import { html, css, nothing, TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
 
 import {
@@ -21,7 +21,12 @@ import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
 import { ListFilterUpdatedEvent } from '@/components/list-filter/list-filter.events';
 import { themed } from '@/lib/Theme';
 
-import { StreakFormProp, streakFormProps, StreakFormProps } from './streak-form.models';
+import {
+  StreakFormProp,
+  streakFormProps,
+  StreakFormProps,
+  defaultStreakContext,
+} from './streak-form.models';
 import { StreakContextChangedEvent } from './streak-form.events';
 
 import '@ss/ui/components/ss-input';
@@ -113,12 +118,21 @@ export class StreakForm extends MobxLitElement {
   [StreakFormProp.CONTEXT]: StreakFormProps[StreakFormProp.CONTEXT] =
     streakFormProps[StreakFormProp.CONTEXT].default;
 
+  @state() private localContext: StreakContext = defaultStreakContext();
+
+  updated(changedProperties: Map<string, unknown>): void {
+    if (changedProperties.has(StreakFormProp.CONTEXT) && this[StreakFormProp.CONTEXT]) {
+      this.localContext = this[StreakFormProp.CONTEXT];
+    }
+  }
+
   private emit(context: StreakContext): void {
+    this.localContext = context;
     this.dispatchEvent(new StreakContextChangedEvent({ context }));
   }
 
   private renderInnerValue(): TemplateResult {
-    const ctx = this[StreakFormProp.CONTEXT];
+    const ctx = this.localContext;
     if (ctx.innerContext.operation === FactOperation.ANALYSIS_CLASSIFICATION) {
       return html`
         <div class="field">
@@ -151,7 +165,7 @@ export class StreakForm extends MobxLitElement {
   private renderFilterSection(
     context: EntityCountFactContext | UniqueTagCountFactContext | AnalysisClassificationFactContext,
   ): TemplateResult {
-    const ctx = this[StreakFormProp.CONTEXT];
+    const ctx = this.localContext;
     return html`
       <div class="context-fields">
         <div class="section-label">${translate('filterSettings')}</div>
@@ -167,7 +181,7 @@ export class StreakForm extends MobxLitElement {
   }
 
   private renderMedalCountFields(context: MedalCountFactContext): TemplateResult {
-    const ctx = this[StreakFormProp.CONTEXT];
+    const ctx = this.localContext;
     return html`
       <div class="context-fields">
         <div class="row">
@@ -195,7 +209,7 @@ export class StreakForm extends MobxLitElement {
   }
 
   private renderAnalysisClassificationFields(context: AnalysisClassificationFactContext): TemplateResult {
-    const ctx = this[StreakFormProp.CONTEXT];
+    const ctx = this.localContext;
     return html`
       <div class="context-fields">
         <div class="row">
@@ -217,7 +231,7 @@ export class StreakForm extends MobxLitElement {
   }
 
   render(): TemplateResult {
-    const ctx = this[StreakFormProp.CONTEXT];
+    const ctx = this.localContext;
     const { operation } = ctx.innerContext;
 
     return html`
