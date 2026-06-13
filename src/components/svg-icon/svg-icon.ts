@@ -10,6 +10,7 @@ import './svg/svg-charts';
 import './svg/svg-cloud';
 import './svg/svg-database';
 import './svg/svg-device';
+import './svg/svg-fire';
 import './svg/svg-folder';
 import './svg/svg-image';
 import './svg/svg-key';
@@ -89,6 +90,8 @@ export class SvgIcon extends LitElement {
         return html`<svg-database></svg-database>`;
       case IconName.DEVICE:
         return html`<svg-device></svg-device>`;
+      case IconName.FIRE:
+        return html`<svg-fire></svg-fire>`;
       case IconName.FOLDER:
         return html`<svg-folder></svg-folder>`;
       case IconName.IMAGE:

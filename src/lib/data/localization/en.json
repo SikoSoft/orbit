@@ -558,5 +558,7 @@
   "failedToSaveStreak": "Failed to save streak.",
   "streakNameRequired": "Streak name is required.",
   "currentStreak": "Current Streak",
-  "longestStreak": "Longest Streak"
+  "longestStreak": "Longest Streak",
+  "current": "Current",
+  "pb": "PB"
 }

@@ -10,9 +10,11 @@ import {
   ChartResponse,
   ChartVersion,
 } from 'api-spec/models/Statistic';
+import { Streak, StreakResult } from 'api-spec/models/Fact';
 
 import '@/components/chart-js/chart-js';
 import '@/components/dashboard-cards/dashboard-cards';
+import '@/components/streak-card/streak-card';
 
 import { appState } from '@/state';
 import { translate } from '@/lib/Localization';
@@ -28,6 +30,8 @@ export class UserDashboard extends MobxLitElement {
   @state() private savedCharts: Chart[] = [];
   @state() private chartDataMap: Map<number, ChartData> = new Map();
   @state() private loadingChartIds: Set<number> = new Set();
+  @state() private streaks: Streak[] = [];
+  @state() private streakResults: StreakResult[] = [];
 
   static styles = css`
     .user-dashboard {
@@ -42,6 +46,12 @@ export class UserDashboard extends MobxLitElement {
 
     dashboard-cards {
       margin-top: 1rem;
+    }
+
+    .streak-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
     }
 
     .charts {
@@ -111,6 +121,17 @@ export class UserDashboard extends MobxLitElement {
   connectedCallback(): void {
     super.connectedCallback();
     this.loadCharts();
+    this.loadStreaks();
+  }
+
+  private async loadStreaks(): Promise<void> {
+    const data = await storage.getStreaks();
+    this.streaks = data.streaks;
+    this.streakResults = data.results;
+  }
+
+  private getStreakResult(streakId: number): StreakResult | undefined {
+    return this.streakResults.find(r => r.streakId === streakId);
   }
 
   private async loadCharts(): Promise<void> {
@@ -155,6 +176,22 @@ export class UserDashboard extends MobxLitElement {
           ? html`<p class="welcome">
               ${translate('dashboard.welcome', { name: this.displayName })}
             </p>`
+          : nothing}
+        ${this.streaks.length > 0
+          ? html`
+              <div class="streak-cards">
+                ${repeat(
+                  this.streaks,
+                  streak => streak.id,
+                  streak => html`
+                    <streak-card
+                      .streak=${streak}
+                      .result=${this.getStreakResult(streak.id) ?? null}
+                    ></streak-card>
+                  `,
+                )}
+              </div>
+            `
           : nothing}
         <dashboard-cards .cards=${this.cards}></dashboard-cards>
 

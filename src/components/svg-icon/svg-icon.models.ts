@@ -9,6 +9,7 @@ export enum IconName {
   CLOUD = 'cloud',
   DATABASE = 'database',
   DEVICE = 'device',
+  FIRE = 'fire',
   FOLDER = 'folder',
   IMAGE = 'image',
   KEY = 'key',
