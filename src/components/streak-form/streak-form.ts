@@ -39,10 +39,22 @@ const segmentUnitOptions = Object.values(SegmentationTimeUnit).map(v => ({
 }));
 
 const operationOptions = [
-  { value: FactOperation.ENTITY_COUNT, label: translate('factOperation.entityCount') },
-  { value: FactOperation.UNIQUE_TAG_COUNT, label: translate('factOperation.uniqueTagCount') },
-  { value: FactOperation.MEDAL_COUNT, label: translate('factOperation.medalCount') },
-  { value: FactOperation.ANALYSIS_CLASSIFICATION, label: translate('factOperation.analysisClassification') },
+  {
+    value: FactOperation.ENTITY_COUNT,
+    label: translate('factOperation.entityCount'),
+  },
+  {
+    value: FactOperation.UNIQUE_TAG_COUNT,
+    label: translate('factOperation.uniqueTagCount'),
+  },
+  {
+    value: FactOperation.MEDAL_COUNT,
+    label: translate('factOperation.medalCount'),
+  },
+  {
+    value: FactOperation.ANALYSIS_CLASSIFICATION,
+    label: translate('factOperation.analysisClassification'),
+  },
 ];
 
 const evalOperatorOptions: { value: EvalOperator; label: string }[] = [
@@ -55,10 +67,12 @@ const evalOperatorOptions: { value: EvalOperator; label: string }[] = [
   { value: 'contains', label: 'contains' },
 ];
 
-const analysisTypeOptions = Object.values(AnalysisClassificationType).map(v => ({
-  value: v,
-  label: translate(`analysisType.${v}`),
-}));
+const analysisTypeOptions = Object.values(AnalysisClassificationType).map(
+  v => ({
+    value: v,
+    label: translate(`analysisType.${v}`),
+  }),
+);
 
 const booleanOptions = [
   { value: 'true', label: translate('true') },
@@ -121,7 +135,10 @@ export class StreakForm extends MobxLitElement {
   @state() private localContext: StreakContext = defaultStreakContext();
 
   updated(changedProperties: Map<string, unknown>): void {
-    if (changedProperties.has(StreakFormProp.CONTEXT) && this[StreakFormProp.CONTEXT]) {
+    if (
+      changedProperties.has(StreakFormProp.CONTEXT) &&
+      this[StreakFormProp.CONTEXT]
+    ) {
       this.localContext = this[StreakFormProp.CONTEXT];
     }
   }
@@ -133,6 +150,7 @@ export class StreakForm extends MobxLitElement {
 
   private renderInnerValue(): TemplateResult {
     const ctx = this.localContext;
+    /*
     if (ctx.innerContext.operation === FactOperation.ANALYSIS_CLASSIFICATION) {
       return html`
         <div class="field">
@@ -147,6 +165,7 @@ export class StreakForm extends MobxLitElement {
         </div>
       `;
     }
+      */
     return html`
       <div class="field">
         <label>${translate('innerValue')}</label>
@@ -154,7 +173,8 @@ export class StreakForm extends MobxLitElement {
           .value=${String(ctx.innerValue)}
           @input-changed=${(e: InputChangedEvent): void => {
             const raw = e.detail.value;
-            const value: string | number = raw !== '' && !isNaN(Number(raw)) ? Number(raw) : raw;
+            const value: string | number =
+              raw !== '' && !isNaN(Number(raw)) ? Number(raw) : raw;
             this.emit({ ...ctx, innerValue: value });
           }}
         ></ss-input>
@@ -163,7 +183,10 @@ export class StreakForm extends MobxLitElement {
   }
 
   private renderFilterSection(
-    context: EntityCountFactContext | UniqueTagCountFactContext | AnalysisClassificationFactContext,
+    context:
+      | EntityCountFactContext
+      | UniqueTagCountFactContext
+      | AnalysisClassificationFactContext,
   ): TemplateResult {
     const ctx = this.localContext;
     return html`
@@ -173,14 +196,19 @@ export class StreakForm extends MobxLitElement {
           showAll
           .listFilter=${context.filter}
           @list-filter-updated=${(e: ListFilterUpdatedEvent): void => {
-            this.emit({ ...ctx, innerContext: { ...context, filter: e.detail } });
+            this.emit({
+              ...ctx,
+              innerContext: { ...context, filter: e.detail },
+            });
           }}
         ></list-filter-control>
       </div>
     `;
   }
 
-  private renderMedalCountFields(context: MedalCountFactContext): TemplateResult {
+  private renderMedalCountFields(
+    context: MedalCountFactContext,
+  ): TemplateResult {
     const ctx = this.localContext;
     return html`
       <div class="context-fields">
@@ -190,7 +218,13 @@ export class StreakForm extends MobxLitElement {
             <ss-input
               .value=${String(context.medalConfigId)}
               @input-changed=${(e: InputChangedEvent): void => {
-                this.emit({ ...ctx, innerContext: { ...context, medalConfigId: Number(e.detail.value) } });
+                this.emit({
+                  ...ctx,
+                  innerContext: {
+                    ...context,
+                    medalConfigId: Number(e.detail.value),
+                  },
+                });
               }}
             ></ss-input>
           </div>
@@ -199,7 +233,10 @@ export class StreakForm extends MobxLitElement {
             <ss-input
               .value=${context.series}
               @input-changed=${(e: InputChangedEvent): void => {
-                this.emit({ ...ctx, innerContext: { ...context, series: e.detail.value } });
+                this.emit({
+                  ...ctx,
+                  innerContext: { ...context, series: e.detail.value },
+                });
               }}
             ></ss-input>
           </div>
@@ -208,7 +245,9 @@ export class StreakForm extends MobxLitElement {
     `;
   }
 
-  private renderAnalysisClassificationFields(context: AnalysisClassificationFactContext): TemplateResult {
+  private renderAnalysisClassificationFields(
+    context: AnalysisClassificationFactContext,
+  ): TemplateResult {
     const ctx = this.localContext;
     return html`
       <div class="context-fields">
@@ -218,8 +257,13 @@ export class StreakForm extends MobxLitElement {
             <ss-select
               .options=${analysisTypeOptions}
               .selected=${context.analysisType}
-              @select-changed=${(e: SelectChangedEvent<AnalysisClassificationType>): void => {
-                const updated: AnalysisClassificationFactContext = { ...context, analysisType: e.detail.value };
+              @select-changed=${(
+                e: SelectChangedEvent<AnalysisClassificationType>,
+              ): void => {
+                const updated: AnalysisClassificationFactContext = {
+                  ...context,
+                  analysisType: e.detail.value,
+                };
                 this.emit({ ...ctx, innerContext: updated });
               }}
             ></ss-select>
@@ -241,7 +285,9 @@ export class StreakForm extends MobxLitElement {
           <ss-select
             .options=${segmentUnitOptions}
             .selected=${ctx.segmentUnit}
-            @select-changed=${(e: SelectChangedEvent<SegmentationTimeUnit>): void => {
+            @select-changed=${(
+              e: SelectChangedEvent<SegmentationTimeUnit>,
+            ): void => {
               this.emit({ ...ctx, segmentUnit: e.detail.value });
             }}
           ></ss-select>
@@ -251,7 +297,10 @@ export class StreakForm extends MobxLitElement {
           <ss-input
             .value=${String(ctx.length)}
             @input-changed=${(e: InputChangedEvent): void => {
-              this.emit({ ...ctx, length: Math.max(1, Number(e.detail.value) || 1) });
+              this.emit({
+                ...ctx,
+                length: Math.max(1, Number(e.detail.value) || 1),
+              });
             }}
           ></ss-input>
         </div>
@@ -265,20 +314,42 @@ export class StreakForm extends MobxLitElement {
             <ss-select
               .options=${operationOptions}
               .selected=${operation}
-              @select-changed=${(e: SelectChangedEvent<FactOperation>): void => {
+              @select-changed=${(
+                e: SelectChangedEvent<FactOperation>,
+              ): void => {
                 const op = e.detail.value;
                 let newInnerContext;
                 if (op === FactOperation.MEDAL_COUNT) {
-                  newInnerContext = { operation: op, medalConfigId: 0, series: '' };
+                  newInnerContext = {
+                    operation: op,
+                    medalConfigId: 0,
+                    series: '',
+                  };
                 } else if (op === FactOperation.ANALYSIS_CLASSIFICATION) {
-                  newInnerContext = { operation: op, filter: { ...defaultListFilter }, analysisType: AnalysisClassificationType.MORNING_FASTING };
+                  newInnerContext = {
+                    operation: op,
+                    filter: { ...defaultListFilter },
+                    analysisType: AnalysisClassificationType.MORNING_FASTING,
+                  };
                 } else if (op === FactOperation.PROPERTY_SUM) {
-                  newInnerContext = { operation: op, filter: { ...defaultListFilter }, propertyConfigId: 0 };
+                  newInnerContext = {
+                    operation: op,
+                    filter: { ...defaultListFilter },
+                    propertyConfigId: 0,
+                  };
                 } else {
-                  newInnerContext = { operation: op, filter: { ...defaultListFilter } };
+                  newInnerContext = {
+                    operation: op,
+                    filter: { ...defaultListFilter },
+                  };
                 }
-                const newInnerValue = op === FactOperation.ANALYSIS_CLASSIFICATION ? true : 0;
-                this.emit({ ...ctx, innerContext: newInnerContext, innerValue: newInnerValue });
+                const newInnerValue =
+                  op === FactOperation.ANALYSIS_CLASSIFICATION ? true : 0;
+                this.emit({
+                  ...ctx,
+                  innerContext: newInnerContext,
+                  innerValue: newInnerValue,
+                });
               }}
             ></ss-select>
           </div>
@@ -295,13 +366,18 @@ export class StreakForm extends MobxLitElement {
           ${this.renderInnerValue()}
         </div>
 
-        ${operation === FactOperation.ENTITY_COUNT || operation === FactOperation.UNIQUE_TAG_COUNT
+        ${operation === FactOperation.ENTITY_COUNT ||
+        operation === FactOperation.UNIQUE_TAG_COUNT
           ? this.renderFilterSection(
-              ctx.innerContext as EntityCountFactContext | UniqueTagCountFactContext,
+              ctx.innerContext as
+                | EntityCountFactContext
+                | UniqueTagCountFactContext,
             )
           : nothing}
         ${operation === FactOperation.MEDAL_COUNT
-          ? this.renderMedalCountFields(ctx.innerContext as MedalCountFactContext)
+          ? this.renderMedalCountFields(
+              ctx.innerContext as MedalCountFactContext,
+            )
           : nothing}
         ${operation === FactOperation.ANALYSIS_CLASSIFICATION
           ? this.renderAnalysisClassificationFields(
