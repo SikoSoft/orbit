@@ -447,6 +447,7 @@ export class EntityForm extends ViewElement {
               valueIsSet:
                 'calculation' in propertyConfig ||
                 propertyConfig.dataType === DataType.DATE ||
+                propertyConfig.dataType === DataType.BOOLEAN ||
                 (propertyConfig.dataType === DataType.INT &&
                   value !== propertyConfig.defaultValue)
                   ? true
