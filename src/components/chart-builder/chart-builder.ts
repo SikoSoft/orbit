@@ -297,6 +297,8 @@ export class ChartBuilder extends MobxLitElement {
       new ChartBuiltEvent({
         ...result.value,
         chartType: this.chartType,
+        dataPoints: this.dataPoints,
+        chartName: this.chartName || undefined,
         saved: save,
         updated: save && !!this.chart,
       }),

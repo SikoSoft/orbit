@@ -60,7 +60,13 @@ export class ChartView extends ViewElement {
           }}
           @chart-built=${(e: ChartBuiltEvent): void => {
             this.isChartLoading = false;
-            this.chartData = convertResponseToChartData(e.detail);
+            const firstOp = e.detail.dataPoints[0]?.operation;
+            const label =
+              e.detail.chartName ??
+              (firstOp
+                ? translate(`factOperation.${firstOp}`)
+                : undefined);
+            this.chartData = convertResponseToChartData(e.detail, label);
             this.chartType = e.detail.chartType;
             this.hasChart = true;
             if (e.detail.saved) {

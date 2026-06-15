@@ -10,7 +10,7 @@ import {
   ChartResponse,
   ChartVersion,
 } from 'api-spec/models/Statistic';
-import { Streak, StreakResult } from 'api-spec/models/Fact';
+import { FactContext, Streak, StreakResult } from 'api-spec/models/Fact';
 
 import '@/components/chart-js/chart-js';
 import '@/components/dashboard-cards/dashboard-cards';
@@ -150,17 +150,25 @@ export class UserDashboard extends MobxLitElement {
     this.loadingChartIds = newIds;
     if (result?.isOk) {
       const newMap = new Map(this.chartDataMap);
-      newMap.set(chart.id, this.convertResponseToChartData(result.value));
+      const firstOp = (chart.config.dataPoints[0] as FactContext | undefined)
+        ?.operation;
+      const label = firstOp
+        ? translate(`factOperation.${firstOp}`)
+        : translate('chartData');
+      newMap.set(chart.id, this.convertResponseToChartData(result.value, label));
       this.chartDataMap = newMap;
     }
   }
 
-  private convertResponseToChartData(response: ChartResponse): ChartData {
+  private convertResponseToChartData(
+    response: ChartResponse,
+    label: string,
+  ): ChartData {
     return {
       labels: response.segmentedData.map(d => d.segment),
       datasets: [
         {
-          label: translate('chartData'),
+          label,
           data: response.segmentedData.map(d =>
             typeof d.value.value === 'number' ? d.value.value : 0,
           ),
