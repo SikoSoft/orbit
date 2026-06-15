@@ -540,10 +540,17 @@ export class SQLiteStorage implements StorageSchema {
           propertyFilter.value,
           dataType,
         );
-        conditions.push(
-          `EXISTS (SELECT 1 FROM entity_property ep WHERE ep.entity_id = e.id AND ep.property_config_id = ? AND ep.value = ?)`,
-        );
-        bindings.push(propertyFilter.propertyId, serializedValue);
+        if (propertyFilter.matchUnset) {
+          conditions.push(
+            `(EXISTS (SELECT 1 FROM entity_property ep WHERE ep.entity_id = e.id AND ep.property_config_id = ? AND ep.value = ?) OR NOT EXISTS (SELECT 1 FROM entity_property ep WHERE ep.entity_id = e.id AND ep.property_config_id = ?))`,
+          );
+          bindings.push(propertyFilter.propertyId, serializedValue, propertyFilter.propertyId);
+        } else {
+          conditions.push(
+            `EXISTS (SELECT 1 FROM entity_property ep WHERE ep.entity_id = e.id AND ep.property_config_id = ? AND ep.value = ?)`,
+          );
+          bindings.push(propertyFilter.propertyId, serializedValue);
+        }
       }
 
       // Tag filters
@@ -934,10 +941,17 @@ export class SQLiteStorage implements StorageSchema {
         propertyFilter.value,
         dataType,
       );
-      conditions.push(
-        `EXISTS (SELECT 1 FROM entity_property ep WHERE ep.entity_id = e.id AND ep.property_config_id = ? AND ep.value = ?)`,
-      );
-      bindings.push(propertyFilter.propertyId, serializedValue);
+      if (propertyFilter.matchUnset) {
+        conditions.push(
+          `(EXISTS (SELECT 1 FROM entity_property ep WHERE ep.entity_id = e.id AND ep.property_config_id = ? AND ep.value = ?) OR NOT EXISTS (SELECT 1 FROM entity_property ep WHERE ep.entity_id = e.id AND ep.property_config_id = ?))`,
+        );
+        bindings.push(propertyFilter.propertyId, serializedValue, propertyFilter.propertyId);
+      } else {
+        conditions.push(
+          `EXISTS (SELECT 1 FROM entity_property ep WHERE ep.entity_id = e.id AND ep.property_config_id = ? AND ep.value = ?)`,
+        );
+        bindings.push(propertyFilter.propertyId, serializedValue);
+      }
     }
 
     if (!(filter.includeAllTagging ?? true)) {

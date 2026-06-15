@@ -81,6 +81,10 @@ export class FilterPropertyElement extends MobxLitElement {
   [FilterPropertyProp.OPERATION]: FilterPropertyProps[FilterPropertyProp.OPERATION] =
     filterPropertyProps[FilterPropertyProp.OPERATION].default;
 
+  @property({ type: Boolean })
+  [FilterPropertyProp.MATCH_UNSET]: FilterPropertyProps[FilterPropertyProp.MATCH_UNSET] =
+    filterPropertyProps[FilterPropertyProp.MATCH_UNSET].default;
+
   @state()
   get uiId(): string {
     return `filter-property-${this.index}`;
@@ -178,6 +182,7 @@ export class FilterPropertyElement extends MobxLitElement {
       propertyId: propertyConfigId,
       value: defaultValue,
       operation: this.operation,
+      matchUnset: this.matchUnset,
     };
 
     this.dispatchEvent(
@@ -190,6 +195,7 @@ export class FilterPropertyElement extends MobxLitElement {
       propertyId: this.propertyConfigId,
       value: e.detail.value,
       operation: this.operation,
+      matchUnset: this.matchUnset,
     };
 
     this.dispatchEvent(
@@ -202,6 +208,20 @@ export class FilterPropertyElement extends MobxLitElement {
       propertyId: this.propertyConfigId,
       value: this.value ?? '',
       operation: e.detail.value as TextType,
+      matchUnset: this.matchUnset,
+    };
+
+    this.dispatchEvent(
+      new FilterPropertyUpdatedEvent({ index: this.index, filter }),
+    );
+  }
+
+  private handleMatchUnsetChanged(): void {
+    const filter: FilterProperty = {
+      propertyId: this.propertyConfigId,
+      value: this.value ?? '',
+      operation: this.operation,
+      matchUnset: !this.matchUnset,
     };
 
     this.dispatchEvent(
@@ -308,6 +328,18 @@ export class FilterPropertyElement extends MobxLitElement {
         </div>
 
         ${this.selectedPropertyConfig ? this.renderField() : nothing}
+
+        <div>
+          <input
+            id="${this.uiId}-match-unset"
+            type="checkbox"
+            ?checked=${this.matchUnset}
+            @change=${this.handleMatchUnsetChanged}
+          />
+          <label for="${this.uiId}-match-unset"
+            >${translate('matchUnsetValues')}</label
+          >
+        </div>
       </div>
     `;
   }

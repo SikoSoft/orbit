@@ -9,6 +9,7 @@ export enum FilterPropertyProp {
   INDEX = 'index',
   INCLUDE_TYPES = 'includeTypes',
   OPERATION = 'operation',
+  MATCH_UNSET = 'matchUnset',
 }
 
 export interface FilterPropertyProps extends PropTypes {
@@ -17,6 +18,7 @@ export interface FilterPropertyProps extends PropTypes {
   [FilterPropertyProp.INDEX]: number;
   [FilterPropertyProp.INCLUDE_TYPES]: number[];
   [FilterPropertyProp.OPERATION]: TextType;
+  [FilterPropertyProp.MATCH_UNSET]: boolean;
 }
 
 export const filterPropertyProps: PropConfigMap<FilterPropertyProps> = {
@@ -44,5 +46,10 @@ export const filterPropertyProps: PropConfigMap<FilterPropertyProps> = {
     default: TextType.EQUALS,
     control: { type: ControlType.SELECT, options: Object.values(TextType) },
     description: 'The comparison operation for this property filter',
+  },
+  [FilterPropertyProp.MATCH_UNSET]: {
+    default: false,
+    control: { type: ControlType.BOOLEAN },
+    description: 'Whether to also match entities where this property is unset',
   },
 };

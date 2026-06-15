@@ -59,7 +59,7 @@ export class FilterProperties extends LitElement {
   private handleAddFilter(): void {
     const filters: FilterProperty[] = [
       ...this.filters,
-      { propertyId: 0, value: '', operation: TextType.EQUALS },
+      { propertyId: 0, value: '', operation: TextType.EQUALS, matchUnset: false },
     ];
     this.dispatchEvent(new FilterPropertiesUpdatedEvent({ filters }));
   }
@@ -80,6 +80,7 @@ export class FilterProperties extends LitElement {
                 propertyConfigId=${filter.propertyId}
                 .value=${filter.value}
                 operation=${filter.operation ?? TextType.EQUALS}
+                ?matchUnset=${filter.matchUnset ?? false}
                 @filter-property-updated=${(
                   e: FilterPropertyUpdatedEvent,
                 ): void => {
