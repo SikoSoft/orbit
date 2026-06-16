@@ -1127,6 +1127,7 @@ export class SQLiteStorage implements StorageSchema {
       );
 
       for (const prop of config.properties) {
+        const isCalculated = 'calculation' in prop;
         await this.run(
           `INSERT OR REPLACE INTO entity_property_config
            (id, entity_config_id, name, data_type, prefix, suffix, required, repeat, allowed, hidden, default_value, options_only, options)
@@ -1138,13 +1139,13 @@ export class SQLiteStorage implements StorageSchema {
             prop.dataType,
             prop.prefix,
             prop.suffix,
-            prop.required,
-            prop.repeat,
-            prop.allowed,
+            isCalculated ? null : prop.required,
+            isCalculated ? null : prop.repeat,
+            isCalculated ? null : prop.allowed,
             prop.hidden ? 1 : 0,
             serializePropertyValue(prop.defaultValue, prop.dataType),
-            prop.optionsOnly ? 1 : 0,
-            JSON.stringify(prop.options),
+            isCalculated ? null : (prop.optionsOnly ? 1 : 0),
+            isCalculated ? null : JSON.stringify(prop.options),
           ],
         );
       }
