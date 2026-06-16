@@ -2,6 +2,7 @@ import { html, css, TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import { ViewElement } from '@/lib/ViewElement';
+import { themed } from '@/lib/Theme';
 import { appState } from '@/state';
 import { StreakSavedEvent } from '@/components/streak-config-form/streak-config-form.events';
 import { StreakList } from '@/components/streak-list/streak-list';
@@ -12,6 +13,7 @@ import '@/components/streak-config-form/streak-config-form';
 import '@/components/streak-list/streak-list';
 
 @customElement('streaks-view')
+@themed()
 export class StreaksView extends ViewElement {
   private appState = appState;
 
@@ -21,6 +23,10 @@ export class StreaksView extends ViewElement {
     .view-content {
       margin-top: 1rem;
       padding: 0 1rem;
+    }
+
+    .box {
+      padding: 1rem;
     }
   `;
 
@@ -35,11 +41,13 @@ export class StreaksView extends ViewElement {
     return html`
       <user-header></user-header>
       <div class="view-content">
-        <streak-config-form
-          @streak-saved=${(_e: StreakSavedEvent): void => {
-            this.streakList?.refresh();
-          }}
-        ></streak-config-form>
+        <div class="box">
+          <streak-config-form
+            @streak-saved=${(_e: StreakSavedEvent): void => {
+              this.streakList?.refresh();
+            }}
+          ></streak-config-form>
+        </div>
         <streak-list></streak-list>
       </div>
     `;

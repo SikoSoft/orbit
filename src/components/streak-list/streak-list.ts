@@ -33,6 +33,11 @@ export class StreakList extends MobxLitElement {
       margin-top: 2rem;
     }
 
+    ss-collapsable {
+      display: block;
+      margin-bottom: 1rem;
+    }
+
     .saved-streaks-heading {
       font-size: 1.1rem;
       font-weight: bold;
