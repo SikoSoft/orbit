@@ -254,10 +254,18 @@ export class PropertyConfigForm extends LitElement {
       }
     }
 
-    if (changedProperties.has('value1Type') && this.value1Type === 'property' && !this.value1PropertyConfigId) {
+    if (
+      changedProperties.has('value1Type') &&
+      this.value1Type === 'property' &&
+      !this.value1PropertyConfigId
+    ) {
       this.value1PropertyConfigId = this.pickableProperties[0]?.id ?? 0;
     }
-    if (changedProperties.has('value2Type') && this.value2Type === 'property' && !this.value2PropertyConfigId) {
+    if (
+      changedProperties.has('value2Type') &&
+      this.value2Type === 'property' &&
+      !this.value2PropertyConfigId
+    ) {
       this.value2PropertyConfigId = this.pickableProperties[0]?.id ?? 0;
     }
   }
@@ -758,7 +766,7 @@ export class PropertyConfigForm extends LitElement {
               label: translate(option),
               value: option,
             }))}
-            selected=${this[field]}
+            selected=${String(this[field])}
             @select-changed=${(e: InputChangedEvent): void => {
               if (field === PropertyConfigFormProp.DATA_TYPE) {
                 this.handleDataTypeChange(e.detail.value as DataType);
@@ -782,7 +790,7 @@ export class PropertyConfigForm extends LitElement {
         return html`
           <ss-input
             type=${propertyConfigFormProps[field].control.type}
-            value=${this[field]}
+            value=${String(this[field])}
             @input-changed=${(e: InputChangedEvent): void => {
               this.updateField(field, e.detail.value);
             }}
@@ -930,8 +938,8 @@ export class PropertyConfigForm extends LitElement {
           ]}
           selected=${this.operation}
           @select-changed=${(e: InputChangedEvent): void => {
-            this.operation =
-              e.detail.value as EntityPropertyCalculationOperation;
+            this.operation = e.detail
+              .value as EntityPropertyCalculationOperation;
           }}
         ></ss-select>
       </div>
