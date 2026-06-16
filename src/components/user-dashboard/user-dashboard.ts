@@ -10,11 +10,12 @@ import {
   ChartResponse,
   ChartVersion,
 } from 'api-spec/models/Statistic';
-import { FactContext, Streak, StreakResult } from 'api-spec/models/Fact';
+import { Fact, FactContext, FactResult, Streak, StreakResult } from 'api-spec/models/Fact';
 
 import '@/components/chart-js/chart-js';
 import '@/components/dashboard-cards/dashboard-cards';
 import '@/components/streak-card/streak-card';
+import '@/components/fact-card/fact-card';
 
 import { appState } from '@/state';
 import { translate } from '@/lib/Localization';
@@ -32,6 +33,8 @@ export class UserDashboard extends MobxLitElement {
   @state() private loadingChartIds: Set<number> = new Set();
   @state() private streaks: Streak[] = [];
   @state() private streakResults: StreakResult[] = [];
+  @state() private facts: Fact[] = [];
+  @state() private factResults: FactResult[] = [];
 
   static styles = css`
     .user-dashboard {
@@ -49,6 +52,12 @@ export class UserDashboard extends MobxLitElement {
     }
 
     .streak-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .fact-cards {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1rem;
@@ -101,6 +110,7 @@ export class UserDashboard extends MobxLitElement {
       },
       { label: translate('charts'), icon: IconName.CHARTS, url: '/chart' },
       { label: translate('streaks'), icon: IconName.LAYERS, url: '/streaks' },
+      { label: translate('facts'), icon: IconName.CHARTS, url: '/facts' },
       { label: translate('admin'), icon: IconName.ADMIN, url: '/admin' },
     ];
   }
@@ -122,6 +132,7 @@ export class UserDashboard extends MobxLitElement {
     super.connectedCallback();
     this.loadCharts();
     this.loadStreaks();
+    this.loadFacts();
   }
 
   private async loadStreaks(): Promise<void> {
@@ -132,6 +143,16 @@ export class UserDashboard extends MobxLitElement {
 
   private getStreakResult(streakId: number): StreakResult | undefined {
     return this.streakResults.find(r => r.streakId === streakId);
+  }
+
+  private async loadFacts(): Promise<void> {
+    const data = await storage.getFacts();
+    this.facts = data.facts;
+    this.factResults = data.results;
+  }
+
+  private getFactResult(factId: number): FactResult | undefined {
+    return this.factResults.find(r => r.factId === factId);
   }
 
   private async loadCharts(): Promise<void> {
@@ -196,6 +217,22 @@ export class UserDashboard extends MobxLitElement {
                       .streak=${streak}
                       .result=${this.getStreakResult(streak.id) ?? null}
                     ></streak-card>
+                  `,
+                )}
+              </div>
+            `
+          : nothing}
+        ${this.facts.length > 0
+          ? html`
+              <div class="fact-cards">
+                ${repeat(
+                  this.facts,
+                  fact => fact.id,
+                  fact => html`
+                    <fact-card
+                      .fact=${fact}
+                      .result=${this.getFactResult(fact.id) ?? null}
+                    ></fact-card>
                   `,
                 )}
               </div>

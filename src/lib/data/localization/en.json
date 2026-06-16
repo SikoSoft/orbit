@@ -561,5 +561,17 @@
   "currentStreak": "Current Streak",
   "longestStreak": "Longest Streak",
   "current": "Current",
-  "pb": "PB"
+  "pb": "PB",
+  "facts": "Facts",
+  "savedFacts": "Saved Facts",
+  "noSavedFacts": "No saved facts.",
+  "editFact": "Edit Fact",
+  "deleteFact": "Delete Fact",
+  "confirmDeleteFact": "Are you sure you want to delete this fact? This action cannot be undone.",
+  "factDeleted": "Fact deleted successfully.",
+  "failedToDeleteFact": "Failed to delete fact.",
+  "factSaved": "Fact saved successfully.",
+  "failedToSaveFact": "Failed to save fact.",
+  "factNameRequired": "Fact name is required.",
+  "factValue": "Value"
 }
