@@ -253,6 +253,13 @@ export class PropertyConfigForm extends LitElement {
         }
       }
     }
+
+    if (changedProperties.has('value1Type') && this.value1Type === 'property' && !this.value1PropertyConfigId) {
+      this.value1PropertyConfigId = this.pickableProperties[0]?.id ?? 0;
+    }
+    if (changedProperties.has('value2Type') && this.value2Type === 'property' && !this.value2PropertyConfigId) {
+      this.value2PropertyConfigId = this.pickableProperties[0]?.id ?? 0;
+    }
   }
 
   get visibleFields(): PropertyConfigFormProp[] {
