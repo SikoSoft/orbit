@@ -58,7 +58,7 @@ import {
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { Workspace } from 'api-spec/models/Workspace';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
-import { Streak, StreakContext, StreakResult } from 'api-spec/models/Fact';
+import { Fact, FactContext, FactResult, Streak, StreakContext, StreakResult } from 'api-spec/models/Fact';
 
 export interface SavedListFilter {
   filter: ListFilter;
@@ -964,6 +964,33 @@ export class Storage implements StorageSchema {
 
   @delegateSource()
   async deleteStreak(_id: number): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
+  @delegateSource()
+  async getFacts(): Promise<{ facts: Fact[]; results: FactResult[] }> {
+    return Promise.resolve({ facts: [], results: [] });
+  }
+
+  @delegateSource()
+  async createFact(
+    _name: string,
+    _context: FactContext,
+  ): Promise<StorageResult<Fact>> {
+    return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
+  }
+
+  @delegateSource()
+  async updateFact(
+    _id: number,
+    _name: string | undefined,
+    _context: FactContext | undefined,
+  ): Promise<StorageResult<Fact>> {
+    return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
+  }
+
+  @delegateSource()
+  async deleteFact(_id: number): Promise<boolean> {
     return Promise.resolve(false);
   }
 

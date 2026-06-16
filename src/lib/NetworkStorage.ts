@@ -43,7 +43,7 @@ import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { Workspace } from 'api-spec/models/Workspace';
 import { ThemeName } from '@/models/Page';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
-import { Streak, StreakContext, StreakResult } from 'api-spec/models/Fact';
+import { Fact, FactContext, FactResult, Streak, StreakContext, StreakResult } from 'api-spec/models/Fact';
 
 export class NetworkStorage implements StorageSchema {
   isActive = true;
@@ -1083,6 +1083,56 @@ export class NetworkStorage implements StorageSchema {
 
   async deleteStreak(id: number): Promise<boolean> {
     const result = await api.delete<null>(`streakRequest/${id}`);
+
+    if (result && result.isOk) {
+      return true;
+    }
+
+    return false;
+  }
+
+  async getFacts(): Promise<{ facts: Fact[]; results: FactResult[] }> {
+    const result = await api.get<{ facts: Fact[]; results: FactResult[] }>('factRequest');
+
+    if (result && result.isOk) {
+      return result.response;
+    }
+
+    return { facts: [], results: [] };
+  }
+
+  async createFact(name: string, context: FactContext): Promise<StorageResult<Fact>> {
+    const result = await api.post<{ name: string; context: FactContext }, { fact: Fact }>(
+      'factRequest',
+      { name, context },
+    );
+
+    if (result && result.isOk) {
+      return { isOk: true, value: result.response.fact };
+    }
+
+    return { isOk: false, error: new Error('Failed to create fact') };
+  }
+
+  async updateFact(
+    id: number,
+    name: string | undefined,
+    context: FactContext | undefined,
+  ): Promise<StorageResult<Fact>> {
+    const result = await api.put<
+      { name?: string; context?: FactContext },
+      { fact: Fact }
+    >(`factRequest/${id}`, { name, context });
+
+    if (result && result.isOk) {
+      return { isOk: true, value: result.response.fact };
+    }
+
+    return { isOk: false, error: new Error('Failed to update fact') };
+  }
+
+  async deleteFact(id: number): Promise<boolean> {
+    const result = await api.delete<null>(`factRequest/${id}`);
 
     if (result && result.isOk) {
       return true;
