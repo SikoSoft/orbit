@@ -244,6 +244,32 @@ export class AppState {
     );
   }
 
+  get activeWorkspaceStreakIds(): number[] | null {
+    if (!this.activeWorkspaceId || !this.workspaces.length) {
+      return null;
+    }
+    const activeWorkspace = this.workspaces.find(
+      w => w.id === this.activeWorkspaceId,
+    );
+    if (!activeWorkspace) {
+      return null;
+    }
+    return activeWorkspace.streaks;
+  }
+
+  get activeWorkspaceFactIds(): number[] | null {
+    if (!this.activeWorkspaceId || !this.workspaces.length) {
+      return null;
+    }
+    const activeWorkspace = this.workspaces.find(
+      w => w.id === this.activeWorkspaceId,
+    );
+    if (!activeWorkspace) {
+      return null;
+    }
+    return activeWorkspace.facts;
+  }
+
   get workspaceEntityConfigs(): EntityConfig[] {
     if (!this.activeWorkspaceId || !this.workspaces.length) {
       return this.entityConfigs;

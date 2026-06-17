@@ -198,6 +198,22 @@ export class UserDashboard extends MobxLitElement {
     };
   }
 
+  private get visibleStreaks(): Streak[] {
+    const ids = this.state.activeWorkspaceStreakIds;
+    if (ids === null) {
+      return this.streaks;
+    }
+    return this.streaks.filter(s => ids.includes(s.id));
+  }
+
+  private get visibleFacts(): Fact[] {
+    const ids = this.state.activeWorkspaceFactIds;
+    if (ids === null) {
+      return this.facts;
+    }
+    return this.facts.filter(f => ids.includes(f.id));
+  }
+
   render(): TemplateResult {
     return html`
       <div class="user-dashboard">
@@ -206,11 +222,11 @@ export class UserDashboard extends MobxLitElement {
               ${translate('dashboard.welcome', { name: this.displayName })}
             </p>`
           : nothing}
-        ${this.streaks.length > 0
+        ${this.visibleStreaks.length > 0
           ? html`
               <div class="streak-cards">
                 ${repeat(
-                  this.streaks,
+                  this.visibleStreaks,
                   streak => streak.id,
                   streak => html`
                     <streak-card
@@ -222,11 +238,11 @@ export class UserDashboard extends MobxLitElement {
               </div>
             `
           : nothing}
-        ${this.facts.length > 0
+        ${this.visibleFacts.length > 0
           ? html`
               <div class="fact-cards">
                 ${repeat(
-                  this.facts,
+                  this.visibleFacts,
                   fact => fact.id,
                   fact => html`
                     <fact-card
