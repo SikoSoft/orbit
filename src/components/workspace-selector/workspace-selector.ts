@@ -198,6 +198,11 @@ export class WorkspaceSelector extends MobxLitElement {
     this.isExpanded = true;
   }
 
+  private handleWorkspaceItemClick(e: MouseEvent, index: number): void {
+    e.stopPropagation();
+    this.selectWorkspace(index);
+  }
+
   private selectWorkspace(index: number): void {
     const workspace = this.appState.workspaces[index];
     if (!workspace) {
@@ -293,10 +298,8 @@ export class WorkspaceSelector extends MobxLitElement {
               <div
                 class=${this.itemClass(i)}
                 style="color:${color}"
-                @click=${(e: MouseEvent): void => {
-                  e.stopPropagation();
-                  this.selectWorkspace(i);
-                }}
+                @click=${(e: MouseEvent): void =>
+                  this.handleWorkspaceItemClick(e, i)}
               >
                 ${w.name}
               </div>

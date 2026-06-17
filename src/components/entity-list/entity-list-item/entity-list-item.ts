@@ -486,6 +486,11 @@ export class EntityListItem extends MobxLitElement {
     }
   }
 
+  private handleImageClick(e: Event, value: ImageDataValue): void {
+    e.stopPropagation();
+    this.zoomedImage = value;
+  }
+
   handleMouseEnter(): void {
     if (this.mode === EntityListItemMode.EDIT) {
       return;
@@ -575,10 +580,7 @@ export class EntityListItem extends MobxLitElement {
         src=${value.src}
         alt=${value.alt}
         crossorigin="anonymous"
-        @click=${(e: Event): void => {
-          e.stopPropagation();
-          this.zoomedImage = value;
-        }}
+        @click=${(e: Event): void => this.handleImageClick(e, value)}
         @mousedown=${(e: Event): void => {
           e.stopPropagation();
         }}

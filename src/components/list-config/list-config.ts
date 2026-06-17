@@ -672,6 +672,35 @@ export class ListConfig extends MobxLitElement {
     this.sortIsOpen = !this.sortIsOpen;
   }
 
+  private handleConfigCloseClick(e: MouseEvent): void {
+    this.state.setSelectListConfigMode(false);
+    this.state.setEditListConfigMode(false);
+    e.stopPropagation();
+  }
+
+  private handlePublicLinkClick(e: MouseEvent): void {
+    const input = e.currentTarget as HTMLInputElement;
+    input.select();
+    navigator.clipboard.writeText(this.publicUrl);
+    addToast(translate('publicLinkCopied'), NotificationType.SUCCESS);
+  }
+
+  private handleDeleteConfirmClosed(): void {
+    this.confirmDeleteIsOpen = false;
+    this.deleteItemsChecked = false;
+  }
+
+  private handleDeleteConfigConfirmed(): void {
+    this.deleteConfig();
+    this.confirmDeleteIsOpen = false;
+    this.deleteItemsChecked = false;
+  }
+
+  private handleDeleteConfigCanceled(): void {
+    this.confirmDeleteIsOpen = false;
+    this.deleteItemsChecked = false;
+  }
+
   showConfigDeleteConfirm(): void {
     this.confirmDeleteIsOpen = true;
   }
@@ -722,11 +751,8 @@ export class ListConfig extends MobxLitElement {
                     html`<div class="config-slide">
                       <div
                         class="close"
-                        @click=${(e: MouseEvent): void => {
-                          this.state.setSelectListConfigMode(false);
-                          this.state.setEditListConfigMode(false);
-                          e.stopPropagation();
-                        }}
+                        @click=${(e: MouseEvent): void =>
+                          this.handleConfigCloseClick(e)}
                       ></div>
 
                       <div class="name">
@@ -835,15 +861,8 @@ export class ListConfig extends MobxLitElement {
                     type="text"
                     readonly
                     value=${this.publicUrl}
-                    @click=${(e: MouseEvent): void => {
-                      const input = e.currentTarget as HTMLInputElement;
-                      input.select();
-                      navigator.clipboard.writeText(this.publicUrl);
-                      addToast(
-                        translate('publicLinkCopied'),
-                        NotificationType.SUCCESS,
-                      );
-                    }}
+                    @click=${(e: MouseEvent): void =>
+                      this.handlePublicLinkClick(e)}
                   />
                 </fieldset>
               </div>`
@@ -878,10 +897,7 @@ export class ListConfig extends MobxLitElement {
         closeOnOutsideClick
         closeOnEsc
         closeButton
-        @pop-up-closed=${(): void => {
-          this.confirmDeleteIsOpen = false;
-          this.deleteItemsChecked = false;
-        }}
+        @pop-up-closed=${(): void => this.handleDeleteConfirmClosed()}
       >
         <div class="delete-config-modal">
           <p>${translate('confirmDeleteListConfig')}</p>
@@ -899,18 +915,11 @@ export class ListConfig extends MobxLitElement {
           </label>
           <div class="delete-config-actions">
             <ss-button
-              @click=${(): void => {
-                this.deleteConfig();
-                this.confirmDeleteIsOpen = false;
-                this.deleteItemsChecked = false;
-              }}
+              @click=${(): void => this.handleDeleteConfigConfirmed()}
               >${translate('delete')}</ss-button
             >
             <ss-button
-              @click=${(): void => {
-                this.confirmDeleteIsOpen = false;
-                this.deleteItemsChecked = false;
-              }}
+              @click=${(): void => this.handleDeleteConfigCanceled()}
               >${translate('cancel')}</ss-button
             >
           </div>

@@ -182,6 +182,11 @@ export class TacticalNuke extends MobxLitElement {
     }, 3000);
   }
 
+  private handleNukeDeclined(): void {
+    addToast(translate('wiseMove'), NotificationType.INFO);
+    this.confirmModalShown = false;
+  }
+
   handleCheckboxChange(type: NukedDataType): void {
     this.selectedTypes = this.selectedTypes.includes(type)
       ? this.selectedTypes.filter(t => t !== type)
@@ -222,10 +227,7 @@ export class TacticalNuke extends MobxLitElement {
 
         <confirmation-modal
           @confirmation-accepted=${this.nukeIt}
-          @confirmation-declined=${(): void => {
-            addToast(translate('wiseMove'), NotificationType.INFO);
-            this.confirmModalShown = false;
-          }}
+          @confirmation-declined=${(): void => this.handleNukeDeclined()}
           message=${translate('nukeConfirmation')}
           ?open=${this.confirmModalShown}
         ></confirmation-modal>

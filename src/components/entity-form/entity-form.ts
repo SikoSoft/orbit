@@ -902,6 +902,13 @@ export class EntityForm extends ViewElement {
     this.propertyPopUpIsOpen = true;
   }
 
+  private handleAddPropertyOptionClick(
+    propertyConfig: EntityPropertyConfig | EntityCalculatedPropertyConfig,
+  ): void {
+    this.addProperty(propertyConfig);
+    this.propertyPopUpIsOpen = false;
+  }
+
   renderPropertyField(
     propertyInstance: PropertyInstance,
   ): TemplateResult | typeof nothing {
@@ -1032,10 +1039,8 @@ export class EntityForm extends ViewElement {
             propertyConfig =>
               html`<div class="property-option">
                 <div
-                  @click=${(): void => {
-                    this.addProperty(propertyConfig);
-                    this.propertyPopUpIsOpen = false;
-                  }}
+                  @click=${(): void =>
+                    this.handleAddPropertyOptionClick(propertyConfig)}
                 >
                   ${propertyConfig.name}
                 </div>
@@ -1052,10 +1057,8 @@ export class EntityForm extends ViewElement {
                   propertyConfig =>
                     html`<div class="property-option">
                       <div
-                        @click=${(): void => {
-                          this.addProperty(propertyConfig);
-                          this.propertyPopUpIsOpen = false;
-                        }}
+                        @click=${(): void =>
+                          this.handleAddPropertyOptionClick(propertyConfig)}
                       >
                         ${propertyConfig.name}
                       </div>

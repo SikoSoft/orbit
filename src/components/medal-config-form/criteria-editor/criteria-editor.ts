@@ -220,6 +220,29 @@ export class CriteriaEditor extends MobxLitElement {
     this.dispatchEvent(new CriteriaChangedEvent({ criteria: newCriteria }));
   }
 
+  private handleValueChanged(e: InputChangedEvent, nodePath: number[]): void {
+    const raw = e.detail.value;
+    const value: string | number = raw !== '' && !isNaN(Number(raw)) ? Number(raw) : raw;
+    this.applyUpdate(updateAtPath(this.localCriteria, nodePath, n => ({ ...(n as Criterion), value })));
+  }
+
+  private handleModeChanged(e: SelectChangedEvent<'all' | 'any'>, groupPath: number[]): void {
+    const newMode = e.detail.value;
+    this.applyUpdate(
+      updateAtPath(this.localCriteria, groupPath, n => {
+        const g = n as Criteria;
+        const kids = groupChildren(g);
+        return { [newMode]: kids };
+      }),
+    );
+  }
+
+  private handleAddCriterion(groupPath: number[]): void {
+    const aliases = this[CriteriaEditorProp.FACT_ALIASES];
+    const fact = aliases.length > 0 ? aliases[0] : defaultCriterion.fact;
+    this.applyUpdate(addChildAtPath(this.localCriteria, groupPath, { ...defaultCriterion, fact }));
+  }
+
   private renderCriterion(node: Criterion, nodePath: number[]): TemplateResult {
     const aliases = this[CriteriaEditorProp.FACT_ALIASES];
     const factOptions = aliases.map(a => ({ value: a, label: a }));
@@ -250,12 +273,7 @@ export class CriteriaEditor extends MobxLitElement {
           <label>${translate('value')}</label>
           <ss-input
             .value=${String(node.value)}
-            @input-changed=${(e: InputChangedEvent): void => {
-              const raw = e.detail.value;
-              const value: string | number =
-                raw !== '' && !isNaN(Number(raw)) ? Number(raw) : raw;
-              this.applyUpdate(updateAtPath(this.localCriteria, nodePath, n => ({ ...(n as Criterion), value })));
-            }}
+            @input-changed=${(e: InputChangedEvent): void => this.handleValueChanged(e, nodePath)}
           ></ss-input>
         </div>
         <ss-button
@@ -280,16 +298,7 @@ export class CriteriaEditor extends MobxLitElement {
           <ss-select
             .options=${groupModeOptions}
             .selected=${mode}
-            @select-changed=${(e: SelectChangedEvent<'all' | 'any'>): void => {
-              const newMode = e.detail.value;
-              this.applyUpdate(
-                updateAtPath(this.localCriteria, groupPath, n => {
-                  const g = n as Criteria;
-                  const kids = groupChildren(g);
-                  return { [newMode]: kids };
-                }),
-              );
-            }}
+            @select-changed=${(e: SelectChangedEvent<'all' | 'any'>): void => this.handleModeChanged(e, groupPath)}
           ></ss-select>
           ${!isRoot
             ? html`<ss-button
@@ -319,11 +328,7 @@ export class CriteriaEditor extends MobxLitElement {
 
         <div class="group-actions">
           <ss-button
-            @click=${(): void => {
-              const aliases = this[CriteriaEditorProp.FACT_ALIASES];
-              const fact = aliases.length > 0 ? aliases[0] : defaultCriterion.fact;
-              this.applyUpdate(addChildAtPath(this.localCriteria, groupPath, { ...defaultCriterion, fact }));
-            }}
+            @click=${(): void => this.handleAddCriterion(groupPath)}
           >${translate('addCriterion')}</ss-button>
           <ss-button
             @click=${(): void => {

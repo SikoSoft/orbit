@@ -637,6 +637,21 @@ export class PropertyConfigForm extends LitElement {
     this.updateField(PropertyConfigFormProp.OPTIONS, e.detail.tags);
   }
 
+  handlePropertyTypeChanged(e: InputChangedEvent): void {
+    this.isCalculated = e.detail.value === 'calculated';
+    if (this.isCalculated) {
+      const calc = this[PropertyConfigFormProp.CALCULATION];
+      if (!calc) {
+        const def = defaultCalculation;
+        this.operation = def.operation;
+        this.value1Type = 'number';
+        this.value1Number = typeof def.value1 === 'number' ? def.value1 : 0;
+        this.value2Type = 'number';
+        this.value2Number = typeof def.value2 === 'number' ? def.value2 : 0;
+      }
+    }
+  }
+
   handleTagSuggestionsRequested(e: CustomEvent): void {
     return;
     // For demo purposes, we'll just return some static suggestions.
@@ -989,22 +1004,8 @@ export class PropertyConfigForm extends LitElement {
               ]}
               selected=${this.isCalculated ? 'calculated' : 'standard'}
               ?disabled=${!!this[PropertyConfigFormProp.PROPERTY_CONFIG_ID]}
-              @select-changed=${(e: InputChangedEvent): void => {
-                this.isCalculated = e.detail.value === 'calculated';
-                if (this.isCalculated) {
-                  const calc = this[PropertyConfigFormProp.CALCULATION];
-                  if (!calc) {
-                    const def = defaultCalculation;
-                    this.operation = def.operation;
-                    this.value1Type = 'number';
-                    this.value1Number =
-                      typeof def.value1 === 'number' ? def.value1 : 0;
-                    this.value2Type = 'number';
-                    this.value2Number =
-                      typeof def.value2 === 'number' ? def.value2 : 0;
-                  }
-                }
-              }}
+              @select-changed=${(e: InputChangedEvent): void =>
+                this.handlePropertyTypeChanged(e)}
             ></ss-select>
           </div>
 

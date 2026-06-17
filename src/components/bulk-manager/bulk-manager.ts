@@ -272,6 +272,13 @@ export class BulkManager extends MobxLitElement {
     );
   }
 
+  private handlePropertyOptionClicked(
+    propertyConfig: EntityPropertyConfig,
+  ): void {
+    this.addProperty(propertyConfig);
+    this.propertyPopUpIsOpen = false;
+  }
+
   private addProperty(propertyConfig: EntityPropertyConfig): void {
     this.propertyInstances = [
       ...this.propertyInstances,
@@ -335,10 +342,7 @@ export class BulkManager extends MobxLitElement {
                   pc => html`
                     <div
                       class="property-option"
-                      @click=${(): void => {
-                        this.addProperty(pc);
-                        this.propertyPopUpIsOpen = false;
-                      }}
+                      @click=${(): void => this.handlePropertyOptionClicked(pc)}
                     >
                       ${pc.name}
                     </div>

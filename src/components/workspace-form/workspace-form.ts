@@ -133,6 +133,11 @@ export class WorkspaceForm extends MobxLitElement {
     };
   }
 
+  private handleDeleteConfirmed(): void {
+    this.delete();
+    this.confirmDeleteIsOpen = false;
+  }
+
   private toggleListConfig(listConfigId: string): void {
     const current = this.localWorkspace.listConfigs;
     const updated = current.includes(listConfigId)
@@ -330,10 +335,7 @@ export class WorkspaceForm extends MobxLitElement {
         <confirmation-modal
           ?open=${this.confirmDeleteIsOpen}
           message=${translate('confirmDeleteWorkspace')}
-          @confirmation-accepted=${(): void => {
-            this.delete();
-            this.confirmDeleteIsOpen = false;
-          }}
+          @confirmation-accepted=${(): void => this.handleDeleteConfirmed()}
           @confirmation-declined=${(): void => {
             this.confirmDeleteIsOpen = false;
           }}

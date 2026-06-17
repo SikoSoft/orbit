@@ -43,6 +43,20 @@ export class ChartView extends ViewElement {
     }
   `;
 
+  private handleChartBuilt(e: ChartBuiltEvent): void {
+    this.isChartLoading = false;
+    const firstOp = e.detail.dataPoints[0]?.operation;
+    const label =
+      e.detail.chartName ??
+      (firstOp ? translate(`factOperation.${firstOp}`) : undefined);
+    this.chartData = convertResponseToChartData(e.detail, label);
+    this.chartType = e.detail.chartType;
+    this.hasChart = true;
+    if (e.detail.saved) {
+      this.chartList?.refresh();
+    }
+  }
+
   render(): TemplateResult {
     if (!this.appState.authToken) {
       return html`
@@ -58,21 +72,8 @@ export class ChartView extends ViewElement {
           @chart-generating=${(_e: ChartGeneratingEvent): void => {
             this.isChartLoading = true;
           }}
-          @chart-built=${(e: ChartBuiltEvent): void => {
-            this.isChartLoading = false;
-            const firstOp = e.detail.dataPoints[0]?.operation;
-            const label =
-              e.detail.chartName ??
-              (firstOp
-                ? translate(`factOperation.${firstOp}`)
-                : undefined);
-            this.chartData = convertResponseToChartData(e.detail, label);
-            this.chartType = e.detail.chartType;
-            this.hasChart = true;
-            if (e.detail.saved) {
-              this.chartList?.refresh();
-            }
-          }}
+          @chart-built=${(e: ChartBuiltEvent): void =>
+            this.handleChartBuilt(e)}
         ></chart-builder>
         ${this.isChartLoading || this.hasChart
           ? html`

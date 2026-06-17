@@ -138,6 +138,47 @@ export class DataPointBuilder extends MobxLitElement {
     this.dispatchEvent(new DataPointUpdatedEvent(this.buildFactContext()));
   }
 
+  private handleFilterUpdated(e: ListFilterUpdatedEvent): void {
+    e.stopPropagation();
+    this.filter = e.detail;
+    this.emitUpdate();
+  }
+
+  private handleMedalConfigIdChanged(e: InputChangedEvent): void {
+    this.medalConfigId = parseInt(e.detail.value) || 0;
+    this.emitUpdate();
+  }
+
+  private handleSeriesChanged(e: InputChangedEvent): void {
+    this.series = e.detail.value;
+    this.emitUpdate();
+  }
+
+  private handleMedalStartChanged(e: InputChangedEvent): void {
+    this.medalStart = e.detail.value;
+    this.emitUpdate();
+  }
+
+  private handleMedalEndChanged(e: InputChangedEvent): void {
+    this.medalEnd = e.detail.value;
+    this.emitUpdate();
+  }
+
+  private handleAnalysisTypeChanged(e: SelectChangedEvent<string>): void {
+    this.analysisType = e.detail.value as AnalysisClassificationType;
+    this.emitUpdate();
+  }
+
+  private handlePropertyConfigIdChanged(e: SelectChangedEvent<string>): void {
+    this.propertyConfigId = parseInt(e.detail.value) || 0;
+    this.emitUpdate();
+  }
+
+  private handleOperationChanged(e: SelectChangedEvent<string>): void {
+    this.operation = e.detail.value as FactOperation;
+    this.emitUpdate();
+  }
+
   private getIntPropertyOptions(): { value: string; label: string }[] {
     const types = this.filter.includeTypes ?? [];
     const configs =
@@ -163,11 +204,8 @@ export class DataPointBuilder extends MobxLitElement {
         <list-filter-control
           showAll
           .listFilter=${this.filter}
-          @list-filter-updated=${(e: ListFilterUpdatedEvent): void => {
-            e.stopPropagation();
-            this.filter = e.detail;
-            this.emitUpdate();
-          }}
+          @list-filter-updated=${(e: ListFilterUpdatedEvent): void =>
+            this.handleFilterUpdated(e)}
         ></list-filter-control>
       </div>
     `;
@@ -185,20 +223,16 @@ export class DataPointBuilder extends MobxLitElement {
             <ss-input
               type="number"
               value=${String(this.medalConfigId)}
-              @input-changed=${(e: InputChangedEvent): void => {
-                this.medalConfigId = parseInt(e.detail.value) || 0;
-                this.emitUpdate();
-              }}
+              @input-changed=${(e: InputChangedEvent): void =>
+                this.handleMedalConfigIdChanged(e)}
             ></ss-input>
           </div>
           <div class="field">
             <label>${translate('series')}</label>
             <ss-input
               value=${this.series}
-              @input-changed=${(e: InputChangedEvent): void => {
-                this.series = e.detail.value;
-                this.emitUpdate();
-              }}
+              @input-changed=${(e: InputChangedEvent): void =>
+                this.handleSeriesChanged(e)}
             ></ss-input>
           </div>
           <div class="field">
@@ -206,10 +240,8 @@ export class DataPointBuilder extends MobxLitElement {
             <ss-input
               type="datetime-local"
               value=${this.medalStart}
-              @input-changed=${(e: InputChangedEvent): void => {
-                this.medalStart = e.detail.value;
-                this.emitUpdate();
-              }}
+              @input-changed=${(e: InputChangedEvent): void =>
+                this.handleMedalStartChanged(e)}
             ></ss-input>
           </div>
           <div class="field">
@@ -217,10 +249,8 @@ export class DataPointBuilder extends MobxLitElement {
             <ss-input
               type="datetime-local"
               value=${this.medalEnd}
-              @input-changed=${(e: InputChangedEvent): void => {
-                this.medalEnd = e.detail.value;
-                this.emitUpdate();
-              }}
+              @input-changed=${(e: InputChangedEvent): void =>
+                this.handleMedalEndChanged(e)}
             ></ss-input>
           </div>
         `;
@@ -234,11 +264,8 @@ export class DataPointBuilder extends MobxLitElement {
                 value: v,
                 label: translate(`analysisType.${v}`),
               }))}
-              @select-changed=${(e: SelectChangedEvent<string>): void => {
-                this.analysisType = e.detail
-                  .value as AnalysisClassificationType;
-                this.emitUpdate();
-              }}
+              @select-changed=${(e: SelectChangedEvent<string>): void =>
+                this.handleAnalysisTypeChanged(e)}
             ></ss-select>
           </div>
           ${this.renderFilterField()}
@@ -251,10 +278,8 @@ export class DataPointBuilder extends MobxLitElement {
             <ss-select
               selected=${String(this.propertyConfigId)}
               .options=${this.getIntPropertyOptions()}
-              @select-changed=${(e: SelectChangedEvent<string>): void => {
-                this.propertyConfigId = parseInt(e.detail.value) || 0;
-                this.emitUpdate();
-              }}
+              @select-changed=${(e: SelectChangedEvent<string>): void =>
+                this.handlePropertyConfigIdChanged(e)}
             ></ss-select>
           </div>
         `;
@@ -274,10 +299,8 @@ export class DataPointBuilder extends MobxLitElement {
               value: v,
               label: translate(`factOperation.${v}`),
             }))}
-            @select-changed=${(e: SelectChangedEvent<string>): void => {
-              this.operation = e.detail.value as FactOperation;
-              this.emitUpdate();
-            }}
+            @select-changed=${(e: SelectChangedEvent<string>): void =>
+              this.handleOperationChanged(e)}
           ></ss-select>
         </div>
         ${this.renderOperationFields()}

@@ -195,6 +195,11 @@ export class WorkspaceManager extends MobxLitElement {
     this.dispatchEvent(new WorkspaceDeletedEvent({ id: this.localWorkspace.id }));
   }
 
+  private async handleConfirmDelete(): Promise<void> {
+    await this.delete();
+    this.confirmDeleteIsOpen = false;
+  }
+
   render(): TemplateResult {
     const tabs = [
       {
@@ -301,10 +306,8 @@ export class WorkspaceManager extends MobxLitElement {
         <confirmation-modal
           ?open=${this.confirmDeleteIsOpen}
           message=${translate('confirmDeleteWorkspace')}
-          @confirmation-accepted=${(): void => {
-            this.delete();
-            this.confirmDeleteIsOpen = false;
-          }}
+          @confirmation-accepted=${(): Promise<void> =>
+            this.handleConfirmDelete()}
           @confirmation-declined=${(): void => {
             this.confirmDeleteIsOpen = false;
           }}

@@ -49,6 +49,11 @@ export class SyncTool extends MobxLitElement {
     await storage.syncDeviceToCloud();
   }
 
+  private handleConfirmSync(): void {
+    this.confirmIsOpen = false;
+    this.handleSyncData();
+  }
+
   private async handleSyncData(): Promise<void> {
     this.isLoading = true;
     try {
@@ -111,10 +116,7 @@ export class SyncTool extends MobxLitElement {
               >${translate('cancel')}</ss-button
             >
             <ss-button
-              @click=${(): void => {
-                this.confirmIsOpen = false;
-                this.handleSyncData();
-              }}
+              @click=${(): void => this.handleConfirmSync()}
               >${translate('confirm')}</ss-button
             >
           </div>

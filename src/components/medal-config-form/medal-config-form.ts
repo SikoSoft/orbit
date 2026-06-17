@@ -281,6 +281,28 @@ export class MedalConfigForm extends MobxLitElement {
     };
   }
 
+  private handleFactRequestChanged(e: FactRequestChangedEvent): void {
+    const updated = [...this.localConfig.factRequests];
+    updated[e.detail.index] = e.detail.factRequest;
+    this.localConfig = { ...this.localConfig, factRequests: updated };
+  }
+
+  private handleFactRequestRemoved(e: FactRequestRemovedEvent): void {
+    const updated = this.localConfig.factRequests.filter((_, idx) => idx !== e.detail.index);
+    this.localConfig = { ...this.localConfig, factRequests: updated };
+  }
+
+  private handleStreakRequestChanged(e: StreakRequestChangedEvent): void {
+    const updated = [...this.localConfig.streakRequests];
+    updated[e.detail.index] = e.detail.streakRequest;
+    this.localConfig = { ...this.localConfig, streakRequests: updated };
+  }
+
+  private handleStreakRequestRemoved(e: StreakRequestRemovedEvent): void {
+    const updated = this.localConfig.streakRequests.filter((_, idx) => idx !== e.detail.index);
+    this.localConfig = { ...this.localConfig, streakRequests: updated };
+  }
+
   private addStreakRequest(): void {
     const newRequest: StreakRequest = {
       alias: '',
@@ -406,15 +428,8 @@ export class MedalConfigForm extends MobxLitElement {
               <fact-request-editor
                 .factRequest=${fr}
                 .index=${i}
-                @fact-request-changed=${(e: FactRequestChangedEvent): void => {
-                  const updated = [...this.localConfig.factRequests];
-                  updated[e.detail.index] = e.detail.factRequest;
-                  this.localConfig = { ...this.localConfig, factRequests: updated };
-                }}
-                @fact-request-removed=${(e: FactRequestRemovedEvent): void => {
-                  const updated = this.localConfig.factRequests.filter((_, idx) => idx !== e.detail.index);
-                  this.localConfig = { ...this.localConfig, factRequests: updated };
-                }}
+                @fact-request-changed=${(e: FactRequestChangedEvent): void => this.handleFactRequestChanged(e)}
+                @fact-request-removed=${(e: FactRequestRemovedEvent): void => this.handleFactRequestRemoved(e)}
               ></fact-request-editor>
             `,
           )}
@@ -433,15 +448,8 @@ export class MedalConfigForm extends MobxLitElement {
               <streak-request-editor
                 .streakRequest=${sr}
                 .index=${i}
-                @streak-request-changed=${(e: StreakRequestChangedEvent): void => {
-                  const updated = [...this.localConfig.streakRequests];
-                  updated[e.detail.index] = e.detail.streakRequest;
-                  this.localConfig = { ...this.localConfig, streakRequests: updated };
-                }}
-                @streak-request-removed=${(e: StreakRequestRemovedEvent): void => {
-                  const updated = this.localConfig.streakRequests.filter((_, idx) => idx !== e.detail.index);
-                  this.localConfig = { ...this.localConfig, streakRequests: updated };
-                }}
+                @streak-request-changed=${(e: StreakRequestChangedEvent): void => this.handleStreakRequestChanged(e)}
+                @streak-request-removed=${(e: StreakRequestRemovedEvent): void => this.handleStreakRequestRemoved(e)}
               ></streak-request-editor>
             `,
           )}
