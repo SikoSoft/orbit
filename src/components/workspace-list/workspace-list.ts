@@ -15,12 +15,12 @@ import { themed } from '@/lib/Theme';
 import { CollapsableToggledEvent } from '@ss/ui/components/ss-collapsable.events';
 
 import '@ss/ui/components/ss-button';
-import '@/components/workspace-form/workspace-form';
+import '@/components/workspace-manager/workspace-manager';
 
 import {
   WorkspaceDeletedEvent,
   WorkspaceSavedEvent,
-} from '../workspace-form/workspace-form.events';
+} from '../workspace-manager/workspace-manager.events';
 
 @themed()
 @customElement('workspace-list')
@@ -66,6 +66,8 @@ export class WorkspaceList extends MobxLitElement {
       userId: '',
       listConfigs: [],
       theme: defaultTheme,
+      facts: [],
+      streaks: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -76,7 +78,7 @@ export class WorkspaceList extends MobxLitElement {
     this.dispatchEvent(
       new CollapsableToggledEvent({
         isOpen: true,
-        panelId: `workspaceForm-${e.detail.id}`,
+        panelId: `workspaceManager-${e.detail.id}`,
       }),
     );
     if (e.detail.id) {
@@ -93,7 +95,7 @@ export class WorkspaceList extends MobxLitElement {
     if (!id) {
       return true;
     }
-    return this.state.collapsablePanelState[`workspaceForm-${id}`] || false;
+    return this.state.collapsablePanelState[`workspaceManager-${id}`] || false;
   }
 
   render(): TemplateResult {
@@ -106,17 +108,19 @@ export class WorkspaceList extends MobxLitElement {
               workspaces,
               workspace => workspace.id,
               workspace => html`
-                <workspace-form
+                <workspace-manager
                   workspaceId=${workspace.id}
                   name=${workspace.name}
                   color=${workspace.color}
                   ?showEverything=${workspace.showEverything}
                   .listConfigs=${workspace.listConfigs}
                   theme=${workspace.theme}
+                  .facts=${workspace.facts}
+                  .streaks=${workspace.streaks}
                   ?open=${this.isPanelOpen(workspace.id)}
                   @workspace-saved=${this.handleWorkspaceSaved}
                   @workspace-deleted=${this.handleWorkspaceDeleted}
-                ></workspace-form>
+                ></workspace-manager>
               `,
             )
           : html`

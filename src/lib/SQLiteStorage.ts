@@ -1340,6 +1340,8 @@ export class SQLiteStorage implements StorageSchema {
       userId: row['user_id'] as string,
       listConfigs: JSON.parse(row['list_configs'] as string) as string[],
       theme: (row['theme'] as ThemeName) ?? defaultTheme,
+      facts: [],
+      streaks: [],
       createdAt: new Date(row['created_at'] as string),
       updatedAt: new Date(row['updated_at'] as string),
     }));

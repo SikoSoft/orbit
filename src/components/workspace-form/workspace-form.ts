@@ -81,6 +81,8 @@ export class WorkspaceForm extends MobxLitElement {
     showEverything: false,
     listConfigs: [],
     theme: defaultTheme,
+    facts: [],
+    streaks: [],
   };
 
   @state()
@@ -126,6 +128,8 @@ export class WorkspaceForm extends MobxLitElement {
       showEverything: this[WorkspaceFormProp.SHOW_EVERYTHING],
       listConfigs: [...this[WorkspaceFormProp.LIST_CONFIGS]],
       theme: this[WorkspaceFormProp.THEME],
+      facts: [],
+      streaks: [],
     };
   }
 
@@ -187,6 +191,8 @@ export class WorkspaceForm extends MobxLitElement {
       showEverything: result.value.showEverything,
       listConfigs: result.value.listConfigs,
       theme: result.value.theme,
+      facts: result.value.facts,
+      streaks: result.value.streaks,
     };
 
     this.dispatchEvent(new WorkspaceSavedEvent(result.value));
