@@ -254,7 +254,7 @@ export class AppState {
     if (!activeWorkspace) {
       return null;
     }
-    return activeWorkspace.streaks;
+    return activeWorkspace.streaks ?? null;
   }
 
   get activeWorkspaceFactIds(): number[] | null {
@@ -267,7 +267,7 @@ export class AppState {
     if (!activeWorkspace) {
       return null;
     }
-    return activeWorkspace.facts;
+    return activeWorkspace.facts ?? null;
   }
 
   get workspaceEntityConfigs(): EntityConfig[] {
