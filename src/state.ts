@@ -270,6 +270,19 @@ export class AppState {
     return activeWorkspace.facts ?? null;
   }
 
+  get activeWorkspaceChartIds(): number[] | null {
+    if (!this.activeWorkspaceId || !this.workspaces.length) {
+      return null;
+    }
+    const activeWorkspace = this.workspaces.find(
+      w => w.id === this.activeWorkspaceId,
+    );
+    if (!activeWorkspace) {
+      return null;
+    }
+    return activeWorkspace.charts ?? null;
+  }
+
   get workspaceEntityConfigs(): EntityConfig[] {
     if (!this.activeWorkspaceId || !this.workspaces.length) {
       return this.entityConfigs;
