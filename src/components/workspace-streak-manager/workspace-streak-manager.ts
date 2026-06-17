@@ -98,12 +98,6 @@ export class WorkspaceStreakManager extends MobxLitElement {
       .filter((s): s is Streak => s !== undefined);
   }
 
-  private get availableStreaks(): Streak[] {
-    return this.allStreaks.filter(
-      s => !this[WorkspaceStreakManagerProp.STREAKS].includes(s.id),
-    );
-  }
-
   private addStreak(streakId: number): void {
     this.dispatchEvent(
       new WorkspaceStreaksChangedEvent({

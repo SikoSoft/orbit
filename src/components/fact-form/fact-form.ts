@@ -29,13 +29,23 @@ import '@ss/ui/components/ss-input';
 import '@ss/ui/components/ss-select';
 import '@/components/list-filter-control/list-filter-control';
 
-const operationOptions = [
-  { value: FactOperation.ENTITY_COUNT, label: translate('factOperation.entityCount') },
-  { value: FactOperation.UNIQUE_TAG_COUNT, label: translate('factOperation.uniqueTagCount') },
-  { value: FactOperation.MEDAL_COUNT, label: translate('factOperation.medalCount') },
-  { value: FactOperation.ANALYSIS_CLASSIFICATION, label: translate('factOperation.analysisClassification') },
-  { value: FactOperation.PROPERTY_SUM, label: translate('factOperation.propertySum') },
-];
+const operationLabels: Record<FactOperation, string> = {
+  [FactOperation.ENTITY_COUNT]: translate('factOperation.entityCount'),
+  [FactOperation.UNIQUE_TAG_COUNT]: translate('factOperation.uniqueTagCount'),
+  [FactOperation.MEDAL_COUNT]: translate('factOperation.medalCount'),
+  [FactOperation.ANALYSIS_CLASSIFICATION]: translate('factOperation.analysisClassification'),
+  [FactOperation.PROPERTY_SUM]: translate('factOperation.propertySum'),
+};
+
+const operationOptions = Object.entries(operationLabels).map(([value, label]) => ({
+  value: value as FactOperation,
+  label,
+}));
+
+const analysisTypeOptions = Object.values(AnalysisClassificationType).map(v => ({
+  value: v,
+  label: translate(`analysisType.${v}`),
+}));
 
 @themed()
 @customElement('fact-form')
@@ -95,6 +105,25 @@ export class FactForm extends MobxLitElement {
   private emit(context: FactContext): void {
     this.localContext = context;
     this.dispatchEvent(new FactContextChangedEvent({ context }));
+  }
+
+  private handleOperationChanged(e: SelectChangedEvent<FactOperation>): void {
+    const op = e.detail.value;
+    let newContext: FactContext;
+    if (op === FactOperation.MEDAL_COUNT) {
+      newContext = { operation: op, medalConfigId: 0, series: '' };
+    } else if (op === FactOperation.ANALYSIS_CLASSIFICATION) {
+      newContext = {
+        operation: op,
+        filter: { ...defaultListFilter },
+        analysisType: AnalysisClassificationType.MORNING_FASTING,
+      };
+    } else if (op === FactOperation.PROPERTY_SUM) {
+      newContext = { operation: op, filter: { ...defaultListFilter }, propertyConfigId: 0 };
+    } else {
+      newContext = { operation: op, filter: { ...defaultListFilter } };
+    }
+    this.emit(newContext);
   }
 
   private getIntPropertyOptions(): { value: string; label: string }[] {
@@ -164,10 +193,7 @@ export class FactForm extends MobxLitElement {
           <div class="field">
             <label>${translate('analysisType')}</label>
             <ss-select
-              .options=${Object.values(AnalysisClassificationType).map(v => ({
-                value: v,
-                label: translate(`analysisType.${v}`),
-              }))}
+              .options=${analysisTypeOptions}
               .selected=${context.analysisType}
               @select-changed=${(e: SelectChangedEvent<AnalysisClassificationType>): void => {
                 this.emit({ ...context, analysisType: e.detail.value });
@@ -211,24 +237,7 @@ export class FactForm extends MobxLitElement {
           <ss-select
             .options=${operationOptions}
             .selected=${operation}
-            @select-changed=${(e: SelectChangedEvent<FactOperation>): void => {
-              const op = e.detail.value;
-              let newContext: FactContext;
-              if (op === FactOperation.MEDAL_COUNT) {
-                newContext = { operation: op, medalConfigId: 0, series: '' };
-              } else if (op === FactOperation.ANALYSIS_CLASSIFICATION) {
-                newContext = {
-                  operation: op,
-                  filter: { ...defaultListFilter },
-                  analysisType: AnalysisClassificationType.MORNING_FASTING,
-                };
-              } else if (op === FactOperation.PROPERTY_SUM) {
-                newContext = { operation: op, filter: { ...defaultListFilter }, propertyConfigId: 0 };
-              } else {
-                newContext = { operation: op, filter: { ...defaultListFilter } };
-              }
-              this.emit(newContext);
-            }}
+            @select-changed=${this.handleOperationChanged}
           ></ss-select>
         </div>
       </div>

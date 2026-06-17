@@ -98,12 +98,6 @@ export class WorkspaceFactManager extends MobxLitElement {
       .filter((f): f is Fact => f !== undefined);
   }
 
-  private get availableFacts(): Fact[] {
-    return this.allFacts.filter(
-      f => !this[WorkspaceFactManagerProp.FACTS].includes(f.id),
-    );
-  }
-
   private addFact(factId: number): void {
     this.dispatchEvent(
       new WorkspaceFactsChangedEvent({
