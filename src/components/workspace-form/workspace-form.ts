@@ -83,6 +83,7 @@ export class WorkspaceForm extends MobxLitElement {
     theme: defaultTheme,
     facts: [],
     streaks: [],
+    charts: [],
   };
 
   @state()
@@ -130,6 +131,7 @@ export class WorkspaceForm extends MobxLitElement {
       theme: this[WorkspaceFormProp.THEME],
       facts: [],
       streaks: [],
+      charts: [],
     };
   }
 
@@ -198,6 +200,7 @@ export class WorkspaceForm extends MobxLitElement {
       theme: result.value.theme,
       facts: result.value.facts,
       streaks: result.value.streaks,
+      charts: result.value.charts,
     };
 
     this.dispatchEvent(new WorkspaceSavedEvent(result.value));

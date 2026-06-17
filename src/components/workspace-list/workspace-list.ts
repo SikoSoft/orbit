@@ -68,6 +68,7 @@ export class WorkspaceList extends MobxLitElement {
       theme: defaultTheme,
       facts: [],
       streaks: [],
+      charts: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -117,6 +118,7 @@ export class WorkspaceList extends MobxLitElement {
                   theme=${workspace.theme}
                   .facts=${workspace.facts}
                   .streaks=${workspace.streaks}
+                  .charts=${workspace.charts}
                   ?open=${this.isPanelOpen(workspace.id)}
                   @workspace-saved=${this.handleWorkspaceSaved}
                   @workspace-deleted=${this.handleWorkspaceDeleted}

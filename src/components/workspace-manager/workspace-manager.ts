@@ -22,6 +22,7 @@ import '@/components/workspace-config/workspace-config';
 import '@/components/workspace-list-manager/workspace-list-manager';
 import '@/components/workspace-fact-manager/workspace-fact-manager';
 import '@/components/workspace-streak-manager/workspace-streak-manager';
+import '@/components/workspace-chart-manager/workspace-chart-manager';
 
 import {
   WorkspaceManagerProp,
@@ -32,6 +33,7 @@ import { WorkspaceConfigChangedEvent } from '@/components/workspace-config/works
 import { WorkspaceListsChangedEvent } from '@/components/workspace-list-manager/workspace-list-manager.events';
 import { WorkspaceFactsChangedEvent } from '@/components/workspace-fact-manager/workspace-fact-manager.events';
 import { WorkspaceStreaksChangedEvent } from '@/components/workspace-streak-manager/workspace-streak-manager.events';
+import { WorkspaceChartsChangedEvent } from '@/components/workspace-chart-manager/workspace-chart-manager.events';
 import { WorkspaceDeletedEvent, WorkspaceSavedEvent } from './workspace-manager.events';
 
 @themed()
@@ -62,6 +64,7 @@ export class WorkspaceManager extends MobxLitElement {
     theme: defaultTheme,
     facts: [],
     streaks: [],
+    charts: [],
   };
 
   @state()
@@ -109,6 +112,10 @@ export class WorkspaceManager extends MobxLitElement {
   [WorkspaceManagerProp.STREAKS]: WorkspaceManagerProps[WorkspaceManagerProp.STREAKS] =
     workspaceManagerProps[WorkspaceManagerProp.STREAKS].default;
 
+  @property({ type: Array })
+  [WorkspaceManagerProp.CHARTS]: WorkspaceManagerProps[WorkspaceManagerProp.CHARTS] =
+    workspaceManagerProps[WorkspaceManagerProp.CHARTS].default;
+
   connectedCallback(): void {
     super.connectedCallback();
     this.localWorkspace = {
@@ -120,6 +127,7 @@ export class WorkspaceManager extends MobxLitElement {
       theme: this[WorkspaceManagerProp.THEME],
       facts: [...this[WorkspaceManagerProp.FACTS]],
       streaks: [...this[WorkspaceManagerProp.STREAKS]],
+      charts: [...this[WorkspaceManagerProp.CHARTS]],
     };
   }
 
@@ -150,6 +158,7 @@ export class WorkspaceManager extends MobxLitElement {
         theme: this.localWorkspace.theme,
         facts: this.localWorkspace.facts,
         streaks: this.localWorkspace.streaks,
+        charts: this.localWorkspace.charts,
       });
     } else {
       result = await storage.createWorkspace(
@@ -177,6 +186,7 @@ export class WorkspaceManager extends MobxLitElement {
       theme: result.value.theme,
       facts: result.value.facts,
       streaks: result.value.streaks,
+      charts: result.value.charts,
     };
 
     this.dispatchEvent(new WorkspaceSavedEvent(result.value));
@@ -262,6 +272,20 @@ export class WorkspaceManager extends MobxLitElement {
               };
             }}
           ></workspace-streak-manager>
+        `,
+      },
+      {
+        title: translate('workspaceChartsTab'),
+        content: () => html`
+          <workspace-chart-manager
+            .charts=${this.localWorkspace.charts}
+            @workspace-charts-changed=${(e: WorkspaceChartsChangedEvent): void => {
+              this.localWorkspace = {
+                ...this.localWorkspace,
+                charts: e.detail.charts,
+              };
+            }}
+          ></workspace-chart-manager>
         `,
       },
     ];

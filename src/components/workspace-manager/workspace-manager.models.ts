@@ -12,6 +12,7 @@ export enum WorkspaceManagerProp {
   OPEN = 'open',
   FACTS = 'facts',
   STREAKS = 'streaks',
+  CHARTS = 'charts',
 }
 
 export interface WorkspaceManagerProps extends PropTypes {
@@ -24,6 +25,7 @@ export interface WorkspaceManagerProps extends PropTypes {
   [WorkspaceManagerProp.OPEN]: boolean;
   [WorkspaceManagerProp.FACTS]: number[];
   [WorkspaceManagerProp.STREAKS]: number[];
+  [WorkspaceManagerProp.CHARTS]: number[];
 }
 
 export const workspaceManagerProps: PropConfigMap<WorkspaceManagerProps> = {
@@ -73,6 +75,11 @@ export const workspaceManagerProps: PropConfigMap<WorkspaceManagerProps> = {
   [WorkspaceManagerProp.STREAKS]: {
     default: [],
     description: 'Streak IDs assigned to this workspace',
+    control: { type: ControlType.HIDDEN },
+  },
+  [WorkspaceManagerProp.CHARTS]: {
+    default: [],
+    description: 'Chart IDs assigned to this workspace',
     control: { type: ControlType.HIDDEN },
   },
 };

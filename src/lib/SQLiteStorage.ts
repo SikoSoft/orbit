@@ -1342,6 +1342,7 @@ export class SQLiteStorage implements StorageSchema {
       theme: (row['theme'] as ThemeName) ?? defaultTheme,
       facts: [],
       streaks: [],
+      charts: [],
       createdAt: new Date(row['created_at'] as string),
       updatedAt: new Date(row['updated_at'] as string),
     }));
