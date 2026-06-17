@@ -1,7 +1,5 @@
 import { html, css, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
-import { classMap } from 'lit/directives/class-map.js';
 
 import { Fact } from 'api-spec/models/Fact';
 import { translate } from '@/lib/Localization';
@@ -12,10 +10,9 @@ import { NotificationType } from '@ss/ui/components/notification-provider.models
 import { MobxLitElement } from '@adobe/lit-mobx';
 import { themed } from '@/lib/Theme';
 
-import '@ss/ui/components/sortable-list';
-import '@ss/ui/components/sortable-item';
-import '@ss/ui/components/ss-icon';
-import { SortUpdatedEvent } from '@ss/ui/components/sortable-list.events';
+import '@/components/option-list-builder/option-list-builder';
+import { OptionListBuilderItem } from '@/components/option-list-builder/option-list-builder.models';
+import { OptionListUpdatedEvent } from '@/components/option-list-builder/option-list-builder.events';
 
 import {
   WorkspaceFactManagerProp,
@@ -35,35 +32,6 @@ export class WorkspaceFactManager extends MobxLitElement {
     a {
       display: inline-block;
       margin-bottom: 1rem;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    ul li {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.25rem 0;
-    }
-
-    ul li.active {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-
-    ul li.active ss-icon {
-      display: none;
-    }
-
-    ss-icon {
-      cursor: pointer;
-    }
-
-    .empty {
-      font-style: italic;
     }
 
     h3 {
@@ -92,32 +60,17 @@ export class WorkspaceFactManager extends MobxLitElement {
     }
   }
 
-  private get workspaceFacts(): Fact[] {
-    return this[WorkspaceFactManagerProp.FACTS]
-      .map(id => this.allFacts.find(f => f.id === id))
-      .filter((f): f is Fact => f !== undefined);
+  private get availableFacts(): OptionListBuilderItem[] {
+    return this.allFacts.map(fact => ({
+      id: String(fact.id),
+      label: fact.name,
+    }));
   }
 
-  private addFact(factId: number): void {
+  private handleOptionListUpdated(e: OptionListUpdatedEvent): void {
     this.dispatchEvent(
       new WorkspaceFactsChangedEvent({
-        facts: [...this[WorkspaceFactManagerProp.FACTS], factId],
-      }),
-    );
-  }
-
-  private removeFact(factId: number): void {
-    this.dispatchEvent(
-      new WorkspaceFactsChangedEvent({
-        facts: this[WorkspaceFactManagerProp.FACTS].filter(id => id !== factId),
-      }),
-    );
-  }
-
-  private handleSortUpdated(e: SortUpdatedEvent): void {
-    this.dispatchEvent(
-      new WorkspaceFactsChangedEvent({
-        facts: e.detail.sortedIds.map(Number),
+        facts: e.detail.selected.map(Number),
       }),
     );
   }
@@ -126,45 +79,15 @@ export class WorkspaceFactManager extends MobxLitElement {
     return html`
       <a href="/facts">${translate('manageFacts')}</a>
 
-      <h3>${translate('availableFacts')}</h3>
-      <ul>
-        ${repeat(
-          this.allFacts,
-          fact => fact.id,
-          fact =>
-            html`<li
-              class=${classMap({
-                active: this[WorkspaceFactManagerProp.FACTS].includes(fact.id),
-              })}
-            >
-              <span>${fact.name}</span>
-              <ss-icon
-                name="add"
-                size="16"
-                @click=${(): void => this.addFact(fact.id)}
-              ></ss-icon>
-            </li>`,
-        )}
-      </ul>
-
-      <h3>${translate('workspaceFacts')}</h3>
-      ${this.workspaceFacts.length > 0
-        ? html`
-            <sortable-list @sort-updated=${this.handleSortUpdated}>
-              ${this.workspaceFacts.map(
-                fact =>
-                  html`<sortable-item id=${String(fact.id)}>
-                    <span>${fact.name}</span>
-                    <ss-icon
-                      name="trash"
-                      size="16"
-                      @click=${(): void => this.removeFact(fact.id)}
-                    ></ss-icon>
-                  </sortable-item>`,
-              )}
-            </sortable-list>
-          `
-        : html`<p class="empty">${translate('noWorkspaceFacts')}</p>`}
+      <option-list-builder
+        .available=${this.availableFacts}
+        .selected=${this[WorkspaceFactManagerProp.FACTS].map(String)}
+        emptyMessage=${translate('noWorkspaceFacts')}
+        @option-list-updated=${this.handleOptionListUpdated}
+      >
+        <h3 slot="available-heading">${translate('availableFacts')}</h3>
+        <h3 slot="selected-heading">${translate('workspaceFacts')}</h3>
+      </option-list-builder>
     `;
   }
 }

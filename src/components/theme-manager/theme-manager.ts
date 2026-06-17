@@ -7,45 +7,17 @@ import {
 } from './theme-manager.models';
 import { translate } from '@/lib/Localization';
 import { ThemeName } from '@/models/Page';
-import { repeat } from 'lit/directives/repeat.js';
 
-import '@ss/ui/components/sortable-list';
-import '@ss/ui/components/sortable-item';
-import '@ss/ui/components/ss-icon';
+import '@/components/option-list-builder/option-list-builder';
+import { OptionListBuilderItem } from '@/components/option-list-builder/option-list-builder.models';
+import { OptionListUpdatedEvent } from '@/components/option-list-builder/option-list-builder.events';
 import { ThemesUpdatedEvent, ThemesSavedEvent } from './theme-manager.events';
-import { classMap } from 'lit/directives/class-map.js';
-import { SortUpdatedEvent } from '@ss/ui/components/sortable-list.events';
 import { themed } from '@/lib/Theme';
 
 @themed()
 @customElement('theme-manager')
 export class ThemeManager extends LitElement {
   static styles = css`
-    ul {
-      list-style: none;
-      padding: 0;
-
-      li {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.5;
-      }
-    }
-
-    .available-themes li.active {
-      opacity: 0.5;
-      pointer-events: none;
-
-      ss-icon {
-        display: none;
-      }
-    }
-
-    ss-icon {
-      cursor: pointer;
-    }
-
     .buttons {
       margin-top: 1rem;
     }
@@ -59,8 +31,11 @@ export class ThemeManager extends LitElement {
   initialActive: string[] = [];
 
   @state()
-  get available(): string[] {
-    return Object.values(ThemeName);
+  get available(): OptionListBuilderItem[] {
+    return Object.values(ThemeName).map(theme => ({
+      id: theme,
+      label: theme,
+    }));
   }
 
   @state()
@@ -77,34 +52,16 @@ export class ThemeManager extends LitElement {
     this.initialActive = [...this[ThemeManagerProp.ACTIVE]];
   }
 
-  addTheme(theme: string): void {
-    this.dispatchEvent(
-      new ThemesUpdatedEvent({
-        themes: [...this[ThemeManagerProp.ACTIVE], theme],
-      }),
-    );
-  }
-
-  removeTheme(theme: string): void {
-    this.dispatchEvent(
-      new ThemesUpdatedEvent({
-        themes: this[ThemeManagerProp.ACTIVE].filter(t => t !== theme),
-      }),
-    );
-  }
-
   saveThemes(): void {
     this.dispatchEvent(
       new ThemesSavedEvent({ themes: this[ThemeManagerProp.ACTIVE] }),
     );
   }
 
-  handleSortUpdated(e: SortUpdatedEvent): void {
-    const themes = e.detail.sortedIds;
-
+  private handleOptionListUpdated(e: OptionListUpdatedEvent): void {
     this.dispatchEvent(
       new ThemesUpdatedEvent({
-        themes,
+        themes: e.detail.selected,
       }),
     );
   }
@@ -112,47 +69,15 @@ export class ThemeManager extends LitElement {
   render(): TemplateResult {
     return html`
       <div>
-        <h3>${translate('availableThemes')}</h3>
-
-        <ul class="available-themes">
-          ${repeat(
-            this.available,
-            theme => theme,
-            theme =>
-              html`<li
-                class=${classMap({
-                  active: this[ThemeManagerProp.ACTIVE].includes(theme),
-                })}
-              >
-                <span>${theme}</span
-                ><ss-icon
-                  name="add"
-                  size="16"
-                  @click=${(): void => this.addTheme(theme)}
-                ></ss-icon>
-              </li>`,
-          )}
-        </ul>
-
-        <h3>${translate('activeThemes')}</h3>
-        ${this[ThemeManagerProp.ACTIVE].length > 0
-          ? html`<sortable-list
-              class="active-themes"
-              @sort-updated=${this.handleSortUpdated}
-            >
-              ${this[ThemeManagerProp.ACTIVE].map(
-                theme =>
-                  html`<sortable-item id=${theme}>
-                    <span>${theme}</span>
-                    <ss-icon
-                      name="trash"
-                      size="16"
-                      @click=${(): void => this.removeTheme(theme)}
-                    ></ss-icon>
-                  </sortable-item>`,
-              )}
-            </sortable-list>`
-          : translate('noThemesActive')}
+        <option-list-builder
+          .available=${this.available}
+          .selected=${this[ThemeManagerProp.ACTIVE]}
+          emptyMessage=${translate('noThemesActive')}
+          @option-list-updated=${this.handleOptionListUpdated}
+        >
+          <h3 slot="available-heading">${translate('availableThemes')}</h3>
+          <h3 slot="selected-heading">${translate('activeThemes')}</h3>
+        </option-list-builder>
 
         <div class="buttons">
           <ss-button
