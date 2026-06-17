@@ -214,6 +214,14 @@ export class UserDashboard extends MobxLitElement {
     return this.facts.filter(f => ids.includes(f.id));
   }
 
+  private get visibleCharts(): Chart[] {
+    const ids = this.state.activeWorkspaceChartIds;
+    if (ids === null) {
+      return this.savedCharts;
+    }
+    return this.savedCharts.filter(c => ids.includes(c.id));
+  }
+
   render(): TemplateResult {
     return html`
       <div class="user-dashboard">
@@ -258,7 +266,7 @@ export class UserDashboard extends MobxLitElement {
 
         <div class="charts">
           ${repeat(
-            this.savedCharts,
+            this.visibleCharts,
             chart => chart.id,
             chart => {
               const isLoading = this.loadingChartIds.has(chart.id);
