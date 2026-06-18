@@ -222,6 +222,19 @@ export class EntityFormProperties extends MobxLitElement {
     }
   }
 
+  private getDefaultValueIsSet(
+    propertyConfig: EntityPropertyConfig | EntityCalculatedPropertyConfig,
+    value: PropertyDataValue,
+  ): boolean {
+    return (
+      'calculation' in propertyConfig ||
+      propertyConfig.dataType === DataType.DATE ||
+      propertyConfig.dataType === DataType.BOOLEAN ||
+      (propertyConfig.dataType === DataType.INT &&
+        value !== propertyConfig.defaultValue)
+    );
+  }
+
   private mapInstancesToProperties(): EntityProperty[] {
     return this.propertyInstances
       .filter(prop => prop.valueIsSet)
@@ -339,14 +352,7 @@ export class EntityFormProperties extends MobxLitElement {
             instanceId: 0,
             uiId: uuidv4(),
             value,
-            valueIsSet:
-              'calculation' in propertyConfig ||
-              propertyConfig.dataType === DataType.DATE ||
-              propertyConfig.dataType === DataType.BOOLEAN ||
-              (propertyConfig.dataType === DataType.INT &&
-                value !== propertyConfig.defaultValue)
-                ? true
-                : false,
+            valueIsSet: this.getDefaultValueIsSet(propertyConfig, value),
           };
         });
 
@@ -387,22 +393,31 @@ export class EntityFormProperties extends MobxLitElement {
     }
   }
 
-  private addProperty(
+  private async addProperty(
     propertyConfig: EntityPropertyConfig | EntityCalculatedPropertyConfig,
-  ): void {
+  ): Promise<void> {
     if (!propertyConfig) {
       return;
     }
+    const value = propertyConfig.defaultValue;
     this.propertyInstances = [
       ...this.propertyInstances,
       {
         uiId: uuidv4(),
         instanceId: 0,
         propertyConfigId: propertyConfig.id,
-        value: propertyConfig.defaultValue,
-        valueIsSet: false,
+        value,
+        valueIsSet: this.getDefaultValueIsSet(propertyConfig, value),
       },
     ];
+    const instancesHash = await this.getInstancesHash();
+    this.dispatchEvent(
+      new EntityFormPropertiesChangedEvent({
+        instancesHash,
+        sortedIds: this.sortedIds,
+        isInitial: false,
+      }),
+    );
   }
 
   private showAddPropertyPopUp(): void {
