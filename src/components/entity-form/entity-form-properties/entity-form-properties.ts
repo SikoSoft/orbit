@@ -426,6 +426,7 @@ export class EntityFormProperties extends MobxLitElement {
     }
     propertyInstance.valueIsSet = true;
     propertyInstance.value = value;
+    this.propertyInstances = [...this.propertyInstances];
     const instancesHash = await this.getInstancesHash();
     this.dispatchEvent(
       new EntityFormPropertiesChangedEvent({
