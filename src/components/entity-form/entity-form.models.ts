@@ -1,8 +1,4 @@
-import {
-  DataType,
-  EntityProperty,
-  PropertyDataValue,
-} from 'api-spec/models/Entity';
+import { DataType, EntityProperty, PropertyDataValue } from 'api-spec/models/Entity';
 import { nothing, TemplateResult } from 'lit';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
 import { ControlType } from '@/models/Control';
@@ -30,7 +26,6 @@ export enum EntityFormProp {
   DESC = 'desc',
   OCCURRED_AT = 'occurredAt',
   TAGS = 'tags',
-  TAG_VALUE = 'tagValue',
   PROPERTIES = 'properties',
   VIEW_ACCESS_POLICY_ID = 'viewAccessPolicyId',
   EDIT_ACCESS_POLICY_ID = 'editAccessPolicyId',
@@ -43,7 +38,6 @@ export interface EntityFormProps extends PropTypes {
   [EntityFormProp.DESC]: string;
   [EntityFormProp.OCCURRED_AT]: string;
   [EntityFormProp.TAGS]: string[];
-  [EntityFormProp.TAG_VALUE]: string;
   [EntityFormProp.PROPERTIES]: EntityProperty[];
   [EntityFormProp.VIEW_ACCESS_POLICY_ID]: number;
   [EntityFormProp.EDIT_ACCESS_POLICY_ID]: number;
@@ -85,13 +79,6 @@ export const entityFormProps: PropConfigMap<EntityFormProps> = {
       type: ControlType.TEXT,
     },
     description: 'The tags of the entity',
-  },
-  [EntityFormProp.TAG_VALUE]: {
-    default: '',
-    control: {
-      type: ControlType.TEXT,
-    },
-    description: 'The value of the tag',
   },
   [EntityFormProp.PROPERTIES]: {
     default: [],

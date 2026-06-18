@@ -1,20 +1,11 @@
 import { html, css, nothing, TemplateResult } from 'lit';
-import { property, customElement, state } from 'lit/decorators.js';
+import { property, customElement, state, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { v4 as uuidv4 } from 'uuid';
 
 import { ListFilterType } from 'api-spec/models/List';
-import { SettingName, TagSuggestions } from 'api-spec/models/Setting';
-import {
-  DataType,
-  EntityCalculatedPropertyConfig,
-  EntityConfig,
-  EntityProperty,
-  PropertyDataValue,
-  EntityPropertyConfig,
-  ImageDataValue,
-} from 'api-spec/models/Entity';
+import { SettingName } from 'api-spec/models/Setting';
+import { EntityConfig } from 'api-spec/models/Entity';
 import { Role } from 'api-spec/models/Identity';
 import { appState } from '@/state';
 import { ViewElement } from '@/lib/ViewElement';
@@ -22,30 +13,22 @@ import {
   EntityFormProp,
   entityFormProps,
   EntityFormProps,
-  PropertyInstance,
-  PropertyReference,
   RequestBody,
-  SuggestionInputType,
-  SuggestionLastInput,
   TabEntry,
-  ValidateionResult,
 } from './entity-form.models';
-import { addToast, sha256 } from '@/lib/Util';
-import { Time } from '@/lib/Time';
+import { addToast } from '@/lib/Util';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 
-import '@ss/ui/components/pop-up';
 import '@ss/ui/components/ss-button';
-import '@ss/ui/components/ss-input';
 import '@ss/ui/components/ss-select';
-import '@ss/ui/components/tag-manager';
 import '@ss/ui/components/confirmation-modal';
 import '@ss/ui/components/tab-container';
 import '@ss/ui/components/tab-pane';
-import '@/components/entity-form/property-field/property-field';
 import '@/components/svg-icon/svg-icon';
 import '@/components/access-policy-assignment/access-policy-assignment';
 import '@/components/entity-suggestions/entity-suggestions';
+import '@/components/entity-form/entity-form-properties/entity-form-properties';
+import '@/components/entity-form/entity-form-tags/entity-form-tags';
 
 import {
   EntityItemCanceledEvent,
@@ -53,38 +36,35 @@ import {
   EntityItemDeletedEvent,
   EntityItemUpdatedEvent,
 } from './entity-form.events';
-import { TagsUpdatedEvent } from '@ss/ui/components/tag-manager.events';
-import { TagSuggestionsRequestedEvent } from '@ss/ui/components/tag-input.events';
 import { TabIndexChangedEvent } from '@ss/ui/components/tab-container.events';
 import { SelectChangedEvent } from '@ss/ui/components/ss-select.events';
-
-import {
-  PropertyChangedEvent,
-  PropertyClonedEvent,
-  PropertyDeletedEvent,
-  PropertySubmittedEvent,
-} from './property-field/property-field.events';
 import { translate } from '@/lib/Localization';
 import { navigate } from '@/lib/Router';
 
-import '@ss/ui/components/sortable-list';
-import { SortUpdatedEvent } from '@ss/ui/components/sortable-list.events';
 import '@ss/ui/components/ss-toggle';
 import { ToggleChangedEvent } from '@ss/ui/components/ss-toggle.events';
 import { reaction } from 'mobx';
 import { themed } from '@/lib/Theme';
-import { LitElement } from 'lit';
-import { PropertyField } from '@/components/entity-form/property-field/property-field';
 import { storage } from '@/lib/Storage';
+
+import { EntityFormProperties } from './entity-form-properties/entity-form-properties';
+import { EntityFormTags } from './entity-form-tags/entity-form-tags';
+import {
+  EntityFormPropertiesChangedEvent,
+  EntityFormPropertySubmittedEvent,
+} from './entity-form-properties/entity-form-properties.events';
+import { EntityFormTagsUpdatedEvent } from './entity-form-tags/entity-form-tags.events';
 
 @themed()
 @customElement('entity-form')
 export class EntityForm extends ViewElement {
   private state = appState;
-  private minLengthForSuggestion = 1;
-  private suggestionTimeout: ReturnType<typeof setTimeout> | null = null;
-  private abortController: AbortController | null = null;
-  @state() private sortedIds: string[] = [];
+
+  @query('entity-form-properties')
+  private propertiesRef: EntityFormProperties | undefined;
+
+  @query('entity-form-tags')
+  private tagsRef: EntityFormTags | undefined;
 
   static styles = css`
     :host {
@@ -96,23 +76,6 @@ export class EntityForm extends ViewElement {
       padding: 1rem;
     }
 
-    tag-manager {
-      display: block;
-      margin-top: 1rem;
-    }
-
-    tag-manager:part(legend) {
-      font-weight: bold;
-    }
-
-    .buttons {
-      margin-top: 1rem;
-    }
-
-    property-field {
-      margin-bottom: 1rem;
-    }
-
     .save-button::part(button) {
       font-weight: bold;
     }
@@ -122,25 +85,6 @@ export class EntityForm extends ViewElement {
       align-items: center;
       gap: 0.5rem;
       margin-top: 1rem;
-    }
-
-    .property-option {
-      cursor: pointer;
-      padding: 0.5rem;
-
-      &:hover {
-        background-color: var(--background-hover-color);
-      }
-    }
-
-    .property-group-label {
-      font-size: 0.75rem;
-      font-weight: bold;
-      text-transform: uppercase;
-      color: var(--text-secondary-color, #666);
-      padding: 0.5rem 0.5rem 0.25rem;
-      margin-top: 0.25rem;
-      border-top: 1px solid var(--border-color, #ddd);
     }
 
     .no-entity-configs {
@@ -195,10 +139,6 @@ export class EntityForm extends ViewElement {
   [EntityFormProp.TAGS]: EntityFormProps[EntityFormProp.TAGS] =
     entityFormProps[EntityFormProp.TAGS].default;
 
-  @property()
-  [EntityFormProp.TAG_VALUE]: EntityFormProps[EntityFormProp.TAG_VALUE] =
-    entityFormProps[EntityFormProp.TAG_VALUE].default;
-
   @property({ type: Array })
   [EntityFormProp.PROPERTIES]: EntityFormProps[EntityFormProp.PROPERTIES] =
     entityFormProps[EntityFormProp.PROPERTIES].default;
@@ -215,27 +155,14 @@ export class EntityForm extends ViewElement {
   [EntityFormProp.PUBLISHED]: EntityFormProps[EntityFormProp.PUBLISHED] =
     entityFormProps[EntityFormProp.PUBLISHED].default;
 
-  @state() initialTags: string = '';
   @state() confirmModalShown: boolean = false;
-  @state() advancedMode: boolean = false;
   @state() loading: boolean = false;
-  @state() lastInput: SuggestionLastInput = {
-    [SuggestionInputType.ACTION]: { value: '', hadResults: true },
-    [SuggestionInputType.TAG]: { value: '', hadResults: true },
-  };
-  @state() tagSuggestions: string[] = [];
-
-  @state() propertyInstances: PropertyInstance[] = [];
-
-  @state() propertiesSetup = false;
-
   @state() initialHash = '';
   @state() instancesHash = '';
   @state() initialSortedIds: string[] = [];
+  @state() currentSortedIds: string[] = [];
   @state() initialPublished: boolean = false;
-
-  @state() propertyReferences: PropertyReference[] = [];
-  @state() propertyPopUpIsOpen = false;
+  @state() initialTags: string = '';
   @state() activeTabIndex: number = 0;
 
   @state()
@@ -249,28 +176,8 @@ export class EntityForm extends ViewElement {
   }
 
   @state()
-  get tagSuggestionsEnabled(): boolean {
-    return (
-      this.state.listConfig.setting[SettingName.TAG_SUGGESTIONS] !==
-      TagSuggestions.DISABLED
-    );
-  }
-
-  @state()
   get entityConfig(): EntityConfig | undefined {
     return this.availableEntityConfigs.find(entity => entity.id === this.type);
-  }
-
-  @state()
-  get canAddProperty(): boolean {
-    if (!this.entityConfig) {
-      return false;
-    }
-
-    return (
-      this.allowedPropertiesToAdd.length > 0 ||
-      this.allowedCalculatedPropertiesToAdd.length > 0
-    );
   }
 
   @state()
@@ -278,7 +185,7 @@ export class EntityForm extends ViewElement {
     return (
       this.initialHash !== this.instancesHash ||
       JSON.stringify(this.tagsAndSuggestions) !== this.initialTags ||
-      JSON.stringify(this.sortedIds) !==
+      JSON.stringify(this.currentSortedIds) !==
         JSON.stringify(this.initialSortedIds) ||
       this.published !== this.initialPublished
     );
@@ -291,35 +198,6 @@ export class EntityForm extends ViewElement {
         (this.state.listFilter.includeTypes?.length ?? 0) === 0 ||
         this.state.listFilter.includeTypes?.includes(config.id),
     );
-  }
-
-  @state()
-  get allowedPropertiesToAdd(): EntityPropertyConfig[] {
-    if (!this.entityConfig) {
-      return [];
-    }
-
-    return this.entityConfig.properties
-      .filter((p): p is EntityPropertyConfig => !('calculation' in p))
-      .filter(propertyConfig => !this.propertyAtMax(propertyConfig.id));
-  }
-
-  @state()
-  get allowedCalculatedPropertiesToAdd(): EntityCalculatedPropertyConfig[] {
-    if (!this.entityConfig) {
-      return [];
-    }
-
-    return this.entityConfig.properties
-      .filter(
-        (p): p is EntityCalculatedPropertyConfig => 'calculation' in p,
-      )
-      .filter(
-        propertyConfig =>
-          !this.propertyInstances.some(
-            instance => instance.propertyConfigId === propertyConfig.id,
-          ),
-      );
   }
 
   connectedCallback(): void {
@@ -343,9 +221,8 @@ export class EntityForm extends ViewElement {
         } else {
           this.type = 0;
         }
-        this.propertiesSetup = false;
-        this.propertyInstances = [];
-        this.setupProperties();
+
+        this.propertiesRef?.reset();
       },
       {
         fireImmediately: true,
@@ -353,274 +230,40 @@ export class EntityForm extends ViewElement {
     );
   }
 
-  disconnectedCallback(): void {
-    super.disconnectedCallback();
-
-    if (this.suggestionTimeout) {
-      clearTimeout(this.suggestionTimeout);
-      this.suggestionTimeout = null;
-    }
-
-    if (this.abortController) {
-      this.abortController.abort();
-      this.abortController = null;
-    }
-  }
-
-  updated(changedProperties: Map<string, unknown>): void {
-    super.updated(changedProperties);
-
-    if (!this.propertiesSetup) {
-      this.setupProperties();
-    }
-
-    if (changedProperties.has(EntityFormProp.PROPERTIES) && this.entityConfig) {
-      this.propertyReferences = [];
-      for (const property of this[EntityFormProp.PROPERTIES]) {
-        const dataType = this.entityConfig.properties.find(
-          prop => prop.id === property.propertyConfigId,
-        )?.dataType;
-
-        if (!dataType) {
-          continue;
-        }
-
-        this.propertyReferences.push({
-          dataType,
-          propertyValueId: property.id,
-        });
-      }
-    }
-  }
-
   get apiUrl(): string {
     return this.entityId ? `entity/${this.entityId}` : `entity`;
   }
 
-  async getInstancesHash(): Promise<string> {
-    return await sha256(JSON.stringify(this.mapInstancesToProperties()));
-  }
+  private async save(): Promise<void> {
+    this.loading = true;
 
-  async setupProperties(): Promise<void> {
-    if (!this.entityConfig) {
+    if (!this.propertiesRef) {
+      this.loading = false;
       return;
     }
 
-    if (this.entityConfig && !this.propertiesSetup) {
-      const existingProperties: PropertyInstance[] = this.properties.map(
-        property => {
-          const propConfig = this.entityConfig!.properties.find(
-            p => p.id === property.propertyConfigId,
-          );
-          let value = property.value;
-          if (
-            propConfig?.dataType === DataType.DATE &&
-            typeof value === 'number'
-          ) {
-            value = Time.formatDateTime(new Date(value));
-          }
-          return {
-            propertyConfigId: property.propertyConfigId,
-            instanceId: property.id,
-            uiId: uuidv4(),
-            value,
-            valueIsSet: true,
-          };
-        },
-      );
-
-      const availableProperties: PropertyInstance[] =
-        this.entityConfig.properties
-          .filter(
-            propertyConfig =>
-              !existingProperties.some(
-                existing => existing.propertyConfigId === propertyConfig.id,
-              ),
-          )
-          .map(propertyConfig => {
-            const value = propertyConfig.defaultValue;
-            return {
-              propertyConfigId: propertyConfig.id,
-              instanceId: 0,
-              uiId: uuidv4(),
-              value,
-              valueIsSet:
-                'calculation' in propertyConfig ||
-                propertyConfig.dataType === DataType.DATE ||
-                propertyConfig.dataType === DataType.BOOLEAN ||
-                (propertyConfig.dataType === DataType.INT &&
-                  value !== propertyConfig.defaultValue)
-                  ? true
-                  : false,
-            };
-          });
-
-      if (this.entityId) {
-        this.propertyInstances = [...existingProperties];
-      } else {
-        this.propertyInstances = [
-          ...existingProperties,
-          ...availableProperties,
-        ];
-      }
-      this.setSortedIds(this.propertyInstances.map(prop => prop.uiId));
-      this.propertiesSetup = true;
-      this.initialHash = this.instancesHash = await this.getInstancesHash();
-      this.initialSortedIds = [...this.sortedIds];
-      this.initialPublished = this.published;
-    }
-  }
-
-  setSortedIds(sortedIds: string[]): void {
-    this.sortedIds = sortedIds;
-  }
-
-  private propertyAtMax(propertyId: number): boolean {
-    if (!this.entityConfig) {
-      return true;
-    }
-
-    const propertyConfig = this.entityConfig.properties.find(
-      prop => prop.id === propertyId,
-    );
-
-    if (!propertyConfig || 'calculation' in propertyConfig) {
-      return true;
-    }
-
-    const numberOfPropertiesWithType = this.numberOfPropertiesWithType(
-      propertyConfig.dataType,
-      propertyId,
-      false,
-    );
-
-    return numberOfPropertiesWithType >= propertyConfig.allowed;
-  }
-
-  private numberOfPropertiesWithType(
-    dataType: DataType,
-    type: number,
-    onlyValidated = true,
-  ): number {
-    if (!this.entityConfig) {
-      return 0;
-    }
-
-    return this.propertyInstances.filter(
-      prop =>
-        prop.propertyConfigId === type &&
-        (this.validateTypedData(dataType, prop.value) || !onlyValidated),
-    ).length;
-  }
-
-  private validateTypedData(
-    dataType: DataType,
-    value: PropertyDataValue,
-  ): boolean {
-    let imageValue: ImageDataValue;
-    switch (dataType) {
-      case DataType.SHORT_TEXT:
-      case DataType.LONG_TEXT:
-        return (
-          typeof value === 'string' && value.length > 0 && value.length <= 255
-        );
-      case DataType.INT:
-        return typeof value === 'number';
-      case DataType.BOOLEAN:
-        return typeof value === 'boolean';
-      case DataType.IMAGE:
-        imageValue = value as ImageDataValue;
-        return typeof value === 'object' && imageValue.src.length > 0;
-      case DataType.DATE:
-        return value === null || !isNaN(new Date(value as string).getTime());
-      default:
-        return false;
-    }
-  }
-
-  private mapInstancesToProperties(): EntityProperty[] {
-    return this.propertyInstances
-      .filter(prop => prop.valueIsSet)
-      .map(propertyInstance => ({
-        id: propertyInstance.instanceId,
-        propertyConfigId: propertyInstance.propertyConfigId,
-        value: propertyInstance.value,
-        order:
-          this.sortedIds.indexOf(propertyInstance.uiId) ??
-          this.propertyInstances.length,
-      }));
-  }
-
-  private validateConstraints(): ValidateionResult {
-    const errors: string[] = [];
-
-    if (!this.entityConfig) {
-      errors.push(translate('entityTypeRequired'));
-      return { isValid: false, errors };
-    }
-
-    this.entityConfig.properties.forEach(propertyConfig => {
-      if ('calculation' in propertyConfig) {
-        return;
-      }
-
-      const count = this.numberOfPropertiesWithType(
-        propertyConfig.dataType,
-        propertyConfig.id,
-      );
-
-      if (count < propertyConfig.required) {
-        errors.push(
-          translate('entityPropertyMinCount', {
-            property: propertyConfig.name,
-            count: propertyConfig.required,
-          }),
-        );
-      }
-
-      if (count > propertyConfig.allowed) {
-        errors.push(
-          translate('entityPropertyMaxCount', {
-            property: propertyConfig.name,
-            count: propertyConfig.allowed,
-          }),
-        );
-      }
-    });
-
-    if (errors.length > 0) {
-      return { isValid: false, errors };
-    }
-
-    return { isValid: true };
-  }
-
-  private async save(): Promise<void> {
-    this.loading = true;
-    const validationResult = this.validateConstraints();
+    const validationResult = this.propertiesRef.validateConstraints();
 
     if (!validationResult.isValid) {
       this.loading = false;
-
       validationResult.errors.forEach(error =>
         addToast(error, NotificationType.ERROR),
       );
-
       return;
     }
 
     try {
       if (validationResult.isValid && this.hasChanged) {
         const timeZone = new Date().getTimezoneOffset();
-
-        const properties: EntityProperty[] = this.mapInstancesToProperties();
+        const { properties, propertyReferences } =
+          this.propertiesRef.getPayload();
 
         const payload: RequestBody = {
           entityConfigId: this.type,
           timeZone,
           tags: this.tagsAndSuggestions,
           properties,
-          propertyReferences: this.propertyReferences,
+          propertyReferences,
           published: this.published,
         };
 
@@ -695,39 +338,23 @@ export class EntityForm extends ViewElement {
   }
 
   private async reset(): Promise<void> {
-    this.propertiesSetup = false;
-    this.propertyInstances = [];
     this.initialHash = '';
     this.instancesHash = '';
     this.initialSortedIds = [];
-    await this.setupProperties();
+    this.currentSortedIds = [];
 
-    this.tagValue = '';
     if (!this.entityId) {
       this.tags =
         this.state.listFilter.tagging?.[ListFilterType.CONTAINS_ALL_OF] ?? [];
       this.published = this.state.listSetting[SettingName.AUTO_PUBLISH];
     }
-    this.state.setTagSuggestions([]);
 
-    if (this.suggestionTimeout) {
-      clearTimeout(this.suggestionTimeout);
-      this.suggestionTimeout = null;
-    }
-
-    this.focusFirstField();
+    await this.propertiesRef?.reset();
+    this.tagsRef?.reset();
   }
 
   async focusFirstField(): Promise<void> {
-    await this.updateComplete;
-    const firstField = this.renderRoot.querySelector(
-      'property-field',
-    ) as PropertyField | null;
-
-    if (firstField) {
-      await (firstField as unknown as LitElement).updateComplete;
-      firstField.focus();
-    }
+    await this.propertiesRef?.focusFirstField();
   }
 
   private async deleteEntity(): Promise<void> {
@@ -735,7 +362,6 @@ export class EntityForm extends ViewElement {
 
     try {
       await storage.deleteEntity(this.entityId);
-
       addToast(translate('removed'), NotificationType.INFO);
     } catch (error) {
       console.error(`Error encountered when deleting entity: ${error}`);
@@ -758,177 +384,33 @@ export class EntityForm extends ViewElement {
     this.confirmModalShown = true;
   }
 
-  private handleTagsUpdated(e: TagsUpdatedEvent): void {
-    this.tags = e.detail.tags;
-
-    this.state.setTagSuggestions(
-      this.state.tagSuggestions.filter(suggestion =>
-        this.tags.includes(suggestion),
-      ),
-    );
-  }
-
-  private async handleTagSuggestionsRequested(
-    e: TagSuggestionsRequestedEvent,
-  ): Promise<void> {
-    const value = e.detail.value;
-    if (
-      (!this.lastInput.tag.hadResults &&
-        value.startsWith(this.lastInput.tag.value)) ||
-      !this.tagSuggestionsEnabled
-    ) {
-      this.tagSuggestions = [];
-      return;
-    }
-
-    this.lastInput.tag.hadResults = false;
-    this.lastInput.tag.value = value;
-
-    let tags: string[] = [];
-
-    if (value.length >= this.minLengthForSuggestion) {
-      const result = await storage.getTags(value);
-      if (result) {
-        tags = result;
-      }
-    }
-
-    if (tags.length || value === '') {
-      this.lastInput.tag.hadResults = true;
-    }
-
-    this.tagSuggestions = tags;
-  }
-
   private handleTypeChanged(e: SelectChangedEvent<string>): void {
     this.type = parseInt(e.detail.value);
-    this.propertiesSetup = false;
-    this.propertyInstances = [];
+    this.propertiesRef?.reset();
   }
 
   private handlePublishedChanged(e: ToggleChangedEvent): void {
     this.published = e.detail.on;
   }
 
-  private async handlePropertyChanged(e: PropertyChangedEvent): Promise<void> {
-    const { value, uiId } = e.detail;
-
-    const propertyInstance = this.propertyInstances.find(
-      property => property.uiId === uiId,
-    );
-
-    if (!propertyInstance) {
-      return;
+  private handlePropertiesChanged(e: EntityFormPropertiesChangedEvent): void {
+    const { instancesHash, sortedIds, isInitial } = e.detail;
+    this.instancesHash = instancesHash;
+    this.currentSortedIds = sortedIds;
+    if (isInitial) {
+      this.initialHash = instancesHash;
+      this.initialSortedIds = sortedIds;
+      this.initialPublished = this.published;
+      this.initialTags = JSON.stringify(this.tagsAndSuggestions);
     }
-
-    propertyInstance.valueIsSet = true;
-    propertyInstance.value = value;
-
-    this.instancesHash = await this.getInstancesHash();
   }
 
-  private async handlePropertyCloned(e: PropertyClonedEvent): Promise<void> {
-    const { uiId } = e.detail;
-    const propertyInstanceIndex = this.propertyInstances.findIndex(
-      property => property.uiId === uiId,
-    );
-
-    const propertyInstances = [
-      ...this.propertyInstances.slice(0, propertyInstanceIndex + 1),
-      { ...this.propertyInstances[propertyInstanceIndex], uiId: uuidv4() },
-      ...this.propertyInstances.slice(propertyInstanceIndex + 1),
-    ];
-
-    this.propertyInstances = propertyInstances;
-
-    this.instancesHash = await this.getInstancesHash();
-  }
-
-  private async handlePropertyDeleted(e: PropertyDeletedEvent): Promise<void> {
-    const { uiId } = e.detail;
-
-    const instanceToRemove = this.propertyInstances.find(
-      property => property.uiId === uiId,
-    );
-
-    if (!instanceToRemove) {
-      return;
-    }
-
-    this.propertyInstances = this.propertyInstances.filter(
-      property => property.uiId !== uiId,
-    );
-
-    this.instancesHash = await this.getInstancesHash();
-  }
-
-  handlePropertySubmitted(e: PropertySubmittedEvent): void {
-    const { uiId } = e.detail;
-    const propertyInstanceIndex = this.propertyInstances.findIndex(
-      property => property.uiId === uiId,
-    );
-
-    if (propertyInstanceIndex < 0) {
-      return;
-    }
-
+  private handlePropertySubmitted(_e: EntityFormPropertySubmittedEvent): void {
     this.save();
   }
 
-  sortUpdated(e: SortUpdatedEvent): void {
-    this.setSortedIds(e.detail.sortedIds);
-  }
-
-  addProperty(
-    propertyConfig: EntityPropertyConfig | EntityCalculatedPropertyConfig,
-  ): void {
-    if (!propertyConfig) {
-      return;
-    }
-
-    this.propertyInstances = [
-      ...this.propertyInstances,
-      {
-        uiId: uuidv4(),
-        instanceId: 0,
-        propertyConfigId: propertyConfig.id,
-        value: propertyConfig.defaultValue,
-        valueIsSet: false,
-      },
-    ];
-  }
-
-  showAddPropertyPopUp(): void {
-    this.propertyPopUpIsOpen = true;
-  }
-
-  private handleAddPropertyOptionClick(
-    propertyConfig: EntityPropertyConfig | EntityCalculatedPropertyConfig,
-  ): void {
-    this.addProperty(propertyConfig);
-    this.propertyPopUpIsOpen = false;
-  }
-
-  renderPropertyField(
-    propertyInstance: PropertyInstance,
-  ): TemplateResult | typeof nothing {
-    const { propertyConfigId, uiId } = propertyInstance;
-    if (!propertyConfigId || !this.entityConfig) {
-      return nothing;
-    }
-
-    return html`<property-field
-      .value=${propertyInstance.value}
-      uiId=${uiId}
-      entityConfigId=${this.entityConfig.id}
-      propertyConfigId=${propertyConfigId}
-      usedOfThisType=${this.state.entityPropertyInstances[propertyConfigId] ||
-      0}
-      @property-changed=${this.handlePropertyChanged}
-      @property-cloned=${this.handlePropertyCloned}
-      @property-deleted=${this.handlePropertyDeleted}
-      @property-submitted=${this.handlePropertySubmitted}
-    ></property-field>`;
+  private handleTagsUpdated(e: EntityFormTagsUpdatedEvent): void {
+    this.tags = e.detail.tags;
   }
 
   renderNoEntityConfig(): TemplateResult {
@@ -995,104 +477,20 @@ export class EntityForm extends ViewElement {
           </div>`
         : nothing}
 
-      <div class="properties">
-        <sortable-list
-          @sort-updated=${this.sortUpdated}
-          ?disabled=${!this.entityConfig?.allowPropertyOrdering}
-        >
-          ${this.propertyInstances.length && this.entityConfig
-            ? repeat(
-                this.propertyInstances,
-                propertyInstance => propertyInstance.uiId,
-                propertyInstance =>
-                  html`<sortable-item
-                    id=${propertyInstance.uiId}
-                    ?disabled=${!this.entityConfig?.allowPropertyOrdering}
-                    >${this.renderPropertyField(
-                      propertyInstance,
-                    )}</sortable-item
-                  >`,
-              )
-            : nothing}
-        </sortable-list>
+      <entity-form-properties
+        entityId=${this.entityId}
+        .entityConfig=${this.entityConfig}
+        .properties=${this.properties}
+        @entity-form-properties-changed=${this.handlePropertiesChanged}
+        @entity-form-property-submitted=${this.handlePropertySubmitted}
+      ></entity-form-properties>
 
-        <div class="buttons">
-          ${this.canAddProperty
-            ? html` <ss-button @click=${this.showAddPropertyPopUp}
-                >${translate('addProperty')}</ss-button
-              >`
-            : nothing}
-        </div>
+      <entity-form-tags
+        .tags=${this.tags}
+        ?allowTags=${this.entityConfig?.allowTags ?? false}
+        @entity-form-tags-updated=${this.handleTagsUpdated}
+      ></entity-form-tags>
 
-        <pop-up
-          closeOnOutsideClick
-          closeOnEsc
-          closeButton
-          ?open=${this.propertyPopUpIsOpen}
-          @pop-up-closed=${(): void => {
-            this.propertyPopUpIsOpen = false;
-          }}
-        >
-          ${repeat(
-            this.allowedPropertiesToAdd,
-            propertyConfig => propertyConfig.id,
-            propertyConfig =>
-              html`<div class="property-option">
-                <div
-                  @click=${(): void =>
-                    this.handleAddPropertyOptionClick(propertyConfig)}
-                >
-                  ${propertyConfig.name}
-                </div>
-              </div>`,
-          )}
-          ${this.allowedCalculatedPropertiesToAdd.length > 0
-            ? html`
-                <div class="property-group-label">
-                  ${translate('calculatedPropertyConfig.calculated')}
-                </div>
-                ${repeat(
-                  this.allowedCalculatedPropertiesToAdd,
-                  propertyConfig => propertyConfig.id,
-                  propertyConfig =>
-                    html`<div class="property-option">
-                      <div
-                        @click=${(): void =>
-                          this.handleAddPropertyOptionClick(propertyConfig)}
-                      >
-                        ${propertyConfig.name}
-                      </div>
-                    </div>`,
-                )}
-              `
-            : nothing}
-        </pop-up>
-      </div>
-
-      ${this.entityConfig?.allowTags
-        ? html` <tag-manager
-            ?enableSuggestions=${this.tagSuggestionsEnabled}
-            value=${this.tagValue}
-            @tags-updated=${this.handleTagsUpdated}
-            @tag-suggestions-requested=${this.handleTagSuggestionsRequested}
-          >
-            <div slot="tags">
-              ${repeat(
-                this.tagsAndSuggestions,
-                tag => tag,
-                tag => html`<data-item>${tag}</data-item>`,
-              )}
-            </div>
-
-            <div slot="suggestions">
-              ${repeat(
-                this.tagSuggestions,
-                suggestion => suggestion,
-                suggestion => html`<data-item>${suggestion}</data-item>`,
-              )}
-            </div>
-          </tag-manager>`
-        : nothing}
       ${this.entityConfig?.id
         ? html` <div class="published">
               <label>${translate('published')}</label>
