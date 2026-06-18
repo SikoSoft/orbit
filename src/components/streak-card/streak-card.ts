@@ -36,8 +36,13 @@ export class StreakCard extends LitElement {
       width: 3rem;
       height: 3rem;
       border-radius: 50%;
-      background: color-mix(in srgb, var(--primary-color, #0066ff) 12%, transparent);
-      border: 2px solid color-mix(in srgb, var(--primary-color, #0066ff) 35%, transparent);
+      background: color-mix(
+        in srgb,
+        var(--primary-color, #0066ff) 12%,
+        transparent
+      );
+      border: 2px solid
+        color-mix(in srgb, var(--primary-color, #0066ff) 35%, transparent);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -58,7 +63,11 @@ export class StreakCard extends LitElement {
     .divider {
       width: 2rem;
       height: 2px;
-      background: color-mix(in srgb, var(--primary-color, #0066ff) 30%, transparent);
+      background: color-mix(
+        in srgb,
+        var(--primary-color, #0066ff) 30%,
+        transparent
+      );
       border-radius: 1px;
       margin: 0.375rem 0;
     }
@@ -98,6 +107,51 @@ export class StreakCard extends LitElement {
       font-weight: 600;
       line-height: 1;
     }
+
+    .card.is-pb {
+      position: relative;
+      overflow: hidden;
+      border-color: #c8973a;
+      border-top-color: #f0c040;
+      background: linear-gradient(
+        160deg,
+        #fffbef 0%,
+        #fff8e1 60%,
+        #fef3c7 100%
+      );
+      color: #5a3e00;
+    }
+
+    .card.is-pb .icon-badge {
+      background: color-mix(in srgb, #d4a017 15%, transparent);
+      border-color: color-mix(in srgb, #d4a017 40%, transparent);
+      color: #b8860b;
+    }
+
+    .card.is-pb .divider {
+      background: color-mix(in srgb, #d4a017 40%, transparent);
+    }
+
+    .card.is-pb .stat-value-current {
+      color: #b8860b;
+    }
+
+    .card.is-pb::after {
+      content: '';
+      position: absolute;
+      top: -60%;
+      left: -30%;
+      width: 60%;
+      height: 200%;
+      background: linear-gradient(
+        105deg,
+        transparent 20%,
+        rgba(255, 255, 255, 0.45) 50%,
+        transparent 80%
+      );
+      transform: skewX(-15deg);
+      pointer-events: none;
+    }
   `;
 
   @property({ type: Object })
@@ -118,9 +172,10 @@ export class StreakCard extends LitElement {
 
     const current = result?.current ?? 0;
     const longest = result?.longest ?? 0;
+    const isPb = longest > 0 && current === longest;
 
     return html`
-      <div class="card">
+      <div class="card ${isPb ? 'is-pb' : ''}">
         <div class="icon-badge">
           <svg-icon .name=${IconName.FIRE} .size=${22}></svg-icon>
         </div>
