@@ -28,6 +28,10 @@ See [docs/architecture.md](docs/architecture.md) for system design specification
 - Register with `@customElement('tag-name')`
 - Always use Lit's repeat directive, instead of map, for iterating in templates
 
+**Models file convention:**
+
+All TypeScript types, interfaces, enums, type aliases, constants, and helper functions specific to a component must live in the component's `.models.ts` file — never inline in the component file itself. This includes not only component props but also internal types (e.g. `SortField`, `StatusFilter`), shared constants (e.g. `PRESTIGE_LEVELS`), and pure utility functions (e.g. `calculateProgress`). If a type or helper is used by more than one component, place it in the models file of the component that owns the data and import it from there.
+
 **Property declaration convention:**
 
 Any component with custom properties must define them in its `.models.ts` file. The models file must export:

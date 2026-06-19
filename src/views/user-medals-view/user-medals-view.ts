@@ -1,7 +1,7 @@
 import { css, html, TemplateResult } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import '@/components/user-medal-list/user-medal-list';
+import '@/components/medal-list/medal-list';
 import '@/components/login-form/login-form';
 import '@/components/logged-in/logged-in';
 import '@/components/logged-out/logged-out';
@@ -24,7 +24,7 @@ export class UserMedalsView extends ViewElement {
           ><template><login-form></login-form></template
         ></logged-out>
         <logged-in
-          ><template><user-medal-list></user-medal-list></template
+          ><template><medal-list></medal-list></template
           ></logged-in>
       </div>
     `;
