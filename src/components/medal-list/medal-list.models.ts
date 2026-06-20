@@ -78,15 +78,16 @@ export function calculateProgress(config: MedalConfigWithProgress): number {
     return 0;
   }
 
-  const criteria = flattenCriteria(config.criteria);
-  if (criteria.length === 0) {
-    return 0;
-  }
-
   let totalProgress = 0;
   let count = 0;
 
-  for (const criterion of criteria) {
+  const streakAliases = new Set((config.streakRequests ?? []).map(sr => sr.alias));
+
+  const factCriteria = flattenCriteria(config.criteria).filter(
+    c => !streakAliases.has(c.fact),
+  );
+
+  for (const criterion of factCriteria) {
     const progressEntry = config.criteriaProgress.find(
       p => p.alias === criterion.fact,
     );
@@ -99,6 +100,20 @@ export function calculateProgress(config: MedalConfigWithProgress): number {
       typeof criterion.value === 'number' && criterion.value > 0
         ? criterion.value
         : 1;
+    totalProgress += Math.min(1, current / target);
+    count++;
+  }
+
+  for (const streakRequest of config.streakRequests ?? []) {
+    const progressEntry = config.criteriaProgress.find(
+      p => p.alias === streakRequest.alias,
+    );
+    if (!progressEntry) {
+      continue;
+    }
+    const current =
+      typeof progressEntry.value === 'number' ? progressEntry.value : 0;
+    const target = streakRequest.context.length;
     totalProgress += Math.min(1, current / target);
     count++;
   }
