@@ -1,8 +1,20 @@
 import type { ChartData } from 'chart.js';
 
 import { ChartResponse } from 'api-spec/models/Statistic';
+import { FactContext, FactOperation } from 'api-spec/models/Fact';
 
 import { translate } from '@/lib/Localization';
+
+export function getChartDatasetLabel(dataPoints: FactContext[]): string {
+  const first = dataPoints[0] as FactContext | undefined;
+  if (first?.operation === FactOperation.ANALYSIS_CLASSIFICATION) {
+    return translate(`chart.analysisClassificationType.${first.analysisType}`);
+  }
+  if (first?.operation) {
+    return translate(`factOperation.${first.operation}`);
+  }
+  return translate('chartData');
+}
 
 export function convertResponseToChartData(
   response: ChartResponse,

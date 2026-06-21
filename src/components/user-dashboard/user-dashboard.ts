@@ -7,10 +7,9 @@ import type { ChartData } from 'chart.js';
 import {
   Chart,
   ChartConfigType,
-  ChartResponse,
   ChartVersion,
 } from 'api-spec/models/Statistic';
-import { Fact, FactContext, FactResult, Streak, StreakResult } from 'api-spec/models/Fact';
+import { Fact, FactResult, Streak, StreakResult } from 'api-spec/models/Fact';
 
 import '@/components/chart-js/chart-js';
 import '@/components/dashboard-cards/dashboard-cards';
@@ -20,6 +19,10 @@ import '@/components/fact-card/fact-card';
 import { appState } from '@/state';
 import { translate } from '@/lib/Localization';
 import { storage } from '@/lib/Storage';
+import {
+  convertResponseToChartData,
+  getChartDatasetLabel,
+} from '@/lib/ChartUtil';
 import { StorageSource } from '@/models/Storage';
 import { IconName } from '@/components/svg-icon/svg-icon.models';
 import { DashboardCard } from '@/components/dashboard-cards/dashboard-cards.models';
@@ -171,31 +174,10 @@ export class UserDashboard extends MobxLitElement {
     this.loadingChartIds = newIds;
     if (result?.isOk) {
       const newMap = new Map(this.chartDataMap);
-      const firstOp = (chart.config.dataPoints[0] as FactContext | undefined)
-        ?.operation;
-      const label = firstOp
-        ? translate(`factOperation.${firstOp}`)
-        : translate('chartData');
-      newMap.set(chart.id, this.convertResponseToChartData(result.value, label));
+      const label = getChartDatasetLabel(chart.config.dataPoints);
+      newMap.set(chart.id, convertResponseToChartData(result.value, label));
       this.chartDataMap = newMap;
     }
-  }
-
-  private convertResponseToChartData(
-    response: ChartResponse,
-    label: string,
-  ): ChartData {
-    return {
-      labels: response.segmentedData.map(d => d.segment),
-      datasets: [
-        {
-          label,
-          data: response.segmentedData.map(d =>
-            typeof d.value.value === 'number' ? d.value.value : 0,
-          ),
-        },
-      ],
-    };
   }
 
   private get visibleStreaks(): Streak[] {

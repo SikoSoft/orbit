@@ -14,7 +14,10 @@ import { translate } from '@/lib/Localization';
 import { appState } from '@/state';
 import { storage } from '@/lib/Storage';
 import { addToast } from '@/lib/Util';
-import { convertResponseToChartData } from '@/lib/ChartUtil';
+import {
+  convertResponseToChartData,
+  getChartDatasetLabel,
+} from '@/lib/ChartUtil';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 import { CollapsableToggledEvent } from '@ss/ui/components/ss-collapsable.events';
 import { ConfirmationAcceptedEvent } from '@ss/ui/components/confirmation-modal.events';
@@ -94,7 +97,8 @@ export class ChartList extends MobxLitElement {
     this.loadingChartIds = newIds;
     if (result?.isOk) {
       const newMap = new Map(this.savedChartDataMap);
-      newMap.set(chart.id, convertResponseToChartData(result.value));
+      const label = getChartDatasetLabel(chart.config.dataPoints);
+      newMap.set(chart.id, convertResponseToChartData(result.value, label));
       this.savedChartDataMap = newMap;
     }
   }
