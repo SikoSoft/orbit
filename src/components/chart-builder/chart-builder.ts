@@ -35,6 +35,8 @@ import '@/components/data-point-builder/data-point-builder';
 @customElement('chart-builder')
 export class ChartBuilder extends MobxLitElement {
   @property({ type: Object, attribute: false }) chart?: Chart;
+  @property({ type: Object, attribute: false }) initialConfig?: ChartConfig;
+  @property({ type: String }) initialName = '';
 
   @state() private chartType: ChartConfigType = ChartConfigType.LINE;
   @state() private dataWindowType: DataWindowType = DataWindowType.LAST_30_DAYS;
@@ -54,13 +56,15 @@ export class ChartBuilder extends MobxLitElement {
 
   updated(changedProperties: PropertyValues): void {
     if (changedProperties.has('chart') && this.chart) {
-      this.initFromChart(this.chart);
+      this.initFromConfig(this.chart.config, this.chart.name);
+    } else if (changedProperties.has('initialConfig') && this.initialConfig) {
+      this.initFromConfig(this.initialConfig, this.initialName);
+      void this.handleGenerateChart(false);
     }
   }
 
-  private initFromChart(chart: Chart): void {
-    this.chartName = chart.name;
-    const config = chart.config;
+  private initFromConfig(config: ChartConfig, name = ''): void {
+    this.chartName = name;
     if (config.version === ChartVersion.V2) {
       this.chartType = (config as ChartConfigV2).type as ChartConfigType;
     }
