@@ -207,7 +207,7 @@ export class EntityForm extends ViewElement {
 
     reaction(
       () => [appState.listConfigId, appState.listFilter],
-      () => {
+      async () => {
         if (this.entityId) {
           return;
         }
@@ -223,7 +223,8 @@ export class EntityForm extends ViewElement {
         }
 
         if (this.propertiesRef) {
-          this.updateComplete.then(() => this.propertiesRef?.reset());
+          await this.updateComplete;
+          this.propertiesRef?.reset();
         }
       },
       {
@@ -386,9 +387,12 @@ export class EntityForm extends ViewElement {
     this.confirmModalShown = true;
   }
 
-  private handleTypeChanged(e: SelectChangedEvent<string>): void {
+  private async handleTypeChanged(
+    e: SelectChangedEvent<string>,
+  ): Promise<void> {
     this.type = parseInt(e.detail.value);
-    this.updateComplete.then(() => this.propertiesRef?.reset());
+    await this.updateComplete;
+    this.propertiesRef?.reset();
   }
 
   private handlePublishedChanged(e: ToggleChangedEvent): void {

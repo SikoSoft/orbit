@@ -132,6 +132,7 @@ The OpenAPI spec for `gapi` lives at `docs/openapi.latest.json` (not committed â
 - Every function must include a return type
 - SVG icons should never be inserted inline. Create new component for icon if it doesn't exist in `components/svg-icon/svg`
 - Every custom event must have its own class extending `CustomEvent<TPayload>`, a named export for the event name string, and a payload type â€” never dispatch a bare `new CustomEvent(...)`. Events with no payload use `Record<string, never>` as the type. See `src/events/` for examples.
+- Prefer `async`/`await` over `.then()` callbacks whenever possible, including inside MobX `reaction()` effects and event handler methods.
 
 See [docs/code-hygeine.md](docs/code-hygeine.md) for further details on code hygeine and cleanup routines.
 
