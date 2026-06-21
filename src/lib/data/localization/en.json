@@ -537,6 +537,8 @@
   "analysisType.morningFasting": "Morning Fasting",
   "analysisType.afternoonSnacking": "Afternoon Snacking",
   "analysisType.caffeineIntake": "Caffeine Intake",
+  "analysisType.sugarIntake": "Sugar Intake",
+  "analysisType.calorieIntake": "Calorie Intake",
   "chartName": "Chart Name",
   "chartType": "Chart Type",
   "chartType.bar": "Bar",
