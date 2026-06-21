@@ -222,7 +222,9 @@ export class EntityForm extends ViewElement {
           this.type = 0;
         }
 
-        this.propertiesRef?.reset();
+        if (this.propertiesRef) {
+          this.updateComplete.then(() => this.propertiesRef?.reset());
+        }
       },
       {
         fireImmediately: true,
@@ -386,7 +388,7 @@ export class EntityForm extends ViewElement {
 
   private handleTypeChanged(e: SelectChangedEvent<string>): void {
     this.type = parseInt(e.detail.value);
-    this.propertiesRef?.reset();
+    this.updateComplete.then(() => this.propertiesRef?.reset());
   }
 
   private handlePublishedChanged(e: ToggleChangedEvent): void {
