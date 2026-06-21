@@ -219,7 +219,9 @@ export class UserDashboard extends MobxLitElement {
     if (ids === null) {
       return this.savedCharts;
     }
-    return this.savedCharts.filter(c => ids.includes(c.id));
+    return ids
+      .map(id => this.savedCharts.find(c => c.id === id))
+      .filter((c): c is Chart => c !== undefined);
   }
 
   render(): TemplateResult {
