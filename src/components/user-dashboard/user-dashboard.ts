@@ -66,11 +66,32 @@ export class UserDashboard extends MobxLitElement {
       gap: 1rem;
     }
 
-    .charts {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
+    .charts-wrapper {
+      position: relative;
       margin-top: 1rem;
+    }
+
+    .charts-wrapper.scrollable::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 3rem;
+      background: linear-gradient(
+        to right,
+        transparent,
+        var(--background-color, #fff)
+      );
+      pointer-events: none;
+    }
+
+    .charts {
+      display: flex;
+      gap: 1.5rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
     }
 
     .chart-container {
@@ -81,6 +102,10 @@ export class UserDashboard extends MobxLitElement {
       border: 2px solid var(--border-color, #ccc);
       border-radius: var(--border-radius, 0.5rem);
       background: var(--box-background-color, #fff);
+      flex: 0 0 100%;
+      width: 100%;
+      box-sizing: border-box;
+      scroll-snap-align: start;
     }
 
     .chart-title {
@@ -248,36 +273,42 @@ export class UserDashboard extends MobxLitElement {
           : nothing}
         <dashboard-cards .cards=${this.cards}></dashboard-cards>
 
-        <div class="charts">
-          ${repeat(
-            this.visibleCharts,
-            chart => chart.id,
-            chart => {
-              const isLoading = this.loadingChartIds.has(chart.id);
-              return html`
-                <div class="chart-container">
-                  <h3 class="chart-title">${chart.name}</h3>
-                  ${isLoading || this.chartDataMap.has(chart.id)
-                    ? html`
-                        <div class="chart-wrapper">
-                          <chart-js
-                            type=${chart.config.version === ChartVersion.V2
-                              ? chart.config.type
-                              : ChartConfigType.LINE}
-                            .data=${this.chartDataMap.get(chart.id) ?? {
-                              labels: [],
-                              datasets: [],
-                            }}
-                            ?loading=${isLoading}
-                            label=${chart.name}
-                          ></chart-js>
-                        </div>
-                      `
-                    : nothing}
-                </div>
-              `;
-            },
-          )}
+        <div
+          class="charts-wrapper ${this.visibleCharts.length > 1
+            ? 'scrollable'
+            : ''}"
+        >
+          <div class="charts">
+            ${repeat(
+              this.visibleCharts,
+              chart => chart.id,
+              chart => {
+                const isLoading = this.loadingChartIds.has(chart.id);
+                return html`
+                  <div class="chart-container">
+                    <h3 class="chart-title">${chart.name}</h3>
+                    ${isLoading || this.chartDataMap.has(chart.id)
+                      ? html`
+                          <div class="chart-wrapper">
+                            <chart-js
+                              type=${chart.config.version === ChartVersion.V2
+                                ? chart.config.type
+                                : ChartConfigType.LINE}
+                              .data=${this.chartDataMap.get(chart.id) ?? {
+                                labels: [],
+                                datasets: [],
+                              }}
+                              ?loading=${isLoading}
+                              label=${chart.name}
+                            ></chart-js>
+                          </div>
+                        `
+                      : nothing}
+                  </div>
+                `;
+              },
+            )}
+          </div>
         </div>
       </div>
     `;
