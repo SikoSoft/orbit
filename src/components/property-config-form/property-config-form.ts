@@ -7,16 +7,13 @@ import {
   nothing,
 } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import {
   BooleanDataValue,
   DataType,
   DataTypedValue,
   DateDataValue,
   defaultEntityPropertyConfig,
-  EntityPropertyCalculation,
-  EntityPropertyCalculationOperation,
-  EntityPropertyCalculationReference,
   EntityPropertyConfig,
   ImageDataValue,
   IntDataValue,
@@ -35,12 +32,8 @@ import {
   propertyConfigFormRequiredProps,
   PropertyConfigFormProps,
 } from './property-config-form.models';
-import {
-  OperandType,
-  isPickableProperty,
-  buildCalculatedConfig,
-  defaultCalculation,
-} from '@/components/calculated-property-config-form/calculated-property-config-form.models';
+import { defaultCalculation } from '@/components/calculated-property-config-form/calculated-property-config-form.models';
+import { CalculatedPropertyConfigForm } from '@/components/calculated-property-config-form/calculated-property-config-form';
 
 import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
 import {
@@ -50,15 +43,20 @@ import {
   PropertyConfigDeletedEvent,
   PropertyConfigUpdatedEvent,
 } from './property-config-form.events';
+import { DefaultValueChangedEvent } from './property-config-default-value/property-config-default-value.events';
+import { OptionsChangedEvent } from './property-config-options/property-config-options.events';
 
 import '@ss/ui/components/ss-input';
 import '@ss/ui/components/ss-select';
 import '@ss/ui/components/confirmation-modal';
 import '@ss/ui/components/ss-toggle';
-import '@/components/entity-form/date-field/date-field';
-import '@/components/entity-form/image-field/image-field';
+import '@ss/ui/components/ss-button';
+import '@ss/ui/components/ss-collapsable';
+import '@/components/calculated-property-config-form/calculated-property-config-form';
+import '@/components/property-config-form/property-config-default-value/property-config-default-value';
+import '@/components/property-config-form/property-config-options/property-config-options';
+
 import { ToggleChangedEvent } from '@ss/ui/components/ss-toggle.events';
-import { PropertyChangedEvent } from '../entity-form/property-field/property-field.events';
 import { repeat } from 'lit/directives/repeat.js';
 import { Revision } from 'api-spec/lib/Revision';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
@@ -66,6 +64,12 @@ import { NotificationType } from '@ss/ui/components/notification-provider.models
 @customElement('property-config-form')
 export class PropertyConfigForm extends LitElement {
   @state() propertyConfig: EntityPropertyConfig = defaultEntityPropertyConfig;
+  @state() confirmationModalIsOpen = false;
+  @state() private invalidFields: PropertyConfigFormProp[] = [];
+  @state() isCalculated = false;
+
+  @query('calculated-property-config-form')
+  private calculatedForm?: CalculatedPropertyConfigForm;
 
   static styles = css`
     :host {
@@ -101,27 +105,6 @@ export class PropertyConfigForm extends LitElement {
         display: block;
         margin-bottom: 0.5rem;
       }
-    }
-
-    .operand-row {
-      display: flex;
-      gap: 0.5rem;
-      align-items: flex-start;
-
-      ss-select,
-      ss-input {
-        flex: 1;
-      }
-    }
-
-    .formula-preview {
-      font-family: monospace;
-      background: var(--surface-color, #f5f5f5);
-      padding: 0.5rem;
-      border-radius: 0.25rem;
-      margin-bottom: 0.75rem;
-      font-size: 0.9rem;
-      color: var(--text-color-secondary, #555);
     }
   `;
 
@@ -197,17 +180,6 @@ export class PropertyConfigForm extends LitElement {
   [PropertyConfigFormProp.ALL_PROPERTIES]: PropertyConfigFormProps[PropertyConfigFormProp.ALL_PROPERTIES] =
     propertyConfigFormProps[PropertyConfigFormProp.ALL_PROPERTIES].default;
 
-  @state() confirmationModalIsOpen = false;
-  @state() private invalidFields: PropertyConfigFormProp[] = [];
-  @state() isCalculated = false;
-  @state() operation: EntityPropertyCalculationOperation = '+';
-  @state() value1Type: OperandType = 'number';
-  @state() value1PropertyConfigId = 0;
-  @state() value1Number = 0;
-  @state() value2Type: OperandType = 'number';
-  @state() value2PropertyConfigId = 0;
-  @state() value2Number = 0;
-
   connectedCallback(): void {
     super.connectedCallback();
 
@@ -216,27 +188,6 @@ export class PropertyConfigForm extends LitElement {
     const calc = this[PropertyConfigFormProp.CALCULATION];
     if (calc) {
       this.isCalculated = true;
-      this.operation = calc.operation;
-
-      if (typeof calc.value1 === 'number') {
-        this.value1Type = 'number';
-        this.value1Number = calc.value1;
-      } else {
-        this.value1Type = 'property';
-        this.value1PropertyConfigId = (
-          calc.value1 as EntityPropertyCalculationReference
-        ).propertyConfigId;
-      }
-
-      if (typeof calc.value2 === 'number') {
-        this.value2Type = 'number';
-        this.value2Number = calc.value2;
-      } else {
-        this.value2Type = 'property';
-        this.value2PropertyConfigId = (
-          calc.value2 as EntityPropertyCalculationReference
-        ).propertyConfigId;
-      }
     }
   }
 
@@ -253,21 +204,6 @@ export class PropertyConfigForm extends LitElement {
         }
       }
     }
-
-    if (
-      changedProperties.has('value1Type') &&
-      this.value1Type === 'property' &&
-      !this.value1PropertyConfigId
-    ) {
-      this.value1PropertyConfigId = this.pickableProperties[0]?.id ?? 0;
-    }
-    if (
-      changedProperties.has('value2Type') &&
-      this.value2Type === 'property' &&
-      !this.value2PropertyConfigId
-    ) {
-      this.value2PropertyConfigId = this.pickableProperties[0]?.id ?? 0;
-    }
   }
 
   get visibleFields(): PropertyConfigFormProp[] {
@@ -278,48 +214,19 @@ export class PropertyConfigForm extends LitElement {
   }
 
   get collapsableTitle(): string {
-    const name = this.propertyConfig.name || translate('propertyConfiguration');
+    const name =
+      (this.isCalculated
+        ? this[PropertyConfigFormProp.NAME]
+        : this.propertyConfig.name) || translate('propertyConfiguration');
     if (this.isCalculated) {
       return `${name} (${translate('calculatedPropertyConfig.calculated')})`;
     }
     return name;
   }
 
-  get pickableProperties(): EntityPropertyConfig[] {
-    return this[PropertyConfigFormProp.ALL_PROPERTIES].filter(p => {
-      if (!isPickableProperty(p)) {
-        return false;
-      }
-      return p.id !== this[PropertyConfigFormProp.PROPERTY_CONFIG_ID];
-    });
-  }
-
-  get formulaDisplay(): string {
-    const fmtOperand = (
-      type: OperandType,
-      propId: number,
-      num: number,
-    ): string => {
-      if (type === 'number') {
-        return String(num);
-      }
-      const prop = this[PropertyConfigFormProp.ALL_PROPERTIES].find(
-        p => p.id === propId,
-      );
-      return prop ? `[${prop.name}]` : `[#${propId}]`;
-    };
-
-    const v1 = fmtOperand(
-      this.value1Type,
-      this.value1PropertyConfigId,
-      this.value1Number,
-    );
-    const v2 = fmtOperand(
-      this.value2Type,
-      this.value2PropertyConfigId,
-      this.value2Number,
-    );
-    return `${v1} ${this.operation} ${v2}`;
+  get optionsFieldsVisible(): boolean {
+    const dataType = this.propertyConfig[PropertyConfigFormProp.DATA_TYPE];
+    return dataType === DataType.SHORT_TEXT || dataType === DataType.INT;
   }
 
   handleDataTypeChange(dataType: DataType = this.dataType as DataType): void {
@@ -509,65 +416,9 @@ export class PropertyConfigForm extends LitElement {
     return true;
   }
 
-  validateCalculated(): boolean {
-    if (!this.propertyConfig.name.trim()) {
-      addToast(
-        translate('calculatedPropertyConfig.requiredFieldMissing', {
-          field: translate('calculatedPropertyConfig.field.name'),
-        }),
-        NotificationType.ERROR,
-      );
-      return false;
-    }
-    return true;
-  }
-
-  buildCalculation(): EntityPropertyCalculation {
-    const value1: EntityPropertyCalculationReference | number =
-      this.value1Type === 'number'
-        ? this.value1Number
-        : { propertyConfigId: this.value1PropertyConfigId };
-    const value2: EntityPropertyCalculationReference | number =
-      this.value2Type === 'number'
-        ? this.value2Number
-        : { propertyConfigId: this.value2PropertyConfigId };
-    return { value1, value2, operation: this.operation };
-  }
-
-  async saveCalculated(): Promise<void> {
-    if (!this.validateCalculated()) {
-      return;
-    }
-
-    const config = buildCalculatedConfig(
-      this[PropertyConfigFormProp.ENTITY_CONFIG_ID],
-      this[PropertyConfigFormProp.PROPERTY_CONFIG_ID],
-      this.propertyConfig.name,
-      this.propertyConfig.prefix,
-      this.propertyConfig.suffix,
-      this.propertyConfig.hidden,
-      this.buildCalculation(),
-    );
-
-    if (this[PropertyConfigFormProp.PROPERTY_CONFIG_ID]) {
-      const result = await storage.updateCalculatedPropertyConfig(config);
-      if (result) {
-        addToast(translate('calculatedPropertyConfig.updatedSuccessfully'));
-        this.dispatchEvent(new PropertyConfigUpdatedEvent(result));
-      }
-      return;
-    }
-
-    const result = await storage.addCalculatedPropertyConfig(config);
-    if (result) {
-      addToast(translate('calculatedPropertyConfig.addedSuccessfully'));
-      this.dispatchEvent(new PropertyConfigAddedEvent(result));
-    }
-  }
-
   async save(): Promise<void> {
     if (this.isCalculated) {
-      await this.saveCalculated();
+      await this.calculatedForm?.save();
       return;
     }
 
@@ -633,107 +484,8 @@ export class PropertyConfigForm extends LitElement {
     return updatedJson === currentJson;
   }
 
-  handleTagsUpdated(e: CustomEvent): void {
-    this.updateField(PropertyConfigFormProp.OPTIONS, e.detail.tags);
-  }
-
   handlePropertyTypeChanged(e: InputChangedEvent): void {
     this.isCalculated = e.detail.value === 'calculated';
-    if (this.isCalculated) {
-      const calc = this[PropertyConfigFormProp.CALCULATION];
-      if (!calc) {
-        const def = defaultCalculation;
-        this.operation = def.operation;
-        this.value1Type = 'number';
-        this.value1Number = typeof def.value1 === 'number' ? def.value1 : 0;
-        this.value2Type = 'number';
-        this.value2Number = typeof def.value2 === 'number' ? def.value2 : 0;
-      }
-    }
-  }
-
-  handleTagSuggestionsRequested(e: CustomEvent): void {
-    return;
-    // For demo purposes, we'll just return some static suggestions.
-    // In a real application, you might fetch suggestions from an API based on the current input.
-    const suggestions = ['Option 1', 'Option 2', 'Option 3'].filter(option =>
-      option.toLowerCase().includes(e.detail.query.toLowerCase()),
-    );
-
-    this.dispatchEvent(
-      new CustomEvent('tag-suggestions-response', {
-        detail: { suggestions },
-        bubbles: true,
-        composed: true,
-      }),
-    );
-  }
-
-  renderDefaultValueField(): TemplateResult {
-    switch (this.propertyConfig[PropertyConfigFormProp.DATA_TYPE]) {
-      case DataType.DATE:
-        return html` <date-field
-          .value=${this.propertyConfig[PropertyConfigFormProp.DEFAULT_VALUE]}
-          @property-changed=${(e: PropertyChangedEvent): void => {
-            this.updateField(
-              PropertyConfigFormProp.DEFAULT_VALUE,
-              e.detail.value,
-            );
-          }}
-        ></date-field>`;
-      case DataType.BOOLEAN:
-        return html` <ss-toggle
-          ?on=${this.propertyConfig[PropertyConfigFormProp.DEFAULT_VALUE]}
-          @toggle-changed=${(e: ToggleChangedEvent): void => {
-            this.updateField(PropertyConfigFormProp.DEFAULT_VALUE, e.detail.on);
-          }}
-        ></ss-toggle>`;
-
-      case DataType.IMAGE:
-        return html` <image-field
-          src=${this.propertyConfig[PropertyConfigFormProp.DEFAULT_VALUE].src}
-          alt=${this.propertyConfig[PropertyConfigFormProp.DEFAULT_VALUE].alt}
-          @property-changed=${(e: PropertyChangedEvent): void => {
-            this.updateField(
-              PropertyConfigFormProp.DEFAULT_VALUE,
-              e.detail.value,
-            );
-          }}
-        ></image-field>`;
-
-      case DataType.INT:
-        return html`
-          <ss-input
-            type="number"
-            value=${this.propertyConfig[PropertyConfigFormProp.DEFAULT_VALUE]}
-            @input-changed=${(e: InputChangedEvent): void => {
-              this.updateField(
-                PropertyConfigFormProp.DEFAULT_VALUE,
-                parseInt(e.detail.value),
-              );
-            }}
-          ></ss-input>
-        `;
-
-      default:
-        return html`
-          <ss-input
-            type="text"
-            value=${this.propertyConfig[PropertyConfigFormProp.DEFAULT_VALUE]}
-            @input-changed=${(e: InputChangedEvent): void => {
-              this.updateField(
-                PropertyConfigFormProp.DEFAULT_VALUE,
-                e.detail.value,
-              );
-            }}
-          ></ss-input>
-        `;
-    }
-  }
-
-  get optionsFieldsVisible(): boolean {
-    const dataType = this.propertyConfig[PropertyConfigFormProp.DATA_TYPE];
-    return dataType === DataType.SHORT_TEXT || dataType === DataType.INT;
   }
 
   isFieldVisible(field: PropertyConfigFormProp): boolean {
@@ -746,29 +498,42 @@ export class PropertyConfigForm extends LitElement {
     return true;
   }
 
-  renderOptionsField(): TemplateResult | typeof nothing {
-    if (!this.optionsFieldsVisible) {
-      return nothing;
-    }
+  private handleDefaultValueChanged(e: DefaultValueChangedEvent): void {
+    this.updateField(PropertyConfigFormProp.DEFAULT_VALUE, e.detail.value);
+  }
 
-    return html`<tag-manager @tags-updated=${this.handleTagsUpdated}>
-      <div slot="tags">
-        ${repeat(
-          this.options,
-          option => option,
-          option => html`<data-item>${option}</data-item>`,
-        )}
-      </div>
-    </tag-manager>`;
+  private handleOptionsChanged(e: OptionsChangedEvent): void {
+    this.updateField(
+      PropertyConfigFormProp.OPTIONS,
+      e.detail.options as unknown as PropertyDataValue,
+    );
+  }
+
+  private handleSelectField(
+    field: PropertyConfigFormProp,
+    e: InputChangedEvent,
+  ): void {
+    if (field === PropertyConfigFormProp.DATA_TYPE) {
+      this.handleDataTypeChange(e.detail.value as DataType);
+    } else {
+      this.updateField(field, e.detail.value);
+    }
   }
 
   renderField(field: PropertyConfigFormProp): TemplateResult | typeof nothing {
     if (field === PropertyConfigFormProp.DEFAULT_VALUE) {
-      return this.renderDefaultValueField();
+      return html`<property-config-default-value
+        dataType=${this.propertyConfig.dataType}
+        .defaultValue=${this.propertyConfig.defaultValue}
+        @default-value-changed=${this.handleDefaultValueChanged}
+      ></property-config-default-value>`;
     }
 
     if (field === PropertyConfigFormProp.OPTIONS) {
-      return this.renderOptionsField();
+      return html`<property-config-options
+        .options=${this.options as string[]}
+        @options-changed=${this.handleOptionsChanged}
+      ></property-config-options>`;
     }
 
     switch (propertyConfigFormProps[field].control.type) {
@@ -782,13 +547,8 @@ export class PropertyConfigForm extends LitElement {
               value: option,
             }))}
             selected=${String(this[field])}
-            @select-changed=${(e: InputChangedEvent): void => {
-              if (field === PropertyConfigFormProp.DATA_TYPE) {
-                this.handleDataTypeChange(e.detail.value as DataType);
-              } else {
-                this.updateField(field, e.detail.value);
-              }
-            }}
+            @select-changed=${(e: InputChangedEvent): void =>
+              this.handleSelectField(field, e)}
           ></ss-select>
         `;
       case ControlType.BOOLEAN:
@@ -814,169 +574,6 @@ export class PropertyConfigForm extends LitElement {
     }
 
     return nothing;
-  }
-
-  renderOperandPicker(
-    type: OperandType,
-    propConfigId: number,
-    num: number,
-    onTypeChange: (t: OperandType) => void,
-    onPropChange: (id: number) => void,
-    onNumChange: (n: number) => void,
-  ): TemplateResult {
-    const pickable = this.pickableProperties;
-
-    return html`
-      <div class="operand-row">
-        <ss-select
-          .options=${[
-            {
-              label: translate('calculatedPropertyConfig.operandType.property'),
-              value: 'property',
-            },
-            {
-              label: translate('calculatedPropertyConfig.operandType.number'),
-              value: 'number',
-            },
-          ]}
-          selected=${type}
-          @select-changed=${(e: InputChangedEvent): void => {
-            onTypeChange(e.detail.value as OperandType);
-          }}
-        ></ss-select>
-
-        ${type === 'property'
-          ? pickable.length > 0
-            ? html`
-                <ss-select
-                  .options=${pickable.map(p => ({
-                    label: p.name,
-                    value: String(p.id),
-                  }))}
-                  selected=${String(propConfigId)}
-                  @select-changed=${(e: InputChangedEvent): void => {
-                    onPropChange(Number(e.detail.value));
-                  }}
-                ></ss-select>
-              `
-            : html`<span
-                >${translate(
-                  'calculatedPropertyConfig.noPickableProperties',
-                )}</span
-              >`
-          : html`
-              <ss-input
-                type="number"
-                value=${num}
-                @input-changed=${(e: InputChangedEvent): void => {
-                  onNumChange(Number(e.detail.value));
-                }}
-              ></ss-input>
-            `}
-      </div>
-    `;
-  }
-
-  renderCalculatedFields(): TemplateResult {
-    return html`
-      <div class="formula-preview">${this.formulaDisplay}</div>
-
-      <div class="field">
-        <label>${translate('calculatedPropertyConfig.field.name')}</label>
-        <ss-input
-          type="text"
-          value=${this.propertyConfig.name}
-          @input-changed=${(e: InputChangedEvent): void => {
-            this.updateField(PropertyConfigFormProp.NAME, e.detail.value);
-          }}
-        ></ss-input>
-      </div>
-
-      <div class="field">
-        <label>${translate('calculatedPropertyConfig.field.prefix')}</label>
-        <ss-input
-          type="text"
-          value=${this.propertyConfig.prefix}
-          @input-changed=${(e: InputChangedEvent): void => {
-            this.updateField(PropertyConfigFormProp.PREFIX, e.detail.value);
-          }}
-        ></ss-input>
-      </div>
-
-      <div class="field">
-        <label>${translate('calculatedPropertyConfig.field.suffix')}</label>
-        <ss-input
-          type="text"
-          value=${this.propertyConfig.suffix}
-          @input-changed=${(e: InputChangedEvent): void => {
-            this.updateField(PropertyConfigFormProp.SUFFIX, e.detail.value);
-          }}
-        ></ss-input>
-      </div>
-
-      <div class="field">
-        <label>${translate('calculatedPropertyConfig.field.hidden')}</label>
-        <ss-toggle
-          ?on=${this.propertyConfig.hidden}
-          @toggle-changed=${(e: ToggleChangedEvent): void => {
-            this.updateField(PropertyConfigFormProp.HIDDEN, e.detail.on);
-          }}
-        ></ss-toggle>
-      </div>
-
-      <div class="field">
-        <label>${translate('calculatedPropertyConfig.field.value1')}</label>
-        ${this.renderOperandPicker(
-          this.value1Type,
-          this.value1PropertyConfigId,
-          this.value1Number,
-          (t): void => {
-            this.value1Type = t;
-          },
-          (id): void => {
-            this.value1PropertyConfigId = id;
-          },
-          (n): void => {
-            this.value1Number = n;
-          },
-        )}
-      </div>
-
-      <div class="field">
-        <label>${translate('calculatedPropertyConfig.field.operation')}</label>
-        <ss-select
-          .options=${[
-            { label: '+', value: '+' },
-            { label: '-', value: '-' },
-            { label: '*', value: '*' },
-            { label: '/', value: '/' },
-          ]}
-          selected=${this.operation}
-          @select-changed=${(e: InputChangedEvent): void => {
-            this.operation = e.detail
-              .value as EntityPropertyCalculationOperation;
-          }}
-        ></ss-select>
-      </div>
-
-      <div class="field">
-        <label>${translate('calculatedPropertyConfig.field.value2')}</label>
-        ${this.renderOperandPicker(
-          this.value2Type,
-          this.value2PropertyConfigId,
-          this.value2Number,
-          (t): void => {
-            this.value2Type = t;
-          },
-          (id): void => {
-            this.value2PropertyConfigId = id;
-          },
-          (n): void => {
-            this.value2Number = n;
-          },
-        )}
-      </div>
-    `;
   }
 
   render(): TemplateResult {
@@ -1010,7 +607,19 @@ export class PropertyConfigForm extends LitElement {
           </div>
 
           ${this.isCalculated
-            ? this.renderCalculatedFields()
+            ? html`<calculated-property-config-form
+                entityConfigId=${this[PropertyConfigFormProp.ENTITY_CONFIG_ID]}
+                propertyConfigId=${this[
+                  PropertyConfigFormProp.PROPERTY_CONFIG_ID
+                ]}
+                name=${this[PropertyConfigFormProp.NAME]}
+                prefix=${this[PropertyConfigFormProp.PREFIX]}
+                suffix=${this[PropertyConfigFormProp.SUFFIX]}
+                ?hidden=${this[PropertyConfigFormProp.HIDDEN]}
+                .calculation=${this[PropertyConfigFormProp.CALCULATION] ??
+                defaultCalculation}
+                .allProperties=${this[PropertyConfigFormProp.ALL_PROPERTIES]}
+              ></calculated-property-config-form>`
             : repeat(
                 this.visibleFields,
                 field => field,

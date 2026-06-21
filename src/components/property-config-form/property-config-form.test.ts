@@ -1,8 +1,8 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { DataType, EntityPropertyCalculationReference } from 'api-spec/models/Entity';
-import { PropertyConfigForm } from './property-config-form';
+import { CalculatedPropertyConfigForm } from '@/components/calculated-property-config-form/calculated-property-config-form';
 
-import './property-config-form';
+import '@/components/calculated-property-config-form/calculated-property-config-form';
 
 vi.mock('@/lib/Storage', () => ({ storage: {} }));
 vi.mock('@/lib/Util', () => ({ addToast: vi.fn() }));
@@ -33,15 +33,19 @@ const prop90 = {
   hidden: false,
 };
 
-async function mount(props: Partial<PropertyConfigForm> = {}): Promise<PropertyConfigForm> {
-  const el = document.createElement('property-config-form') as PropertyConfigForm;
+async function mount(
+  props: Partial<CalculatedPropertyConfigForm> = {},
+): Promise<CalculatedPropertyConfigForm> {
+  const el = document.createElement(
+    'calculated-property-config-form',
+  ) as CalculatedPropertyConfigForm;
   Object.assign(el, { entityConfigId: 1, allProperties: [prop86, prop90], ...props });
   document.body.appendChild(el);
   await el.updateComplete;
   return el;
 }
 
-describe('property-config-form', () => {
+describe('calculated-property-config-form', () => {
   afterEach(() => {
     document.body.innerHTML = '';
   });
