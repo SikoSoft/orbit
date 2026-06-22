@@ -71,13 +71,28 @@ export class UserDashboard extends MobxLitElement {
       margin-top: 1rem;
     }
 
+    .charts-wrapper.scrollable::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -2rem;
+      bottom: 0;
+      width: 2rem;
+      background: linear-gradient(
+        to left,
+        transparent,
+        var(--background-color, #fff)
+      );
+      pointer-events: none;
+    }
+
     .charts-wrapper.scrollable::after {
       content: '';
       position: absolute;
       top: 0;
-      right: 0;
+      right: -2rem;
       bottom: 0;
-      width: 3rem;
+      width: 2rem;
       background: linear-gradient(
         to right,
         transparent,
