@@ -2,7 +2,7 @@ import { html, css, nothing, TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import type { ChartData } from 'chart.js';
 
-import { ChartConfigType } from 'api-spec/models/Statistic';
+import { ChartConfig, ChartConfigType } from 'api-spec/models/Statistic';
 
 import { translate } from '@/lib/Localization';
 import { ViewElement } from '@/lib/ViewElement';
@@ -31,6 +31,8 @@ export class ChartView extends ViewElement {
   @state() private chartType: `${ChartConfigType}` = ChartConfigType.LINE;
   @state() private hasChart = false;
   @state() private isChartLoading = false;
+  @state() private initialChartConfig: ChartConfig | undefined;
+  @state() private initialChartName = '';
 
   @query('chart-list') private chartList: ChartList | undefined;
 
@@ -45,6 +47,20 @@ export class ChartView extends ViewElement {
       height: 400px;
     }
   `;
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    const params = new URLSearchParams(window.location.search);
+    const configParam = params.get('config');
+    if (configParam) {
+      try {
+        this.initialChartConfig = JSON.parse(configParam) as ChartConfig;
+      } catch {
+        this.initialChartConfig = undefined;
+      }
+    }
+    this.initialChartName = params.get('name') ?? '';
+  }
 
   private handleChartBuilt(e: ChartBuiltEvent): void {
     this.isChartLoading = false;
@@ -70,6 +86,8 @@ export class ChartView extends ViewElement {
       <user-header></user-header>
       <div class="view-content">
         <chart-builder
+          .initialConfig=${this.initialChartConfig}
+          initialName=${this.initialChartName}
           @chart-generating=${(_e: ChartGeneratingEvent): void => {
             this.isChartLoading = true;
           }}

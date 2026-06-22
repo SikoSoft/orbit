@@ -1,4 +1,11 @@
 import { Streak, StreakResult } from 'api-spec/models/Fact';
+import {
+  ChartConfig,
+  ChartConfigType,
+  ChartVersion,
+  DataWindowType,
+  SegmentationType,
+} from 'api-spec/models/Statistic';
 
 import { ControlType } from '@/models/Control';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
@@ -25,3 +32,24 @@ export const streakCardProps: PropConfigMap<StreakCardProps> = {
     control: { type: ControlType.HIDDEN },
   },
 };
+
+export function getStreakChartConfig(streak: Streak): ChartConfig {
+  return {
+    version: ChartVersion.V2,
+    type: ChartConfigType.LINE,
+    dataWindow: { type: DataWindowType.LAST_30_DAYS },
+    segmentation: {
+      type: SegmentationType.TIME,
+      unit: streak.context.segmentUnit,
+    },
+    dataPoints: [streak.context.innerContext],
+  };
+}
+
+export function getStreakChartUrl(streak: Streak): string {
+  const params = new URLSearchParams({
+    config: JSON.stringify(getStreakChartConfig(streak)),
+    name: streak.name,
+  });
+  return `/chart?${params.toString()}`;
+}

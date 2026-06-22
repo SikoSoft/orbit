@@ -9,6 +9,7 @@ import {
   StreakCardProp,
   StreakCardProps,
   streakCardProps,
+  getStreakChartUrl,
 } from './streak-card.models';
 
 @customElement('streak-card')
@@ -30,6 +31,7 @@ export class StreakCard extends LitElement {
       border-radius: var(--border-radius, 0.5rem);
       background: var(--box-background-color, #fff);
       color: var(--box-text-color, var(--text-color, inherit));
+      text-decoration: none;
     }
 
     .icon-badge {
@@ -175,7 +177,7 @@ export class StreakCard extends LitElement {
     const isPb = longest > 0 && current === longest;
 
     return html`
-      <div class="card ${isPb ? 'is-pb' : ''}">
+      <a class="card ${isPb ? 'is-pb' : ''}" href=${getStreakChartUrl(streak)}>
         <div class="icon-badge">
           <svg-icon .name=${IconName.FIRE} .size=${22}></svg-icon>
         </div>
@@ -189,7 +191,7 @@ export class StreakCard extends LitElement {
           <span class="stat-label">${translate('pb')}</span>
           <span class="stat-value-pb">${longest}</span>
         </div>
-      </div>
+      </a>
     `;
   }
 }
