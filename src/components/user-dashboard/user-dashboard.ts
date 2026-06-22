@@ -271,8 +271,6 @@ export class UserDashboard extends MobxLitElement {
               </div>
             `
           : nothing}
-        <dashboard-cards .cards=${this.cards}></dashboard-cards>
-
         <div
           class="charts-wrapper ${this.visibleCharts.length > 1
             ? 'scrollable'
@@ -310,6 +308,8 @@ export class UserDashboard extends MobxLitElement {
             )}
           </div>
         </div>
+
+        <dashboard-cards .cards=${this.cards}></dashboard-cards>
       </div>
     `;
   }
