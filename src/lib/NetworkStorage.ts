@@ -44,6 +44,12 @@ import { Workspace } from 'api-spec/models/Workspace';
 import { ThemeName } from '@/models/Page';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
 import { Fact, FactContext, FactResult, Streak, StreakContext, StreakResult } from 'api-spec/models/Fact';
+import {
+  AddCommentPayload,
+  CommentReactionType,
+  CommentSpec,
+  ReactionCounts,
+} from '@/components/entity-form/entity-comments/entity-comments.models';
 
 export class NetworkStorage implements StorageSchema {
   isActive = true;
@@ -1142,6 +1148,68 @@ export class NetworkStorage implements StorageSchema {
     }
 
     return false;
+  }
+
+  async getComments(entityId: number): Promise<CommentSpec[]> {
+    const result = await api.get<CommentSpec[]>(`comment?entityId=${entityId}`);
+    if (result && result.isOk) {
+      return result.response;
+    }
+    return [];
+  }
+
+  async addComment(payload: AddCommentPayload): Promise<CommentSpec | null> {
+    const result = await api.post<AddCommentPayload, CommentSpec>(
+      'comment',
+      payload,
+    );
+    if (result && result.isOk) {
+      return result.response;
+    }
+    return null;
+  }
+
+  async updateComment(
+    id: number,
+    published: boolean,
+  ): Promise<CommentSpec | null> {
+    const result = await api.patch<{ published: boolean }, CommentSpec>(
+      `comment/${id}`,
+      { published },
+    );
+    if (result && result.isOk) {
+      return result.response;
+    }
+    return null;
+  }
+
+  async deleteComment(id: number): Promise<boolean> {
+    const result = await api.delete<null>(`comment/${id}`);
+    return !!(result && result.isOk);
+  }
+
+  async addCommentReaction(
+    id: number,
+    type: CommentReactionType,
+  ): Promise<ReactionCounts | null> {
+    const result = await api.post<{ type: CommentReactionType }, { counts: ReactionCounts }>(
+      `commentReaction/${id}`,
+      { type },
+    );
+    if (result && result.isOk) {
+      return result.response.counts;
+    }
+    return null;
+  }
+
+  async deleteCommentReaction(id: number): Promise<ReactionCounts | null> {
+    const result = await api.delete<{ counts: ReactionCounts }>(
+      `commentReaction/${id}`,
+    );
+    if (result && result.isOk) {
+      return result.response.counts;
+    }
+    return null;
   }
 }
 

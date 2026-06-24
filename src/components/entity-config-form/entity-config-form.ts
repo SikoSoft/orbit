@@ -7,7 +7,6 @@ import {
   defaultEntityConfig,
   defaultEntityPropertyConfig,
   EntityCalculatedPropertyConfig,
-  EntityConfig,
   EntityPropertyConfig,
 } from 'api-spec/models/Entity';
 import { Role } from 'api-spec/models/Identity';
@@ -18,6 +17,7 @@ import {
   EntityConfigUniqueConstraint,
   entityConfigFormProps,
   EntityConfigFormProps,
+  ExtendedEntityConfig,
   PropertyConfigInstance,
   PropertyConfigProblemMap,
 } from './entity-config-form.models';
@@ -125,7 +125,10 @@ export class EntityConfigForm extends MobxLitElement {
   `;
 
   @state()
-  entityConfig: EntityConfig = defaultEntityConfig;
+  entityConfig: ExtendedEntityConfig = {
+    ...defaultEntityConfig,
+    allowComments: false,
+  };
 
   @state()
   confirmationModalIsOpen: boolean = false;
@@ -176,6 +179,10 @@ export class EntityConfigForm extends MobxLitElement {
     entityConfigFormProps[EntityConfigFormProp.ALLOW_TAGS].default;
 
   @property({ type: Boolean })
+  [EntityConfigFormProp.ALLOW_COMMENTS]: EntityConfigFormProps[EntityConfigFormProp.ALLOW_COMMENTS] =
+    entityConfigFormProps[EntityConfigFormProp.ALLOW_COMMENTS].default;
+
+  @property({ type: Boolean })
   [EntityConfigFormProp.AI_ENABLED]: EntityConfigFormProps[EntityConfigFormProp.AI_ENABLED] =
     entityConfigFormProps[EntityConfigFormProp.AI_ENABLED].default;
 
@@ -224,6 +231,8 @@ export class EntityConfigForm extends MobxLitElement {
       this.entityConfig.allowPropertyOrdering ===
         this[EntityConfigFormProp.ALLOW_PROPERTY_ORDERING] &&
       this.entityConfig.allowTags === this[EntityConfigFormProp.ALLOW_TAGS] &&
+      this.entityConfig.allowComments ===
+        this[EntityConfigFormProp.ALLOW_COMMENTS] &&
       this.entityConfig.aiEnabled === this[EntityConfigFormProp.AI_ENABLED] &&
       this.entityConfig.aiIdentifyPrompt ===
         this[EntityConfigFormProp.AI_IDENTIFY_PROMPT] &&
@@ -249,6 +258,7 @@ export class EntityConfigForm extends MobxLitElement {
       revisionOf: null,
       allowPropertyOrdering: this[EntityConfigFormProp.ALLOW_PROPERTY_ORDERING],
       allowTags: this[EntityConfigFormProp.ALLOW_TAGS],
+      allowComments: this[EntityConfigFormProp.ALLOW_COMMENTS],
       aiEnabled: this[EntityConfigFormProp.AI_ENABLED],
       aiClassifyEnabled: false,
       aiIdentifyPrompt: this[EntityConfigFormProp.AI_IDENTIFY_PROMPT],
@@ -289,7 +299,7 @@ export class EntityConfigForm extends MobxLitElement {
     }
 
     this.isSaving = true;
-    let result: Entity.EntityConfig | null = null;
+    let result: (Entity.EntityConfig & { allowComments?: boolean }) | null = null;
 
     const entityConfig = this.saveNewRevision
       ? {
@@ -433,6 +443,10 @@ export class EntityConfigForm extends MobxLitElement {
     this.entityConfig = { ...this.entityConfig, allowTags: allow };
   }
 
+  updateAllowComments(allow: boolean): void {
+    this.entityConfig = { ...this.entityConfig, allowComments: allow };
+  }
+
   updateAIEnabled(enabled: boolean): void {
     this.entityConfig = { ...this.entityConfig, aiEnabled: enabled };
   }
@@ -573,6 +587,17 @@ export class EntityConfigForm extends MobxLitElement {
             ?on=${this[EntityConfigFormProp.ALLOW_TAGS]}
             @toggle-changed=${(e: ToggleChangedEvent): void => {
               this.updateAllowTags(e.detail.on);
+            }}
+          ></ss-toggle>
+        </div>
+
+        <div class="field">
+          <label for="allow-comments">${translate('allowComments')}</label>
+
+          <ss-toggle
+            ?on=${this.entityConfig.allowComments}
+            @toggle-changed=${(e: ToggleChangedEvent): void => {
+              this.updateAllowComments(e.detail.on);
             }}
           ></ss-toggle>
         </div>

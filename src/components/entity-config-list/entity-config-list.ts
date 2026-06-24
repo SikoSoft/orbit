@@ -10,7 +10,7 @@ import { appState } from '@/state';
 import '@ss/ui/components/ss-button';
 import '@/components/entity-config-form/entity-config-form';
 
-import { defaultEntityConfig } from 'api-spec/models/Entity';
+import { defaultEntityConfig, EntityConfig } from 'api-spec/models/Entity';
 import { ViewElement } from '@/lib/ViewElement';
 import {
   EntityConfigDeletedEvent,
@@ -107,6 +107,7 @@ export class EntityConfigList extends ViewElement {
                   .properties=${toJS(config.properties)}
                   ?allowPropertyOrdering=${config.allowPropertyOrdering}
                   ?allowTags=${config.allowTags}
+                  ?allowComments=${(config as EntityConfig & { allowComments?: boolean }).allowComments ?? false}
                   ?open=${this.isPanelOpen(config.id)}
                   @entity-config-deleted=${this.handleEntityConfigDeleted}
                   @entity-config-updated=${(

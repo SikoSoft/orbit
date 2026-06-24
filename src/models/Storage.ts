@@ -1,5 +1,11 @@
 import { Setting, Settings } from 'api-spec/models/Setting';
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
+import {
+  AddCommentPayload,
+  CommentReactionType,
+  CommentSpec,
+  ReactionCounts,
+} from '@/components/entity-form/entity-comments/entity-comments.models';
 import { Workspace } from 'api-spec/models/Workspace';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
 import { Fact, FactContext, FactResult, Streak, StreakContext, StreakResult } from 'api-spec/models/Fact';
@@ -237,4 +243,13 @@ export interface StorageSchema {
   createFact?(name: string, context: FactContext): Promise<StorageResult<Fact>>;
   updateFact?(id: number, name: string | undefined, context: FactContext | undefined): Promise<StorageResult<Fact>>;
   deleteFact?(id: number): Promise<boolean>;
+  getComments?(entityId: number): Promise<CommentSpec[]>;
+  addComment?(payload: AddCommentPayload): Promise<CommentSpec | null>;
+  updateComment?(id: number, published: boolean): Promise<CommentSpec | null>;
+  deleteComment?(id: number): Promise<boolean>;
+  addCommentReaction?(
+    id: number,
+    type: CommentReactionType,
+  ): Promise<ReactionCounts | null>;
+  deleteCommentReaction?(id: number): Promise<ReactionCounts | null>;
 }

@@ -65,19 +65,23 @@ export class EntityInstance extends MobxLitElement {
       return html`<p>${translate('entityNotFound')}</p>`;
     }
 
+    const entity = this.entity as Entity.Entity & { allowComments?: boolean };
+
     return html`
       <div class="box">
         <entity-list-item
-          type=${this.entity.type}
-          entityId=${this.entity.id}
-          createdAt=${this.entity.createdAt}
-          updatedAt=${this.entity.updatedAt}
-          .tags=${this.entity.tags}
-          .properties=${this.entity.properties}
-          viewAccessPolicyId=${this.entity.viewAccessPolicyId}
-          editAccessPolicyId=${this.entity.editAccessPolicyId}
-          ?published=${this.entity.published}
-          ?suggestion=${this.entity.suggested}
+          type=${entity.type}
+          entityId=${entity.id}
+          createdAt=${entity.createdAt}
+          updatedAt=${entity.updatedAt}
+          .tags=${entity.tags}
+          .properties=${entity.properties}
+          viewAccessPolicyId=${entity.viewAccessPolicyId}
+          editAccessPolicyId=${entity.editAccessPolicyId}
+          ?published=${entity.published}
+          ?suggestion=${entity.suggested}
+          ?allowComments=${entity.allowComments ?? false}
+          ownerId=${entity.userId}
         ></entity-list-item>
       </div>
     `;

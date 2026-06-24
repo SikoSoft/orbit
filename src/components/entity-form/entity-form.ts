@@ -29,6 +29,7 @@ import '@/components/access-policy-assignment/access-policy-assignment';
 import '@/components/entity-suggestions/entity-suggestions';
 import '@/components/entity-form/entity-form-properties/entity-form-properties';
 import '@/components/entity-form/entity-form-tags/entity-form-tags';
+import '@/components/entity-form/entity-comments/entity-comments';
 
 import {
   EntityItemCanceledEvent,
@@ -155,6 +156,14 @@ export class EntityForm extends ViewElement {
   [EntityFormProp.PUBLISHED]: EntityFormProps[EntityFormProp.PUBLISHED] =
     entityFormProps[EntityFormProp.PUBLISHED].default;
 
+  @property({ type: Boolean })
+  [EntityFormProp.ALLOW_COMMENTS]: EntityFormProps[EntityFormProp.ALLOW_COMMENTS] =
+    entityFormProps[EntityFormProp.ALLOW_COMMENTS].default;
+
+  @property({ type: String })
+  [EntityFormProp.OWNER_ID]: EntityFormProps[EntityFormProp.OWNER_ID] =
+    entityFormProps[EntityFormProp.OWNER_ID].default;
+
   @state() confirmModalShown: boolean = false;
   @state() loading: boolean = false;
   @state() initialHash = '';
@@ -268,6 +277,7 @@ export class EntityForm extends ViewElement {
           properties,
           propertyReferences,
           published: this.published,
+          allowComments: this.allowComments,
         };
 
         const isNew = !this.entityId;
@@ -399,6 +409,10 @@ export class EntityForm extends ViewElement {
     this.published = e.detail.on;
   }
 
+  private handleAllowCommentsChanged(e: ToggleChangedEvent): void {
+    this.allowComments = e.detail.on;
+  }
+
   private handlePropertiesChanged(e: EntityFormPropertiesChangedEvent): void {
     const { instancesHash, sortedIds, isInitial } = e.detail;
     this.instancesHash = instancesHash;
@@ -455,6 +469,16 @@ export class EntityForm extends ViewElement {
           ></access-policy-assignment>`,
         shouldShow: () => this.state.hasRole(Role.ACCESS),
       },
+      {
+        heading: translate('entityForm.tab.comments'),
+        content: () =>
+          html`<entity-comments
+            entityId=${this.entityId}
+            ?allowComments=${this.allowComments}
+            ownerId=${this.ownerId}
+          ></entity-comments>`,
+        shouldShow: () => !!this.entityId,
+      },
     ];
   }
 
@@ -505,6 +529,18 @@ export class EntityForm extends ViewElement {
                 @toggle-changed=${this.handlePublishedChanged}
               ></ss-toggle>
             </div>
+
+            ${this.entityId
+              ? html`
+                  <div class="published">
+                    <label>${translate('allowComments')}</label>
+                    <ss-toggle
+                      ?on=${this.allowComments}
+                      @toggle-changed=${this.handleAllowCommentsChanged}
+                    ></ss-toggle>
+                  </div>
+                `
+              : nothing}
 
             <div class="buttons">
               <ss-button

@@ -164,6 +164,19 @@ export class Api {
     });
   }
 
+  async patch<RequestType, ResponseType>(
+    path: string,
+    body: RequestType,
+    config?: RequestInit,
+  ): Promise<ApiResult<ResponseType>> {
+    return await this.httpRequest<ResponseType>(path, {
+      method: 'patch',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+      ...config,
+    });
+  }
+
   async delete<ResponseType>(
     path: string,
     config?: RequestInit,

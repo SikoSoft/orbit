@@ -59,6 +59,12 @@ import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { Workspace } from 'api-spec/models/Workspace';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
 import { Fact, FactContext, FactResult, Streak, StreakContext, StreakResult } from 'api-spec/models/Fact';
+import {
+  AddCommentPayload,
+  CommentReactionType,
+  CommentSpec,
+  ReactionCounts,
+} from '@/components/entity-form/entity-comments/entity-comments.models';
 
 export interface SavedListFilter {
   filter: ListFilter;
@@ -992,6 +998,42 @@ export class Storage implements StorageSchema {
   @delegateSource()
   async deleteFact(_id: number): Promise<boolean> {
     return Promise.resolve(false);
+  }
+
+  @delegateSource()
+  async getComments(_entityId: number): Promise<CommentSpec[]> {
+    return Promise.resolve([]);
+  }
+
+  @delegateSource()
+  async addComment(_payload: AddCommentPayload): Promise<CommentSpec | null> {
+    return Promise.resolve(null);
+  }
+
+  @delegateSource()
+  async updateComment(
+    _id: number,
+    _published: boolean,
+  ): Promise<CommentSpec | null> {
+    return Promise.resolve(null);
+  }
+
+  @delegateSource()
+  async deleteComment(_id: number): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
+  @delegateSource()
+  async addCommentReaction(
+    _id: number,
+    _type: CommentReactionType,
+  ): Promise<ReactionCounts | null> {
+    return Promise.resolve(null);
+  }
+
+  @delegateSource()
+  async deleteCommentReaction(_id: number): Promise<ReactionCounts | null> {
+    return Promise.resolve(null);
   }
 
   getActiveWorkspaceId(): string {

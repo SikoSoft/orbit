@@ -22,6 +22,8 @@ export enum EntityListItemProp {
   EDIT_ACCESS_POLICY_ID = 'editAccessPolicyId',
   PUBLISHED = 'published',
   SUGGESTION = 'suggestion',
+  ALLOW_COMMENTS = 'allowComments',
+  OWNER_ID = 'ownerId',
 }
 
 export interface EntityListItemProps extends PropTypes {
@@ -38,6 +40,8 @@ export interface EntityListItemProps extends PropTypes {
   [EntityListItemProp.EDIT_ACCESS_POLICY_ID]: number;
   [EntityListItemProp.PUBLISHED]: boolean;
   [EntityListItemProp.SUGGESTION]: boolean;
+  [EntityListItemProp.ALLOW_COMMENTS]: boolean;
+  [EntityListItemProp.OWNER_ID]: string;
 }
 
 export const entityListItemProps: PropConfigMap<EntityListItemProps> = {
@@ -131,5 +135,19 @@ export const entityListItemProps: PropConfigMap<EntityListItemProps> = {
       type: ControlType.BOOLEAN,
     },
     description: 'Whether the entity is a suggestion',
+  },
+  [EntityListItemProp.ALLOW_COMMENTS]: {
+    default: false,
+    control: {
+      type: ControlType.BOOLEAN,
+    },
+    description: 'Whether comments are enabled for this entity',
+  },
+  [EntityListItemProp.OWNER_ID]: {
+    default: '',
+    control: {
+      type: ControlType.TEXT,
+    },
+    description: 'The user ID of the entity owner',
   },
 };

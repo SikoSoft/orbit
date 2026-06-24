@@ -284,6 +284,14 @@ export class EntityListItem extends MobxLitElement {
   [EntityListItemProp.SUGGESTION]: EntityListItemProps[EntityListItemProp.SUGGESTION] =
     entityListItemProps[EntityListItemProp.SUGGESTION].default;
 
+  @property({ type: Boolean })
+  [EntityListItemProp.ALLOW_COMMENTS]: EntityListItemProps[EntityListItemProp.ALLOW_COMMENTS] =
+    entityListItemProps[EntityListItemProp.ALLOW_COMMENTS].default;
+
+  @property({ type: String })
+  [EntityListItemProp.OWNER_ID]: EntityListItemProps[EntityListItemProp.OWNER_ID] =
+    entityListItemProps[EntityListItemProp.OWNER_ID].default;
+
   @state() mode: EntityListItemMode = EntityListItemMode.PREVIEW;
   @state() pointerDown: Date = new Date();
   @state() downTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
@@ -646,6 +654,8 @@ export class EntityListItem extends MobxLitElement {
                 ?published=${this.published}
                 .tags=${this.tags}
                 .properties=${this.properties}
+                ?allowComments=${this.allowComments}
+                ownerId=${this.ownerId}
               ></entity-form>
             `
           : html`

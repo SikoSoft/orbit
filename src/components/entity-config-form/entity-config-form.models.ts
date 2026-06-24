@@ -1,12 +1,15 @@
 import { ControlType } from '@/models/Control';
 import {
   EntityCalculatedPropertyConfig,
+  EntityConfig,
   EntityConfigUniqueConstraint,
   EntityPropertyConfig,
 } from 'api-spec/models/Entity';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
 import { RevisionProblems } from 'api-spec/models/Revision';
 import { AccessPolicy } from 'api-spec/models/Access';
+
+export type ExtendedEntityConfig = EntityConfig & { allowComments: boolean };
 
 export interface PropertyConfigInstance {
   propertyConfigId: number;
@@ -24,6 +27,7 @@ export enum EntityConfigFormProp {
   PROPERTIES = 'properties',
   ALLOW_PROPERTY_ORDERING = 'allowPropertyOrdering',
   ALLOW_TAGS = 'allowTags',
+  ALLOW_COMMENTS = 'allowComments',
   AI_ENABLED = 'aiEnabled',
   AI_IDENTIFY_PROMPT = 'aiIdentifyPrompt',
   VIEW_ACCESS_POLICY = 'viewAccessPolicy',
@@ -44,6 +48,7 @@ export interface EntityConfigFormProps extends PropTypes {
   )[];
   [EntityConfigFormProp.ALLOW_PROPERTY_ORDERING]: boolean;
   [EntityConfigFormProp.ALLOW_TAGS]: boolean;
+  [EntityConfigFormProp.ALLOW_COMMENTS]: boolean;
   [EntityConfigFormProp.AI_ENABLED]: boolean;
   [EntityConfigFormProp.AI_IDENTIFY_PROMPT]: string;
   [EntityConfigFormProp.VIEW_ACCESS_POLICY]: AccessPolicy | null;
@@ -82,6 +87,11 @@ export const entityConfigFormProps: PropConfigMap<EntityConfigFormProps> = {
     default: false,
     control: { type: ControlType.BOOLEAN },
     description: 'Whether tags are enabled for this entity',
+  },
+  [EntityConfigFormProp.ALLOW_COMMENTS]: {
+    default: false,
+    control: { type: ControlType.BOOLEAN },
+    description: 'Whether comments are enabled by default for entities of this type',
   },
   [EntityConfigFormProp.AI_ENABLED]: {
     default: false,

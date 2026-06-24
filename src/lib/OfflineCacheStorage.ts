@@ -41,6 +41,12 @@ import { Workspace } from 'api-spec/models/Workspace';
 import { ThemeName } from '@/models/Page';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
 import { Fact, FactContext, FactResult, Streak, StreakContext, StreakResult } from 'api-spec/models/Fact';
+import {
+  AddCommentPayload,
+  CommentReactionType,
+  CommentSpec,
+  ReactionCounts,
+} from '@/components/entity-form/entity-comments/entity-comments.models';
 
 import { SQLiteStorage, serializePropertyValue } from './SQLiteStorage';
 import { networkStorage } from './NetworkStorage';
@@ -1355,6 +1361,36 @@ export class OfflineCacheStorage implements StorageSchema {
 
   async deleteFact(id: number): Promise<boolean> {
     return networkStorage.deleteFact(id);
+  }
+
+  async getComments(entityId: number): Promise<CommentSpec[]> {
+    return networkStorage.getComments(entityId);
+  }
+
+  async addComment(payload: AddCommentPayload): Promise<CommentSpec | null> {
+    return networkStorage.addComment(payload);
+  }
+
+  async updateComment(
+    id: number,
+    published: boolean,
+  ): Promise<CommentSpec | null> {
+    return networkStorage.updateComment(id, published);
+  }
+
+  async deleteComment(id: number): Promise<boolean> {
+    return networkStorage.deleteComment(id);
+  }
+
+  async addCommentReaction(
+    id: number,
+    type: CommentReactionType,
+  ): Promise<ReactionCounts | null> {
+    return networkStorage.addCommentReaction(id, type);
+  }
+
+  async deleteCommentReaction(id: number): Promise<ReactionCounts | null> {
+    return networkStorage.deleteCommentReaction(id);
   }
 }
 
