@@ -329,6 +329,7 @@ export class EntityForm extends ViewElement {
             tags: this.tags,
             properties: result.properties,
             published: payload.published,
+            allowComments: payload.allowComments ?? false,
             updatedAt: result.updatedAt,
           }),
         );

@@ -7,6 +7,7 @@ export interface EntityItemUpdatedEventPayload {
   tags: string[];
   properties: EntityProperty[];
   published: boolean;
+  allowComments: boolean;
   updatedAt: string;
 }
 
