@@ -99,6 +99,7 @@ function rowToEntityConfig(row: Record<string, unknown>): EntityConfig {
     revisionOf: (row['revision_of'] as number | null) ?? null,
     allowPropertyOrdering: row['allow_property_ordering'] === 1,
     allowTags: row['allow_tags'] === 1,
+    allowComments: row['allow_comments'] === 1,
     aiEnabled: row['ai_enabled'] === 1,
     aiClassifyEnabled: row['ai_classify_enabled'] === 1,
     aiIdentifyPrompt: (row['ai_identify_prompt'] as string | null) ?? '',
@@ -249,14 +250,15 @@ export class SQLiteStorage implements StorageSchema {
     entityConfig: EntityConfig,
   ): Promise<EntityConfig | null> {
     await this.run(
-      `INSERT INTO entity_config (name, description, revision_of, allow_property_ordering, allow_tags, ai_enabled, ai_identify_prompt, public)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO entity_config (name, description, revision_of, allow_property_ordering, allow_tags, allow_comments, ai_enabled, ai_identify_prompt, public)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         entityConfig.name,
         entityConfig.description,
         entityConfig.revisionOf ?? null,
         entityConfig.allowPropertyOrdering ? 1 : 0,
         entityConfig.allowTags ? 1 : 0,
+        entityConfig.allowComments ? 1 : 0,
         entityConfig.aiEnabled ? 1 : 0,
         entityConfig.aiIdentifyPrompt,
         entityConfig.public ? 1 : 0,
@@ -300,7 +302,7 @@ export class SQLiteStorage implements StorageSchema {
   ): Promise<EntityConfig | null> {
     await this.run(
       `UPDATE entity_config
-       SET name = ?, description = ?, revision_of = ?, allow_property_ordering = ?, allow_tags = ?, ai_enabled = ?, ai_identify_prompt = ?, public = ?
+       SET name = ?, description = ?, revision_of = ?, allow_property_ordering = ?, allow_tags = ?, allow_comments = ?, ai_enabled = ?, ai_identify_prompt = ?, public = ?
        WHERE id = ?`,
       [
         entityConfig.name,
@@ -308,6 +310,7 @@ export class SQLiteStorage implements StorageSchema {
         entityConfig.revisionOf ?? null,
         entityConfig.allowPropertyOrdering ? 1 : 0,
         entityConfig.allowTags ? 1 : 0,
+        entityConfig.allowComments ? 1 : 0,
         entityConfig.aiEnabled ? 1 : 0,
         entityConfig.aiIdentifyPrompt,
         entityConfig.public ? 1 : 0,
@@ -486,6 +489,9 @@ export class SQLiteStorage implements StorageSchema {
         viewAccessPolicyId: 0,
         editAccessPolicyId: 0,
         published: Boolean(row['published']),
+        allowComments: row['allow_comments'] === undefined
+          ? true
+          : Boolean(row['allow_comments']),
         suggested: false,
         identified: false,
         tags: tagRows
@@ -628,7 +634,7 @@ export class SQLiteStorage implements StorageSchema {
     const total = (await this.execValue(countSql, bindings)) as number;
 
     const rowSql = `
-      SELECT DISTINCT e.id, e.type, e.created_at, e.updated_at
+      SELECT DISTINCT e.id, e.type, e.created_at, e.updated_at, e.published, e.allow_comments
       FROM entity e
       ${joinClause}
       ${whereClause}
@@ -651,8 +657,14 @@ export class SQLiteStorage implements StorageSchema {
     const now = new Date().toISOString();
 
     await this.run(
-      `INSERT INTO entity (type, created_at, updated_at, published) VALUES (?, ?, ?, ?)`,
-      [payload.entityConfigId, now, now, payload.published ? 1 : 0],
+      `INSERT INTO entity (type, created_at, updated_at, published, allow_comments) VALUES (?, ?, ?, ?, ?)`,
+      [
+        payload.entityConfigId,
+        now,
+        now,
+        payload.published ? 1 : 0,
+        payload.allowComments ?? true ? 1 : 0,
+      ],
     );
 
     const id = (await this.execValue('SELECT last_insert_rowid()')) as number;
@@ -668,8 +680,14 @@ export class SQLiteStorage implements StorageSchema {
     const now = new Date().toISOString();
 
     await this.run(
-      `UPDATE entity SET type = ?, updated_at = ?, published = ? WHERE id = ?`,
-      [payload.entityConfigId, now, payload.published ? 1 : 0, id],
+      `UPDATE entity SET type = ?, updated_at = ?, published = ?, allow_comments = ? WHERE id = ?`,
+      [
+        payload.entityConfigId,
+        now,
+        payload.published ? 1 : 0,
+        payload.allowComments ?? true ? 1 : 0,
+        id,
+      ],
     );
 
     await this.run('DELETE FROM entity_tag WHERE entity_id = ?', [id]);
@@ -1111,8 +1129,8 @@ export class SQLiteStorage implements StorageSchema {
   async import(data: ExportDataContents): Promise<boolean> {
     for (const config of data[ExportDataType.ENTITY_CONFIGS]) {
       await this.run(
-        `INSERT OR REPLACE INTO entity_config (id, name, description, revision_of, allow_property_ordering, allow_tags, ai_enabled, ai_identify_prompt, public)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT OR REPLACE INTO entity_config (id, name, description, revision_of, allow_property_ordering, allow_tags, allow_comments, ai_enabled, ai_identify_prompt, public)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           config.id,
           config.name,
@@ -1120,6 +1138,7 @@ export class SQLiteStorage implements StorageSchema {
           config.revisionOf ?? null,
           config.allowPropertyOrdering ? 1 : 0,
           config.allowTags ? 1 : 0,
+          config.allowComments ? 1 : 0,
           config.aiEnabled ? 1 : 0,
           config.aiIdentifyPrompt,
           config.public ? 1 : 0,
@@ -1153,9 +1172,16 @@ export class SQLiteStorage implements StorageSchema {
 
     for (const entity of data[ExportDataType.ENTITIES]) {
       await this.run(
-        `INSERT OR REPLACE INTO entity (id, type, created_at, updated_at)
-         VALUES (?, ?, ?, ?)`,
-        [entity.id, entity.type, entity.createdAt, entity.updatedAt],
+        `INSERT OR REPLACE INTO entity (id, type, created_at, updated_at, published, allow_comments)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          entity.id,
+          entity.type,
+          entity.createdAt,
+          entity.updatedAt,
+          entity.published ? 1 : 0,
+          entity.allowComments ? 1 : 0,
+        ],
       );
 
       await this.run('DELETE FROM entity_tag WHERE entity_id = ?', [entity.id]);

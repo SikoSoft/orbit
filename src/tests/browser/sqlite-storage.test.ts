@@ -176,6 +176,13 @@ describe('SQLiteStorage', () => {
       expect(result!.allowPropertyOrdering).toBe(true);
     });
 
+    it('stores allowComments', async () => {
+      const result = await db.addEntityConfig(
+        makeConfig({ allowComments: false }),
+      );
+      expect(result!.allowComments).toBe(false);
+    });
+
     it('stores revisionOf', async () => {
       const original = await db.addEntityConfig(makeConfig({ name: 'v1' }));
       const revision = await db.addEntityConfig(
@@ -305,6 +312,20 @@ describe('SQLiteStorage', () => {
       );
       expect(entity!.properties).toHaveLength(1);
       expect(entity!.properties[0].value).toBe('hello');
+    });
+
+    it('stores and retrieves allowComments on an entity', async () => {
+      const config = await db.addEntityConfig(makeConfig());
+      await db.addEntity(makePayload(config!.id, { allowComments: false }));
+      const result = await db.getEntities(
+        0,
+        10,
+        defaultListFilter,
+        defaultListSort,
+      );
+      if (result.isOk) {
+        expect(result.value.entities[0].allowComments).toBe(false);
+      }
     });
 
     it('updates an entity', async () => {

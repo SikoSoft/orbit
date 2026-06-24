@@ -161,6 +161,7 @@ describe('AppState', () => {
         revisionOf: null,
         allowPropertyOrdering: false,
         allowTags: true,
+        allowComments: true,
         aiEnabled: false,
         aiClassifyEnabled: false,
         aiIdentifyPrompt: '',
