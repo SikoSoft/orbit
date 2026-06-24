@@ -330,6 +330,7 @@ export class EntityList extends ViewElement {
                   viewAccessPolicyId=${item.viewAccessPolicyId}
                   editAccessPolicyId=${item.editAccessPolicyId}
                   ?published=${item.published}
+                  ?allowComments=${item.allowComments}
                   ?suggestion=${item.suggested}
                   @pointer-long-press=${this.handlePointerLongPress}
                   @pointer-up=${this.handlePointerUp}

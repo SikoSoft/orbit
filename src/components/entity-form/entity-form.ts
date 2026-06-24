@@ -171,6 +171,7 @@ export class EntityForm extends ViewElement {
   @state() initialSortedIds: string[] = [];
   @state() currentSortedIds: string[] = [];
   @state() initialPublished: boolean = false;
+  @state() initialAllowComments: boolean = false;
   @state() initialTags: string = '';
   @state() activeTabIndex: number = 0;
 
@@ -196,7 +197,8 @@ export class EntityForm extends ViewElement {
       JSON.stringify(this.tagsAndSuggestions) !== this.initialTags ||
       JSON.stringify(this.currentSortedIds) !==
         JSON.stringify(this.initialSortedIds) ||
-      this.published !== this.initialPublished
+      this.published !== this.initialPublished ||
+      this.allowComments !== this.initialAllowComments
     );
   }
 
@@ -421,6 +423,7 @@ export class EntityForm extends ViewElement {
       this.initialHash = instancesHash;
       this.initialSortedIds = sortedIds;
       this.initialPublished = this.published;
+      this.initialAllowComments = this.allowComments;
       this.initialTags = JSON.stringify(this.tagsAndSuggestions);
     }
   }
