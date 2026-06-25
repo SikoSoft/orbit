@@ -1,56 +1,41 @@
 import { MobxLitElement } from '@adobe/lit-mobx';
 import { reaction } from 'mobx';
-import {
-  css,
-  CSSResult,
-  html,
-  nothing,
-  PropertyValues,
-  TemplateResult,
-} from 'lit';
+import { css, html, nothing, TemplateResult } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import { translate } from '@/lib/Localization';
 import { appState } from '@/state';
 import { storage } from '@/lib/Storage';
-import { InputType } from '@ss/ui/components/ss-input.models';
 import { addToast } from '@/lib/Util';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
+import { Access } from '@/lib/Access';
 
 import '@ss/ui/components/ss-button';
-import '@ss/ui/components/ss-carousel';
-import '@ss/ui/components/ss-select';
 import '@ss/ui/components/pop-up';
-import '@/components/setting/list-settings/list-settings';
-import '@/components/list-filter/list-filter';
-import '@/components/list-sort/list-sort';
 import '@/components/theme-manager/theme-manager';
-import '@/components/access-policy-assignment/access-policy-assignment';
-
-import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
-import { ListConfigChangedEvent } from './list-config.events';
-import { CarouselSlideChangedEvent } from '@ss/ui/components/ss-carousel.events';
+import './list-config-carousel/list-config-carousel';
+import './list-config-menus/list-config-menus';
 
 import {
   ThemesUpdatedEvent,
   ThemesSavedEvent,
 } from '../theme-manager/theme-manager.events';
 import { themed } from '@/lib/Theme';
-import { ListFilterUpdatedEvent } from '../list-filter/list-filter.events';
-import { ListSortUpdatedEvent } from '../list-sort/list-sort.events';
 import {
-  EntityListLoadEvent,
-  EntityListSyncEvent,
-} from '../entity-list/entity-list.events';
+  AddConfigRequestedEvent,
+  ConfigNameBlurredEvent,
+  ConfigNameFocusedEvent,
+  ConfigNameSaveRequestedEvent,
+  ConfigNameSubmittedEvent,
+  DeleteConfigRequestedEvent,
+  ThemeManagerRequestedEvent,
+} from './list-config-carousel/list-config-carousel.events';
 import {
   ListConfigProp,
   listConfigProps,
   ListConfigProps,
 } from './list-config.models';
-import { ifDefined } from 'lit/directives/if-defined.js';
-import { Access } from '@/lib/Access';
 
 @themed()
 @customElement('list-config')
@@ -63,76 +48,6 @@ export class ListConfig extends MobxLitElement {
 
     .list-config {
       margin-bottom: 1rem;
-      //position: relative;
-
-      .config {
-        transition: all 0.3s;
-        opacity: 0;
-      }
-
-      .name {
-        transition: all 0.3s;
-        opacity: 1;
-        font-size: 2rem;
-        text-align: center;
-        height: 3rem;
-        line-height: 3rem;
-
-        ss-input {
-          margin: auto;
-        }
-
-        ss-input::part(input) {
-          transition: all 0.2s;
-          width: 80%;
-          text-align: center;
-          font-size: 2rem;
-          height: 3rem;
-          line-height: 3rem;
-          background-color: transparent;
-          border-color: transparent;
-          color: var(--text-color);
-        }
-      }
-
-      &:not(.view-only).edit-mode .name,
-      &:not(.view-only) .name:hover {
-        ss-input::part(input) {
-          font-size: 2.2rem;
-          border-color: var(--input-border-color);
-          background-color: var(--input-background-color);
-          color: var(--input-text-color);
-        }
-        ss-input[unsaved]::part(input) {
-          border-color: var(--input-unsaved-border-color);
-        }
-      }
-
-      &.view-only .name,
-      &.view-only .name:hover {
-        ss-input::part(input) {
-          cursor: default;
-          border-color: transparent;
-          background-color: transparent;
-          pointer-events: none;
-        }
-      }
-
-      .everything-slide .name,
-      .everything-slide .name:hover {
-        ss-input::part(input) {
-          cursor: default;
-          border-color: transparent;
-          background-color: transparent;
-          pointer-events: none;
-        }
-      }
-
-      .carousel-wrapper {
-        padding: 1rem;
-        position: relative;
-        touch-action: none;
-      }
 
       .collapsable-menus {
         display: none;
@@ -145,62 +60,6 @@ export class ListConfig extends MobxLitElement {
 
       &.edit-mode .collapsable-menus {
         display: block;
-      }
-
-      .buttons {
-        position: relative;
-        width: 100%;
-        top: -1.5rem;
-
-        .buttons-inner {
-          display: flex;
-          justify-content: center;
-          gap: 1rem;
-          position: absolute;
-          left: 50%;
-          transform: translateX(-50%);
-          top: 2rem;
-        }
-
-        button {
-          display: inline-block;
-          width: 16px;
-          height: 16px;
-          line-height: 16px;
-          box-sizing: content-box;
-          border-radius: 50%;
-          background-color: var(--input-background-color);
-          border: 1px solid var(--input-border-color);
-          cursor: pointer;
-          color: var(--input-text-color);
-          transition: all 0.1s;
-          opacity: 0;
-          pointer-events: none;
-          padding: 0.5rem;
-
-          &:hover {
-            scale: 1.5;
-          }
-        }
-      }
-
-      .public-link {
-        margin-top: 1rem;
-        text-align: center;
-        font-size: 0.9rem;
-        color: var(--text-color);
-        word-break: break-all;
-      }
-
-      .managed-indicator {
-        margin-top: 0.5rem;
-        text-align: center;
-        font-size: 0.8rem;
-        padding: 0.25rem 0.75rem;
-        border-radius: 4px;
-        background-color: color-mix(in srgb, currentColor 10%, transparent);
-        border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
-        opacity: 0.8;
       }
     }
 
@@ -224,40 +83,8 @@ export class ListConfig extends MobxLitElement {
       }
     }
   `;
-  private defaultModeStyles = css`
-    .config-slide {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
 
-      .config {
-        display: none;
-      }
-    }
-  `;
-  private editModeStyles = css`
-    .config-slide {
-      .config {
-        display: block;
-      }
-
-      &.active {
-        .buttons button {
-          opacity: 1;
-          pointer-events: auto;
-        }
-      }
-    }
-  `;
-  private configModeStyles = css`
-    .config-slide {
-      .config {
-        display: block;
-      }
-    }
-  `;
-
-  private state = appState;
+  private appState = appState;
   private isSaving: boolean = false;
   private windowClickHandler: ((e: MouseEvent) => void) | null = null;
 
@@ -265,160 +92,98 @@ export class ListConfig extends MobxLitElement {
   [ListConfigProp.VIEW_ONLY]: ListConfigProps[ListConfigProp.VIEW_ONLY] =
     listConfigProps[ListConfigProp.VIEW_ONLY].default;
 
-  @state() id: string = '';
-  @state() name: string = '';
-  @state() ready: boolean = false;
-  @state() navigationIndex: number = 0;
   @state() themeManagerIsOpen: boolean = false;
   @state() confirmDeleteIsOpen: boolean = false;
   @state() deleteItemsChecked: boolean = false;
-  @state() filterIsOpen: boolean = false;
-  @state() settingIsOpen: boolean = false;
-  @state() sortIsOpen: boolean = false;
   @state() nameInFocus: boolean = false;
   @state() menusInFocus: boolean = false;
-  @state() accessIsOpen: boolean = false;
 
-  @query('#config-selector') configSelector!: HTMLSelectElement;
-  @query('.collapsable-menus') collapsableMenus!: HTMLDivElement;
-
-  @state()
-  get canEdit(): boolean {
-    if (this[ListConfigProp.VIEW_ONLY] || !this.state.user?.id) {
-      return false;
-    }
-
-    const isOwner = this.state.listConfig.userId === this.state.user.id;
-
-    if (
-      !isOwner &&
-      !Access.userHasAccess(
-        this.state.listConfig.editAccessPolicy,
-        this.state.user.id,
-      )
-    ) {
-      return false;
-    }
-
-    return true;
-  }
-
-  @state()
-  get canDelete(): boolean {
-    if (this[ListConfigProp.VIEW_ONLY] || !this.state.user?.id) {
-      return false;
-    }
-    const isOwner = this.state.listConfig.userId === this.state.user.id;
-
-    if (isOwner) {
-      return true;
-    }
-
-    return false;
-  }
-
-  @state() get publicUrl(): string {
-    const path = [
-      import.meta.env.BASE_URL.replace(/\/$/, '').replace(/^\//, ''),
-      'list',
-      this.state.listConfigId,
-    ].join('/');
-    const url = new URL(path, window.location.origin);
-    return url.href;
-  }
-
-  @state()
-  get inSync(): boolean {
-    if (!this.state.listConfig) {
-      return true;
-    }
-
-    return this.name === this.state.listConfig.name;
-  }
-
-  @state()
-  get isManagedExternally(): boolean {
-    if (!this.state.user?.id || !this.state.listConfig?.userId) {
-      return false;
-    }
-    return this.state.listConfig.userId !== this.state.user.id;
-  }
+  @query('list-config-menus') listConfigMenus!: HTMLElement;
 
   @state()
   get showEverythingSlide(): boolean {
     if (this[ListConfigProp.VIEW_ONLY]) {
       return false;
     }
-    if (!this.state.workspaces.length) {
+    if (!this.appState.workspaces.length) {
       return true;
     }
-    if (!this.state.activeWorkspaceId) {
+    if (!this.appState.activeWorkspaceId) {
       return true;
     }
-    const activeWorkspace = this.state.workspaces.find(
-      w => w.id === this.state.activeWorkspaceId,
+    const activeWorkspace = this.appState.workspaces.find(
+      w => w.id === this.appState.activeWorkspaceId,
     );
     return !activeWorkspace || activeWorkspace.showEverything;
+  }
+
+  @state()
+  get canEdit(): boolean {
+    if (this[ListConfigProp.VIEW_ONLY] || !this.appState.user?.id) {
+      return false;
+    }
+    const isOwner =
+      this.appState.listConfig.userId === this.appState.user.id;
+    if (
+      !isOwner &&
+      !Access.userHasAccess(
+        this.appState.listConfig.editAccessPolicy,
+        this.appState.user.id,
+      )
+    ) {
+      return false;
+    }
+    return true;
+  }
+
+  @state()
+  get canDelete(): boolean {
+    if (this[ListConfigProp.VIEW_ONLY] || !this.appState.user?.id) {
+      return false;
+    }
+    return this.appState.listConfig.userId === this.appState.user.id;
   }
 
   @state() get classes(): Record<string, boolean> {
     return {
       'list-config': true,
-      'config-mode': this.state.selectListConfigMode,
-      'edit-mode': this.state.editListConfigMode,
+      'config-mode': this.appState.selectListConfigMode,
+      'edit-mode': this.appState.editListConfigMode,
       'view-only': this.canEdit === false,
       'can-edit': this.canEdit,
       'can-delete': this.canDelete,
     };
   }
 
-  @state() get carouselStyles(): CSSResult[] {
-    const styles: CSSResult[] = [this.defaultModeStyles];
-    if (this.state.editListConfigMode) {
-      styles.push(this.editModeStyles);
-    }
-    if (this.state.selectListConfigMode) {
-      styles.push(this.configModeStyles);
-    }
-    return styles;
-  }
-
   connectedCallback(): void {
     super.connectedCallback();
 
     reaction(
-      () => this.state.listConfigId,
-      () => {
-        this.sync();
-      },
-    );
-
-    reaction(
       () => this.showEverythingSlide,
       showEverythingSlide => {
-        if (!showEverythingSlide && !this.state.listConfigId) {
-          const firstConfig = this.state.listConfigs[0];
+        if (!showEverythingSlide && !this.appState.listConfigId) {
+          const firstConfig = this.appState.listConfigs[0];
           if (firstConfig) {
             this.setListConfigId(firstConfig.id);
           }
         }
-        this.sync();
       },
     );
 
     this.setup();
   }
 
-  protected firstUpdated(changedProperties: PropertyValues): void {
-    super.firstUpdated(changedProperties);
-
+  protected firstUpdated(): void {
     this.windowClickHandler = (e: MouseEvent): void => {
-      if (e.composedPath().includes(this.collapsableMenus)) {
+      if (
+        this.listConfigMenus &&
+        e.composedPath().includes(this.listConfigMenus)
+      ) {
         this.menusInFocus = true;
       } else {
         this.menusInFocus = false;
         if (!this.nameInFocus) {
-          this.state.setEditListConfigMode(false);
+          this.appState.setEditListConfigMode(false);
         }
       }
     };
@@ -435,52 +200,19 @@ export class ListConfig extends MobxLitElement {
   }
 
   async setup(): Promise<void> {
-    const listConfigs = this.state.filteredListConfigs;
-    if (this.state.hasFetchedListConfigs && !listConfigs.length) {
+    const listConfigs = this.appState.filteredListConfigs;
+    if (this.appState.hasFetchedListConfigs && !listConfigs.length) {
       await this.addConfig();
     }
-
-    this.sync();
-    this.ready = true;
   }
 
-  enableEditMode(): void {
-    if (!this.canEdit) {
-      return;
-    }
-
-    this.state.setEditListConfigMode(true);
+  setListConfigId(listConfigId: string): void {
+    storage.saveActiveListConfigId(listConfigId);
+    this.appState.setListConfigId(listConfigId);
   }
 
-  handleNameChanged(e: InputChangedEvent): void {
-    this.name = e.detail.value;
-  }
-
-  handleNameSubmitted(): void {
-    this.blur();
-    this.saveConfig();
-    this.state.setEditListConfigMode(false);
-  }
-
-  handleNameBlurred(): void {
-    this.nameInFocus = false;
-    this.blur();
-    this.saveConfig();
-    setTimeout((): void => {
-      if (this.menusInFocus) {
-        return;
-      }
-
-      this.state.setEditListConfigMode(false);
-    }, 200);
-  }
-
-  handleNameFocused(): void {
-    this.nameInFocus = true;
-  }
-
-  async saveConfig(): Promise<void> {
-    if (this.inSync || this.isSaving) {
+  async saveConfig(name: string): Promise<void> {
+    if (name === this.appState.listConfig?.name || this.isSaving) {
       return;
     }
 
@@ -488,12 +220,12 @@ export class ListConfig extends MobxLitElement {
 
     const result = await storage.saveListConfig({
       userId: '',
-      id: this.id,
-      name: this.name,
-      filter: this.state.listFilter,
-      sort: this.state.listSort,
-      setting: this.state.listSetting,
-      themes: this.state.listConfig.themes,
+      id: this.appState.listConfigId,
+      name,
+      filter: this.appState.listFilter,
+      sort: this.appState.listSort,
+      setting: this.appState.listSetting,
+      themes: this.appState.listConfig.themes,
       viewAccessPolicy: null,
       editAccessPolicy: null,
     });
@@ -505,15 +237,14 @@ export class ListConfig extends MobxLitElement {
     }
 
     addToast(translate('listConfigSaved'), NotificationType.SUCCESS);
-    this.state.setListConfigs(await storage.getListConfigs());
-    this.sync();
+    this.appState.setListConfigs(await storage.getListConfigs());
 
     this.isSaving = false;
   }
 
   async deleteConfig(): Promise<void> {
     const result = await storage.deleteListConfig(
-      this.id,
+      this.appState.listConfigId,
       this.deleteItemsChecked,
     );
     if (!result) {
@@ -526,19 +257,18 @@ export class ListConfig extends MobxLitElement {
     if (listConfigs.length) {
       this.setListConfigId(listConfigs[0].id);
     }
-    this.state.setListConfigs(listConfigs);
-    this.sync();
+    this.appState.setListConfigs(listConfigs);
   }
 
   async addConfig(): Promise<void> {
     const id = await storage.addListConfig();
     addToast(translate('configAdded'), NotificationType.SUCCESS);
     const listConfigs = await storage.getListConfigs();
-    this.state.setListConfigs(listConfigs);
+    this.appState.setListConfigs(listConfigs);
 
-    if (this.state.activeWorkspaceId) {
-      const activeWorkspace = this.state.workspaces.find(
-        w => w.id === this.state.activeWorkspaceId,
+    if (this.appState.activeWorkspaceId) {
+      const activeWorkspace = this.appState.workspaces.find(
+        w => w.id === this.appState.activeWorkspaceId,
       );
       if (activeWorkspace && !activeWorkspace.listConfigs.includes(id)) {
         const updatedWorkspace = {
@@ -547,142 +277,48 @@ export class ListConfig extends MobxLitElement {
         };
         const result = await storage.saveWorkspace(updatedWorkspace);
         if (result.isOk) {
-          this.state.upsertWorkspace(result.value);
+          this.appState.upsertWorkspace(result.value);
         }
       }
     }
 
     this.setListConfigId(id);
-    this.sync();
   }
 
-  sync(_reset = false): void {
-    if (!this[ListConfigProp.VIEW_ONLY] && !this.state.listConfigId) {
-      this.state.setTitle(translate('everything'));
-      this.id = '';
-      this.name = translate('everything');
-      this.navigationIndex = 0;
-      return;
-    }
-
-    const config = this.state.filteredListConfigs.find(
-      c => c.id === this.state.listConfigId,
-    );
-    if (!config) {
-      return;
-    }
-
-    this.state.setTitle(config.name);
-    this.id = config.id;
-    this.name = config.name;
-    this.navigationIndex =
-      this.state.filteredListConfigs.findIndex(c => c.id === this.id) +
-      (this.showEverythingSlide ? 1 : 0);
+  private handleCarouselNameSaveRequested(
+    e: ConfigNameSaveRequestedEvent,
+  ): void {
+    this.saveConfig(e.detail.name);
   }
 
-  setListConfigId(listConfigId: string): void {
-    storage.saveActiveListConfigId(listConfigId);
-    this.state.setListConfigId(listConfigId);
-    this.dispatchEvent(new ListConfigChangedEvent({ listConfigId }));
+  private handleCarouselNameFocused(_e: ConfigNameFocusedEvent): void {
+    this.nameInFocus = true;
   }
 
-  carouselSlideChanged(e: CarouselSlideChangedEvent): void {
-    if (!this[ListConfigProp.VIEW_ONLY]) {
-      if (this.showEverythingSlide && e.detail.slideIndex === 0) {
-        if (this.state.listConfigId === '') {
-          return;
-        }
-        this.state.setEditListConfigMode(false);
-        this.state.setSelectListConfigMode(false);
-        this.navigationIndex = e.detail.navigationIndex;
-        this.setListConfigId('');
+  private handleCarouselNameBlurred(_e: ConfigNameBlurredEvent): void {
+    this.nameInFocus = false;
+    setTimeout((): void => {
+      if (this.menusInFocus) {
         return;
       }
-      const offset = this.showEverythingSlide ? 1 : 0;
-      const newListConfigId =
-        this.state.filteredListConfigs[e.detail.slideIndex - offset]?.id;
-      if (!newListConfigId || newListConfigId === this.state.listConfigId) {
-        return;
-      }
-      this.state.setEditListConfigMode(false);
-      this.state.setSelectListConfigMode(false);
-      this.navigationIndex = e.detail.navigationIndex;
-      this.setListConfigId(newListConfigId);
-      return;
-    }
-
-    const newListConfigId =
-      this.state.filteredListConfigs[e.detail.slideIndex]?.id;
-    if (!newListConfigId || newListConfigId === this.state.listConfigId) {
-      return;
-    }
-    this.state.setEditListConfigMode(false);
-    this.state.setSelectListConfigMode(false);
-    this.navigationIndex = e.detail.navigationIndex;
-    this.setListConfigId(newListConfigId);
+      this.appState.setEditListConfigMode(false);
+    }, 200);
   }
 
-  showThemeManager(): void {
+  private handleCarouselNameSubmitted(_e: ConfigNameSubmittedEvent): void {
+    this.appState.setEditListConfigMode(false);
+  }
+
+  private handleAddConfigRequested(_e: AddConfigRequestedEvent): void {
+    this.addConfig();
+  }
+
+  private handleThemeManagerRequested(_e: ThemeManagerRequestedEvent): void {
     this.themeManagerIsOpen = true;
   }
 
-  hideThemeManager(): void {
-    this.themeManagerIsOpen = false;
-  }
-
-  private handleFilterUpdated(e: ListFilterUpdatedEvent): void {
-    this.state.setListFilter(e.detail);
-    if (this.state.listConfigId) {
-      storage.updateListFilter(this.state.listConfigId, e.detail);
-    }
-    addToast(translate('filterUpdated'), NotificationType.INFO);
-    this.filterIsOpen = false;
-    this.dispatchEvent(new EntityListLoadEvent());
-  }
-
-  private handleSortUpdated(_e: ListSortUpdatedEvent): void {
-    if (this.state.listConfigId) {
-      storage.updateListSort(this.state.listConfigId, this.state.listSort);
-    }
-    this.sortIsOpen = false;
-    this.dispatchEvent(new EntityListSyncEvent());
-  }
-
-  private handleSettingUpdated(_e: CustomEvent): void {
-    this.dispatchEvent(new EntityListLoadEvent());
-  }
-
-  private handleAccessPolicyUpdated(_e: CustomEvent): void {
-    this.dispatchEvent(new EntityListLoadEvent());
-  }
-
-  private toggleAccess(): void {
-    this.accessIsOpen = !this.accessIsOpen;
-  }
-
-  private toggleSetting(): void {
-    this.settingIsOpen = !this.settingIsOpen;
-  }
-
-  private toggleFilter(): void {
-    this.filterIsOpen = !this.filterIsOpen;
-  }
-
-  private toggleSort(): void {
-    this.sortIsOpen = !this.sortIsOpen;
-  }
-
-  private handleConfigCloseClick(e: MouseEvent): void {
-    this.state.setSelectListConfigMode(false);
-    this.state.setEditListConfigMode(false);
-    e.stopPropagation();
-  }
-
-  private handlePublicLinkClick(e: MouseEvent): void {
-    const input = e.currentTarget as HTMLInputElement;
-    input.select();
-    navigator.clipboard.writeText(this.publicUrl);
-    addToast(translate('publicLinkCopied'), NotificationType.SUCCESS);
+  private handleDeleteConfigRequested(_e: DeleteConfigRequestedEvent): void {
+    this.confirmDeleteIsOpen = true;
   }
 
   private handleDeleteConfirmClosed(): void {
@@ -701,195 +337,38 @@ export class ListConfig extends MobxLitElement {
     this.deleteItemsChecked = false;
   }
 
-  showConfigDeleteConfirm(): void {
-    this.confirmDeleteIsOpen = true;
+  private handleDeleteItemsChange(e: Event): void {
+    this.deleteItemsChecked = (e.target as HTMLInputElement).checked;
   }
 
   updateThemes(e: ThemesUpdatedEvent): void {
     e.stopPropagation();
-    const themes = e.detail.themes;
-
-    this.state.setThemes(themes);
+    this.appState.setThemes(e.detail.themes);
   }
 
   saveThemes = (e: ThemesSavedEvent): void => {
-    const themes = e.detail.themes;
-    storage.updateListThemes(this.state.listConfig.id, themes);
+    storage.updateListThemes(this.appState.listConfig.id, e.detail.themes);
     addToast(translate('themesSaved'), NotificationType.SUCCESS);
     this.themeManagerIsOpen = false;
   };
 
   render(): TemplateResult {
     return html`<div class=${classMap(this.classes)}>
-      <div class="carousel-wrapper">
-        <ss-carousel
-          infinite
-          discrete
-          showButtons
-          height="180"
-          width="100%"
-          iconColor="var(--text-color, #000)"
-          navigationIndex=${this.navigationIndex}
-          @carousel-slide-changed=${this.carouselSlideChanged}
-        >
-          ${this.ready
-            ? html`
-                ${this.showEverythingSlide
-                  ? html`<div class="config-slide everything-slide">
-                      <div class="name">
-                        <ss-input
-                          type=${InputType.TEXT}
-                          value=${translate('everything')}
-                        ></ss-input>
-                      </div>
-                    </div>`
-                  : nothing}
-                ${repeat(
-                  this.state.filteredListConfigs,
-                  config => config.id,
-                  config =>
-                    html`<div class="config-slide">
-                      <div
-                        class="close"
-                        @click=${(e: MouseEvent): void =>
-                          this.handleConfigCloseClick(e)}
-                      ></div>
-
-                      <div class="name">
-                        <ss-input
-                          ?unsaved=${!this.inSync}
-                          @input-changed=${this.handleNameChanged}
-                          @input-focused=${this.handleNameFocused}
-                          @input-blurred=${this.handleNameBlurred}
-                          @input-submitted=${this.handleNameSubmitted}
-                          type=${InputType.TEXT}
-                          value=${config.name}
-                          @click=${this.enableEditMode}
-                        ></ss-input>
-                      </div>
-
-                      ${this.state.user?.id &&
-                      config.userId &&
-                      config.userId !== this.state.user.id
-                        ? html`<div class="managed-indicator">
-                            ${translate('managedByExternalParty')}
-                          </div>`
-                        : nothing}
-
-                      <div class="buttons">
-                        <div class="buttons-inner">
-                          <button @click=${this.addConfig}>
-                            <ss-icon
-                              name="add"
-                              color="var(--input-text-color)"
-                              size="16"
-                            ></ss-icon>
-                          </button>
-
-                          <button @click=${this.showThemeManager}>
-                            <ss-icon
-                              name="theme"
-                              color="var(--input-text-color)"
-                              size="16"
-                            ></ss-icon>
-                          </button>
-
-                          ${this.canDelete
-                            ? html`
-                                <button @click=${this.showConfigDeleteConfirm}>
-                                  <ss-icon
-                                    name="trash"
-                                    color="var(--input-text-color)"
-                                    size="16"
-                                  ></ss-icon>
-                                </button>
-                              `
-                            : nothing}
-                        </div>
-                      </div>
-                    </div>`,
-                )}
-              `
-            : nothing}
-
-          <style>
-            ${this.carouselStyles}
-          </style>
-        </ss-carousel>
-      </div>
+      <list-config-carousel
+        ?viewOnly=${this[ListConfigProp.VIEW_ONLY]}
+        @config-name-save-requested=${this.handleCarouselNameSaveRequested}
+        @config-name-focused=${this.handleCarouselNameFocused}
+        @config-name-blurred=${this.handleCarouselNameBlurred}
+        @config-name-submitted=${this.handleCarouselNameSubmitted}
+        @add-config-requested=${this.handleAddConfigRequested}
+        @theme-manager-requested=${this.handleThemeManagerRequested}
+        @delete-config-requested=${this.handleDeleteConfigRequested}
+      ></list-config-carousel>
 
       <div class="collapsable-menus">
-        ${this.canDelete
-          ? html` <ss-collapsable
-              title=${translate('access')}
-              ?open=${this.accessIsOpen}
-              @toggled=${this.toggleAccess}
-            >
-              <div class="filter-body">
-                ${this.accessIsOpen
-                  ? html`<access-policy-assignment
-                      context="listConfig"
-                      listConfigId=${this.state.listConfigId}
-                      @access-policy-updated=${this.handleAccessPolicyUpdated}
-                      viewAccessPolicyId=${ifDefined(
-                        this.state.listConfig.viewAccessPolicy?.id,
-                      )}
-                      editAccessPolicyId=${ifDefined(
-                        this.state.listConfig.editAccessPolicy?.id,
-                      )}
-                    ></access-policy-assignment>`
-                  : nothing}
-              </div>
-            </ss-collapsable>`
-          : nothing}
-
-        <ss-collapsable
-          title=${translate('settings')}
-          ?open=${this.settingIsOpen}
-          @toggled=${this.toggleSetting}
-        >
-          <list-settings
-            listConfigId=${this.state.listConfigId}
-            @setting-updated=${this.handleSettingUpdated}
-          ></list-settings>
-
-          ${this.state.listConfig && this.state.listConfig.setting.public
-            ? html`<div class="public-link">
-                <fieldset>
-                  <legend>${translate('publicLink')}</legend>
-                  <input
-                    type="text"
-                    readonly
-                    value=${this.publicUrl}
-                    @click=${(e: MouseEvent): void =>
-                      this.handlePublicLinkClick(e)}
-                  />
-                </fieldset>
-              </div>`
-            : nothing}
-        </ss-collapsable>
-
-        <ss-collapsable
-          title=${translate('filter')}
-          ?open=${this.filterIsOpen}
-          @toggled=${this.toggleFilter}
-        >
-          <div class="filter-body">
-            <list-filter
-              showAll
-              .listFilter=${this.state.listFilter}
-              @list-filter-updated=${this.handleFilterUpdated}
-            ></list-filter>
-          </div>
-        </ss-collapsable>
-
-        <ss-collapsable
-          title=${translate('sort')}
-          ?open=${this.sortIsOpen}
-          @toggled=${this.toggleSort}
-        >
-          <list-sort @list-sort-updated=${this.handleSortUpdated}></list-sort>
-        </ss-collapsable>
+        <list-config-menus
+          ?viewOnly=${this[ListConfigProp.VIEW_ONLY]}
+        ></list-config-menus>
       </div>
 
       <pop-up
@@ -905,21 +384,15 @@ export class ListConfig extends MobxLitElement {
             <input
               type="checkbox"
               ?checked=${this.deleteItemsChecked}
-              @change=${(e: Event): void => {
-                this.deleteItemsChecked = (
-                  e.target as HTMLInputElement
-                ).checked;
-              }}
+              @change=${this.handleDeleteItemsChange}
             />
             ${translate('deleteItemsInList')}
           </label>
           <div class="delete-config-actions">
-            <ss-button
-              @click=${(): void => this.handleDeleteConfigConfirmed()}
+            <ss-button @click=${(): void => this.handleDeleteConfigConfirmed()}
               >${translate('delete')}</ss-button
             >
-            <ss-button
-              @click=${(): void => this.handleDeleteConfigCanceled()}
+            <ss-button @click=${(): void => this.handleDeleteConfigCanceled()}
               >${translate('cancel')}</ss-button
             >
           </div>
@@ -931,11 +404,13 @@ export class ListConfig extends MobxLitElement {
         closeOnOutsideClick
         closeOnEsc
         closeButton
-        @pop-up-closed=${this.hideThemeManager}
+        @pop-up-closed=${(): void => {
+          this.themeManagerIsOpen = false;
+        }}
       >
         <theme-manager
           .open=${this.themeManagerIsOpen}
-          .active=${this.state.listConfig.themes}
+          .active=${this.appState.listConfig?.themes ?? []}
           @themes-saved=${this.saveThemes}
           @themes-updated=${this.updateThemes}
           @close=${(): void => {
