@@ -11,7 +11,10 @@ export type Router = {
   destroy: () => void;
 };
 
+export type RouterNavigationType = 'initial' | 'push' | 'pop';
+
 export type RouterState = {
   currentPath: string;
   params: Record<string, string>;
+  navigationType: RouterNavigationType;
 };

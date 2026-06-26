@@ -13,7 +13,7 @@ vi.mock('@/lib/Router', () => ({
     destroy: vi.fn(),
   }),
   navigate: vi.fn(),
-  routerState: { currentPath: '/', params: {} },
+  routerState: { currentPath: '/', params: {}, navigationType: 'initial' },
 }));
 
 async function mount(): Promise<AppContainer> {

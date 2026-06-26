@@ -1,15 +1,24 @@
-import { Route, Router, RouterState } from '@/models/Router';
+import {
+  Route,
+  Router,
+  RouterNavigationType,
+  RouterState,
+} from '@/models/Router';
 import { observable, action } from 'mobx';
 
 export const routerState: RouterState = observable({
   currentPath: '/',
   params: {},
+  navigationType: 'initial',
 });
 const setCurrentPath = action((path: string) => {
   routerState.currentPath = path;
 });
 const setParams = action((params: Record<string, string>) => {
   routerState.params = params;
+});
+const setNavigationType = action((navigationType: RouterNavigationType) => {
+  routerState.navigationType = navigationType;
 });
 
 function pathToRegex(path: string): { regex: RegExp; keys: string[] } {
@@ -136,6 +145,7 @@ export function setupRouter(
       (base === '/' ? '' : base.replace(/\/$/, '')) + href,
     );
 
+    setNavigationType('push');
     void renderPath(location.pathname);
   }
 
@@ -165,12 +175,14 @@ export function setupRouter(
   };
 
   const onPop = (): void => {
+    setNavigationType('pop');
     void renderPath(location.pathname);
   };
 
   window.addEventListener('popstate', onPop);
   document.addEventListener('click', onClick);
 
+  setNavigationType('initial');
   void renderPath(location.pathname);
 
   return {

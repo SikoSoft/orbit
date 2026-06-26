@@ -7,7 +7,7 @@ import { storage } from '@/lib/Storage';
 import { appState } from '@/state';
 import { ViewElement } from '@/lib/ViewElement';
 import { api } from '@/lib/Api';
-import { navigate, setupRouter } from '@/lib/Router';
+import { navigate, routerState, setupRouter } from '@/lib/Router';
 import { themed } from '@/lib/Theme';
 import { Router } from '@/models/Router';
 import { routes } from '@/routes';
@@ -136,7 +136,10 @@ export class AppContainer extends MobxLitElement {
 
     window.addEventListener('view-ready', () => {
       this.state.setViewReady(true);
-      const { x, y } = storage.getWindowScrollPosition();
+      const { x, y } =
+        routerState.navigationType === 'push'
+          ? { x: 0, y: 0 }
+          : storage.getWindowScrollPosition();
       setTimeout(() => {
         window.scrollTo(x, y);
         setTimeout(() => {
