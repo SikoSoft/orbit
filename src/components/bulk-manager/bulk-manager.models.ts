@@ -23,3 +23,7 @@ export const propertyOperations: OperationType[] = [
   OperationType.REMOVE_PROPERTIES,
   OperationType.REPLACE_PROPERTIES,
 ];
+
+export const orderPropertyOperations: OperationType[] = [
+  OperationType.ORDER_PROPERTIES,
+];

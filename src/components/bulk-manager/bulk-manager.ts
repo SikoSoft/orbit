@@ -17,6 +17,7 @@ import { addToast } from '@/lib/Util';
 import { appState } from '@/state';
 import {
   BulkPropertyInstance,
+  orderPropertyOperations,
   propertyOperations,
   taggingOperations,
 } from './bulk-manager.models';
@@ -30,11 +31,13 @@ import {
   PropertyChangedEvent,
   PropertyDeletedEvent,
 } from '@/components/entity-form/property-field/property-field.events';
+import { OptionListUpdatedEvent } from '@/components/option-list-builder/option-list-builder.events';
 
 import '@ss/ui/components/ss-button';
 import '@ss/ui/components/tag-manager';
 import '@ss/ui/components/pop-up';
 import '@/components/entity-form/property-field/property-field';
+import '@/components/option-list-builder/option-list-builder';
 import { themed } from '@/lib/Theme';
 import { storage } from '@/lib/Storage';
 
@@ -96,6 +99,7 @@ export class BulkManager extends MobxLitElement {
   @state() tagSuggestions: string[] = [];
   @state() propertyInstances: BulkPropertyInstance[] = [];
   @state() propertyPopUpIsOpen: boolean = false;
+  @state() selectedPropertyConfigIds: string[] = [];
 
   get tagSuggestionsEnabled(): boolean {
     if (!this.state.listConfig) {
@@ -116,6 +120,11 @@ export class BulkManager extends MobxLitElement {
   @state()
   get showPropertyManager(): boolean {
     return propertyOperations.includes(this.operationType);
+  }
+
+  @state()
+  get showOrderPropertyManager(): boolean {
+    return orderPropertyOperations.includes(this.operationType);
   }
 
   @state()
@@ -160,6 +169,7 @@ export class BulkManager extends MobxLitElement {
     const type = e.detail.value as OperationType;
     this.operationType = type;
     this.propertyInstances = [];
+    this.selectedPropertyConfigIds = [];
   }
 
   private buildProperties(): EntityProperty[] {
@@ -193,6 +203,14 @@ export class BulkManager extends MobxLitElement {
         return {
           type: OperationType.REMOVE_PROPERTIES,
           properties: this.buildProperties(),
+        };
+      case OperationType.ORDER_PROPERTIES:
+        return {
+          type: OperationType.ORDER_PROPERTIES,
+          propertyOrder: this.selectedPropertyConfigIds.map((id, index) => ({
+            propertyConfigId: Number(id),
+            order: index,
+          })),
         };
       case OperationType.DELETE:
       default:
@@ -290,8 +308,35 @@ export class BulkManager extends MobxLitElement {
     ];
   }
 
+  private handleOrderPropertyListUpdated(e: OptionListUpdatedEvent): void {
+    this.selectedPropertyConfigIds = e.detail.selected;
+  }
+
   private handleSelectAll(): void {
     this.state.toggleSelectAll();
+  }
+
+  private renderOrderPropertyManager(): TemplateResult | typeof nothing {
+    if (!this.showOrderPropertyManager) {
+      return nothing;
+    }
+
+    const available = this.availablePropertyConfigs.map(pc => ({
+      id: String(pc.id),
+      label: pc.name,
+    }));
+
+    return html`
+      <option-list-builder
+        .available=${available}
+        .selected=${this.selectedPropertyConfigIds}
+        emptyMessage=${translate('noPropertiesSelected')}
+        @option-list-updated=${this.handleOrderPropertyListUpdated}
+      >
+        <span slot="available-heading">${translate('availableProperties')}</span>
+        <span slot="selected-heading">${translate('selectedProperties')}</span>
+      </option-list-builder>
+    `;
   }
 
   private renderPropertyManager(): TemplateResult | typeof nothing {
@@ -394,6 +439,7 @@ export class BulkManager extends MobxLitElement {
             `
           : nothing}
         ${this.renderPropertyManager()}
+        ${this.renderOrderPropertyManager()}
 
         <div class="number-selected">
           ${this.state.selectedEntities.length === 1
