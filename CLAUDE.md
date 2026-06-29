@@ -22,6 +22,8 @@ See [docs/architecture.md](docs/architecture.md) for system design specification
 
 ## Component Conventions
 
+**Naming:** Name components after their purpose, not their usage context. For example, a component that renders general configuration fields for an entity config is `entity-config-general`, not `entity-config-general-tab` (even if it happens to be rendered inside a tab). Sub-components of a parent live in subdirectories of that parent's directory (e.g. `entity-config-form/entity-config-general/`).
+
 - Components live in `src/components/<kebab-case-tag-name>/`
 - Each directory: `component-name.ts` (main), optionally `component-name.models.ts` (types), `component-name.test.ts` (tests) and `component-name.events.ts` (custom DOM events)
 - Extend `MobxLitElement` from `@adobe/lit-mobx` for reactive MobX integration
