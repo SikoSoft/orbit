@@ -314,9 +314,11 @@ export class EntityFormProperties extends MobxLitElement {
       return;
     }
 
+    const entityConfig = this.entityConfig;
+
     const existingProperties: PropertyInstance[] = this.properties.map(
       property => {
-        const propConfig = this.entityConfig!.properties.find(
+        const propConfig = entityConfig.properties.find(
           p => p.id === property.propertyConfigId,
         );
         let value = property.value;
