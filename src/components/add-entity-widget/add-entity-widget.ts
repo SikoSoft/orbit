@@ -13,7 +13,6 @@ import { ToggleChangedEvent } from '@ss/ui/components/ss-toggle.events';
 import { AssistResponse } from './add-entity-widget.models';
 import '@ss/ui/components/pop-up';
 import '@ss/ui/components/ss-toggle';
-import { storage } from '@/lib/Storage';
 import '@/components/svg-icon/svg-icon';
 import { IconName } from '@/components/svg-icon/svg-icon.models';
 import { addToast } from '@/lib/Util';

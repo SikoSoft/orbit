@@ -1,6 +1,6 @@
 import { MobxLitElement } from '@adobe/lit-mobx';
 import { reaction } from 'mobx';
-import { css, html, nothing, TemplateResult } from 'lit';
+import { css, html, TemplateResult } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 

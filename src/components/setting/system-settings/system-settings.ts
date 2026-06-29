@@ -2,9 +2,7 @@ import { customElement } from 'lit/decorators.js';
 
 import {
   Setting,
-  SettingConfig,
   SettingContextType,
-  SettingGroup,
   SettingName,
 } from 'api-spec/models/Setting';
 import { storage } from '@/lib/Storage';

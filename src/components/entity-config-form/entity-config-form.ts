@@ -4,7 +4,6 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import {
   defaultEntityConfig,
-  EntityCalculatedPropertyConfig,
   EntityPropertyConfig,
 } from 'api-spec/models/Entity';
 import { Role } from 'api-spec/models/Identity';
@@ -246,10 +245,7 @@ export class EntityConfigForm extends MobxLitElement {
     const result = await storage.deleteEntityConfig(this.entityConfig.id);
 
     if (!result) {
-      addToast(
-        translate('failedToDeleteEntityConfig'),
-        NotificationType.ERROR,
-      );
+      addToast(translate('failedToDeleteEntityConfig'), NotificationType.ERROR);
       return;
     }
 
@@ -279,9 +275,7 @@ export class EntityConfigForm extends MobxLitElement {
     this.confirmationModalIsOpen = true;
   }
 
-  private handlePropertiesChanged(
-    e: EntityConfigPropertiesChangedEvent,
-  ): void {
+  private handlePropertiesChanged(e: EntityConfigPropertiesChangedEvent): void {
     this.entityConfig = { ...this.entityConfig, properties: e.detail };
   }
 
@@ -303,9 +297,11 @@ export class EntityConfigForm extends MobxLitElement {
             ?isSaveEnabled=${this.isSaveEnabled}
             ?saveNewRevision=${this.saveNewRevision}
             @entity-config-general-config-changed=${this.handleConfigChanged}
-            @entity-config-general-save-new-revision-toggled=${this.handleSaveNewRevisionToggled}
+            @entity-config-general-save-new-revision-toggled=${this
+              .handleSaveNewRevisionToggled}
             @entity-config-general-save-requested=${this.handleSaveRequested}
-            @entity-config-general-delete-requested=${this.handleDeleteRequested}
+            @entity-config-general-delete-requested=${this
+              .handleDeleteRequested}
           ></entity-config-general>
         `,
         shouldShow: () => true,
@@ -318,7 +314,8 @@ export class EntityConfigForm extends MobxLitElement {
             .properties=${this.entityConfig.properties}
             ?performDriftCheck=${this.performDriftCheck}
             @entity-config-properties-changed=${this.handlePropertiesChanged}
-            @entity-config-properties-breaking-changes-updated=${this.handleBreakingChangesUpdated}
+            @entity-config-properties-breaking-changes-updated=${this
+              .handleBreakingChangesUpdated}
           ></entity-config-properties>
         `,
         shouldShow: () => true,

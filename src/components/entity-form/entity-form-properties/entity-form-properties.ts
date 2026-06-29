@@ -7,7 +7,6 @@ import { MobxLitElement } from '@adobe/lit-mobx';
 import {
   DataType,
   EntityCalculatedPropertyConfig,
-  EntityConfig,
   EntityProperty,
   PropertyDataValue,
   EntityPropertyConfig,
