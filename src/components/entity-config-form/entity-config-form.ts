@@ -1,11 +1,9 @@
 import { html, css, nothing, TemplateResult } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
-  DataType,
   defaultEntityConfig,
-  defaultEntityPropertyConfig,
   EntityCalculatedPropertyConfig,
   EntityPropertyConfig,
 } from 'api-spec/models/Entity';
@@ -14,45 +12,44 @@ import { addToast } from '@/lib/Util';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 import {
   EntityConfigFormProp,
-  EntityConfigUniqueConstraint,
   entityConfigFormProps,
   EntityConfigFormProps,
   ExtendedEntityConfig,
-  PropertyConfigInstance,
-  PropertyConfigProblemMap,
 } from './entity-config-form.models';
 import { TabEntry } from '@/components/entity-form/entity-form.models';
 import { storage } from '@/lib/Storage';
 
-import {
-  PropertyConfigAddedEvent,
-  PropertyConfigBreakingChangeDetectedEvent,
-  PropertyConfigUpdatedEvent,
-} from '@/components/property-config-form/property-config-form.events';
-import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
 import { TabIndexChangedEvent } from '@ss/ui/components/tab-container.events';
-
-import '@/components/property-config-form/property-config-form';
-import '@ss/ui/components/ss-collapsable';
-import '@ss/ui/components/confirmation-modal';
-import '@ss/ui/components/sortable-list';
-import '@ss/ui/components/sortable-item';
-import '@ss/ui/components/ss-toggle';
-import '@ss/ui/components/tab-container';
-import '@ss/ui/components/tab-pane';
-import '@/components/access-policy-assignment/access-policy-assignment';
-import { MobxLitElement } from '@adobe/lit-mobx';
-import { appState } from '@/state';
-import { SortUpdatedEvent } from '@ss/ui/components/sortable-list.events';
 import { translate } from '@/lib/Localization';
 import {
   EntityConfigDeletedEvent,
   EntityConfigUpdatedEvent,
 } from './entity-config-form.events';
 import { Entity } from 'api-spec/models';
-import { ToggleChangedEvent } from '@ss/ui/components/ss-toggle.events';
 import { themed } from '@/lib/Theme';
 import { ifDefined } from 'lit/directives/if-defined.js';
+import { MobxLitElement } from '@adobe/lit-mobx';
+import { appState } from '@/state';
+
+import {
+  EntityConfigGeneralConfigChangedEvent,
+  EntityConfigGeneralDeleteRequestedEvent,
+  EntityConfigGeneralSaveNewRevisionToggledEvent,
+  EntityConfigGeneralSaveRequestedEvent,
+} from './entity-config-general/entity-config-general.events';
+import {
+  EntityConfigPropertiesChangedEvent,
+  EntityConfigPropertiesBreakingChangesUpdatedEvent,
+} from './entity-config-properties/entity-config-properties.events';
+
+import '@ss/ui/components/ss-collapsable';
+import '@ss/ui/components/confirmation-modal';
+import '@ss/ui/components/tab-container';
+import '@ss/ui/components/tab-pane';
+import '@/components/access-policy-assignment/access-policy-assignment';
+import './entity-config-general/entity-config-general';
+import './entity-config-properties/entity-config-properties';
+import './entity-config-constraints/entity-config-constraints';
 
 @themed()
 @customElement('entity-config-form')
@@ -63,64 +60,6 @@ export class EntityConfigForm extends MobxLitElement {
     :host {
       display: block;
       padding: 1rem;
-    }
-
-    .field {
-      margin-bottom: 1rem;
-
-      label {
-        display: block;
-        font-weight: bold;
-        margin-bottom: 0.25rem;
-      }
-    }
-
-    .buttons {
-      padding: 0.5rem 0;
-
-      ss-button {
-        display: block;
-        margin-bottom: 0.5rem;
-      }
-    }
-
-    .revision-info {
-      border: 1px solid #ffa500;
-      background-color: #ffe4b1;
-      color: #000;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 4px;
-    }
-
-    .warning {
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-    }
-
-    ss-collapsable::part(head) {
-      font-weight: bold;
-    }
-
-    .constraint {
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      padding: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .constraint-properties {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .constraint-property {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      cursor: pointer;
     }
   `;
 
@@ -140,13 +79,10 @@ export class EntityConfigForm extends MobxLitElement {
   performDriftCheck: boolean = false;
 
   @state()
-  propertyConfigInstances: PropertyConfigInstance[] = [];
-
-  @state()
-  propertyConfigProblems: PropertyConfigProblemMap = [];
-
-  @state()
   saveNewRevision: boolean = false;
+
+  @state()
+  hasBreakingChanges: boolean = false;
 
   @state()
   activeTabIndex: number = 0;
@@ -207,20 +143,6 @@ export class EntityConfigForm extends MobxLitElement {
     entityConfigFormProps[EntityConfigFormProp.UNIQUE_CONSTRAINTS].default;
 
   @state()
-  localConstraints: EntityConfigUniqueConstraint[] = [];
-
-  @state()
-  isSavingConstraints = false;
-
-  @state()
-  get hasBreakingChanges(): boolean {
-    return (
-      this.performDriftCheck &&
-      this.propertyConfigProblems.some(problems => problems !== undefined)
-    );
-  }
-
-  @state()
   get inSync(): boolean {
     return (
       this.entityConfig.name === this[EntityConfigFormProp.NAME] &&
@@ -240,11 +162,14 @@ export class EntityConfigForm extends MobxLitElement {
     );
   }
 
-  @query('.revision-target')
-  revisionInfo!: HTMLElement;
-
   get isSaveEnabled(): boolean {
     return !this.isSaving && (!this.inSync || this.saveNewRevision);
+  }
+
+  get nonCalculatedProperties(): EntityPropertyConfig[] {
+    return this.entityConfig.properties.filter(
+      (p): p is EntityPropertyConfig => !('calculation' in p),
+    );
   }
 
   connectedCallback(): void {
@@ -267,17 +192,6 @@ export class EntityConfigForm extends MobxLitElement {
       public: this[EntityConfigFormProp.PUBLIC],
       uniqueConstraints: this[EntityConfigFormProp.UNIQUE_CONSTRAINTS],
     };
-    this.localConstraints = this[EntityConfigFormProp.UNIQUE_CONSTRAINTS].map(
-      c => ({ ...c, propertyIds: [...c.propertyIds] }),
-    );
-  }
-
-  updateName(name: string): void {
-    this.entityConfig = { ...this.entityConfig, name };
-  }
-
-  updateDescription(description: string): void {
-    this.entityConfig = { ...this.entityConfig, description };
   }
 
   validate(): string[] {
@@ -299,7 +213,8 @@ export class EntityConfigForm extends MobxLitElement {
     }
 
     this.isSaving = true;
-    let result: (Entity.EntityConfig & { allowComments?: boolean }) | null = null;
+    let result: (Entity.EntityConfig & { allowComments?: boolean }) | null =
+      null;
 
     const entityConfig = this.saveNewRevision
       ? {
@@ -331,186 +246,81 @@ export class EntityConfigForm extends MobxLitElement {
     const result = await storage.deleteEntityConfig(this.entityConfig.id);
 
     if (!result) {
-      addToast(translate('failedToDeleteEntityConfig'), NotificationType.ERROR);
-      return;
-    }
-
-    addToast(translate('entityConfigDeleted'), NotificationType.SUCCESS);
-
-    this.dispatchEvent(
-      new EntityConfigDeletedEvent({ id: this.entityConfig.id }),
-    );
-  }
-
-  isCalculatedPropertyConfig(
-    p: EntityPropertyConfig | EntityCalculatedPropertyConfig,
-  ): p is EntityCalculatedPropertyConfig {
-    return 'calculation' in p;
-  }
-
-  get nonCalculatedProperties(): EntityPropertyConfig[] {
-    return this.entityConfig.properties.filter(
-      (p): p is EntityPropertyConfig => !this.isCalculatedPropertyConfig(p),
-    );
-  }
-
-  addPropertyToTop(): void {
-    this.entityConfig = {
-      ...this.entityConfig,
-      properties: [{ ...defaultEntityPropertyConfig }, ...this.entityConfig.properties],
-    };
-  }
-
-  addPropertyToBottom(): void {
-    this.entityConfig = {
-      ...this.entityConfig,
-      properties: [...this.entityConfig.properties, { ...defaultEntityPropertyConfig }],
-    };
-  }
-
-  updateProperty(
-    index: number,
-    updatedProperty: EntityPropertyConfig | EntityCalculatedPropertyConfig,
-  ): void {
-    this.entityConfig = {
-      ...this.entityConfig,
-      properties: this.entityConfig.properties.map((p, i) =>
-        i === index ? updatedProperty : p,
-      ),
-    };
-  }
-
-  deleteProperty(index: number): void {
-    this.entityConfig = {
-      ...this.entityConfig,
-      properties: this.entityConfig.properties.filter((_, i) => i !== index),
-    };
-  }
-
-  isPanelOpen(id: number): boolean {
-    if (!id) {
-      return true;
-    }
-
-    return (
-      this.state.collapsablePanelState[`propertyConfigForm-${id}`] || false
-    );
-  }
-
-  sortUpdated(e: SortUpdatedEvent): void {
-    const newOrder = e.detail;
-
-    storage.setEntityPropertyOrder(
-      this.entityConfig.id,
-      newOrder.sortedIds.map((id, index) => ({ id: Number(id), order: index })),
-    );
-  }
-
-  breakingChangeDetected(
-    index: number,
-    e: PropertyConfigBreakingChangeDetectedEvent,
-  ): void {
-    if (!this.performDriftCheck) {
-      return;
-    }
-
-    addToast(
-      translate('propertyConfig.breakingChangeDetected'),
-      NotificationType.ERROR,
-    );
-
-    const { problems } = e.detail;
-    this.propertyConfigProblems = this.propertyConfigProblems.map((p, i) =>
-      i === index ? problems : p,
-    ) as PropertyConfigProblemMap;
-
-    if (this.revisionInfo) {
-      this.revisionInfo.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }
-
-  breakingChangesResolved(index: number): void {
-    this.propertyConfigProblems = this.propertyConfigProblems.map((p, i) =>
-      i === index ? undefined : p,
-    ) as PropertyConfigProblemMap;
-  }
-
-  updateAllowPropertyOrdering(allow: boolean): void {
-    this.entityConfig = { ...this.entityConfig, allowPropertyOrdering: allow };
-  }
-
-  updateAllowTags(allow: boolean): void {
-    this.entityConfig = { ...this.entityConfig, allowTags: allow };
-  }
-
-  updateAllowComments(allow: boolean): void {
-    this.entityConfig = { ...this.entityConfig, allowComments: allow };
-  }
-
-  updateAIEnabled(enabled: boolean): void {
-    this.entityConfig = { ...this.entityConfig, aiEnabled: enabled };
-  }
-
-  updateAIIdentifyPrompt(prompt: string): void {
-    this.entityConfig = { ...this.entityConfig, aiIdentifyPrompt: prompt };
-  }
-
-  updatePublic(isPublic: boolean): void {
-    this.entityConfig = { ...this.entityConfig, public: isPublic };
-  }
-
-  addConstraint(): void {
-    this.localConstraints = [...this.localConstraints, { propertyIds: [] }];
-  }
-
-  removeConstraint(index: number): void {
-    this.localConstraints = this.localConstraints.filter((_, i) => i !== index);
-  }
-
-  toggleConstraintProperty(constraintIndex: number, propertyId: number): void {
-    this.localConstraints = this.localConstraints.map((c, i) => {
-      if (i !== constraintIndex) {
-        return c;
-      }
-      const propertyIds = c.propertyIds.includes(propertyId)
-        ? c.propertyIds.filter(id => id !== propertyId)
-        : [...c.propertyIds, propertyId];
-      return { ...c, propertyIds };
-    });
-  }
-
-  async saveConstraints(): Promise<void> {
-    this.isSavingConstraints = true;
-    const result = await storage.saveEntityConfigUniqueConstraints(
-      this.entityConfig.id,
-      this.localConstraints,
-    );
-    this.isSavingConstraints = false;
-
-    if (!result) {
       addToast(
-        translate('entityConfigForm.constraints.saveError'),
+        translate('failedToDeleteEntityConfig'),
         NotificationType.ERROR,
       );
       return;
     }
 
-    addToast(
-      translate('entityConfigForm.constraints.saveSuccess'),
-      NotificationType.SUCCESS,
+    addToast(translate('entityConfigDeleted'), NotificationType.SUCCESS);
+    this.dispatchEvent(
+      new EntityConfigDeletedEvent({ id: this.entityConfig.id }),
     );
+  }
+
+  private handleConfigChanged(e: EntityConfigGeneralConfigChangedEvent): void {
+    this.entityConfig = e.detail;
+  }
+
+  private handleSaveNewRevisionToggled(
+    e: EntityConfigGeneralSaveNewRevisionToggledEvent,
+  ): void {
+    this.saveNewRevision = e.detail.value;
+  }
+
+  private handleSaveRequested(_e: EntityConfigGeneralSaveRequestedEvent): void {
+    this.save();
+  }
+
+  private handleDeleteRequested(
+    _e: EntityConfigGeneralDeleteRequestedEvent,
+  ): void {
+    this.confirmationModalIsOpen = true;
+  }
+
+  private handlePropertiesChanged(
+    e: EntityConfigPropertiesChangedEvent,
+  ): void {
+    this.entityConfig = { ...this.entityConfig, properties: e.detail };
+  }
+
+  private handleBreakingChangesUpdated(
+    e: EntityConfigPropertiesBreakingChangesUpdatedEvent,
+  ): void {
+    this.hasBreakingChanges = e.detail.hasBreakingChanges;
   }
 
   get tabRegistry(): TabEntry[] {
     return [
       {
         heading: translate('entityConfigForm.tab.config'),
-        content: () => this.renderConfigTab(),
+        content: () => html`
+          <entity-config-general
+            .entityConfig=${this.entityConfig}
+            ?hasBreakingChanges=${this.hasBreakingChanges}
+            ?isSaving=${this.isSaving}
+            ?isSaveEnabled=${this.isSaveEnabled}
+            ?saveNewRevision=${this.saveNewRevision}
+            @entity-config-general-config-changed=${this.handleConfigChanged}
+            @entity-config-general-save-new-revision-toggled=${this.handleSaveNewRevisionToggled}
+            @entity-config-general-save-requested=${this.handleSaveRequested}
+            @entity-config-general-delete-requested=${this.handleDeleteRequested}
+          ></entity-config-general>
+        `,
         shouldShow: () => true,
       },
       {
         heading: translate('entityConfigForm.tab.properties'),
-        content: () => this.renderPropertiesTab(),
+        content: () => html`
+          <entity-config-properties
+            entityConfigId=${this.entityConfig.id}
+            .properties=${this.entityConfig.properties}
+            ?performDriftCheck=${this.performDriftCheck}
+            @entity-config-properties-changed=${this.handlePropertiesChanged}
+            @entity-config-properties-breaking-changes-updated=${this.handleBreakingChangesUpdated}
+          ></entity-config-properties>
+        `,
         shouldShow: () => true,
       },
       {
@@ -530,7 +340,13 @@ export class EntityConfigForm extends MobxLitElement {
       },
       {
         heading: translate('entityConfigForm.tab.constraints'),
-        content: () => this.renderConstraintsTab(),
+        content: () => html`
+          <entity-config-constraints
+            entityConfigId=${this.entityConfig.id}
+            .uniqueConstraints=${this[EntityConfigFormProp.UNIQUE_CONSTRAINTS]}
+            .nonCalculatedProperties=${this.nonCalculatedProperties}
+          ></entity-config-constraints>
+        `,
         shouldShow: () => !!this.entityConfig.id,
       },
     ];
@@ -538,273 +354,6 @@ export class EntityConfigForm extends MobxLitElement {
 
   get visibleTabs(): TabEntry[] {
     return this.tabRegistry.filter(tab => tab.shouldShow());
-  }
-
-  renderConfigTab(): TemplateResult {
-    return html`
-      <div class="entity-config-form">
-        <div class="field">
-          <label for="entity-name">${translate('entityName')}</label>
-
-          <ss-input
-            id="entity-name"
-            .value=${this.entityConfig.name}
-            @input-changed=${(e: InputChangedEvent): void =>
-              this.updateName(e.detail.value)}
-          ></ss-input>
-        </div>
-
-        <div class="field">
-          <label for="entity-description"
-            >${translate('entityDescription')}</label
-          >
-
-          <ss-input
-            id="entity-description"
-            .value=${this.entityConfig.description}
-            @input-changed=${(e: InputChangedEvent): void =>
-              this.updateDescription(e.detail.value)}
-          ></ss-input>
-        </div>
-
-        <div class="field">
-          <label for="allow-property-ordering"
-            >${translate('allowPropertyOrdering')}</label
-          >
-
-          <ss-toggle
-            ?on=${this[EntityConfigFormProp.ALLOW_PROPERTY_ORDERING]}
-            @toggle-changed=${(e: ToggleChangedEvent): void => {
-              this.updateAllowPropertyOrdering(e.detail.on);
-            }}
-          ></ss-toggle>
-        </div>
-
-        <div class="field">
-          <label for="allow-tags">${translate('allowTags')}</label>
-
-          <ss-toggle
-            ?on=${this[EntityConfigFormProp.ALLOW_TAGS]}
-            @toggle-changed=${(e: ToggleChangedEvent): void => {
-              this.updateAllowTags(e.detail.on);
-            }}
-          ></ss-toggle>
-        </div>
-
-        <div class="field">
-          <label for="allow-comments">${translate('allowComments')}</label>
-
-          <ss-toggle
-            ?on=${this.entityConfig.allowComments}
-            @toggle-changed=${(e: ToggleChangedEvent): void => {
-              this.updateAllowComments(e.detail.on);
-            }}
-          ></ss-toggle>
-        </div>
-
-        <div class="field">
-          <label for="ai-enabled">${translate('aiEnabled')}</label>
-
-          <ss-toggle
-            ?on=${this[EntityConfigFormProp.AI_ENABLED]}
-            @toggle-changed=${(e: ToggleChangedEvent): void => {
-              this.updateAIEnabled(e.detail.on);
-            }}
-          ></ss-toggle>
-        </div>
-
-        <div class="field">
-          <label for="ai-identify-prompt"
-            >${translate('aiIdentifyPrompt')}</label
-          >
-
-          <ss-input
-            id="ai-identify-prompt"
-            .value=${this[EntityConfigFormProp.AI_IDENTIFY_PROMPT]}
-            @input-changed=${(e: InputChangedEvent): void => {
-              this.updateAIIdentifyPrompt(e.detail.value);
-            }}
-          ></ss-input>
-        </div>
-
-        <div class="field">
-          <label for="entity-config-public"
-            >${translate('entityConfigPublic')}</label
-          >
-
-          <ss-toggle
-            ?on=${this.entityConfig.public}
-            @toggle-changed=${(e: ToggleChangedEvent): void => {
-              this.updatePublic(e.detail.on);
-            }}
-          ></ss-toggle>
-        </div>
-
-        <div class="revision-target"></div>
-
-        ${this.hasBreakingChanges
-          ? html` <div class="revision-info">
-              <div class="warning">${translate('breakingChangeWarning')}</div>
-
-              <input
-                type="checkbox"
-                id="new-revision"
-                ?checked=${this.saveNewRevision}
-                @click=${(): void => {
-                  this.saveNewRevision = !this.saveNewRevision;
-                }}
-              />
-
-              <label for="new-revision"
-                >${translate('createNewRevision')}</label
-              >
-            </div>`
-          : nothing}
-
-        <div class="buttons">
-          <ss-button
-            positive
-            ?disabled=${!this.isSaveEnabled}
-            @click=${this.save}
-            >${translate(
-              this.saveNewRevision
-                ? 'createNewRevision'
-                : this.entityConfig.id
-                  ? 'update'
-                  : 'create',
-            )}</ss-button
-          >
-
-          <ss-button
-            negative
-            @click=${(): void => {
-              this.confirmationModalIsOpen = true;
-            }}
-            >${translate('delete')}</ss-button
-          >
-        </div>
-      </div>
-    `;
-  }
-
-  renderPropertyForm(
-    property: EntityPropertyConfig | EntityCalculatedPropertyConfig,
-    index: number,
-  ): TemplateResult {
-    const isCalc = this.isCalculatedPropertyConfig(property);
-    const calcProp = isCalc
-      ? (property as EntityCalculatedPropertyConfig)
-      : null;
-    const stdProp = isCalc ? null : (property as EntityPropertyConfig);
-
-    return html`
-      <property-config-form
-        ?open=${this.isPanelOpen(property.id)}
-        entityConfigId=${this.entityConfig.id}
-        propertyConfigId=${property.id}
-        name=${property.name}
-        prefix=${property.prefix}
-        suffix=${property.suffix}
-        ?hidden=${property.hidden}
-        dataType=${stdProp?.dataType ?? DataType.INT}
-        required=${stdProp?.required ?? 0}
-        repeat=${stdProp?.repeat ?? 0}
-        allowed=${stdProp?.allowed ?? 0}
-        ?optionsOnly=${stdProp?.optionsOnly ?? false}
-        .options=${stdProp?.options ?? []}
-        .defaultValue=${stdProp?.defaultValue ?? 0}
-        ?performDriftCheck=${this.performDriftCheck}
-        .calculation=${calcProp?.calculation ?? null}
-        .allProperties=${this.nonCalculatedProperties}
-        @property-config-updated=${(e: PropertyConfigUpdatedEvent): void =>
-          this.updateProperty(index, e.detail)}
-        @property-config-added=${(e: PropertyConfigAddedEvent): void =>
-          this.updateProperty(index, e.detail)}
-        @property-config-deleted=${(): void => this.deleteProperty(index)}
-        @property-config-breaking-change-detected=${(
-          e: PropertyConfigBreakingChangeDetectedEvent,
-        ): void => this.breakingChangeDetected(index, e)}
-        @property-config-breaking-changes-resolved=${(): void =>
-          this.breakingChangesResolved(index)}
-      ></property-config-form>
-    `;
-  }
-
-  renderPropertiesTab(): TemplateResult {
-    return html`
-      <div class="properties">
-        <ss-button @click=${this.addPropertyToTop}
-          >${translate('addProperty')}</ss-button
-        >
-
-        <sortable-list @sort-updated=${this.sortUpdated}>
-          ${repeat(
-            this.entityConfig.properties,
-            property => property.id,
-            (property, index) =>
-              html`<sortable-item id=${property.id}>
-                ${this.renderPropertyForm(property, index)}
-              </sortable-item>`,
-          )}
-        </sortable-list>
-
-        <ss-button @click=${this.addPropertyToBottom}
-          >${translate('addProperty')}</ss-button
-        >
-      </div>
-    `;
-  }
-
-  renderConstraintsTab(): TemplateResult {
-    return html`
-      <div class="constraints">
-        ${repeat(
-          this.localConstraints,
-          (_, i) => i,
-          (constraint, index) => html`
-            <div class="constraint">
-              <div class="constraint-properties">
-                ${repeat(
-                  this.nonCalculatedProperties,
-                  p => p.id,
-                  property => html`
-                    <label class="constraint-property">
-                      <input
-                        type="checkbox"
-                        ?checked=${constraint.propertyIds.includes(property.id)}
-                        @change=${(): void =>
-                          this.toggleConstraintProperty(index, property.id)}
-                      />
-                      ${property.name}
-                    </label>
-                  `,
-                )}
-              </div>
-              <ss-button
-                negative
-                @click=${(): void => this.removeConstraint(index)}
-              >
-                ${translate('remove')}
-              </ss-button>
-            </div>
-          `,
-        )}
-
-        <div class="buttons">
-          <ss-button @click=${this.addConstraint}>
-            ${translate('entityConfigForm.constraints.addConstraint')}
-          </ss-button>
-
-          <ss-button
-            positive
-            ?disabled=${this.isSavingConstraints}
-            @click=${this.saveConstraints}
-          >
-            ${translate('save')}
-          </ss-button>
-        </div>
-      </div>
-    `;
   }
 
   render(): TemplateResult {
