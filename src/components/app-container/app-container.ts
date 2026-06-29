@@ -7,7 +7,7 @@ import { storage } from '@/lib/Storage';
 import { appState } from '@/state';
 import { ViewElement } from '@/lib/ViewElement';
 import { api } from '@/lib/Api';
-import { navigate, setupRouter } from '@/lib/Router';
+import { navigate, routerState, setupRouter } from '@/lib/Router';
 import { themed } from '@/lib/Theme';
 import { Router } from '@/models/Router';
 import { routes } from '@/routes';
@@ -136,7 +136,9 @@ export class AppContainer extends MobxLitElement {
 
     window.addEventListener('view-ready', () => {
       this.state.setViewReady(true);
-      const { x, y } = storage.getWindowScrollPosition();
+      const { x, y } = routerState.isPopState
+        ? storage.getWindowScrollPosition()
+        : { x: 0, y: 0 };
       setTimeout(() => {
         window.scrollTo(x, y);
         setTimeout(() => {
@@ -247,12 +249,16 @@ export class AppContainer extends MobxLitElement {
         this.state.authToken
       ) {
         console.time('[orbit] restoreState:fetchConfigs');
+        let workspacesFetchFailed = false;
         const [listConfigs, entityConfigs, settings, workspaces] =
           await Promise.all([
             storage.getListConfigs(),
             storage.getEntityConfigs(),
             storage.getSettings().catch(() => null),
-            storage.getWorkspaces().catch(() => [] as typeof this.state.workspaces),
+            storage.getWorkspaces().catch(() => {
+              workspacesFetchFailed = true;
+              return [] as typeof this.state.workspaces;
+            }),
           ]);
         console.timeEnd('[orbit] restoreState:fetchConfigs');
         console.log(
@@ -270,7 +276,12 @@ export class AppContainer extends MobxLitElement {
           this.state.setSystemSettings(settings.system);
         }
 
-        if (workspaces.length === 0) {
+        if (workspacesFetchFailed) {
+          addToast(
+            translate('failedToLoadWorkspaces'),
+            NotificationType.ERROR,
+          );
+        } else if (workspaces.length === 0) {
           const defaultResult = await storage.createWorkspace(
             translate('workspace'),
             listConfigs.map(c => c.id),

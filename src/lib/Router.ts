@@ -4,12 +4,16 @@ import { observable, action } from 'mobx';
 export const routerState: RouterState = observable({
   currentPath: '/',
   params: {},
+  isPopState: false,
 });
 const setCurrentPath = action((path: string) => {
   routerState.currentPath = path;
 });
 const setParams = action((params: Record<string, string>) => {
   routerState.params = params;
+});
+const setIsPopState = action((isPopState: boolean) => {
+  routerState.isPopState = isPopState;
 });
 
 function pathToRegex(path: string): { regex: RegExp; keys: string[] } {
@@ -136,6 +140,7 @@ export function setupRouter(
       (base === '/' ? '' : base.replace(/\/$/, '')) + href,
     );
 
+    setIsPopState(false);
     void renderPath(location.pathname);
   }
 
@@ -165,6 +170,7 @@ export function setupRouter(
   };
 
   const onPop = (): void => {
+    setIsPopState(true);
     void renderPath(location.pathname);
   };
 
