@@ -58,7 +58,7 @@ import {
 import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { Workspace } from 'api-spec/models/Workspace';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
-import { Fact, FactContext, FactResult, Streak, StreakContext, StreakResult } from 'api-spec/models/Fact';
+import { Fact, FactContext, FactResult, Streak, StreakAlertConfig, StreakContext, StreakResult } from 'api-spec/models/Fact';
 import {
   AddCommentPayload,
   CommentReactionType,
@@ -970,6 +970,27 @@ export class Storage implements StorageSchema {
 
   @delegateSource()
   async deleteStreak(_id: number): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
+  @delegateSource()
+  async createStreakAlertConfig(
+    _streakId: number,
+    _noticeTime: number,
+  ): Promise<StorageResult<StreakAlertConfig>> {
+    return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
+  }
+
+  @delegateSource()
+  async updateStreakAlertConfig(
+    _id: number,
+    _noticeTime: number,
+  ): Promise<StorageResult<StreakAlertConfig>> {
+    return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
+  }
+
+  @delegateSource()
+  async deleteStreakAlertConfig(_id: number): Promise<boolean> {
     return Promise.resolve(false);
   }
 

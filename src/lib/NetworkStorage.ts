@@ -43,7 +43,7 @@ import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { Workspace } from 'api-spec/models/Workspace';
 import { ThemeName } from '@/models/Page';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
-import { Fact, FactContext, FactResult, Streak, StreakContext, StreakResult } from 'api-spec/models/Fact';
+import { Fact, FactContext, FactResult, Streak, StreakAlertConfig, StreakContext, StreakResult } from 'api-spec/models/Fact';
 import {
   AddCommentPayload,
   CommentReactionType,
@@ -1092,6 +1092,48 @@ export class NetworkStorage implements StorageSchema {
 
   async deleteStreak(id: number): Promise<boolean> {
     const result = await api.delete<null>(`streakRequest/${id}`);
+
+    if (result && result.isOk) {
+      return true;
+    }
+
+    return false;
+  }
+
+  async createStreakAlertConfig(
+    streakId: number,
+    noticeTime: number,
+  ): Promise<StorageResult<StreakAlertConfig>> {
+    const result = await api.post<
+      { streakId: number; noticeTime: number },
+      { alertConfig: StreakAlertConfig }
+    >('streakAlertConfig', { streakId, noticeTime });
+
+    if (result && result.isOk) {
+      return { isOk: true, value: result.response.alertConfig };
+    }
+
+    return { isOk: false, error: new Error('Failed to create streak alert config') };
+  }
+
+  async updateStreakAlertConfig(
+    id: number,
+    noticeTime: number,
+  ): Promise<StorageResult<StreakAlertConfig>> {
+    const result = await api.put<
+      { noticeTime: number },
+      { alertConfig: StreakAlertConfig }
+    >(`streakAlertConfig/${id}`, { noticeTime });
+
+    if (result && result.isOk) {
+      return { isOk: true, value: result.response.alertConfig };
+    }
+
+    return { isOk: false, error: new Error('Failed to update streak alert config') };
+  }
+
+  async deleteStreakAlertConfig(id: number): Promise<boolean> {
+    const result = await api.delete<null>(`streakAlertConfig/${id}`);
 
     if (result && result.isOk) {
       return true;

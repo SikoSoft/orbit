@@ -40,7 +40,7 @@ import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { Workspace } from 'api-spec/models/Workspace';
 import { ThemeName } from '@/models/Page';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
-import { Fact, FactContext, FactResult, Streak, StreakContext, StreakResult } from 'api-spec/models/Fact';
+import { Fact, FactContext, FactResult, Streak, StreakAlertConfig, StreakContext, StreakResult } from 'api-spec/models/Fact';
 import {
   AddCommentPayload,
   CommentReactionType,
@@ -1341,6 +1341,24 @@ export class OfflineCacheStorage implements StorageSchema {
 
   async deleteStreak(id: number): Promise<boolean> {
     return networkStorage.deleteStreak(id);
+  }
+
+  async createStreakAlertConfig(
+    streakId: number,
+    noticeTime: number,
+  ): Promise<StorageResult<StreakAlertConfig>> {
+    return networkStorage.createStreakAlertConfig(streakId, noticeTime);
+  }
+
+  async updateStreakAlertConfig(
+    id: number,
+    noticeTime: number,
+  ): Promise<StorageResult<StreakAlertConfig>> {
+    return networkStorage.updateStreakAlertConfig(id, noticeTime);
+  }
+
+  async deleteStreakAlertConfig(id: number): Promise<boolean> {
+    return networkStorage.deleteStreakAlertConfig(id);
   }
 
   async getFacts(): Promise<{ facts: Fact[]; results: FactResult[] }> {

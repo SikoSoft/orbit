@@ -13,11 +13,13 @@ import { NotificationType } from '@ss/ui/components/notification-provider.models
 import { CollapsableToggledEvent } from '@ss/ui/components/ss-collapsable.events';
 import { ConfirmationAcceptedEvent } from '@ss/ui/components/confirmation-modal.events';
 import { StreakSavedEvent } from '@/components/streak-config-form/streak-config-form.events';
+import { AlertsChangedEvent } from '@/components/streak-alert-config-list/streak-alert-config-list.events';
 
 import '@ss/ui/components/ss-collapsable';
 import '@ss/ui/components/ss-button';
 import '@ss/ui/components/confirmation-modal';
 import '@/components/streak-config-form/streak-config-form';
+import '@/components/streak-alert-config-list/streak-alert-config-list';
 
 @customElement('streak-list')
 export class StreakList extends MobxLitElement {
@@ -160,6 +162,15 @@ export class StreakList extends MobxLitElement {
           @click=${(): void => this.handleDeleteRequested(streak.id)}
         >${translate('deleteStreak')}</ss-button>
       </div>
+      <streak-alert-config-list
+        .streakId=${streak.id}
+        .alerts=${streak.alerts}
+        @alerts-changed=${(e: AlertsChangedEvent): void => {
+          this.streaks = this.streaks.map(s =>
+            s.id === streak.id ? { ...s, alerts: e.detail.alerts } : s,
+          );
+        }}
+      ></streak-alert-config-list>
     `;
   }
 

@@ -8,7 +8,7 @@ import {
 } from '@/components/entity-form/entity-comments/entity-comments.models';
 import { Workspace } from 'api-spec/models/Workspace';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
-import { Fact, FactContext, FactResult, Streak, StreakContext, StreakResult } from 'api-spec/models/Fact';
+import { Fact, FactContext, FactResult, Streak, StreakAlertConfig, StreakContext, StreakResult } from 'api-spec/models/Fact';
 import { ListConfig, ListSort, ListFilter } from 'api-spec/models/List';
 import {
   EntityCalculatedPropertyConfig,
@@ -239,6 +239,9 @@ export interface StorageSchema {
   createStreak?(name: string, context: StreakContext): Promise<StorageResult<Streak>>;
   updateStreak?(id: number, name: string | undefined, context: StreakContext | undefined): Promise<StorageResult<Streak>>;
   deleteStreak?(id: number): Promise<boolean>;
+  createStreakAlertConfig?(streakId: number, noticeTime: number): Promise<StorageResult<StreakAlertConfig>>;
+  updateStreakAlertConfig?(id: number, noticeTime: number): Promise<StorageResult<StreakAlertConfig>>;
+  deleteStreakAlertConfig?(id: number): Promise<boolean>;
   getFacts?(): Promise<{ facts: Fact[]; results: FactResult[] }>;
   createFact?(name: string, context: FactContext): Promise<StorageResult<Fact>>;
   updateFact?(id: number, name: string | undefined, context: FactContext | undefined): Promise<StorageResult<Fact>>;
