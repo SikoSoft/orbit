@@ -176,6 +176,7 @@
   "requestDebounceDelay": "Request debounce delay",
   "defaultListConfig": "Default list configuration",
   "public": "Public",
+  "showTags": "Show tags",
   "youAreNowLoggedOut": "You are now logged out.",
   "allowPropertyOrdering": "Allow Property Ordering",
   "allowTags": "Allow Tags",

@@ -39,6 +39,7 @@ import {
   entityListProps,
   EntityListResult,
 } from './entity-list.models';
+import { ListFilter } from 'api-spec/models/List';
 
 @themed()
 @customElement('entity-list')
@@ -73,6 +74,10 @@ export class EntityList extends ViewElement {
   @property({ type: Boolean })
   [EntityListProp.PUBLIC_VIEW]: EntityListProps[EntityListProp.PUBLIC_VIEW] =
     entityListProps[EntityListProp.PUBLIC_VIEW].default;
+
+  @property({ type: Object })
+  [EntityListProp.OVERRIDE_FILTER]: EntityListProps[EntityListProp.OVERRIDE_FILTER] =
+    entityListProps[EntityListProp.OVERRIDE_FILTER].default;
 
   private scrollHandler: EventListener = () => this.handleScroll();
   @query('#lazy-loader') lazyLoader!: HTMLDivElement;
@@ -266,10 +271,12 @@ export class EntityList extends ViewElement {
   }
 
   async getEntities(): Promise<EntityListResult> {
+    const filter: ListFilter =
+      this[EntityListProp.OVERRIDE_FILTER] ?? this.state.listFilter;
     const result = await storage.getEntities(
       this.start,
       this.perPage,
-      this.state.listFilter,
+      filter,
       this.state.listSort,
     );
 
