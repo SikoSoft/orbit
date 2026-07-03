@@ -30,73 +30,110 @@ export class ListFilterPreview extends MobxLitElement {
   [ListFilterPreviewProp.LIST_FILTER]: ListFilterPreviewProps[ListFilterPreviewProp.LIST_FILTER] =
     listFilterPreviewProps[ListFilterPreviewProp.LIST_FILTER].default;
 
-  private get summaryParts(): string[] {
-    const filter = this[ListFilterPreviewProp.LIST_FILTER];
-    if (!filter) {
+  private get filter() {
+    return this[ListFilterPreviewProp.LIST_FILTER];
+  }
+
+  private get typePart(): string[] {
+    if (!this.filter) {
       return [];
     }
-
-    const parts: string[] = [];
-
-    if (filter.includeAll) {
-      parts.push(translate('filterPreview.allItems'));
-    } else if (filter.includeTypes?.length) {
-      const names = filter.includeTypes
+    if (this.filter.includeAll) {
+      return [translate('filterPreview.allItems')];
+    }
+    if (this.filter.includeTypes?.length) {
+      const names = this.filter.includeTypes
         .map(id => this.state.entityConfigs.find(c => c.id === id)?.name ?? '')
         .filter(Boolean);
       if (names.length) {
-        parts.push(`${names.join(' & ')} ${translate('filterPreview.items')}`);
+        return [`${names.join(' & ')} ${translate('filterPreview.items')}`];
       }
     }
+    return [];
+  }
 
-    if (filter.published === true) {
-      parts.push(translate('published'));
-    } else if (filter.published === false) {
-      parts.push(translate('unpublished'));
-    } else {
-      parts.push(translate('filterPreview.publishedOrUnpublished'));
+  private get publishedPart(): string[] {
+    if (!this.filter) {
+      return [];
     }
-
-    if (filter.suggested === true) {
-      parts.push(translate('suggested'));
-    } else if (filter.suggested === false) {
-      parts.push(translate('nonSuggested'));
+    if (this.filter.published === true) {
+      return [translate('published')];
     }
-
-    if (filter.identified === true) {
-      parts.push(translate('identified'));
-    } else if (filter.identified === false) {
-      parts.push(translate('nonIdentified'));
+    if (this.filter.published === false) {
+      return [translate('unpublished')];
     }
+    return [translate('filterPreview.publishedOrUnpublished')];
+  }
 
+  private get suggestedPart(): string[] {
+    if (!this.filter) {
+      return [];
+    }
+    if (this.filter.suggested === true) {
+      return [translate('suggested')];
+    }
+    if (this.filter.suggested === false) {
+      return [translate('nonSuggested')];
+    }
+    return [];
+  }
+
+  private get identifiedPart(): string[] {
+    if (!this.filter) {
+      return [];
+    }
+    if (this.filter.identified === true) {
+      return [translate('identified')];
+    }
+    if (this.filter.identified === false) {
+      return [translate('nonIdentified')];
+    }
+    return [];
+  }
+
+  private get taggingParts(): string[] {
+    if (!this.filter) {
+      return [];
+    }
+    const parts: string[] = [];
     const containsOneOf =
-      filter.tagging?.[ListFilterType.CONTAINS_ONE_OF] ?? [];
+      this.filter.tagging?.[ListFilterType.CONTAINS_ONE_OF] ?? [];
     const containsAllOf =
-      filter.tagging?.[ListFilterType.CONTAINS_ALL_OF] ?? [];
-
+      this.filter.tagging?.[ListFilterType.CONTAINS_ALL_OF] ?? [];
     if (containsOneOf.length) {
       parts.push(
         `${translate('filterType.containsOneOf')}: ${containsOneOf.join(', ')}`,
       );
     }
-
     if (containsAllOf.length) {
       parts.push(
         `${translate('filterType.containsAllOf')}: ${containsAllOf.join(', ')}`,
       );
     }
+    return parts;
+  }
 
-    if (filter.time) {
-      if (filter.time.type === ListFilterTimeType.EXACT_DATE) {
-        parts.push(`${translate('filterPreview.on')} ${filter.time.date}`);
-      } else if (filter.time.type === ListFilterTimeType.RANGE) {
-        parts.push(
-          `${translate('filterPreview.from')} ${filter.time.start} ${translate('filterPreview.to')} ${filter.time.end}`,
-        );
-      }
+  private get timePart(): string[] {
+    if (!this.filter?.time) {
+      return [];
     }
+    if (this.filter.time.type === ListFilterTimeType.EXACT_DATE) {
+      return [`${translate('filterPreview.on')} ${this.filter.time.date}`];
+    }
+    if (this.filter.time.type === ListFilterTimeType.RANGE) {
+      return [
+        `${translate('filterPreview.from')} ${this.filter.time.start} ${translate('filterPreview.to')} ${this.filter.time.end}`,
+      ];
+    }
+    return [];
+  }
 
-    for (const propertyFilter of filter.properties ?? []) {
+  private get propertyParts(): string[] {
+    if (!this.filter) {
+      return [];
+    }
+    const parts: string[] = [];
+    for (const propertyFilter of this.filter.properties ?? []) {
       if (!propertyFilter.propertyId) {
         continue;
       }
@@ -112,13 +149,25 @@ export class ListFilterPreview extends MobxLitElement {
       }
       const operationLabel = translate(`textType.${propertyFilter.operation}`);
       const displayValue =
-        typeof value === 'object'
-          ? translate('image')
-          : String(value);
+        typeof value === 'object' ? translate('image') : String(value);
       parts.push(`${propertyConfig.name} ${operationLabel} ${displayValue}`);
     }
-
     return parts;
+  }
+
+  private get summaryParts(): string[] {
+    if (!this.filter) {
+      return [];
+    }
+    return [
+      ...this.typePart,
+      ...this.publishedPart,
+      ...this.suggestedPart,
+      ...this.identifiedPart,
+      ...this.taggingParts,
+      ...this.timePart,
+      ...this.propertyParts,
+    ];
   }
 
   render(): TemplateResult {
