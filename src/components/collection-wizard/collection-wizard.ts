@@ -241,7 +241,7 @@ export class CollectionWizard extends MobxLitElement {
         translate('collectionWizard.importSuccess'),
         NotificationType.SUCCESS,
       );
-      navigate('/entities');
+      navigate('/');
     } catch (error) {
       console.error('Collection wizard import error:', error);
       addToast(

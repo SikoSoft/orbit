@@ -353,7 +353,9 @@ export class EntityListItem extends MobxLitElement {
   }
 
   @state()
-  get propertyConfigs(): (EntityPropertyConfig | EntityCalculatedPropertyConfig)[] | undefined {
+  get propertyConfigs():
+    | (EntityPropertyConfig | EntityCalculatedPropertyConfig)[]
+    | undefined {
     if (!this.entityConfig) {
       return undefined;
     }
@@ -455,9 +457,13 @@ export class EntityListItem extends MobxLitElement {
   }
 
   private isEventFromActionBar(e: Event): boolean {
-    return e.composedPath().some(
-      el => el instanceof HTMLElement && el.classList.contains('action-bar-container'),
-    );
+    return e
+      .composedPath()
+      .some(
+        el =>
+          el instanceof HTMLElement &&
+          el.classList.contains('action-bar-container'),
+      );
   }
 
   private handleTouchStart(e: TouchEvent): void {
@@ -631,8 +637,7 @@ export class EntityListItem extends MobxLitElement {
         @touchend=${(e: Event): void => {
           e.stopPropagation();
         }}
-      /></span
-    >`;
+    /></span>`;
   }
 
   getPropertyConfig(
@@ -664,7 +669,7 @@ export class EntityListItem extends MobxLitElement {
       },
       time: { type: ListFilterTimeType.ALL_TIME },
     };
-    return `/entities?filter=${encodeURIComponent(JSON.stringify(filter))}`;
+    return `/list?filter=${encodeURIComponent(JSON.stringify(filter))}`;
   }
 
   private renderTags(): TemplateResult | typeof nothing {
@@ -679,7 +684,8 @@ export class EntityListItem extends MobxLitElement {
         ${repeat(
           this.tags,
           tag => tag,
-          tag => html`<a class="tag-link" href=${this.tagFilterUrl(tag)}>${tag}</a>`,
+          tag =>
+            html`<a class="tag-link" href=${this.tagFilterUrl(tag)}>${tag}</a>`,
         )}
       </div>
     `;

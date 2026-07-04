@@ -92,12 +92,6 @@ export const routes: Route[] = [
       await import('@/views/user-settings-view/user-settings-view'),
   },
   {
-    path: '/entities',
-    component: 'entity-list-view',
-    action: async () =>
-      await import('@/views/entity-list-view/entity-list-view'),
-  },
-  {
     path: '/add',
     component: 'entity-form-view',
     action: async () =>
