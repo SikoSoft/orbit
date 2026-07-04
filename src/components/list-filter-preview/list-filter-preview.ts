@@ -30,7 +30,7 @@ export class ListFilterPreview extends MobxLitElement {
   [ListFilterPreviewProp.LIST_FILTER]: ListFilterPreviewProps[ListFilterPreviewProp.LIST_FILTER] =
     listFilterPreviewProps[ListFilterPreviewProp.LIST_FILTER].default;
 
-  private get filter() {
+  private get filter(): ListFilterPreviewProps[ListFilterPreviewProp.LIST_FILTER] {
     return this[ListFilterPreviewProp.LIST_FILTER];
   }
 
@@ -91,6 +91,26 @@ export class ListFilterPreview extends MobxLitElement {
     return [];
   }
 
+  private formatTagsOneOf(tags: string[]): string {
+    const prefix = translate('filterPreview.tagsContain');
+    if (tags.length === 1) {
+      return `${prefix} ${tags[0]}`;
+    }
+    const last = tags[tags.length - 1];
+    const rest = tags.slice(0, -1).join(', ');
+    return `${prefix} ${translate('filterPreview.either')} ${rest} ${translate('filterPreview.or')} ${last}`;
+  }
+
+  private formatTagsAllOf(tags: string[]): string {
+    const prefix = translate('filterPreview.tagsContain');
+    if (tags.length === 1) {
+      return `${prefix} ${tags[0]}`;
+    }
+    const last = tags[tags.length - 1];
+    const rest = tags.slice(0, -1).join(', ');
+    return `${prefix} ${rest} ${translate('filterPreview.and')} ${last}`;
+  }
+
   private get taggingParts(): string[] {
     if (!this.filter) {
       return [];
@@ -101,14 +121,10 @@ export class ListFilterPreview extends MobxLitElement {
     const containsAllOf =
       this.filter.tagging?.[ListFilterType.CONTAINS_ALL_OF] ?? [];
     if (containsOneOf.length) {
-      parts.push(
-        `${translate('filterType.containsOneOf')}: ${containsOneOf.join(', ')}`,
-      );
+      parts.push(this.formatTagsOneOf(containsOneOf));
     }
     if (containsAllOf.length) {
-      parts.push(
-        `${translate('filterType.containsAllOf')}: ${containsAllOf.join(', ')}`,
-      );
+      parts.push(this.formatTagsAllOf(containsAllOf));
     }
     return parts;
   }
