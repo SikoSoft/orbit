@@ -392,6 +392,21 @@ export class Storage implements StorageSchema {
     return listConfigId;
   }
 
+  hasActiveListConfigId(): boolean {
+    try {
+      return (
+        localStorage.getItem(StorageItemKey.ACTIVE_LIST_CONFIG_ID) !== null
+      );
+    } catch (error) {
+      console.error(
+        `Encountered an error while trying to check for a stored active list config ID: ${JSON.stringify(
+          error,
+        )}`,
+      );
+      return false;
+    }
+  }
+
   setAuthToken(authToken: string): void {
     localStorage.setItem(StorageItemKey.AUTH_TOKEN_KEY, authToken);
   }
