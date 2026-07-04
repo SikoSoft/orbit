@@ -320,7 +320,11 @@ export class AppContainer extends MobxLitElement {
         this.state.setListConfigId(listConfigId);
       }
 
-      if (!this.state.listConfigId && this.state.listConfigs.length) {
+      if (
+        !this.state.listConfigId &&
+        !storage.hasActiveListConfigId() &&
+        this.state.listConfigs.length
+      ) {
         const defaultListConfigId = this.state.getSetting<string>(
           SettingName.DEFAULT_LIST_CONFIG,
         );
