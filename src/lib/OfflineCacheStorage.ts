@@ -1346,15 +1346,17 @@ export class OfflineCacheStorage implements StorageSchema {
   async createStreakAlertConfig(
     streakId: number,
     noticeTime: number,
+    message?: string,
   ): Promise<StorageResult<StreakAlertConfig>> {
-    return networkStorage.createStreakAlertConfig(streakId, noticeTime);
+    return networkStorage.createStreakAlertConfig(streakId, noticeTime, message);
   }
 
   async updateStreakAlertConfig(
     id: number,
     noticeTime: number,
+    message?: string,
   ): Promise<StorageResult<StreakAlertConfig>> {
-    return networkStorage.updateStreakAlertConfig(id, noticeTime);
+    return networkStorage.updateStreakAlertConfig(id, noticeTime, message);
   }
 
   async deleteStreakAlertConfig(id: number): Promise<boolean> {

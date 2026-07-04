@@ -24,8 +24,10 @@ export class StreakAlertConfigList extends LitElement {
 
   @state() private editingAlertId: number | null = null;
   @state() private editingNoticeTime: number = 0;
+  @state() private editingMessage: string = '';
   @state() private addingAlert: boolean = false;
   @state() private newNoticeTime: number = 60;
+  @state() private newMessage: string = '';
   @state() private confirmDeleteAlertId: number | null = null;
 
   static styles = css`
@@ -90,11 +92,13 @@ export class StreakAlertConfigList extends LitElement {
   private handleEditAlert(alert: StreakAlertConfig): void {
     this.editingAlertId = alert.id;
     this.editingNoticeTime = alert.noticeTime;
+    this.editingMessage = alert.message ?? '';
   }
 
   private handleCancelEdit(): void {
     this.editingAlertId = null;
     this.editingNoticeTime = 0;
+    this.editingMessage = '';
   }
 
   private async handleSaveEdit(): Promise<void> {
@@ -103,7 +107,11 @@ export class StreakAlertConfigList extends LitElement {
       return;
     }
 
-    const result = await storage.updateStreakAlertConfig?.(id, this.editingNoticeTime);
+    const result = await storage.updateStreakAlertConfig?.(
+      id,
+      this.editingNoticeTime,
+      this.editingMessage || undefined,
+    );
 
     if (!result?.isOk) {
       addToast(translate('failedToUpdateAlert'), NotificationType.ERROR);
@@ -111,8 +119,10 @@ export class StreakAlertConfigList extends LitElement {
     }
 
     this.editingAlertId = null;
+    const message = this.editingMessage || undefined;
+    this.editingMessage = '';
     const updatedAlerts = this.alerts.map(a =>
-      a.id === id ? { ...a, noticeTime: this.editingNoticeTime } : a,
+      a.id === id ? { ...a, noticeTime: this.editingNoticeTime, message } : a,
     );
     this.dispatchEvent(new AlertsChangedEvent({ alerts: updatedAlerts }));
     addToast(translate('alertUpdated'), NotificationType.SUCCESS);
@@ -145,15 +155,21 @@ export class StreakAlertConfigList extends LitElement {
   private handleStartAdd(): void {
     this.addingAlert = true;
     this.newNoticeTime = 60;
+    this.newMessage = '';
   }
 
   private handleCancelAdd(): void {
     this.addingAlert = false;
     this.newNoticeTime = 60;
+    this.newMessage = '';
   }
 
   private async handleSaveAdd(): Promise<void> {
-    const result = await storage.createStreakAlertConfig?.(this.streakId, this.newNoticeTime);
+    const result = await storage.createStreakAlertConfig?.(
+      this.streakId,
+      this.newNoticeTime,
+      this.newMessage || undefined,
+    );
 
     if (!result?.isOk) {
       addToast(translate('failedToAddAlert'), NotificationType.ERROR);
@@ -178,6 +194,13 @@ export class StreakAlertConfigList extends LitElement {
               this.editingNoticeTime = Number(e.detail.value);
             }}
           ></ss-input>
+          <ss-input
+            .value=${this.editingMessage}
+            label=${translate('alertMessage')}
+            @input-changed=${(e: InputChangedEvent): void => {
+              this.editingMessage = e.detail.value;
+            }}
+          ></ss-input>
           <ss-button @click=${(): Promise<void> => this.handleSaveEdit()}
             >${translate('saveAlert')}</ss-button>
           <ss-button @click=${(): void => this.handleCancelEdit()}
@@ -188,7 +211,11 @@ export class StreakAlertConfigList extends LitElement {
 
     return html`
       <div class="alert-row">
-        <span class="alert-label">${this.formatNoticeTime(alert.noticeTime)}</span>
+        <span class="alert-label"
+          >${this.formatNoticeTime(alert.noticeTime)}${alert.message
+            ? html` &mdash; ${alert.message}`
+            : ''}</span
+        >
         <ss-button @click=${(): void => this.handleEditAlert(alert)}
           >${translate('editAlert')}</ss-button>
         <ss-button
@@ -224,6 +251,13 @@ export class StreakAlertConfigList extends LitElement {
                   .value=${String(this.newNoticeTime)}
                   @input-changed=${(e: InputChangedEvent): void => {
                     this.newNoticeTime = Number(e.detail.value);
+                  }}
+                ></ss-input>
+                <ss-input
+                  .value=${this.newMessage}
+                  label=${translate('alertMessage')}
+                  @input-changed=${(e: InputChangedEvent): void => {
+                    this.newMessage = e.detail.value;
                   }}
                 ></ss-input>
                 <ss-button @click=${(): Promise<void> => this.handleSaveAdd()}

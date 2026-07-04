@@ -591,6 +591,7 @@
   "streakAlerts": "Streak Alerts",
   "addAlert": "Add Alert",
   "minutesBeforeMidnight": "Minutes before midnight",
+  "alertMessage": "Message (optional)",
   "alertNoticeTimeLabel": "{value} minutes before midnight",
   "alertNoticeTimeHourLabel": "{value} hour before midnight",
   "alertNoticeTimeHoursLabel": "{value} hours before midnight",

@@ -977,6 +977,7 @@ export class Storage implements StorageSchema {
   async createStreakAlertConfig(
     _streakId: number,
     _noticeTime: number,
+    _message?: string,
   ): Promise<StorageResult<StreakAlertConfig>> {
     return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
   }
@@ -985,6 +986,7 @@ export class Storage implements StorageSchema {
   async updateStreakAlertConfig(
     _id: number,
     _noticeTime: number,
+    _message?: string,
   ): Promise<StorageResult<StreakAlertConfig>> {
     return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
   }

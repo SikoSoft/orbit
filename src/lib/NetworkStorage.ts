@@ -1103,11 +1103,12 @@ export class NetworkStorage implements StorageSchema {
   async createStreakAlertConfig(
     streakId: number,
     noticeTime: number,
+    message?: string,
   ): Promise<StorageResult<StreakAlertConfig>> {
     const result = await api.post<
-      { streakId: number; noticeTime: number },
+      { streakId: number; noticeTime: number; message?: string },
       { alertConfig: StreakAlertConfig }
-    >('streakAlertConfig', { streakId, noticeTime });
+    >('streakAlertConfig', { streakId, noticeTime, ...(message ? { message } : {}) });
 
     if (result && result.isOk) {
       return { isOk: true, value: result.response.alertConfig };
@@ -1119,11 +1120,12 @@ export class NetworkStorage implements StorageSchema {
   async updateStreakAlertConfig(
     id: number,
     noticeTime: number,
+    message?: string,
   ): Promise<StorageResult<StreakAlertConfig>> {
     const result = await api.put<
-      { noticeTime: number },
+      { noticeTime: number; message?: string },
       { alertConfig: StreakAlertConfig }
-    >(`streakAlertConfig/${id}`, { noticeTime });
+    >(`streakAlertConfig/${id}`, { noticeTime, ...(message ? { message } : {}) });
 
     if (result && result.isOk) {
       return { isOk: true, value: result.response.alertConfig };

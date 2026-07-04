@@ -239,8 +239,8 @@ export interface StorageSchema {
   createStreak?(name: string, context: StreakContext): Promise<StorageResult<Streak>>;
   updateStreak?(id: number, name: string | undefined, context: StreakContext | undefined): Promise<StorageResult<Streak>>;
   deleteStreak?(id: number): Promise<boolean>;
-  createStreakAlertConfig?(streakId: number, noticeTime: number): Promise<StorageResult<StreakAlertConfig>>;
-  updateStreakAlertConfig?(id: number, noticeTime: number): Promise<StorageResult<StreakAlertConfig>>;
+  createStreakAlertConfig?(streakId: number, noticeTime: number, message?: string): Promise<StorageResult<StreakAlertConfig>>;
+  updateStreakAlertConfig?(id: number, noticeTime: number, message?: string): Promise<StorageResult<StreakAlertConfig>>;
   deleteStreakAlertConfig?(id: number): Promise<boolean>;
   getFacts?(): Promise<{ facts: Fact[]; results: FactResult[] }>;
   createFact?(name: string, context: FactContext): Promise<StorageResult<Fact>>;
