@@ -2,27 +2,15 @@ import { html, css, nothing, TemplateResult } from 'lit';
 import { property, customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
-import { marked } from 'marked';
-import { default as DOMPurify } from 'dompurify';
 
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 
 import {
-  DataType,
   EntityCalculatedPropertyConfig,
   EntityConfig,
   EntityProperty,
   EntityPropertyConfig,
-  ImageDataValue,
-  PropertyDataValue,
 } from 'api-spec/models/Entity';
-import {
-  ListFilter,
-  ListFilterType,
-  ListFilterTimeType,
-} from 'api-spec/models/List';
-import { SettingName } from 'api-spec/models/Setting';
-import { Time } from '@/lib/Time';
 import {
   EntityListItemMode,
   EntityListItemProp,
@@ -33,11 +21,8 @@ import { appState } from '@/state';
 import { translate } from '@/lib/Localization';
 import { repeat } from 'lit/directives/repeat.js';
 import { themed } from '@/lib/Theme';
-import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { storage } from '@/lib/Storage';
 import { addToast } from '@/lib/Util';
-
-import '@/components/svg-icon/svg/svg-close';
 
 import { PointerDownEvent } from '@/events/pointer-down';
 import { PointerUpEvent } from '@/events/pointer-up';
@@ -53,6 +38,9 @@ import '@ss/ui/components/ss-button';
 import '@ss/ui/components/confirmation-modal';
 import '@/components/entity-form/entity-form';
 import './entity-action-bar/entity-action-bar';
+import './entity-list-item-property/entity-list-item-property';
+import './entity-list-item-tags/entity-list-item-tags';
+import './entity-list-item-time/entity-list-item-time';
 
 const holdThreshold = 500;
 
@@ -99,105 +87,9 @@ export class EntityListItem extends MobxLitElement {
       }
     }
 
-    .time {
-      color: #888;
-      font-size: 0.9rem;
-      display: flex;
-      justify-content: center;
-      padding: var(--padding);
-      gap: 2rem;
-
-      label {
-        font-weight: lighter;
-        opacity: 0.8;
-        margin-right: 0.25rem;
-      }
-    }
-
     .show-full,
     .show-edit {
       display: none;
-    }
-
-    .property.image {
-      img {
-        max-width: 100%;
-        cursor: zoom-in;
-      }
-    }
-
-    .image-zoom-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .image-zoom-modal {
-      position: relative;
-      width: 90vw;
-      height: 90vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .image-zoom-modal img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
-
-    .image-zoom-close {
-      position: absolute;
-      top: -2.5rem;
-      right: 0;
-      background: none;
-      border: none;
-      color: #fff;
-      cursor: pointer;
-      padding: 0.25rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      svg-close {
-        width: 2rem;
-        height: 2rem;
-      }
-    }
-
-    .property {
-      padding: var(--padding);
-      text-align: left;
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-
-      .property-name {
-        font-weight: lighter;
-        opacity: 0.8;
-      }
-
-      .property-value {
-        font-weight: normal;
-      }
-    }
-
-    .property-longtext .property-value {
-      white-space: pre-wrap;
-
-      ul,
-      ol {
-        margin: 0;
-
-        li p {
-          margin: 0;
-        }
-      }
     }
 
     .unpublished-badge {
@@ -237,31 +129,8 @@ export class EntityListItem extends MobxLitElement {
         display: block;
       }
     }
-
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem;
-      padding: var(--padding);
-      padding-top: 0;
-      justify-content: center;
-    }
-
-    .tag-link {
-      display: inline-block;
-      padding: 0.15rem 0.5rem;
-      border-radius: 3px;
-      background-color: color-mix(in srgb, currentColor 12%, transparent);
-      color: inherit;
-      text-decoration: none;
-      font-size: 0.8rem;
-      opacity: 0.8;
-
-      &:hover {
-        opacity: 1;
-      }
-    }
   `;
+
   @property({ type: Number })
   [EntityListItemProp.TYPE]: EntityListItemProps[EntityListItemProp.TYPE] =
     entityListItemProps[EntityListItemProp.TYPE].default;
@@ -327,7 +196,6 @@ export class EntityListItem extends MobxLitElement {
   @state() downTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
   @state() downActivation: boolean = false;
   @state() confirmDeleteShown: boolean = false;
-  @state() zoomedImage: ImageDataValue | null = null;
   private touchStartX: number = 0;
   private touchStartY: number = 0;
   private touchMoved: boolean = false;
@@ -361,21 +229,6 @@ export class EntityListItem extends MobxLitElement {
     }
 
     return this.entityConfig.properties;
-  }
-
-  get readableCreatedAt(): string {
-    const date = new Date(this.createdAt);
-    return Time.formatDateTime(date);
-  }
-
-  get readableUpdatedAt(): string {
-    const date = new Date(this.updatedAt);
-    return Time.formatDateTime(date);
-  }
-
-  getReadableTime(timeString: string): string {
-    const date = new Date(timeString);
-    return Time.formatDateTime(date);
   }
 
   setMode(mode: EntityListItemMode): void {
@@ -530,11 +383,6 @@ export class EntityListItem extends MobxLitElement {
     }
   }
 
-  private handleImageClick(e: Event, value: ImageDataValue): void {
-    e.stopPropagation();
-    this.zoomedImage = value;
-  }
-
   handleMouseEnter(): void {
     if (this.mode === EntityListItemMode.EDIT) {
       return;
@@ -551,144 +399,12 @@ export class EntityListItem extends MobxLitElement {
     this.mode = EntityListItemMode.PREVIEW;
   }
 
-  private renderProperty(
-    property: EntityProperty,
-  ): TemplateResult | typeof nothing {
-    const propertyConfig = this.getPropertyConfig(property.propertyConfigId);
-    if (!propertyConfig || propertyConfig.hidden) {
-      return nothing;
-    }
-
-    let value: PropertyDataValue | TemplateResult = propertyConfig.defaultValue;
-
-    switch (propertyConfig.dataType) {
-      case DataType.DATE:
-        value = this.getReadableTime(property.value as string);
-        break;
-      case DataType.INT:
-        value = property.value as number;
-        break;
-      case DataType.LONG_TEXT:
-        value = html`${unsafeHTML(
-          DOMPurify.sanitize(marked.parse(property.value as string).toString()),
-        )}`;
-        break;
-      default:
-        value = property.value as string;
-        break;
-    }
-
-    if (propertyConfig.dataType === DataType.IMAGE) {
-      return this.renderImageProperty(property);
-    }
-
-    return html`
-      <div
-        class=${classMap({
-          property: true,
-          [`property-${propertyConfig.dataType.toLowerCase()}`]: true,
-          [`property--${propertyConfig.name.toLowerCase()}`]: true,
-        })}
-        data-name=${propertyConfig.name}
-        data-value=${value}
-        slot=${propertyConfig.name}
-      >
-        <span class="property-name">${propertyConfig.name}</span>
-        <span class="property-value"
-          >${propertyConfig.prefix
-            ? html`<span class="property-prefix"
-                >${propertyConfig.prefix}</span
-              >`
-            : nothing}${value}${propertyConfig.suffix
-            ? html`<span class="property-suffix"
-                >${propertyConfig.suffix}</span
-              >`
-            : nothing}</span
-        >
-      </div>
-    `;
-  }
-
-  renderImageProperty(
-    property: EntityProperty,
-  ): TemplateResult | typeof nothing {
-    const propertyConfig = this.getPropertyConfig(property.propertyConfigId);
-    if (!propertyConfig || propertyConfig.dataType !== DataType.IMAGE) {
-      return nothing;
-    }
-
-    const value = property.value as ImageDataValue;
-
-    return html`<span class="property image"
-      ><img
-        src=${value.src}
-        alt=${value.alt}
-        crossorigin="anonymous"
-        @click=${(e: Event): void => this.handleImageClick(e, value)}
-        @mousedown=${(e: Event): void => {
-          e.stopPropagation();
-        }}
-        @mouseup=${(e: Event): void => {
-          e.stopPropagation();
-        }}
-        @touchstart=${(e: Event): void => {
-          e.stopPropagation();
-        }}
-        @touchend=${(e: Event): void => {
-          e.stopPropagation();
-        }}
-    /></span>`;
-  }
-
-  getPropertyConfig(
-    propertyConfigId: number,
-  ): EntityPropertyConfig | EntityCalculatedPropertyConfig | undefined {
-    if (!this.propertyConfigs) {
-      return undefined;
-    }
-
-    return this.propertyConfigs.find(config => config.id === propertyConfigId);
-  }
-
   showFull(): void {
     this.mode = EntityListItemMode.FULL;
   }
 
   showEdit(): void {
     this.mode = EntityListItemMode.EDIT;
-  }
-
-  private tagFilterUrl(tag: string): string {
-    const filter: ListFilter = {
-      includeAll: false,
-      includeAllTagging: false,
-      includeUntagged: false,
-      tagging: {
-        [ListFilterType.CONTAINS_ALL_OF]: [tag],
-        [ListFilterType.CONTAINS_ONE_OF]: [],
-      },
-      time: { type: ListFilterTimeType.ALL_TIME },
-    };
-    return `/list?filter=${encodeURIComponent(JSON.stringify(filter))}`;
-  }
-
-  private renderTags(): TemplateResult | typeof nothing {
-    if (
-      !this.state.getSetting<boolean>(SettingName.SHOW_TAGS) ||
-      !this.tags?.length
-    ) {
-      return nothing;
-    }
-    return html`
-      <div class="tags">
-        ${repeat(
-          this.tags,
-          tag => tag,
-          tag =>
-            html`<a class="tag-link" href=${this.tagFilterUrl(tag)}>${tag}</a>`,
-        )}
-      </div>
-    `;
   }
 
   render(): TemplateResult {
@@ -751,27 +467,23 @@ export class EntityListItem extends MobxLitElement {
                 <div class="properties item-properties">
                   ${repeat(
                     this.properties,
-                    property => property.id,
-                    property => this.renderProperty(property),
+                    (property: EntityProperty) => property.id,
+                    (property: EntityProperty) =>
+                      html`<entity-list-item-property
+                        .property=${property}
+                        .propertyConfigs=${this.propertyConfigs ?? []}
+                      ></entity-list-item-property>`,
                   )}
                 </div>
 
-                ${this.renderTags()}
+                <entity-list-item-tags
+                  .tags=${this.tags}
+                ></entity-list-item-tags>
 
-                <div class="time">
-                  <span class="created-at">
-                    <label>${translate('createdAt')}</label>:
-                    ${this.readableCreatedAt}
-                  </span>
-                  ${this.createdAt !== this.updatedAt
-                    ? html`
-                        <span class="updated-at"
-                          ><label>${translate('updatedAt')}</label>:
-                          ${this.readableUpdatedAt}</span
-                        >
-                      `
-                    : nothing}
-                </div>
+                <entity-list-item-time
+                  createdAt=${this.createdAt}
+                  updatedAt=${this.updatedAt}
+                ></entity-list-item-time>
               </div>
               ${this.mode === EntityListItemMode.FULL
                 ? html`
@@ -795,38 +507,6 @@ export class EntityListItem extends MobxLitElement {
         message=${translate('confirmDeleteSuggestion')}
         ?open=${this.confirmDeleteShown}
       ></confirmation-modal>
-      ${this.zoomedImage
-        ? html`
-            <div
-              class="image-zoom-overlay"
-              @click=${(): void => {
-                this.zoomedImage = null;
-              }}
-            >
-              <div
-                class="image-zoom-modal"
-                @click=${(e: Event): void => {
-                  e.stopPropagation();
-                }}
-              >
-                <button
-                  class="image-zoom-close"
-                  aria-label=${translate('close')}
-                  @click=${(): void => {
-                    this.zoomedImage = null;
-                  }}
-                >
-                  <svg-close></svg-close>
-                </button>
-                <img
-                  src=${this.zoomedImage.src}
-                  alt=${this.zoomedImage.alt}
-                  crossorigin="anonymous"
-                />
-              </div>
-            </div>
-          `
-        : nothing}
     `;
   }
 }
