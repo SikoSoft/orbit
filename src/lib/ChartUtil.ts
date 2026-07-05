@@ -1,19 +1,81 @@
 import type { ChartData } from 'chart.js';
 
 import { ChartResponse } from 'api-spec/models/Statistic';
-import { FactContext, FactOperation } from 'api-spec/models/Fact';
+import {
+  FactContext,
+  FactOperation,
+  EntityCountFactContext,
+  PropertySumFactContext,
+  AnalysisClassificationFactContext,
+} from 'api-spec/models/Fact';
+import {
+  EntityConfig,
+  EntityPropertyConfig,
+  EntityCalculatedPropertyConfig,
+} from 'api-spec/models/Entity';
 
 import { translate } from '@/lib/Localization';
 
-export function getChartDatasetLabel(dataPoints: FactContext[]): string {
+export interface DataPointLabelContext {
+  entityConfigs: EntityConfig[];
+  propertyConfigs: (EntityPropertyConfig | EntityCalculatedPropertyConfig)[];
+}
+
+type LabelResolver<T extends FactContext> = (
+  dataPoint: T,
+  context: DataPointLabelContext,
+) => string;
+
+const labelResolvers: Partial<{
+  [K in FactOperation]: LabelResolver<Extract<FactContext, { operation: K }>>;
+}> = {
+  [FactOperation.ENTITY_COUNT]: (
+    dataPoint: EntityCountFactContext,
+    context: DataPointLabelContext,
+  ): string => {
+    const typeId = dataPoint.filter.includeTypes?.[0];
+    if (typeId !== undefined) {
+      const entityConfig = context.entityConfigs.find(c => c.id === typeId);
+      if (entityConfig) {
+        return entityConfig.name;
+      }
+    }
+    return translate(`factOperation.${FactOperation.ENTITY_COUNT}`);
+  },
+
+  [FactOperation.PROPERTY_SUM]: (
+    dataPoint: PropertySumFactContext,
+    context: DataPointLabelContext,
+  ): string => {
+    const propertyConfig = context.propertyConfigs.find(
+      c => c.id === dataPoint.propertyConfigId,
+    );
+    return propertyConfig
+      ? propertyConfig.name
+      : translate(`factOperation.${FactOperation.PROPERTY_SUM}`);
+  },
+
+  [FactOperation.ANALYSIS_CLASSIFICATION]: (
+    dataPoint: AnalysisClassificationFactContext,
+  ): string =>
+    translate(`chart.analysisClassificationType.${dataPoint.analysisType}`),
+};
+
+export function getChartDatasetLabel(
+  dataPoints: FactContext[],
+  context: DataPointLabelContext = { entityConfigs: [], propertyConfigs: [] },
+): string {
   const first = dataPoints[0] as FactContext | undefined;
-  if (first?.operation === FactOperation.ANALYSIS_CLASSIFICATION) {
-    return translate(`chart.analysisClassificationType.${first.analysisType}`);
+  if (!first?.operation) {
+    return translate('chartData');
   }
-  if (first?.operation) {
-    return translate(`factOperation.${first.operation}`);
+
+  const resolver = labelResolvers[first.operation];
+  if (resolver) {
+    return (resolver as LabelResolver<FactContext>)(first, context);
   }
-  return translate('chartData');
+
+  return translate(`factOperation.${first.operation}`);
 }
 
 export function convertResponseToChartData(
