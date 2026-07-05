@@ -315,11 +315,17 @@ export class OfflineCacheStorage implements StorageSchema {
   private syncInProgress = false;
 
   constructor() {
+    console.log(
+      '[orbit/offline] OfflineCacheStorage created — initial isOnline=%s',
+      this.isOnline,
+    );
     window.addEventListener('online', () => {
+      console.log('[orbit/offline] network came ONLINE — triggering syncPendingQueue');
       this.isOnline = true;
       void this.syncPendingQueue();
     });
     window.addEventListener('offline', () => {
+      console.log('[orbit/offline] network went OFFLINE — writes will be queued');
       this.isOnline = false;
     });
   }
@@ -373,8 +379,13 @@ export class OfflineCacheStorage implements StorageSchema {
     entityConfig: EntityConfig,
   ): Promise<EntityConfig | null> {
     if (this.isOnline) {
+      console.log('[orbit/offline] addEntityConfig: online — sending to network');
       const result = await networkStorage.addEntityConfig(entityConfig);
       if (result) {
+        console.log(
+          '[orbit/offline] addEntityConfig: network succeeded (id=%d), caching to SQLite',
+          result.id,
+        );
         await this.db.import({
           meta: emptyMeta(),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -386,9 +397,13 @@ export class OfflineCacheStorage implements StorageSchema {
         });
         return result;
       }
+      console.warn('[orbit/offline] addEntityConfig: network call returned null — falling back to offline queue');
+    } else {
+      console.log('[orbit/offline] addEntityConfig: offline — saving locally and queueing for sync');
     }
 
     const tempId = await this.db.nextTempId('entity_config');
+    console.log('[orbit/offline] addEntityConfig: assigned tempId=%d', tempId);
     const cached = await this.db.insertEntityConfigOffline(
       entityConfig,
       tempId,
@@ -408,9 +423,24 @@ export class OfflineCacheStorage implements StorageSchema {
     await this.db.updateEntityConfig(entityConfig);
 
     if (this.isOnline && entityConfig.id > 0) {
+      console.log(
+        '[orbit/offline] updateEntityConfig: online — sending id=%d to network',
+        entityConfig.id,
+      );
       return networkStorage.updateEntityConfig(entityConfig);
     }
 
+    if (!this.isOnline) {
+      console.log(
+        '[orbit/offline] updateEntityConfig: offline — id=%d queued for sync',
+        entityConfig.id,
+      );
+    } else {
+      console.log(
+        '[orbit/offline] updateEntityConfig: id=%d is a temp id — queued for sync',
+        entityConfig.id,
+      );
+    }
     await this.db.enqueue('updateEntityConfig', [entityConfig]);
     return entityConfig;
   }
@@ -419,9 +449,18 @@ export class OfflineCacheStorage implements StorageSchema {
     await this.db.deleteEntityConfig(id);
 
     if (this.isOnline && id > 0) {
+      console.log(
+        '[orbit/offline] deleteEntityConfig: online — sending id=%d to network',
+        id,
+      );
       return networkStorage.deleteEntityConfig(id);
     }
 
+    if (!this.isOnline) {
+      console.log('[orbit/offline] deleteEntityConfig: offline — id=%d queued for sync', id);
+    } else {
+      console.log('[orbit/offline] deleteEntityConfig: id=%d is a temp id — queued for sync', id);
+    }
     await this.db.enqueue('deleteEntityConfig', [id]);
     return true;
   }
@@ -432,14 +471,31 @@ export class OfflineCacheStorage implements StorageSchema {
     propertyConfig: EntityPropertyConfig,
   ): Promise<EntityPropertyConfig | null> {
     if (this.isOnline && propertyConfig.entityConfigId > 0) {
+      console.log(
+        '[orbit/offline] addPropertyConfig: online — sending entityConfigId=%d to network',
+        propertyConfig.entityConfigId,
+      );
       const result = await networkStorage.addPropertyConfig(propertyConfig);
       if (result) {
+        console.log(
+          '[orbit/offline] addPropertyConfig: network succeeded (id=%d), caching to SQLite',
+          result.id,
+        );
         await this.db.upsertPropertyConfig(result, result.id);
         return result;
       }
+      console.warn('[orbit/offline] addPropertyConfig: network returned null — falling back to offline queue');
+    } else if (!this.isOnline) {
+      console.log('[orbit/offline] addPropertyConfig: offline — saving locally and queueing for sync');
+    } else {
+      console.log(
+        '[orbit/offline] addPropertyConfig: entityConfigId=%d is a temp id — saving locally and queueing',
+        propertyConfig.entityConfigId,
+      );
     }
 
     const tempId = await this.db.nextTempId('entity_property_config');
+    console.log('[orbit/offline] addPropertyConfig: assigned tempId=%d', tempId);
     const cached = await this.db.upsertPropertyConfig(propertyConfig, tempId);
     await this.db.enqueue(
       'addPropertyConfig',
@@ -461,12 +517,21 @@ export class OfflineCacheStorage implements StorageSchema {
       propertyConfig.id > 0 &&
       propertyConfig.entityConfigId > 0
     ) {
+      console.log(
+        '[orbit/offline] updatePropertyConfig: online — sending id=%d to network',
+        propertyConfig.id,
+      );
       return networkStorage.updatePropertyConfig(
         propertyConfig,
         performDriftCheck,
       );
     }
 
+    console.log(
+      '[orbit/offline] updatePropertyConfig: id=%d queued for sync (isOnline=%s)',
+      propertyConfig.id,
+      this.isOnline,
+    );
     await this.db.enqueue('updatePropertyConfig', [
       propertyConfig,
       performDriftCheck,
@@ -481,9 +546,19 @@ export class OfflineCacheStorage implements StorageSchema {
     await this.db.deletePropertyConfig(entityConfigId, id);
 
     if (this.isOnline && id > 0 && entityConfigId > 0) {
+      console.log(
+        '[orbit/offline] deletePropertyConfig: online — sending id=%d entityConfigId=%d to network',
+        id,
+        entityConfigId,
+      );
       return networkStorage.deletePropertyConfig(entityConfigId, id);
     }
 
+    console.log(
+      '[orbit/offline] deletePropertyConfig: id=%d queued for sync (isOnline=%s)',
+      id,
+      this.isOnline,
+    );
     await this.db.enqueue('deletePropertyConfig', [entityConfigId, id]);
     return true;
   }
@@ -529,6 +604,12 @@ export class OfflineCacheStorage implements StorageSchema {
     listSort: ListSort,
   ): Promise<StorageResult<EntityListResult>> {
     if (this.isOnline) {
+      console.log(
+        '[orbit/offline] getEntities: online — fetching from network (start=%d perPage=%d). ' +
+        'NOTE: network results are NOT cached to SQLite; offline reads rely on entities added via addEntity/updateEntity.',
+        start,
+        perPage,
+      );
       const result = await networkStorage.getEntities(
         start,
         perPage,
@@ -536,22 +617,62 @@ export class OfflineCacheStorage implements StorageSchema {
         listSort,
       );
       if (result.isOk) {
+        console.log(
+          '[orbit/offline] getEntities: network returned %d entities (total=%d)',
+          result.value.entities.length,
+          result.value.total,
+        );
         return result;
       }
+      console.warn(
+        '[orbit/offline] getEntities: network failed (isOk=false) — falling back to SQLite cache',
+        result,
+      );
+    } else {
+      console.log('[orbit/offline] getEntities: offline — reading from SQLite cache');
     }
-    return this.db.getEntities(start, perPage, listFilter, listSort);
+    const cached = await this.db.getEntities(start, perPage, listFilter, listSort);
+    if (cached.isOk) {
+      console.log(
+        '[orbit/offline] getEntities: SQLite cache returned %d entities (total=%d)',
+        cached.value.entities.length,
+        cached.value.total,
+      );
+    } else {
+      console.warn('[orbit/offline] getEntities: SQLite cache read failed', cached);
+    }
+    return cached;
   }
 
   async addEntity(payload: RequestBody): Promise<Entity.Entity | null> {
     if (this.isOnline && payload.entityConfigId > 0) {
+      console.log(
+        '[orbit/offline] addEntity: online — sending entityConfigId=%d to network',
+        payload.entityConfigId,
+      );
       const result = await networkStorage.addEntity(payload);
       if (result) {
+        console.log(
+          '[orbit/offline] addEntity: network succeeded (id=%d), caching to SQLite',
+          result.id,
+        );
         await this.db.upsertEntity(payload, result.id);
+      } else {
+        console.warn('[orbit/offline] addEntity: network returned null — entity NOT cached');
       }
       return result;
     }
 
+    if (!this.isOnline) {
+      console.log('[orbit/offline] addEntity: offline — saving locally and queueing for sync');
+    } else {
+      console.log(
+        '[orbit/offline] addEntity: entityConfigId=%d is a temp id — saving locally and queueing',
+        payload.entityConfigId,
+      );
+    }
     const tempId = await this.db.nextTempId('entity');
+    console.log('[orbit/offline] addEntity: assigned tempId=%d', tempId);
     const cached = await this.db.upsertEntity(payload, tempId);
     await this.db.enqueue('addEntity', [payload], String(tempId), 'entity');
     return cached;
@@ -564,9 +685,18 @@ export class OfflineCacheStorage implements StorageSchema {
     await this.db.updateEntity(id, payload);
 
     if (this.isOnline && id > 0) {
+      console.log(
+        '[orbit/offline] updateEntity: online — sending id=%d to network',
+        id,
+      );
       return networkStorage.updateEntity(id, payload);
     }
 
+    console.log(
+      '[orbit/offline] updateEntity: id=%d queued for sync (isOnline=%s)',
+      id,
+      this.isOnline,
+    );
     await this.db.enqueue('updateEntity', [id, payload]);
     return this.db.updateEntity(id, payload);
   }
@@ -575,14 +705,27 @@ export class OfflineCacheStorage implements StorageSchema {
     await this.db.deleteEntity(id);
 
     if (this.isOnline && id > 0) {
+      console.log(
+        '[orbit/offline] deleteEntity: online — sending id=%d to network',
+        id,
+      );
       return networkStorage.deleteEntity(id);
     }
 
+    console.log(
+      '[orbit/offline] deleteEntity: id=%d queued for sync (isOnline=%s)',
+      id,
+      this.isOnline,
+    );
     await this.db.enqueue('deleteEntity', [id]);
     return true;
   }
 
   async getEntity(id: number): Promise<Entity.Entity | null> {
+    console.log(
+      '[orbit/offline] getEntity: always fetching id=%d from network (no cache path)',
+      id,
+    );
     return networkStorage.getEntity(id);
   }
 
@@ -590,9 +733,11 @@ export class OfflineCacheStorage implements StorageSchema {
     if (this.isOnline) {
       try {
         return await networkStorage.getTags(tag);
-      } catch {
-        // fall through
+      } catch (err) {
+        console.warn('[orbit/offline] getTags: network failed, falling back to SQLite cache', err);
       }
+    } else {
+      console.log('[orbit/offline] getTags: offline — reading from SQLite cache');
     }
     return this.db.getTags(tag);
   }
@@ -607,20 +752,40 @@ export class OfflineCacheStorage implements StorageSchema {
           propertyConfigId,
           query,
         );
-      } catch {
-        // fall through
+      } catch (err) {
+        console.warn(
+          '[orbit/offline] getPropertySuggestions: network failed, falling back to SQLite cache',
+          err,
+        );
       }
+    } else {
+      console.log('[orbit/offline] getPropertySuggestions: offline — reading from SQLite cache');
     }
     return this.db.getPropertySuggestions(propertyConfigId, query);
   }
 
   async bulkOperation(payload: BulkOperationPayload): Promise<boolean> {
     if (this.isOnline && payload.entities.every(id => id > 0)) {
+      console.log(
+        '[orbit/offline] bulkOperation: online — sending %d entities to network',
+        payload.entities.length,
+      );
       const result = await networkStorage.bulkOperation(payload);
       if (result) {
+        console.log('[orbit/offline] bulkOperation: network succeeded, caching to SQLite');
         await this.db.bulkOperation(payload);
         return true;
       }
+      console.warn('[orbit/offline] bulkOperation: network failed — falling back to offline queue');
+    } else if (!this.isOnline) {
+      console.log(
+        '[orbit/offline] bulkOperation: offline — queueing %d entities for sync',
+        payload.entities.length,
+      );
+    } else {
+      console.log(
+        '[orbit/offline] bulkOperation: some entities have temp ids — queueing for sync',
+      );
     }
 
     await this.db.bulkOperation(payload);
@@ -974,27 +1139,72 @@ export class OfflineCacheStorage implements StorageSchema {
   }
 
   async syncPendingQueue(): Promise<void> {
-    if (this.syncInProgress || !this.isOnline) {
+    if (this.syncInProgress) {
+      console.log('[orbit/offline] syncPendingQueue: skipping — sync already in progress');
+      return;
+    }
+    if (!this.isOnline) {
+      console.log('[orbit/offline] syncPendingQueue: skipping — currently offline');
       return;
     }
     this.syncInProgress = true;
+    console.log('[orbit/offline] syncPendingQueue: starting sync');
 
     try {
       const ops = await this.db.pendingOps();
+      console.log('[orbit/offline] syncPendingQueue: %d pending op(s) found', ops.length);
 
+      if (ops.length === 0) {
+        console.log('[orbit/offline] syncPendingQueue: nothing to sync');
+        return;
+      }
+
+      let successCount = 0;
       for (const op of ops) {
         const args = JSON.parse(op.payload) as unknown[];
+        console.log(
+          '[orbit/offline] syncPendingQueue: dispatching op id=%d operation=%s local_id=%s table=%s',
+          op.id,
+          op.operation,
+          op.local_id ?? '(none)',
+          op.table_name ?? '(none)',
+        );
         try {
           await this.dispatchOp(op, args);
           await this.db.dequeue(op.id);
-        } catch {
+          successCount++;
+          console.log(
+            '[orbit/offline] syncPendingQueue: op id=%d (%s) succeeded and dequeued',
+            op.id,
+            op.operation,
+          );
+        } catch (err) {
+          console.error(
+            '[orbit/offline] syncPendingQueue: op id=%d (%s) FAILED — stopping sync. Error:',
+            op.id,
+            op.operation,
+            err,
+          );
           // Stop on first failure — network may have dropped again.
           break;
         }
       }
 
+      console.log(
+        '[orbit/offline] syncPendingQueue: completed %d/%d ops',
+        successCount,
+        ops.length,
+      );
+
       if (!(await this.db.hasPendingOps())) {
+        console.log('[orbit/offline] syncPendingQueue: all ops synced — dispatching offline-sync-complete');
         window.dispatchEvent(new CustomEvent('offline-sync-complete'));
+      } else {
+        const remaining = await this.db.pendingOps();
+        console.warn(
+          '[orbit/offline] syncPendingQueue: %d op(s) still pending after sync attempt',
+          remaining.length,
+        );
       }
     } finally {
       this.syncInProgress = false;
@@ -1005,12 +1215,19 @@ export class OfflineCacheStorage implements StorageSchema {
     switch (op.operation) {
       case 'addEntityConfig': {
         const config = args[0] as EntityConfig;
+        console.log('[orbit/offline] dispatchOp addEntityConfig: name="%s"', config.name);
         const result = await networkStorage.addEntityConfig(config);
         if (!result) {
           throw new Error('addEntityConfig failed');
         }
+        console.log('[orbit/offline] dispatchOp addEntityConfig: server assigned id=%d', result.id);
         if (op.local_id !== null) {
           const tempId = parseInt(op.local_id, 10);
+          console.log(
+            '[orbit/offline] dispatchOp addEntityConfig: mapping tempId=%d → serverId=%d',
+            tempId,
+            result.id,
+          );
           await this.db.mapId(tempId, 'entity_config', result.id);
           await this.db.patchEntityConfigId(tempId, result.id);
         }
@@ -1023,6 +1240,11 @@ export class OfflineCacheStorage implements StorageSchema {
           config.id,
           'entity_config',
         );
+        console.log(
+          '[orbit/offline] dispatchOp updateEntityConfig: localId=%d → resolvedId=%d',
+          config.id,
+          resolvedId,
+        );
         await networkStorage.updateEntityConfig({ ...config, id: resolvedId });
         break;
       }
@@ -1032,8 +1254,15 @@ export class OfflineCacheStorage implements StorageSchema {
           args[0] as number,
           'entity_config',
         );
+        console.log(
+          '[orbit/offline] dispatchOp deleteEntityConfig: localId=%d → resolvedId=%d',
+          args[0],
+          id,
+        );
         if (id > 0) {
           await networkStorage.deleteEntityConfig(id);
+        } else {
+          console.warn('[orbit/offline] dispatchOp deleteEntityConfig: resolved id=%d is ≤0, skipping network call', id);
         }
         break;
       }
@@ -1044,6 +1273,12 @@ export class OfflineCacheStorage implements StorageSchema {
           config.entityConfigId,
           'entity_config',
         );
+        console.log(
+          '[orbit/offline] dispatchOp addPropertyConfig: name="%s" entityConfigId=%d → resolvedEntityConfigId=%d',
+          config.name,
+          config.entityConfigId,
+          resolvedEntityConfigId,
+        );
         const result = await networkStorage.addPropertyConfig({
           ...config,
           entityConfigId: resolvedEntityConfigId,
@@ -1051,8 +1286,14 @@ export class OfflineCacheStorage implements StorageSchema {
         if (!result) {
           throw new Error('addPropertyConfig failed');
         }
+        console.log('[orbit/offline] dispatchOp addPropertyConfig: server assigned id=%d', result.id);
         if (op.local_id !== null) {
           const tempId = parseInt(op.local_id, 10);
+          console.log(
+            '[orbit/offline] dispatchOp addPropertyConfig: mapping tempId=%d → serverId=%d',
+            tempId,
+            result.id,
+          );
           await this.db.mapId(tempId, 'entity_property_config', result.id);
           await this.db.patchPropertyConfigId(tempId, result.id);
         }
@@ -1070,6 +1311,13 @@ export class OfflineCacheStorage implements StorageSchema {
           config.entityConfigId,
           'entity_config',
         );
+        console.log(
+          '[orbit/offline] dispatchOp updatePropertyConfig: id=%d → %d entityConfigId=%d → %d',
+          config.id,
+          resolvedId,
+          config.entityConfigId,
+          resolvedEntityConfigId,
+        );
         await networkStorage.updatePropertyConfig(
           { ...config, id: resolvedId, entityConfigId: resolvedEntityConfigId },
           performDriftCheck,
@@ -1086,8 +1334,21 @@ export class OfflineCacheStorage implements StorageSchema {
           args[1] as number,
           'entity_property_config',
         );
+        console.log(
+          '[orbit/offline] dispatchOp deletePropertyConfig: id=%d → %d entityConfigId=%d → %d',
+          args[1],
+          id,
+          args[0],
+          entityConfigId,
+        );
         if (id > 0 && entityConfigId > 0) {
           await networkStorage.deletePropertyConfig(entityConfigId, id);
+        } else {
+          console.warn(
+            '[orbit/offline] dispatchOp deletePropertyConfig: resolved ids not positive (id=%d entityConfigId=%d), skipping',
+            id,
+            entityConfigId,
+          );
         }
         break;
       }
@@ -1098,19 +1359,40 @@ export class OfflineCacheStorage implements StorageSchema {
           'entity_config',
         );
         const order = args[1] as { id: number; order: number }[];
+        console.log(
+          '[orbit/offline] dispatchOp setEntityPropertyOrder: entityConfigId=%d → %d (%d properties)',
+          args[0],
+          entityConfigId,
+          order.length,
+        );
         await networkStorage.setEntityPropertyOrder(entityConfigId, order);
         break;
       }
 
       case 'addEntity': {
         const payload = args[0] as RequestBody;
+        console.log(
+          '[orbit/offline] dispatchOp addEntity: entityConfigId=%d, resolving temp ids...',
+          payload.entityConfigId,
+        );
         const resolvedPayload = await this.resolveRequestBody(payload);
+        console.log(
+          '[orbit/offline] dispatchOp addEntity: resolved entityConfigId=%d → %d',
+          payload.entityConfigId,
+          resolvedPayload.entityConfigId,
+        );
         const result = await networkStorage.addEntity(resolvedPayload);
         if (!result) {
           throw new Error('addEntity failed');
         }
+        console.log('[orbit/offline] dispatchOp addEntity: server assigned id=%d', result.id);
         if (op.local_id !== null) {
           const tempId = parseInt(op.local_id, 10);
+          console.log(
+            '[orbit/offline] dispatchOp addEntity: mapping tempId=%d → serverId=%d',
+            tempId,
+            result.id,
+          );
           await this.db.mapId(tempId, 'entity', result.id);
           await this.db.patchEntityId(tempId, result.id);
         }
@@ -1119,25 +1401,48 @@ export class OfflineCacheStorage implements StorageSchema {
 
       case 'updateEntity': {
         const id = await this.db.resolveIntId(args[0] as number, 'entity');
+        console.log(
+          '[orbit/offline] dispatchOp updateEntity: localId=%d → resolvedId=%d',
+          args[0],
+          id,
+        );
         const payload = await this.resolveRequestBody(args[1] as RequestBody);
         if (id > 0) {
           await networkStorage.updateEntity(id, payload);
+        } else {
+          console.warn('[orbit/offline] dispatchOp updateEntity: resolved id=%d is ≤0, skipping', id);
         }
         break;
       }
 
       case 'deleteEntity': {
         const id = await this.db.resolveIntId(args[0] as number, 'entity');
+        console.log(
+          '[orbit/offline] dispatchOp deleteEntity: localId=%d → resolvedId=%d',
+          args[0],
+          id,
+        );
         if (id > 0) {
           await networkStorage.deleteEntity(id);
+        } else {
+          console.warn('[orbit/offline] dispatchOp deleteEntity: resolved id=%d is ≤0, skipping', id);
         }
         break;
       }
 
       case 'bulkOperation': {
         const bulkPayload = args[0] as BulkOperationPayload;
+        console.log(
+          '[orbit/offline] dispatchOp bulkOperation: resolving %d entity ids',
+          bulkPayload.entities.length,
+        );
         const resolvedActions = await Promise.all(
           bulkPayload.entities.map(id => this.db.resolveIntId(id, 'entity')),
+        );
+        console.log(
+          '[orbit/offline] dispatchOp bulkOperation: resolved ids %s → %s',
+          JSON.stringify(bulkPayload.entities),
+          JSON.stringify(resolvedActions),
         );
         await networkStorage.bulkOperation({
           ...bulkPayload,
@@ -1147,11 +1452,18 @@ export class OfflineCacheStorage implements StorageSchema {
       }
 
       case 'addListConfig': {
+        console.log('[orbit/offline] dispatchOp addListConfig: local_id=%s', op.local_id);
         const serverId = await networkStorage.addListConfig();
         if (!serverId) {
           throw new Error('addListConfig failed');
         }
+        console.log('[orbit/offline] dispatchOp addListConfig: server assigned id=%s', serverId);
         if (op.local_id !== null) {
+          console.log(
+            '[orbit/offline] dispatchOp addListConfig: mapping local=%s → server=%s',
+            op.local_id,
+            serverId,
+          );
           await this.db.mapId(op.local_id, 'list_config', serverId);
           await this.db.patchListConfigId(op.local_id, serverId);
         }
@@ -1164,6 +1476,11 @@ export class OfflineCacheStorage implements StorageSchema {
           listConfig.id,
           'list_config',
         );
+        console.log(
+          '[orbit/offline] dispatchOp saveListConfig: id=%s → resolvedId=%s',
+          listConfig.id,
+          resolvedId,
+        );
         await networkStorage.saveListConfig({ ...listConfig, id: resolvedId });
         break;
       }
@@ -1173,6 +1490,11 @@ export class OfflineCacheStorage implements StorageSchema {
           args[0] as string,
           'list_config',
         );
+        console.log(
+          '[orbit/offline] dispatchOp updateListSort: id=%s → %s',
+          args[0],
+          listConfigId,
+        );
         await networkStorage.updateListSort(listConfigId, args[1] as ListSort);
         break;
       }
@@ -1181,6 +1503,11 @@ export class OfflineCacheStorage implements StorageSchema {
         const listConfigId = await this.db.resolveStrId(
           args[0] as string,
           'list_config',
+        );
+        console.log(
+          '[orbit/offline] dispatchOp updateListFilter: id=%s → %s',
+          args[0],
+          listConfigId,
         );
         await networkStorage.updateListFilter(
           listConfigId,
@@ -1194,6 +1521,11 @@ export class OfflineCacheStorage implements StorageSchema {
           args[0] as string,
           'list_config',
         );
+        console.log(
+          '[orbit/offline] dispatchOp updateListThemes: id=%s → %s',
+          args[0],
+          listConfigId,
+        );
         await networkStorage.updateListThemes(
           listConfigId,
           args[1] as string[],
@@ -1206,6 +1538,11 @@ export class OfflineCacheStorage implements StorageSchema {
           args[0] as string,
           'list_config',
         );
+        console.log(
+          '[orbit/offline] dispatchOp deleteListConfig: id=%s → %s',
+          args[0],
+          listConfigId,
+        );
         await networkStorage.deleteListConfig(listConfigId, args[1] as boolean);
         break;
       }
@@ -1215,11 +1552,20 @@ export class OfflineCacheStorage implements StorageSchema {
           args[1] as string,
           'list_config',
         );
+        console.log(
+          '[orbit/offline] dispatchOp saveSetting: listConfigId=%s → %s',
+          args[1],
+          listConfigId,
+        );
         await networkStorage.saveSetting(args[0] as Setting, listConfigId);
         break;
       }
 
       default:
+        console.warn(
+          '[orbit/offline] dispatchOp: unknown operation "%s" — skipping',
+          op.operation,
+        );
         break;
     }
   }

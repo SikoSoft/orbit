@@ -77,10 +77,29 @@ const cloudDelegate = OFFLINE_CACHE_ENABLED
   ? offlineCacheStorage
   : networkStorage;
 const storageDelegates: StorageSchema[] = [cloudDelegate, sqliteStorage];
+const storedStorageSource = localStorage.getItem(StorageItemKey.STORAGE_SOURCE);
+console.log(
+  '[orbit/storage] init — OFFLINE_CACHE_ENABLED=%s storedSource=%s',
+  OFFLINE_CACHE_ENABLED,
+  storedStorageSource ?? '(none)',
+);
 for (let i = 0; i < storageDelegates.length; i++) {
   storageDelegates[i].isActive =
     storageDelegates[i].storageSource ===
-    localStorage.getItem(StorageItemKey.STORAGE_SOURCE);
+    storedStorageSource;
+  console.log(
+    '[orbit/storage] delegate[%d] source=%s isActive=%s',
+    i,
+    storageDelegates[i].storageSource,
+    storageDelegates[i].isActive,
+  );
+}
+if (!storageDelegates.some(d => d.isActive)) {
+  console.warn(
+    '[orbit/storage] WARNING: no delegate is active — all @delegateSource() calls will fall through to the Storage class stubs. ' +
+    'This typically means STORAGE_SOURCE has never been set in localStorage. ' +
+    'Call storage.setStorageSource(StorageSource.CLOUD) to activate the cloud/offline-cache delegate.',
+  );
 }
 
 function delegateSource(): MethodDecorator {
@@ -105,12 +124,21 @@ function delegateSource(): MethodDecorator {
           if (!method || typeof method !== 'function') {
             continue;
           }
+          console.log(
+            '[orbit/storage] @delegateSource %s → %s',
+            key,
+            storageDelegate.storageSource,
+          );
           return (method as (...a: unknown[]) => unknown).apply(
             storageDelegate,
             args,
           );
         }
       }
+      console.warn(
+        '[orbit/storage] @delegateSource %s — no active delegate handled this call, falling through to Storage stub',
+        key,
+      );
       return originalValue?.apply(this, args);
     };
     return descriptor;
@@ -129,11 +157,22 @@ export class Storage implements StorageSchema {
   }
 
   setStorageSource(source: StorageSource): void {
+    console.log('[orbit/storage] setStorageSource(%s)', source);
     storageDelegates.forEach(delegate => {
       delegate.isActive = delegate.storageSource === source;
+      console.log(
+        '[orbit/storage] delegate source=%s isActive=%s',
+        delegate.storageSource,
+        delegate.isActive,
+      );
     });
 
     if (!Object.values(StorageSource).includes(source)) {
+      console.warn(
+        '[orbit/storage] setStorageSource: unrecognised source "%s", defaulting to %s',
+        source,
+        StorageSource.CLOUD,
+      );
       localStorage.setItem(StorageItemKey.STORAGE_SOURCE, StorageSource.CLOUD);
       return;
     }
