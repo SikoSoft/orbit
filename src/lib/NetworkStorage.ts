@@ -43,7 +43,15 @@ import { Medal, MedalConfig } from 'api-spec/models/Medal';
 import { Workspace } from 'api-spec/models/Workspace';
 import { ThemeName } from '@/models/Page';
 import { Chart, ChartRequest, ChartResponse } from 'api-spec/models/Statistic';
-import { Fact, FactContext, FactResult, Streak, StreakAlertConfig, StreakContext, StreakResult } from 'api-spec/models/Fact';
+import {
+  Fact,
+  FactContext,
+  FactResult,
+  Streak,
+  StreakAlertConfig,
+  StreakContext,
+  StreakResult,
+} from 'api-spec/models/Fact';
 import {
   AddCommentPayload,
   CommentReactionType,
@@ -288,7 +296,14 @@ export class NetworkStorage implements StorageSchema {
   ): Promise<EntityCalculatedPropertyConfig | null> {
     const { name, prefix, suffix, hidden, calculation } = config;
     const result = await api.post<
-      { name: string; prefix: string; suffix: string; hidden: boolean; calculation: EntityCalculatedPropertyConfig['calculation']; timeZone: number },
+      {
+        name: string;
+        prefix: string;
+        suffix: string;
+        hidden: boolean;
+        calculation: EntityCalculatedPropertyConfig['calculation'];
+        timeZone: number;
+      },
       EntityCalculatedPropertyConfig
     >(`propertyConfig/${config.entityConfigId}`, {
       name,
@@ -311,7 +326,14 @@ export class NetworkStorage implements StorageSchema {
   ): Promise<EntityCalculatedPropertyConfig | null> {
     const { name, prefix, suffix, hidden, calculation } = config;
     const result = await api.put<
-      { name: string; prefix: string; suffix: string; hidden: boolean; calculation: EntityCalculatedPropertyConfig['calculation']; timeZone: number },
+      {
+        name: string;
+        prefix: string;
+        suffix: string;
+        hidden: boolean;
+        calculation: EntityCalculatedPropertyConfig['calculation'];
+        timeZone: number;
+      },
       EntityCalculatedPropertyConfig
     >(`propertyConfig/${config.entityConfigId}/${config.id}`, {
       name,
@@ -827,7 +849,11 @@ export class NetworkStorage implements StorageSchema {
   }
 
   async getEntitySuggestions(filter: ListFilter): Promise<Entity.Entity[]> {
-    const suggestionFilter = { ...filter, suggested: true, published: undefined };
+    const suggestionFilter = {
+      ...filter,
+      suggested: true,
+      published: undefined,
+    };
     const queryParams = new URLSearchParams({
       filter: JSON.stringify(suggestionFilter),
     });
@@ -842,10 +868,10 @@ export class NetworkStorage implements StorageSchema {
   }
 
   async addEntitySuggestion(id: number): Promise<boolean> {
-    const result = await api.put<
-      { published: boolean; suggested: boolean },
-      Entity.Entity
-    >(`entity/${id}`, { published: true, suggested: false });
+    const result = await api.put<{ published: boolean }, Entity.Entity>(
+      `entity/${id}`,
+      { published: true },
+    );
 
     if (result && result.isOk) {
       return true;
@@ -863,8 +889,13 @@ export class NetworkStorage implements StorageSchema {
     return { isOk: false, error: new Error('Failed to fetch MFA setup') };
   }
 
-  async verifyMfaSetup(body: MfaVerifySetupRequestBody): Promise<StorageResult<void>> {
-    const result = await api.post<MfaVerifySetupRequestBody, void>('mfaVerifySetup', body);
+  async verifyMfaSetup(
+    body: MfaVerifySetupRequestBody,
+  ): Promise<StorageResult<void>> {
+    const result = await api.post<MfaVerifySetupRequestBody, void>(
+      'mfaVerifySetup',
+      body,
+    );
 
     if (result && result.isOk) {
       return { isOk: true, value: undefined };
@@ -884,7 +915,9 @@ export class NetworkStorage implements StorageSchema {
   }
 
   async getMedalConfigs(): Promise<MedalConfig[]> {
-    const result = await api.get<{ medalConfigs: MedalConfig[] }>('medalConfig');
+    const result = await api.get<{ medalConfigs: MedalConfig[] }>(
+      'medalConfig',
+    );
 
     if (result && result.isOk) {
       return Promise.resolve(result.response.medalConfigs);
@@ -906,10 +939,10 @@ export class NetworkStorage implements StorageSchema {
   async createMedalConfig(
     body: Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<MedalConfig | null> {
-    const result = await api.post<Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>, MedalConfig>(
-      'medalConfig',
-      body,
-    );
+    const result = await api.post<
+      Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>,
+      MedalConfig
+    >('medalConfig', body);
 
     if (result && result.isOk) {
       return result.response;
@@ -922,10 +955,10 @@ export class NetworkStorage implements StorageSchema {
     id: number,
     body: Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<MedalConfig | null> {
-    const result = await api.put<Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>, MedalConfig>(
-      `medalConfig/${id}`,
-      body,
-    );
+    const result = await api.put<
+      Omit<MedalConfig, 'id' | 'createdAt' | 'updatedAt'>,
+      MedalConfig
+    >(`medalConfig/${id}`, body);
 
     if (result && result.isOk) {
       return result.response;
@@ -962,7 +995,13 @@ export class NetworkStorage implements StorageSchema {
     theme: ThemeName,
   ): Promise<StorageResult<Workspace>> {
     const result = await api.post<
-      { name: string; listConfigs: string[]; color: string; showEverything: boolean; theme: ThemeName },
+      {
+        name: string;
+        listConfigs: string[];
+        color: string;
+        showEverything: boolean;
+        theme: ThemeName;
+      },
       Workspace
     >('workspace', { name, listConfigs, color, showEverything, theme });
 
@@ -975,7 +1014,16 @@ export class NetworkStorage implements StorageSchema {
 
   async saveWorkspace(workspace: Workspace): Promise<StorageResult<Workspace>> {
     const result = await api.put<
-      { name: string; listConfigs: string[]; color: string; showEverything: boolean; theme: string; facts: number[]; streaks: number[]; charts: number[] },
+      {
+        name: string;
+        listConfigs: string[];
+        color: string;
+        showEverything: boolean;
+        theme: string;
+        facts: number[];
+        streaks: number[];
+        charts: number[];
+      },
       Workspace
     >(`workspace/${workspace.id}`, {
       name: workspace.name,
@@ -1008,7 +1056,10 @@ export class NetworkStorage implements StorageSchema {
   async createChart(
     request: ChartRequest,
   ): Promise<StorageResult<ChartResponse>> {
-    const result = await api.post<ChartRequest, ChartResponse>('chart', request);
+    const result = await api.post<ChartRequest, ChartResponse>(
+      'chart',
+      request,
+    );
 
     if (result && result.isOk) {
       return { isOk: true, value: result.response };
@@ -1031,7 +1082,10 @@ export class NetworkStorage implements StorageSchema {
     id: number,
     request: ChartRequest,
   ): Promise<StorageResult<ChartResponse>> {
-    const result = await api.put<ChartRequest, ChartResponse>(`chart/${id}`, request);
+    const result = await api.put<ChartRequest, ChartResponse>(
+      `chart/${id}`,
+      request,
+    );
 
     if (result && result.isOk) {
       return { isOk: true, value: result.response };
@@ -1051,7 +1105,10 @@ export class NetworkStorage implements StorageSchema {
   }
 
   async getStreaks(): Promise<{ streaks: Streak[]; results: StreakResult[] }> {
-    const result = await api.get<{ streaks: Streak[]; results: StreakResult[] }>('streakRequest');
+    const result = await api.get<{
+      streaks: Streak[];
+      results: StreakResult[];
+    }>('streakRequest');
 
     if (result && result.isOk) {
       return result.response;
@@ -1060,11 +1117,14 @@ export class NetworkStorage implements StorageSchema {
     return { streaks: [], results: [] };
   }
 
-  async createStreak(name: string, context: StreakContext): Promise<StorageResult<Streak>> {
-    const result = await api.post<{ name: string; context: StreakContext }, { streak: Streak }>(
-      'streakRequest',
-      { name, context },
-    );
+  async createStreak(
+    name: string,
+    context: StreakContext,
+  ): Promise<StorageResult<Streak>> {
+    const result = await api.post<
+      { name: string; context: StreakContext },
+      { streak: Streak }
+    >('streakRequest', { name, context });
 
     if (result && result.isOk) {
       return { isOk: true, value: result.response.streak };
@@ -1108,13 +1168,20 @@ export class NetworkStorage implements StorageSchema {
     const result = await api.post<
       { streakId: number; noticeTime: number; message?: string },
       { alertConfig: StreakAlertConfig }
-    >('streakAlertConfig', { streakId, noticeTime, ...(message ? { message } : {}) });
+    >('streakAlertConfig', {
+      streakId,
+      noticeTime,
+      ...(message ? { message } : {}),
+    });
 
     if (result && result.isOk) {
       return { isOk: true, value: result.response.alertConfig };
     }
 
-    return { isOk: false, error: new Error('Failed to create streak alert config') };
+    return {
+      isOk: false,
+      error: new Error('Failed to create streak alert config'),
+    };
   }
 
   async updateStreakAlertConfig(
@@ -1125,13 +1192,19 @@ export class NetworkStorage implements StorageSchema {
     const result = await api.put<
       { noticeTime: number; message?: string },
       { alertConfig: StreakAlertConfig }
-    >(`streakAlertConfig/${id}`, { noticeTime, ...(message ? { message } : {}) });
+    >(`streakAlertConfig/${id}`, {
+      noticeTime,
+      ...(message ? { message } : {}),
+    });
 
     if (result && result.isOk) {
       return { isOk: true, value: result.response.alertConfig };
     }
 
-    return { isOk: false, error: new Error('Failed to update streak alert config') };
+    return {
+      isOk: false,
+      error: new Error('Failed to update streak alert config'),
+    };
   }
 
   async deleteStreakAlertConfig(id: number): Promise<boolean> {
@@ -1145,7 +1218,9 @@ export class NetworkStorage implements StorageSchema {
   }
 
   async getFacts(): Promise<{ facts: Fact[]; results: FactResult[] }> {
-    const result = await api.get<{ facts: Fact[]; results: FactResult[] }>('factRequest');
+    const result = await api.get<{ facts: Fact[]; results: FactResult[] }>(
+      'factRequest',
+    );
 
     if (result && result.isOk) {
       return result.response;
@@ -1154,11 +1229,14 @@ export class NetworkStorage implements StorageSchema {
     return { facts: [], results: [] };
   }
 
-  async createFact(name: string, context: FactContext): Promise<StorageResult<Fact>> {
-    const result = await api.post<{ name: string; context: FactContext }, { fact: Fact }>(
-      'factRequest',
-      { name, context },
-    );
+  async createFact(
+    name: string,
+    context: FactContext,
+  ): Promise<StorageResult<Fact>> {
+    const result = await api.post<
+      { name: string; context: FactContext },
+      { fact: Fact }
+    >('factRequest', { name, context });
 
     if (result && result.isOk) {
       return { isOk: true, value: result.response.fact };
@@ -1236,10 +1314,10 @@ export class NetworkStorage implements StorageSchema {
     id: number,
     type: CommentReactionType,
   ): Promise<ReactionCounts | null> {
-    const result = await api.post<{ type: CommentReactionType }, { counts: ReactionCounts }>(
-      `commentReaction/${id}`,
-      { type },
-    );
+    const result = await api.post<
+      { type: CommentReactionType },
+      { counts: ReactionCounts }
+    >(`commentReaction/${id}`, { type });
     if (result && result.isOk) {
       return result.response.counts;
     }
