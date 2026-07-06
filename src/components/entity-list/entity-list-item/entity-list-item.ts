@@ -209,7 +209,7 @@ export class EntityListItem extends MobxLitElement {
       full: this.mode === EntityListItemMode.FULL,
       edit: this.mode === EntityListItemMode.EDIT,
       unpublished: !this.published,
-      suggestion: this.suggestion,
+      suggestion: this.suggestion && !this.published,
     };
   }
 
@@ -419,7 +419,7 @@ export class EntityListItem extends MobxLitElement {
         @touchmove=${this.handleTouchMove}
         @touchend=${this.handleTouchEnd}
       >
-        ${this.suggestion
+        ${this.suggestion && !this.published
           ? html`<div class="suggestion-badge">${translate('auto')}</div>`
           : nothing}
         ${this.mode === EntityListItemMode.EDIT
