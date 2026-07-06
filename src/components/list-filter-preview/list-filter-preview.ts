@@ -62,7 +62,7 @@ export class ListFilterPreview extends MobxLitElement {
     if (this.filter.published === false) {
       return [translate('unpublished')];
     }
-    return [translate('filterPreview.publishedOrUnpublished')];
+    return [];
   }
 
   private get suggestedPart(): string[] {

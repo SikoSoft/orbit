@@ -32,6 +32,11 @@ export class EntityListCustomizer extends MobxLitElement {
         z-index: 500;
         top: 2.5rem;
 
+        .header {
+          text-align: center;
+          margin-bottom: 2rem;
+        }
+
         .inner {
           display: flex;
           gap: 1rem;
@@ -64,9 +69,12 @@ export class EntityListCustomizer extends MobxLitElement {
 
     return html`
       <div class="enity-list-customizer">
-        <list-filter-preview
-          .listFilter=${this.state.listFilter}
-        ></list-filter-preview>
+        <div class="header">
+          <list-filter-preview
+            .listFilter=${this.state.listFilter}
+          ></list-filter-preview>
+        </div>
+
         <div class="inner">
           <ss-collapsable
             title=${translate('filter')}
