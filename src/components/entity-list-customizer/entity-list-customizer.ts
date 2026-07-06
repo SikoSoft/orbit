@@ -13,6 +13,7 @@ import { ListSortUpdatedEvent } from '@/components/list-sort/list-sort.events';
 
 import '@ss/ui/components/ss-collapsable';
 import '@/components/list-filter/list-filter';
+import '@/components/list-filter-preview/list-filter-preview';
 import { themed } from '@/lib/Theme';
 
 const EVERYTHING_FILTER_PANEL_ID = 'everything-filter';
@@ -63,6 +64,9 @@ export class EntityListCustomizer extends MobxLitElement {
 
     return html`
       <div class="enity-list-customizer">
+        <list-filter-preview
+          .listFilter=${this.state.listFilter}
+        ></list-filter-preview>
         <div class="inner">
           <ss-collapsable
             title=${translate('filter')}
