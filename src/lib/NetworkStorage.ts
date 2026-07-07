@@ -852,7 +852,7 @@ export class NetworkStorage implements StorageSchema {
     const suggestionFilter = {
       ...filter,
       suggested: true,
-      published: undefined,
+      published: false,
     };
     const queryParams = new URLSearchParams({
       filter: JSON.stringify(suggestionFilter),
