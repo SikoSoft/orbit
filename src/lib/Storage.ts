@@ -233,6 +233,15 @@ export class Storage implements StorageSchema {
     );
   }
 
+  getActiveFilter(): ListFilter | null {
+    try {
+      const raw = localStorage.getItem(StorageItemKey.ACTIVE_LIST_FILTER_KEY);
+      return raw ? (JSON.parse(raw) as ListFilter) : null;
+    } catch {
+      return null;
+    }
+  }
+
   saveView(view: PageView): void {
     localStorage.setItem(StorageItemKey.VIEW_KEY, view);
   }

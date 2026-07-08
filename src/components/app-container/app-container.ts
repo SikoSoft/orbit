@@ -318,6 +318,11 @@ export class AppContainer extends MobxLitElement {
 
         const listConfigId = storage.getActiveListConfigId();
         this.state.setListConfigId(listConfigId);
+
+        const savedFilter = storage.getActiveFilter();
+        if (savedFilter) {
+          this.state.setEverythingFilter(savedFilter);
+        }
       }
 
       if (

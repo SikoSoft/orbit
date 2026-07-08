@@ -402,6 +402,14 @@ export class AppState {
   }
 
   @action
+  setEverythingFilter(filter: ListFilter): void {
+    this._everythingFilter = filter;
+    if (!this.listConfigId) {
+      this.setListFilter(filter);
+    }
+  }
+
+  @action
   setListConfigs(listConfigs: ListConfig[]): void {
     this.listConfigs = listConfigs;
     this.hasFetchedListConfigs = true;
