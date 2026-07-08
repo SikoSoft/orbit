@@ -737,14 +737,6 @@ export class AppState {
   constructor() {
     makeObservable(this);
     initPersistedState(this);
-    const savedFilter = localStorage.getItem(StorageItemKey.ACTIVE_LIST_FILTER_KEY);
-    if (savedFilter) {
-      try {
-        this._everythingFilter = JSON.parse(savedFilter) as ListFilter;
-      } catch {
-        // ignore malformed stored value
-      }
-    }
   }
 }
 
