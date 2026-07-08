@@ -1,4 +1,4 @@
-import { action, makeObservable, observable, runInAction } from 'mobx';
+import { action, makeObservable, observable, runInAction, toJS } from 'mobx';
 import { initPersistedState, persisted } from '@/lib/persisted';
 
 import {
@@ -149,6 +149,8 @@ export class AppState {
 
   @observable
   public assistEnabled: boolean = false;
+
+  private _everythingFilter: ListFilter = structuredClone(defaultListFilter);
 
   @observable
   public listConfigId: string = '';
@@ -378,16 +380,24 @@ export class AppState {
 
   @action
   setListConfigId(id: string): void {
+    const wasOnList = !!this.listConfigId;
+
     if (this.listConfigId && this.listConfig) {
       this.removeTagSuggestions(
         this.listConfig.filter.tagging?.[ListFilterType.CONTAINS_ALL_OF] ?? [],
       );
+    } else if (!this.listConfigId) {
+      this._everythingFilter = toJS(this.listFilter);
     }
+
     this.listConfigId = id;
+
     if (this.listConfigId && this.listConfig) {
       this.setListFilter(this.listConfig.filter);
       this.setListSort(this.listConfig.sort);
       this.setListSetting(this.listConfig.setting);
+    } else if (wasOnList) {
+      this.setListFilter({ ...this._everythingFilter });
     }
   }
 
@@ -727,6 +737,14 @@ export class AppState {
   constructor() {
     makeObservable(this);
     initPersistedState(this);
+    const savedFilter = localStorage.getItem(StorageItemKey.ACTIVE_LIST_FILTER_KEY);
+    if (savedFilter) {
+      try {
+        this._everythingFilter = JSON.parse(savedFilter) as ListFilter;
+      } catch {
+        // ignore malformed stored value
+      }
+    }
   }
 }
 
