@@ -85,6 +85,7 @@ export class EntityListCustomizer extends MobxLitElement {
           >
             <list-filter
               showAll
+              .listFilter=${this.state.listFilter}
               @list-filter-updated=${this.handleFilterUpdated}
             ></list-filter>
           </ss-collapsable>
