@@ -23,6 +23,7 @@ export enum PropertyConfigFormProp {
   DEFAULT_VALUE = 'defaultValue',
   OPTIONS_ONLY = 'optionsOnly',
   OPTIONS = 'options',
+  FORMATTERS = 'formatters',
   PERFORM_DRIFT_CHECK = 'performDriftCheck',
   CALCULATION = 'calculation',
   ALL_PROPERTIES = 'allProperties',
@@ -48,6 +49,7 @@ export interface PropertyConfigFormProps extends PropTypes {
   [PropertyConfigFormProp.DEFAULT_VALUE]: PropertyDataValue;
   [PropertyConfigFormProp.OPTIONS_ONLY]: boolean;
   [PropertyConfigFormProp.OPTIONS]: PropertyDataValue[];
+  [PropertyConfigFormProp.FORMATTERS]: string[];
   [PropertyConfigFormProp.PERFORM_DRIFT_CHECK]: boolean;
   [PropertyConfigFormProp.CALCULATION]: EntityPropertyCalculation | null;
   [PropertyConfigFormProp.ALL_PROPERTIES]: EntityPropertyConfig[];
@@ -133,6 +135,11 @@ export const propertyConfigFormProps: PropConfigMap<PropertyConfigFormProps> = {
     default: [],
     control: { type: ControlType.TEXT },
     description: 'The predefined options for the property',
+  },
+  [PropertyConfigFormProp.FORMATTERS]: {
+    default: [],
+    control: { type: ControlType.HIDDEN },
+    description: 'The ids of the formatters applied to this property, in order',
   },
   [PropertyConfigFormProp.CALCULATION]: {
     default: null,

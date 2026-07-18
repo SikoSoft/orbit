@@ -45,6 +45,7 @@ import {
 } from './property-config-form.events';
 import { DefaultValueChangedEvent } from './property-config-default-value/property-config-default-value.events';
 import { OptionsChangedEvent } from './property-config-options/property-config-options.events';
+import { FormattersChangedEvent } from './property-config-formatters/property-config-formatters.events';
 
 import '@ss/ui/components/ss-input';
 import '@ss/ui/components/ss-select';
@@ -52,9 +53,12 @@ import '@ss/ui/components/confirmation-modal';
 import '@ss/ui/components/ss-toggle';
 import '@ss/ui/components/ss-button';
 import '@ss/ui/components/ss-collapsable';
+import '@ss/ui/components/tab-container';
+import '@ss/ui/components/tab-pane';
 import '@/components/calculated-property-config-form/calculated-property-config-form';
 import '@/components/property-config-form/property-config-default-value/property-config-default-value';
 import '@/components/property-config-form/property-config-options/property-config-options';
+import '@/components/property-config-form/property-config-formatters/property-config-formatters';
 
 import { ToggleChangedEvent } from '@ss/ui/components/ss-toggle.events';
 import { repeat } from 'lit/directives/repeat.js';
@@ -167,6 +171,10 @@ export class PropertyConfigForm extends LitElement {
   @property({ type: Array })
   [PropertyConfigFormProp.OPTIONS]: PropertyConfigFormProps[PropertyConfigFormProp.OPTIONS] =
     propertyConfigFormProps[PropertyConfigFormProp.OPTIONS].default;
+
+  @property({ type: Array })
+  [PropertyConfigFormProp.FORMATTERS]: PropertyConfigFormProps[PropertyConfigFormProp.FORMATTERS] =
+    propertyConfigFormProps[PropertyConfigFormProp.FORMATTERS].default;
 
   @property({ type: Boolean })
   [PropertyConfigFormProp.PERFORM_DRIFT_CHECK]: PropertyConfigFormProps[PropertyConfigFormProp.PERFORM_DRIFT_CHECK] =
@@ -293,6 +301,7 @@ export class PropertyConfigForm extends LitElement {
       defaultValue: false,
       optionsOnly: this[PropertyConfigFormProp.OPTIONS_ONLY],
       options: this[PropertyConfigFormProp.OPTIONS],
+      formatters: this[PropertyConfigFormProp.FORMATTERS],
       userId: '' as EntityPropertyConfig['userId'],
     };
 
@@ -509,6 +518,13 @@ export class PropertyConfigForm extends LitElement {
     );
   }
 
+  private handleFormattersChanged(e: FormattersChangedEvent): void {
+    this.propertyConfig = {
+      ...this.propertyConfig,
+      formatters: e.detail.formatters,
+    };
+  }
+
   private handleSelectField(
     field: PropertyConfigFormProp,
     e: InputChangedEvent,
@@ -620,24 +636,38 @@ export class PropertyConfigForm extends LitElement {
                 defaultCalculation}
                 .allProperties=${this[PropertyConfigFormProp.ALL_PROPERTIES]}
               ></calculated-property-config-form>`
-            : repeat(
-                this.visibleFields,
-                field => field,
-                field =>
-                  this.isFieldVisible(field)
-                    ? html` <div
-                        class=${classMap({
-                          field: true,
-                          invalid: this.invalidFields.includes(field),
-                        })}
-                      >
-                        <label for=${field}
-                          >${translate(`propertyConfig.field.${field}`)}</label
-                        >
-                        ${this.renderField(field)}
-                      </div>`
-                    : nothing,
-              )}
+            : html`
+                <tab-container>
+                  <tab-pane title=${translate('propertyConfig.tab.general')}>
+                    ${repeat(
+                      this.visibleFields,
+                      field => field,
+                      field =>
+                        this.isFieldVisible(field)
+                          ? html` <div
+                              class=${classMap({
+                                field: true,
+                                invalid: this.invalidFields.includes(field),
+                              })}
+                            >
+                              <label for=${field}
+                                >${translate(
+                                  `propertyConfig.field.${field}`,
+                                )}</label
+                              >
+                              ${this.renderField(field)}
+                            </div>`
+                          : nothing,
+                    )}
+                  </tab-pane>
+                  <tab-pane title=${translate('propertyConfig.tab.formatters')}>
+                    <property-config-formatters
+                      .formatters=${this.propertyConfig.formatters ?? []}
+                      @formatters-changed=${this.handleFormattersChanged}
+                    ></property-config-formatters>
+                  </tab-pane>
+                </tab-container>
+              `}
         </fieldset>
         <div class="buttons">
           <ss-button positive ?disabled=${this.inSync} @click=${this.save}>
