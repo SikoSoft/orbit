@@ -16,6 +16,7 @@ export enum CalculatedPropertyConfigFormProp {
   PREFIX = 'prefix',
   SUFFIX = 'suffix',
   HIDDEN = 'hidden',
+  FORMATTERS = 'formatters',
   CALCULATION = 'calculation',
   ALL_PROPERTIES = 'allProperties',
 }
@@ -36,6 +37,7 @@ export interface CalculatedPropertyConfigFormProps extends PropTypes {
   [CalculatedPropertyConfigFormProp.PREFIX]: string;
   [CalculatedPropertyConfigFormProp.SUFFIX]: string;
   [CalculatedPropertyConfigFormProp.HIDDEN]: boolean;
+  [CalculatedPropertyConfigFormProp.FORMATTERS]: string[];
   [CalculatedPropertyConfigFormProp.CALCULATION]: EntityPropertyCalculation;
   [CalculatedPropertyConfigFormProp.ALL_PROPERTIES]: EntityPropertyConfig[];
 }
@@ -77,6 +79,11 @@ export const calculatedPropertyConfigFormProps: PropConfigMap<CalculatedProperty
       control: { type: ControlType.BOOLEAN },
       description: 'Whether the property is hidden from list views',
     },
+    [CalculatedPropertyConfigFormProp.FORMATTERS]: {
+      default: [],
+      control: { type: ControlType.HIDDEN },
+      description: 'The ids of the formatters applied to this property, in order',
+    },
     [CalculatedPropertyConfigFormProp.CALCULATION]: {
       default: defaultCalculation,
       control: { type: ControlType.HIDDEN },
@@ -103,6 +110,7 @@ export function buildCalculatedConfig(
   suffix: string,
   hidden: boolean,
   calculation: EntityPropertyCalculation,
+  formatters: string[],
 ): EntityCalculatedPropertyConfig {
   return {
     entityConfigId,
@@ -115,5 +123,6 @@ export function buildCalculatedConfig(
     dataType: DataType.INT,
     defaultValue: 0,
     calculation,
+    formatters,
   } as EntityCalculatedPropertyConfig;
 }

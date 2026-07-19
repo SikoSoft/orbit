@@ -1,6 +1,7 @@
 import { html, LitElement, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { listFormatters } from 'api-spec/lib/Formatter';
+import 'api-spec/lib/formatters/ms-to-duration';
 
 import { translate } from '@/lib/Localization';
 import { OptionListBuilderItem } from '@/components/option-list-builder/option-list-builder.models';
@@ -22,6 +23,7 @@ export class PropertyConfigFormatters extends LitElement {
       .default;
 
   private get availableFormatters(): OptionListBuilderItem[] {
+    console.log('availableFormatters', listFormatters());
     return listFormatters().map(({ id, label }) => ({ id, label }));
   }
 

@@ -635,6 +635,7 @@ export class PropertyConfigForm extends LitElement {
                 .calculation=${this[PropertyConfigFormProp.CALCULATION] ??
                 defaultCalculation}
                 .allProperties=${this[PropertyConfigFormProp.ALL_PROPERTIES]}
+                .formatters=${this[PropertyConfigFormProp.FORMATTERS]}
               ></calculated-property-config-form>`
             : html`
                 <tab-container>

@@ -27,10 +27,14 @@ import {
 
 import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
 import { ToggleChangedEvent } from '@ss/ui/components/ss-toggle.events';
+import { FormattersChangedEvent } from '@/components/property-config-form/property-config-formatters/property-config-formatters.events';
 
 import '@ss/ui/components/ss-input';
 import '@ss/ui/components/ss-select';
 import '@ss/ui/components/ss-toggle';
+import '@ss/ui/components/tab-container';
+import '@ss/ui/components/tab-pane';
+import '@/components/property-config-form/property-config-formatters/property-config-formatters';
 
 @customElement('calculated-property-config-form')
 export class CalculatedPropertyConfigForm extends LitElement {
@@ -119,10 +123,17 @@ export class CalculatedPropertyConfigForm extends LitElement {
       CalculatedPropertyConfigFormProp.ALL_PROPERTIES
     ].default;
 
+  @property({ type: Array })
+  [CalculatedPropertyConfigFormProp.FORMATTERS]: CalculatedPropertyConfigFormProps[CalculatedPropertyConfigFormProp.FORMATTERS] =
+    calculatedPropertyConfigFormProps[
+      CalculatedPropertyConfigFormProp.FORMATTERS
+    ].default;
+
   @state() private fieldName = '';
   @state() private fieldPrefix = '';
   @state() private fieldSuffix = '';
   @state() private fieldHidden = false;
+  @state() private fieldFormatters: string[] = [];
   @state() private operation: EntityPropertyCalculationOperation = '+';
   @state() value1Type: OperandType = 'number';
   @state() value1PropertyConfigId = 0;
@@ -138,6 +149,7 @@ export class CalculatedPropertyConfigForm extends LitElement {
     this.fieldPrefix = this.prefix;
     this.fieldSuffix = this.suffix;
     this.fieldHidden = this.hidden;
+    this.fieldFormatters = this[CalculatedPropertyConfigFormProp.FORMATTERS];
 
     const calc = this.calculation;
     this.operation = calc.operation;
@@ -260,6 +272,7 @@ export class CalculatedPropertyConfigForm extends LitElement {
       this.fieldSuffix,
       this.fieldHidden,
       this.buildCalculation(),
+      this.fieldFormatters,
     );
 
     if (this[CalculatedPropertyConfigFormProp.PROPERTY_CONFIG_ID]) {
@@ -322,6 +335,10 @@ export class CalculatedPropertyConfigForm extends LitElement {
     this.value2Number = Number(e.detail.value);
   }
 
+  private handleFormattersChanged(e: FormattersChangedEvent): void {
+    this.fieldFormatters = e.detail.formatters;
+  }
+
   private renderOperandPicker(
     type: OperandType,
     propConfigId: number,
@@ -379,80 +396,92 @@ export class CalculatedPropertyConfigForm extends LitElement {
 
   render(): TemplateResult {
     return html`
-      <div class="formula-preview">${this.formulaDisplay}</div>
+      <tab-container>
+        <tab-pane title=${translate('propertyConfig.tab.general')}>
+          <div class="formula-preview">${this.formulaDisplay}</div>
 
-      <div class="field">
-        <label>${translate('calculatedPropertyConfig.field.name')}</label>
-        <ss-input
-          type="text"
-          value=${this.fieldName}
-          @input-changed=${this.handleNameChanged}
-        ></ss-input>
-      </div>
+          <div class="field">
+            <label>${translate('calculatedPropertyConfig.field.name')}</label>
+            <ss-input
+              type="text"
+              value=${this.fieldName}
+              @input-changed=${this.handleNameChanged}
+            ></ss-input>
+          </div>
 
-      <div class="field">
-        <label>${translate('calculatedPropertyConfig.field.prefix')}</label>
-        <ss-input
-          type="text"
-          value=${this.fieldPrefix}
-          @input-changed=${this.handlePrefixChanged}
-        ></ss-input>
-      </div>
+          <div class="field">
+            <label>${translate('calculatedPropertyConfig.field.prefix')}</label>
+            <ss-input
+              type="text"
+              value=${this.fieldPrefix}
+              @input-changed=${this.handlePrefixChanged}
+            ></ss-input>
+          </div>
 
-      <div class="field">
-        <label>${translate('calculatedPropertyConfig.field.suffix')}</label>
-        <ss-input
-          type="text"
-          value=${this.fieldSuffix}
-          @input-changed=${this.handleSuffixChanged}
-        ></ss-input>
-      </div>
+          <div class="field">
+            <label>${translate('calculatedPropertyConfig.field.suffix')}</label>
+            <ss-input
+              type="text"
+              value=${this.fieldSuffix}
+              @input-changed=${this.handleSuffixChanged}
+            ></ss-input>
+          </div>
 
-      <div class="field">
-        <label>${translate('calculatedPropertyConfig.field.hidden')}</label>
-        <ss-toggle
-          ?on=${this.fieldHidden}
-          @toggle-changed=${this.handleHiddenChanged}
-        ></ss-toggle>
-      </div>
+          <div class="field">
+            <label>${translate('calculatedPropertyConfig.field.hidden')}</label>
+            <ss-toggle
+              ?on=${this.fieldHidden}
+              @toggle-changed=${this.handleHiddenChanged}
+            ></ss-toggle>
+          </div>
 
-      <div class="field">
-        <label>${translate('calculatedPropertyConfig.field.value1')}</label>
-        ${this.renderOperandPicker(
-          this.value1Type,
-          this.value1PropertyConfigId,
-          this.handleValue1TypeChanged,
-          this.handleValue1PropChanged,
-          this.handleValue1NumberChanged,
-          this.value1Number,
-        )}
-      </div>
+          <div class="field">
+            <label>${translate('calculatedPropertyConfig.field.value1')}</label>
+            ${this.renderOperandPicker(
+              this.value1Type,
+              this.value1PropertyConfigId,
+              this.handleValue1TypeChanged,
+              this.handleValue1PropChanged,
+              this.handleValue1NumberChanged,
+              this.value1Number,
+            )}
+          </div>
 
-      <div class="field">
-        <label>${translate('calculatedPropertyConfig.field.operation')}</label>
-        <ss-select
-          .options=${[
-            { label: '+', value: '+' },
-            { label: '-', value: '-' },
-            { label: '*', value: '*' },
-            { label: '/', value: '/' },
-          ]}
-          selected=${this.operation}
-          @select-changed=${this.handleOperationChanged}
-        ></ss-select>
-      </div>
+          <div class="field">
+            <label
+              >${translate('calculatedPropertyConfig.field.operation')}</label
+            >
+            <ss-select
+              .options=${[
+                { label: '+', value: '+' },
+                { label: '-', value: '-' },
+                { label: '*', value: '*' },
+                { label: '/', value: '/' },
+              ]}
+              selected=${this.operation}
+              @select-changed=${this.handleOperationChanged}
+            ></ss-select>
+          </div>
 
-      <div class="field">
-        <label>${translate('calculatedPropertyConfig.field.value2')}</label>
-        ${this.renderOperandPicker(
-          this.value2Type,
-          this.value2PropertyConfigId,
-          this.handleValue2TypeChanged,
-          this.handleValue2PropChanged,
-          this.handleValue2NumberChanged,
-          this.value2Number,
-        )}
-      </div>
+          <div class="field">
+            <label>${translate('calculatedPropertyConfig.field.value2')}</label>
+            ${this.renderOperandPicker(
+              this.value2Type,
+              this.value2PropertyConfigId,
+              this.handleValue2TypeChanged,
+              this.handleValue2PropChanged,
+              this.handleValue2NumberChanged,
+              this.value2Number,
+            )}
+          </div>
+        </tab-pane>
+        <tab-pane title=${translate('propertyConfig.tab.formatters')}>
+          <property-config-formatters
+            .formatters=${this.fieldFormatters}
+            @formatters-changed=${this.handleFormattersChanged}
+          ></property-config-formatters>
+        </tab-pane>
+      </tab-container>
     `;
   }
 }
