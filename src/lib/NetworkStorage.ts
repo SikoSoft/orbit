@@ -294,7 +294,7 @@ export class NetworkStorage implements StorageSchema {
   async addCalculatedPropertyConfig(
     config: EntityCalculatedPropertyConfig,
   ): Promise<EntityCalculatedPropertyConfig | null> {
-    const { name, prefix, suffix, hidden, calculation } = config;
+    const { name, prefix, suffix, hidden, calculation, formatters } = config;
     const result = await api.post<
       {
         name: string;
@@ -302,6 +302,7 @@ export class NetworkStorage implements StorageSchema {
         suffix: string;
         hidden: boolean;
         calculation: EntityCalculatedPropertyConfig['calculation'];
+        formatters: EntityCalculatedPropertyConfig['formatters'];
         timeZone: number;
       },
       EntityCalculatedPropertyConfig
@@ -311,6 +312,7 @@ export class NetworkStorage implements StorageSchema {
       suffix,
       hidden,
       calculation,
+      formatters,
       timeZone: new Date().getTimezoneOffset(),
     });
 
@@ -324,7 +326,7 @@ export class NetworkStorage implements StorageSchema {
   async updateCalculatedPropertyConfig(
     config: EntityCalculatedPropertyConfig,
   ): Promise<EntityCalculatedPropertyConfig | null> {
-    const { name, prefix, suffix, hidden, calculation } = config;
+    const { name, prefix, suffix, hidden, calculation, formatters } = config;
     const result = await api.put<
       {
         name: string;
@@ -332,6 +334,7 @@ export class NetworkStorage implements StorageSchema {
         suffix: string;
         hidden: boolean;
         calculation: EntityCalculatedPropertyConfig['calculation'];
+        formatters: EntityCalculatedPropertyConfig['formatters'];
         timeZone: number;
       },
       EntityCalculatedPropertyConfig
@@ -341,6 +344,7 @@ export class NetworkStorage implements StorageSchema {
       suffix,
       hidden,
       calculation,
+      formatters,
       timeZone: new Date().getTimezoneOffset(),
     });
 
