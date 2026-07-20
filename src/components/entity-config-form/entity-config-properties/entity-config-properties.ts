@@ -203,6 +203,7 @@ export class EntityConfigProperties extends MobxLitElement {
         allowed=${stdProp?.allowed ?? 0}
         ?optionsOnly=${stdProp?.optionsOnly ?? false}
         .options=${stdProp?.options ?? []}
+        .formatters=${property.formatters ?? []}
         .defaultValue=${stdProp?.defaultValue ?? 0}
         ?performDriftCheck=${this[EntityConfigPropertiesProp.PERFORM_DRIFT_CHECK]}
         .calculation=${calcProp?.calculation ?? null}
