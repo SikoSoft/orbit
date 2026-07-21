@@ -306,12 +306,12 @@ describe('SQLiteStorage', () => {
       const entity = await db.addEntity(
         makePayload(config!.id, {
           properties: [
-            { id: 0, propertyConfigId: propConfigId, value: 'hello', order: 0 },
+            { id: 0, propertyConfigId: propConfigId, value: { raw: 'hello', formatted: '' }, order: 0 },
           ],
         }),
       );
       expect(entity!.properties).toHaveLength(1);
-      expect(entity!.properties[0].value).toBe('hello');
+      expect(entity!.properties[0].value.raw).toBe('hello');
     });
 
     it('stores and retrieves allowComments on an entity', async () => {
@@ -401,14 +401,14 @@ describe('SQLiteStorage', () => {
       await db.addEntity(
         makePayload(config!.id, {
           properties: [
-            { id: 0, propertyConfigId: propConfigId, value: 'red', order: 0 },
+            { id: 0, propertyConfigId: propConfigId, value: { raw: 'red', formatted: '' }, order: 0 },
           ],
         }),
       );
       await db.addEntity(
         makePayload(config!.id, {
           properties: [
-            { id: 0, propertyConfigId: propConfigId, value: 'blue', order: 0 },
+            { id: 0, propertyConfigId: propConfigId, value: { raw: 'blue', formatted: '' }, order: 0 },
           ],
         }),
       );
@@ -425,7 +425,7 @@ describe('SQLiteStorage', () => {
       );
       if (result.isOk) {
         expect(result.value.total).toBe(1);
-        expect(result.value.entities[0].properties[0].value).toBe('red');
+        expect(result.value.entities[0].properties[0].value.raw).toBe('red');
       }
     });
 
@@ -479,7 +479,7 @@ describe('SQLiteStorage', () => {
             {
               id: 0,
               propertyConfigId: propConfigId,
-              value: 'Acme Corp',
+              value: { raw: 'Acme Corp', formatted: '' },
               order: 0,
             },
           ],

@@ -240,7 +240,7 @@ export class EntityFormProperties extends MobxLitElement {
       .map(propertyInstance => ({
         id: propertyInstance.instanceId,
         propertyConfigId: propertyInstance.propertyConfigId,
-        value: propertyInstance.value,
+        value: { raw: propertyInstance.value, formatted: '' },
         order:
           this.sortedIds.indexOf(propertyInstance.uiId) ??
           this.propertyInstances.length,
@@ -321,7 +321,7 @@ export class EntityFormProperties extends MobxLitElement {
         const propConfig = entityConfig.properties.find(
           p => p.id === property.propertyConfigId,
         );
-        let value = property.value;
+        let value = property.value.raw;
         if (
           propConfig?.dataType === DataType.DATE &&
           typeof value === 'number'

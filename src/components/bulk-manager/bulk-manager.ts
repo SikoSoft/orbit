@@ -176,7 +176,7 @@ export class BulkManager extends MobxLitElement {
     return this.propertyInstances.map((inst, i) => ({
       id: 0,
       propertyConfigId: inst.propertyConfigId,
-      value: inst.value,
+      value: { raw: inst.value, formatted: '' },
       order: i,
     }));
   }
