@@ -151,11 +151,8 @@ export class EntityListItemProperty extends LitElement {
     if (propertyConfig.dataType !== DataType.IMAGE) {
       return nothing;
     }
-    if (!this.property.value) {
-      return nothing;
-    }
 
-    const value = this.property.value.raw as ImageDataValue;
+    const value = this.property.value as ImageDataValue;
 
     return html`<span class="property image"
       ><img
@@ -206,29 +203,24 @@ export class EntityListItemProperty extends LitElement {
       return html`${this.renderImageProperty(propertyConfig)}${this.renderZoomOverlay()}`;
     }
 
-    if (!this.property.value) {
-      return nothing;
-    }
-
-    const raw = this.property.value.raw;
     let value: PropertyDataValue | TemplateResult = propertyConfig.defaultValue;
 
     switch (propertyConfig.dataType) {
       case DataType.DATE:
-        value = Time.formatDateTime(new Date(raw as string));
+        value = Time.formatDateTime(new Date(this.property.value as string));
         break;
       case DataType.INT:
-        value = raw as number;
+        value = this.property.value as number;
         break;
       case DataType.LONG_TEXT:
         value = html`${unsafeHTML(
           DOMPurify.sanitize(
-            marked.parse(raw as string).toString(),
+            marked.parse(this.property.value as string).toString(),
           ),
         )}`;
         break;
       default:
-        value = raw as string;
+        value = this.property.value as string;
         break;
     }
 

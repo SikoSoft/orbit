@@ -144,10 +144,7 @@ function rowToEntityProperty(row: Record<string, unknown>): EntityProperty {
   return {
     id: row['id'] as number,
     propertyConfigId: row['property_config_id'] as number,
-    value: {
-      raw: deserializePropertyValue(row['value'] as string, dataType),
-      formatted: '',
-    },
+    value: deserializePropertyValue(row['value'] as string, dataType),
     order: row['sort_order'] as number,
   };
 }
@@ -742,7 +739,7 @@ export class SQLiteStorage implements StorageSchema {
           entityId,
           prop.propertyConfigId,
           dataType,
-          serializePropertyValue(prop.value.raw, dataType),
+          serializePropertyValue(prop.value, dataType),
           prop.order,
         ],
       );
