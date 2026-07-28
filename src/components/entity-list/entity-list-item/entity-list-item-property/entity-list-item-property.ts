@@ -1,6 +1,7 @@
 import { html, css, nothing, TemplateResult } from 'lit';
 import { property, customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import { LitElement } from 'lit';
 import { marked } from 'marked';
 import { default as DOMPurify } from 'dompurify';
@@ -205,19 +206,23 @@ export class EntityListItemProperty extends LitElement {
     }
 
     let value: PropertyDataValue | TemplateResult = propertyConfig.defaultValue;
+    let dataValue: PropertyDataValue = propertyConfig.defaultValue;
 
     switch (propertyConfig.dataType) {
       case DataType.DATE:
         value = Time.formatDateTime(new Date(this.property.value as string));
+        dataValue = value;
         break;
       case DataType.INT:
         value = getFormattedValue(this.property.value, propertyConfig);
+        dataValue = value;
         break;
       case DataType.LONG_TEXT: {
         const formattedText = getFormattedValue(
           this.property.value,
           propertyConfig,
         ) as string;
+        dataValue = formattedText;
         value = html`${unsafeHTML(
           DOMPurify.sanitize(marked.parse(formattedText).toString()),
         )}`;
@@ -225,6 +230,7 @@ export class EntityListItemProperty extends LitElement {
       }
       default:
         value = getFormattedValue(this.property.value, propertyConfig);
+        dataValue = value;
         break;
     }
 
@@ -236,7 +242,7 @@ export class EntityListItemProperty extends LitElement {
           [`property--${propertyConfig.name.toLowerCase()}`]: true,
         })}
         data-name=${propertyConfig.name}
-        data-value=${value}
+        data-value=${ifDefined(dataValue != null ? String(dataValue) : undefined)}
         slot=${propertyConfig.name}
       >
         <span class="property-name">${propertyConfig.name}</span>
