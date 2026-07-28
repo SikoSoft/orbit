@@ -16,6 +16,7 @@ import {
 import { Time } from '@/lib/Time';
 import { translate } from '@/lib/Localization';
 import { themed } from '@/lib/Theme';
+import { getFormattedValue } from '@/lib/FormatterUtil';
 
 import '@/components/svg-icon/svg/svg-close';
 
@@ -210,17 +211,20 @@ export class EntityListItemProperty extends LitElement {
         value = Time.formatDateTime(new Date(this.property.value as string));
         break;
       case DataType.INT:
-        value = this.property.value as number;
+        value = getFormattedValue(this.property.value, propertyConfig);
         break;
-      case DataType.LONG_TEXT:
+      case DataType.LONG_TEXT: {
+        const formattedText = getFormattedValue(
+          this.property.value,
+          propertyConfig,
+        ) as string;
         value = html`${unsafeHTML(
-          DOMPurify.sanitize(
-            marked.parse(this.property.value as string).toString(),
-          ),
+          DOMPurify.sanitize(marked.parse(formattedText).toString()),
         )}`;
         break;
+      }
       default:
-        value = this.property.value as string;
+        value = getFormattedValue(this.property.value, propertyConfig);
         break;
     }
 
