@@ -201,6 +201,10 @@ export class EntityListItemProperty extends LitElement {
       return nothing;
     }
 
+    if (this.property.value == null) {
+      return nothing;
+    }
+
     if (propertyConfig.dataType === DataType.IMAGE) {
       return html`${this.renderImageProperty(propertyConfig)}${this.renderZoomOverlay()}`;
     }
