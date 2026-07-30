@@ -1,7 +1,7 @@
 import { html, LitElement, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { listFormatters } from 'api-spec/lib/Formatter';
-import 'api-spec/lib/formatters/ms-to-duration';
+import { listFormatters } from '@/lib/Formatter';
+import '@/lib/formatters/ms-to-duration';
 
 import { translate } from '@/lib/Localization';
 import { OptionListBuilderItem } from '@/components/option-list-builder/option-list-builder.models';

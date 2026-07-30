@@ -3,15 +3,15 @@ import {
   EntityPropertyConfig,
   PropertyDataValue,
 } from 'api-spec/models/Entity';
-import {
-  applyFormatters,
-  dataTypeSupportsFormatter,
-} from 'api-spec/lib/Formatter';
+import { dataTypeSupportsFormatter } from 'api-spec/lib/Formatter';
+
+import { applyFormatters } from '@/lib/Formatter';
 
 export function getFormattedValue(
   value: PropertyDataValue,
   config: EntityPropertyConfig | EntityCalculatedPropertyConfig,
 ): PropertyDataValue {
+  console.log('getFormattedValue', value, JSON.stringify(config));
   if (value == null) {
     return value;
   }
@@ -19,6 +19,10 @@ export function getFormattedValue(
     return value;
   }
   if (!dataTypeSupportsFormatter(config.dataType)) {
+    console.log(
+      'getFormattedValue: data type does not support formatters',
+      config.dataType,
+    );
     return value;
   }
   return applyFormatters(value, config.formatters);
