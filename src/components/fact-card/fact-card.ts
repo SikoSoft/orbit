@@ -2,6 +2,7 @@ import { LitElement, css, html, nothing, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { translate } from '@/lib/Localization';
+import { applyFormatters } from '@/lib/Formatter';
 import { IconName } from '@/components/svg-icon/svg-icon.models';
 import '@/components/svg-icon/svg-icon';
 
@@ -97,7 +98,11 @@ export class FactCard extends LitElement {
       return nothing;
     }
 
-    const value = result?.value ?? 0;
+    const rawValue = result?.value ?? 0;
+    const value =
+      fact.formatters && fact.formatters.length > 0
+        ? applyFormatters(rawValue, fact.formatters)
+        : rawValue;
 
     return html`
       <div class="card">
