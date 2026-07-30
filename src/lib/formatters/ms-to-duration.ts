@@ -11,9 +11,16 @@ registerFormatter(FormatterId.MS_TO_DURATION, {
       return value;
     }
     const totalMinutes = Math.floor(value / 60000);
-    const hours = Math.floor(totalMinutes / 60);
+    const days = Math.floor(totalMinutes / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
     const minutes = totalMinutes % 60;
 
+    if (days > 0 && hours > 0) {
+      return translate('formatter.msToDuration.daysAndHours', { days, hours });
+    }
+    if (days > 0) {
+      return translate('formatter.msToDuration.daysOnly', { days });
+    }
     if (hours > 0 && minutes > 0) {
       return translate('formatter.msToDuration.hoursAndMinutes', {
         hours,

@@ -69,6 +69,8 @@
   "propertyConfig.formatters.empty": "No formatters selected.",
   "formatter.msToDuration.label": "Milliseconds to Duration",
   "formatter.msToDuration.description": "Converts a millisecond value to a human-readable duration (e.g. 2h 30m).",
+  "formatter.msToDuration.daysAndHours": "{days}d {hours}h",
+  "formatter.msToDuration.daysOnly": "{days}d",
   "formatter.msToDuration.hoursAndMinutes": "{hours}h {minutes}m",
   "formatter.msToDuration.hoursOnly": "{hours}h",
   "formatter.msToDuration.minutesOnly": "{minutes}m",
