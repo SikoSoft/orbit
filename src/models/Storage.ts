@@ -243,8 +243,8 @@ export interface StorageSchema {
   updateStreakAlertConfig?(id: number, noticeTime: number, message?: string): Promise<StorageResult<StreakAlertConfig>>;
   deleteStreakAlertConfig?(id: number): Promise<boolean>;
   getFacts?(): Promise<{ facts: Fact[]; results: FactResult[] }>;
-  createFact?(name: string, context: FactContext): Promise<StorageResult<Fact>>;
-  updateFact?(id: number, name: string | undefined, context: FactContext | undefined): Promise<StorageResult<Fact>>;
+  createFact?(name: string, context: FactContext, formatters?: string[]): Promise<StorageResult<Fact>>;
+  updateFact?(id: number, name: string | undefined, context: FactContext | undefined, formatters?: string[]): Promise<StorageResult<Fact>>;
   deleteFact?(id: number): Promise<boolean>;
   getComments?(entityId: number): Promise<CommentSpec[]>;
   addComment?(payload: AddCommentPayload): Promise<CommentSpec | null>;

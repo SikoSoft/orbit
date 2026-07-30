@@ -1236,11 +1236,12 @@ export class NetworkStorage implements StorageSchema {
   async createFact(
     name: string,
     context: FactContext,
+    formatters?: string[],
   ): Promise<StorageResult<Fact>> {
     const result = await api.post<
-      { name: string; context: FactContext },
+      { name: string; context: FactContext; formatters?: string[] },
       { fact: Fact }
-    >('factRequest', { name, context });
+    >('factRequest', { name, context, formatters });
 
     if (result && result.isOk) {
       return { isOk: true, value: result.response.fact };
@@ -1253,11 +1254,12 @@ export class NetworkStorage implements StorageSchema {
     id: number,
     name: string | undefined,
     context: FactContext | undefined,
+    formatters?: string[],
   ): Promise<StorageResult<Fact>> {
     const result = await api.put<
-      { name?: string; context?: FactContext },
+      { name?: string; context?: FactContext; formatters?: string[] },
       { fact: Fact }
-    >(`factRequest/${id}`, { name, context });
+    >(`factRequest/${id}`, { name, context, formatters });
 
     if (result && result.isOk) {
       return { isOk: true, value: result.response.fact };

@@ -64,6 +64,8 @@
   "propertyConfig.field.options": "Options",
   "propertyConfig.tab.general": "General",
   "propertyConfig.tab.formatters": "Formatters",
+  "factConfig.tab.general": "General",
+  "factConfig.tab.formatters": "Formatters",
   "propertyConfig.formatters.available": "Available Formatters",
   "propertyConfig.formatters.selected": "Active Formatters",
   "propertyConfig.formatters.empty": "No formatters selected.",

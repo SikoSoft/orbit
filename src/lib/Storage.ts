@@ -1068,6 +1068,7 @@ export class Storage implements StorageSchema {
   async createFact(
     _name: string,
     _context: FactContext,
+    _formatters?: string[],
   ): Promise<StorageResult<Fact>> {
     return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
   }
@@ -1077,6 +1078,7 @@ export class Storage implements StorageSchema {
     _id: number,
     _name: string | undefined,
     _context: FactContext | undefined,
+    _formatters?: string[],
   ): Promise<StorageResult<Fact>> {
     return Promise.resolve({ isOk: false, error: new Error('Not implemented') });
   }

@@ -1713,16 +1713,17 @@ export class OfflineCacheStorage implements StorageSchema {
     return networkStorage.getFacts();
   }
 
-  async createFact(name: string, context: FactContext): Promise<StorageResult<Fact>> {
-    return networkStorage.createFact(name, context);
+  async createFact(name: string, context: FactContext, formatters?: string[]): Promise<StorageResult<Fact>> {
+    return networkStorage.createFact(name, context, formatters);
   }
 
   async updateFact(
     id: number,
     name: string | undefined,
     context: FactContext | undefined,
+    formatters?: string[],
   ): Promise<StorageResult<Fact>> {
-    return networkStorage.updateFact(id, name, context);
+    return networkStorage.updateFact(id, name, context, formatters);
   }
 
   async deleteFact(id: number): Promise<boolean> {
