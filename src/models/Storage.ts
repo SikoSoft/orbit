@@ -255,4 +255,5 @@ export interface StorageSchema {
     type: CommentReactionType,
   ): Promise<ReactionCounts | null>;
   deleteCommentReaction?(id: number): Promise<ReactionCounts | null>;
+  clearFactCache?(): Promise<boolean>;
 }

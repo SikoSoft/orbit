@@ -628,6 +628,8 @@
   "current": "Current",
   "pb": "PB",
   "facts": "Facts",
+  "debug": "Debug",
+  "clearFactCache": "Clear fact cache",
   "savedFacts": "Saved Facts",
   "noSavedFacts": "No saved facts.",
   "editFact": "Edit Fact",

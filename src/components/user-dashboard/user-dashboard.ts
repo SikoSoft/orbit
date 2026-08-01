@@ -26,6 +26,7 @@ import {
 import { StorageSource } from '@/models/Storage';
 import { IconName } from '@/components/svg-icon/svg-icon.models';
 import { DashboardCard } from '@/components/dashboard-cards/dashboard-cards.models';
+import { Role } from 'api-spec/models/Identity';
 
 @customElement('user-dashboard')
 export class UserDashboard extends MobxLitElement {
@@ -155,6 +156,9 @@ export class UserDashboard extends MobxLitElement {
       { label: translate('streaks'), icon: IconName.LAYERS, url: '/streaks' },
       { label: translate('facts'), icon: IconName.CHARTS, url: '/facts' },
       { label: translate('admin'), icon: IconName.ADMIN, url: '/admin' },
+      ...(this.state.hasRole(Role.DEBUG)
+        ? [{ label: translate('debug'), icon: IconName.DATABASE, url: '/debug' }]
+        : []),
     ];
   }
 

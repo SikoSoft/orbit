@@ -1759,6 +1759,10 @@ export class OfflineCacheStorage implements StorageSchema {
   async deleteCommentReaction(id: number): Promise<ReactionCounts | null> {
     return networkStorage.deleteCommentReaction(id);
   }
+
+  async clearFactCache(): Promise<boolean> {
+    return networkStorage.clearFactCache();
+  }
 }
 
 export const offlineCacheStorage = new OfflineCacheStorage();

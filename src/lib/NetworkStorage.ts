@@ -1339,6 +1339,11 @@ export class NetworkStorage implements StorageSchema {
     }
     return null;
   }
+
+  async clearFactCache(): Promise<boolean> {
+    const result = await api.delete<null>('factCache');
+    return !!(result && result.isOk);
+  }
 }
 
 export const networkStorage = new NetworkStorage();

@@ -1124,6 +1124,11 @@ export class Storage implements StorageSchema {
     return Promise.resolve(null);
   }
 
+  @delegateSource()
+  async clearFactCache(): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
   getActiveWorkspaceId(): string {
     return localStorage.getItem(StorageItemKey.ACTIVE_WORKSPACE_ID) ?? '';
   }
