@@ -7,10 +7,7 @@ import { ChartConfig, ChartConfigType } from 'api-spec/models/Statistic';
 import { translate } from '@/lib/Localization';
 import { ViewElement } from '@/lib/ViewElement';
 import { appState } from '@/state';
-import {
-  convertResponseToChartData,
-  getChartDatasetLabel,
-} from '@/lib/ChartUtil';
+import { convertResponseToChartData } from '@/lib/ChartUtil';
 import {
   ChartBuiltEvent,
   ChartGeneratingEvent,
@@ -64,13 +61,10 @@ export class ChartView extends ViewElement {
 
   private handleChartBuilt(e: ChartBuiltEvent): void {
     this.isChartLoading = false;
-    const label =
-      e.detail.chartName ??
-      getChartDatasetLabel(e.detail.dataPoints, {
-        entityConfigs: this.appState.entityConfigs,
-        propertyConfigs: this.appState.propertyConfigs,
-      });
-    this.chartData = convertResponseToChartData(e.detail, label);
+    this.chartData = convertResponseToChartData(e.detail, e.detail.dataPoints, {
+      entityConfigs: this.appState.entityConfigs,
+      propertyConfigs: this.appState.propertyConfigs,
+    });
     this.chartType = e.detail.chartType;
     this.hasChart = true;
     if (e.detail.saved) {

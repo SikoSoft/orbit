@@ -62,35 +62,35 @@ const labelResolvers: Partial<{
 };
 
 export function getChartDatasetLabel(
-  dataPoints: FactContext[],
+  dataPoint: FactContext,
   context: DataPointLabelContext = { entityConfigs: [], propertyConfigs: [] },
 ): string {
-  const first = dataPoints[0] as FactContext | undefined;
-  if (!first?.operation) {
+  if (!dataPoint?.operation) {
     return translate('chartData');
   }
 
-  const resolver = labelResolvers[first.operation];
+  const resolver = labelResolvers[dataPoint.operation];
   if (resolver) {
-    return (resolver as LabelResolver<FactContext>)(first, context);
+    return (resolver as LabelResolver<FactContext>)(dataPoint, context);
   }
 
-  return translate(`factOperation.${first.operation}`);
+  return translate(`factOperation.${dataPoint.operation}`);
 }
 
 export function convertResponseToChartData(
   response: ChartResponse,
-  label?: string,
+  dataPoints: FactContext[],
+  context: DataPointLabelContext = { entityConfigs: [], propertyConfigs: [] },
 ): ChartData {
+  const segments = response.datasets[0]?.data.map(d => d.segment) ?? [];
+
   return {
-    labels: response.segmentedData.map(d => d.segment),
-    datasets: [
-      {
-        label: label ?? translate('chartData'),
-        data: response.segmentedData.map(d =>
-          typeof d.value.value === 'number' ? d.value.value : 0,
-        ),
-      },
-    ],
+    labels: segments,
+    datasets: response.datasets.map((dataset, i) => ({
+      label: getChartDatasetLabel(dataPoints[i], context),
+      data: dataset.data.map(d =>
+        typeof d.value.value === 'number' ? d.value.value : 0,
+      ),
+    })),
   };
 }

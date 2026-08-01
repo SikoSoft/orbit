@@ -14,10 +14,7 @@ import { translate } from '@/lib/Localization';
 import { appState } from '@/state';
 import { storage } from '@/lib/Storage';
 import { addToast } from '@/lib/Util';
-import {
-  convertResponseToChartData,
-  getChartDatasetLabel,
-} from '@/lib/ChartUtil';
+import { convertResponseToChartData } from '@/lib/ChartUtil';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 import { CollapsableToggledEvent } from '@ss/ui/components/ss-collapsable.events';
 import { ConfirmationAcceptedEvent } from '@ss/ui/components/confirmation-modal.events';
@@ -97,11 +94,13 @@ export class ChartList extends MobxLitElement {
     this.loadingChartIds = newIds;
     if (result?.isOk) {
       const newMap = new Map(this.savedChartDataMap);
-      const label = getChartDatasetLabel(chart.config.dataPoints, {
-        entityConfigs: appState.entityConfigs,
-        propertyConfigs: appState.propertyConfigs,
-      });
-      newMap.set(chart.id, convertResponseToChartData(result.value, label));
+      newMap.set(
+        chart.id,
+        convertResponseToChartData(result.value, chart.config.dataPoints, {
+          entityConfigs: appState.entityConfigs,
+          propertyConfigs: appState.propertyConfigs,
+        }),
+      );
       this.savedChartDataMap = newMap;
     }
   }

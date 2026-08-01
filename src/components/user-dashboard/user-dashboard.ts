@@ -19,10 +19,7 @@ import '@/components/fact-card/fact-card';
 import { appState } from '@/state';
 import { translate } from '@/lib/Localization';
 import { storage } from '@/lib/Storage';
-import {
-  convertResponseToChartData,
-  getChartDatasetLabel,
-} from '@/lib/ChartUtil';
+import { convertResponseToChartData } from '@/lib/ChartUtil';
 import { StorageSource } from '@/models/Storage';
 import { IconName } from '@/components/svg-icon/svg-icon.models';
 import { DashboardCard } from '@/components/dashboard-cards/dashboard-cards.models';
@@ -218,11 +215,13 @@ export class UserDashboard extends MobxLitElement {
     this.loadingChartIds = newIds;
     if (result?.isOk) {
       const newMap = new Map(this.chartDataMap);
-      const label = getChartDatasetLabel(chart.config.dataPoints, {
-        entityConfigs: appState.entityConfigs,
-        propertyConfigs: appState.propertyConfigs,
-      });
-      newMap.set(chart.id, convertResponseToChartData(result.value, label));
+      newMap.set(
+        chart.id,
+        convertResponseToChartData(result.value, chart.config.dataPoints, {
+          entityConfigs: appState.entityConfigs,
+          propertyConfigs: appState.propertyConfigs,
+        }),
+      );
       this.chartDataMap = newMap;
     }
   }
