@@ -215,13 +215,7 @@ export class UserDashboard extends MobxLitElement {
     this.loadingChartIds = newIds;
     if (result?.isOk) {
       const newMap = new Map(this.chartDataMap);
-      newMap.set(
-        chart.id,
-        convertResponseToChartData(result.value, chart.config.dataPoints, {
-          entityConfigs: appState.entityConfigs,
-          propertyConfigs: appState.propertyConfigs,
-        }),
-      );
+      newMap.set(chart.id, convertResponseToChartData(result.value));
       this.chartDataMap = newMap;
     }
   }

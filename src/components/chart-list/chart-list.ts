@@ -94,13 +94,7 @@ export class ChartList extends MobxLitElement {
     this.loadingChartIds = newIds;
     if (result?.isOk) {
       const newMap = new Map(this.savedChartDataMap);
-      newMap.set(
-        chart.id,
-        convertResponseToChartData(result.value, chart.config.dataPoints, {
-          entityConfigs: appState.entityConfigs,
-          propertyConfigs: appState.propertyConfigs,
-        }),
-      );
+      newMap.set(chart.id, convertResponseToChartData(result.value));
       this.savedChartDataMap = newMap;
     }
   }

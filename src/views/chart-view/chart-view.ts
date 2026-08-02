@@ -61,10 +61,7 @@ export class ChartView extends ViewElement {
 
   private handleChartBuilt(e: ChartBuiltEvent): void {
     this.isChartLoading = false;
-    this.chartData = convertResponseToChartData(e.detail, e.detail.dataPoints, {
-      entityConfigs: this.appState.entityConfigs,
-      propertyConfigs: this.appState.propertyConfigs,
-    });
+    this.chartData = convertResponseToChartData(e.detail);
     this.chartType = e.detail.chartType;
     this.hasChart = true;
     if (e.detail.saved) {
