@@ -2,7 +2,7 @@ import { MobxLitElement } from '@adobe/lit-mobx';
 import { css, html, nothing, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import type { ChartData } from 'chart.js';
+import type { ChartData, ChartOptions } from 'chart.js';
 
 import {
   Chart,
@@ -19,7 +19,7 @@ import '@/components/fact-card/fact-card';
 import { appState } from '@/state';
 import { translate } from '@/lib/Localization';
 import { storage } from '@/lib/Storage';
-import { convertResponseToChartData } from '@/lib/ChartUtil';
+import { buildChartOptions, convertResponseToChartData } from '@/lib/ChartUtil';
 import { StorageSource } from '@/models/Storage';
 import { IconName } from '@/components/svg-icon/svg-icon.models';
 import { DashboardCard } from '@/components/dashboard-cards/dashboard-cards.models';
@@ -31,6 +31,7 @@ export class UserDashboard extends MobxLitElement {
 
   @state() private savedCharts: Chart[] = [];
   @state() private chartDataMap: Map<number, ChartData> = new Map();
+  @state() private chartOptionsMap: Map<number, ChartOptions> = new Map();
   @state() private loadingChartIds: Set<number> = new Set();
   @state() private streaks: Streak[] = [];
   @state() private streakResults: StreakResult[] = [];
@@ -214,9 +215,13 @@ export class UserDashboard extends MobxLitElement {
     newIds.delete(chart.id);
     this.loadingChartIds = newIds;
     if (result?.isOk) {
-      const newMap = new Map(this.chartDataMap);
-      newMap.set(chart.id, convertResponseToChartData(result.value));
-      this.chartDataMap = newMap;
+      const newDataMap = new Map(this.chartDataMap);
+      newDataMap.set(chart.id, convertResponseToChartData(result.value));
+      this.chartDataMap = newDataMap;
+
+      const newOptionsMap = new Map(this.chartOptionsMap);
+      newOptionsMap.set(chart.id, buildChartOptions(result.value));
+      this.chartOptionsMap = newOptionsMap;
     }
   }
 
@@ -304,13 +309,15 @@ export class UserDashboard extends MobxLitElement {
                       ? html`
                           <div class="chart-wrapper">
                             <chart-js
-                              type=${chart.config.version === ChartVersion.V2
+                              type=${chart.config.version === ChartVersion.V2 ||
+                              chart.config.version === ChartVersion.V3
                                 ? chart.config.type
                                 : ChartConfigType.LINE}
                               .data=${this.chartDataMap.get(chart.id) ?? {
                                 labels: [],
                                 datasets: [],
                               }}
+                              .options=${this.chartOptionsMap.get(chart.id) ?? {}}
                               ?loading=${isLoading}
                               label=${chart.name}
                             ></chart-js>

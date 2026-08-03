@@ -1,12 +1,15 @@
-import { ChartConfigType, ChartResponse } from 'api-spec/models/Statistic';
-import { FactContext } from 'api-spec/models/Fact';
+import {
+  ChartConfigType,
+  ChartResponse,
+  FormattedDataPointRequest,
+} from 'api-spec/models/Statistic';
 
 export const chartBuiltEventName = 'chart-built';
 export const chartGeneratingEventName = 'chart-generating';
 
 export type ChartBuiltPayload = ChartResponse & {
   chartType: `${ChartConfigType}`;
-  dataPoints: FactContext[];
+  dataPoints: FormattedDataPointRequest[];
   chartName?: string;
   saved?: boolean;
   updated?: boolean;

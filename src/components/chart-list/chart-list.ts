@@ -2,7 +2,7 @@ import { html, css, nothing, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { MobxLitElement } from '@adobe/lit-mobx';
-import type { ChartData } from 'chart.js';
+import type { ChartData, ChartOptions } from 'chart.js';
 
 import {
   Chart,
@@ -14,7 +14,7 @@ import { translate } from '@/lib/Localization';
 import { appState } from '@/state';
 import { storage } from '@/lib/Storage';
 import { addToast } from '@/lib/Util';
-import { convertResponseToChartData } from '@/lib/ChartUtil';
+import { buildChartOptions, convertResponseToChartData } from '@/lib/ChartUtil';
 import { NotificationType } from '@ss/ui/components/notification-provider.models';
 import { CollapsableToggledEvent } from '@ss/ui/components/ss-collapsable.events';
 import { ConfirmationAcceptedEvent } from '@ss/ui/components/confirmation-modal.events';
@@ -32,6 +32,7 @@ export class ChartList extends MobxLitElement {
 
   @state() private savedCharts: Chart[] = [];
   @state() private savedChartDataMap: Map<number, ChartData> = new Map();
+  @state() private savedChartOptionsMap: Map<number, ChartOptions> = new Map();
   @state() private loadingChartIds: Set<number> = new Set();
   @state() private confirmDeleteChartId: number | null = null;
   @state() private editingChartId: number | null = null;
@@ -93,9 +94,13 @@ export class ChartList extends MobxLitElement {
     newIds.delete(chart.id);
     this.loadingChartIds = newIds;
     if (result?.isOk) {
-      const newMap = new Map(this.savedChartDataMap);
-      newMap.set(chart.id, convertResponseToChartData(result.value));
-      this.savedChartDataMap = newMap;
+      const newDataMap = new Map(this.savedChartDataMap);
+      newDataMap.set(chart.id, convertResponseToChartData(result.value));
+      this.savedChartDataMap = newDataMap;
+
+      const newOptionsMap = new Map(this.savedChartOptionsMap);
+      newOptionsMap.set(chart.id, buildChartOptions(result.value));
+      this.savedChartOptionsMap = newOptionsMap;
     }
   }
 
@@ -151,11 +156,13 @@ export class ChartList extends MobxLitElement {
         ? html`
             <div class="saved-chart-container">
               <chart-js
-                type=${chart.config.version === ChartVersion.V2
+                type=${chart.config.version === ChartVersion.V2 ||
+                chart.config.version === ChartVersion.V3
                   ? chart.config.type
                   : ChartConfigType.LINE}
                 .data=${this.savedChartDataMap.get(chart.id) ??
                 { labels: [], datasets: [] }}
+                .options=${this.savedChartOptionsMap.get(chart.id) ?? {}}
                 ?loading=${isLoading}
                 label=${chart.name}
               ></chart-js>

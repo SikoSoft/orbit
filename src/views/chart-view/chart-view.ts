@@ -1,13 +1,13 @@
 import { html, css, nothing, TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
-import type { ChartData } from 'chart.js';
+import type { ChartData, ChartOptions } from 'chart.js';
 
 import { ChartConfig, ChartConfigType } from 'api-spec/models/Statistic';
 
 import { translate } from '@/lib/Localization';
 import { ViewElement } from '@/lib/ViewElement';
 import { appState } from '@/state';
-import { convertResponseToChartData } from '@/lib/ChartUtil';
+import { buildChartOptions, convertResponseToChartData } from '@/lib/ChartUtil';
 import {
   ChartBuiltEvent,
   ChartGeneratingEvent,
@@ -25,6 +25,7 @@ export class ChartView extends ViewElement {
   private appState = appState;
 
   @state() private chartData: ChartData = { labels: [], datasets: [] };
+  @state() private chartOptions: ChartOptions = {};
   @state() private chartType: `${ChartConfigType}` = ChartConfigType.LINE;
   @state() private hasChart = false;
   @state() private isChartLoading = false;
@@ -62,6 +63,7 @@ export class ChartView extends ViewElement {
   private handleChartBuilt(e: ChartBuiltEvent): void {
     this.isChartLoading = false;
     this.chartData = convertResponseToChartData(e.detail);
+    this.chartOptions = buildChartOptions(e.detail);
     this.chartType = e.detail.chartType;
     this.hasChart = true;
     if (e.detail.saved) {
@@ -95,6 +97,7 @@ export class ChartView extends ViewElement {
                 <chart-js
                   type=${this.chartType}
                   .data=${this.chartData}
+                  .options=${this.chartOptions}
                   ?loading=${this.isChartLoading}
                   label=${translate('chartLabel')}
                 ></chart-js>
