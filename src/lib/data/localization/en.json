@@ -66,6 +66,8 @@
   "propertyConfig.tab.formatters": "Formatters",
   "factConfig.tab.general": "General",
   "factConfig.tab.formatters": "Formatters",
+  "dataPoint.tab.config": "Config",
+  "dataPoint.tab.formatters": "Formatters",
   "propertyConfig.formatters.available": "Available Formatters",
   "propertyConfig.formatters.selected": "Active Formatters",
   "propertyConfig.formatters.empty": "No formatters selected.",

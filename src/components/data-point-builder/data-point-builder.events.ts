@@ -1,8 +1,8 @@
-import { FactContext } from 'api-spec/models/Fact';
+import { FormattedDataPointRequest } from 'api-spec/models/Statistic';
 
 export const dataPointUpdatedEventName = 'data-point-updated';
 
-export type DataPointUpdatedPayload = FactContext;
+export type DataPointUpdatedPayload = FormattedDataPointRequest;
 
 export class DataPointUpdatedEvent extends CustomEvent<DataPointUpdatedPayload> {
   constructor(payload: DataPointUpdatedPayload) {

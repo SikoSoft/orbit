@@ -1,13 +1,13 @@
 import { ControlType } from '@/models/Control';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
-import { FactContext } from 'api-spec/models/Fact';
+import { FormattedDataPointRequest } from 'api-spec/models/Statistic';
 
 export enum DataPointBuilderProp {
   DATA_POINT = 'data-point',
 }
 
 export interface DataPointBuilderProps extends PropTypes {
-  [DataPointBuilderProp.DATA_POINT]: FactContext | null;
+  [DataPointBuilderProp.DATA_POINT]: FormattedDataPointRequest | null;
 }
 
 export const dataPointBuilderProps: PropConfigMap<DataPointBuilderProps> = {

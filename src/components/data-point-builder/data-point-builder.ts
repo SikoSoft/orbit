@@ -9,6 +9,7 @@ import {
   MedalCountFactContext,
   PropertySumFactContext,
 } from 'api-spec/models/Fact';
+import { FormattedDataPointRequest } from 'api-spec/models/Statistic';
 import { DataType } from 'api-spec/models/Entity';
 import { ListFilter as ListFilterSpec } from 'api-spec/models/List';
 
@@ -17,6 +18,7 @@ import { appState, defaultListFilter } from '@/state';
 import { SelectChangedEvent } from '@ss/ui/components/ss-select.events';
 import { InputChangedEvent } from '@ss/ui/components/ss-input.events';
 import { ListFilterUpdatedEvent } from '@/components/list-filter/list-filter.events';
+import { FormattersChangedEvent } from '@/components/property-config-form/property-config-formatters/property-config-formatters.events';
 
 import {
   DataPointBuilderProp,
@@ -27,7 +29,10 @@ import { DataPointUpdatedEvent } from './data-point-builder.events';
 
 import '@ss/ui/components/ss-select';
 import '@ss/ui/components/ss-input';
+import '@ss/ui/components/tab-container';
+import '@ss/ui/components/tab-pane';
 import '@/components/list-filter-control/list-filter-control';
+import '@/components/property-config-form/property-config-formatters/property-config-formatters';
 
 @customElement('data-point-builder')
 export class DataPointBuilder extends MobxLitElement {
@@ -44,6 +49,7 @@ export class DataPointBuilder extends MobxLitElement {
   @state() private analysisType: AnalysisClassificationType =
     AnalysisClassificationType.MORNING_FASTING;
   @state() private propertyConfigId = 0;
+  @state() private formatters: string[] = [];
 
   updated(changedProperties: PropertyValues): void {
     if (changedProperties.has(DataPointBuilderProp.DATA_POINT)) {
@@ -57,6 +63,7 @@ export class DataPointBuilder extends MobxLitElement {
       return;
     }
     this.operation = dp.operation;
+    this.formatters = dp.formatters ? [...dp.formatters] : [];
     if (dp.operation === FactOperation.MEDAL_COUNT) {
       const ctx = dp as MedalCountFactContext;
       this.medalConfigId = ctx.medalConfigId;
@@ -96,46 +103,55 @@ export class DataPointBuilder extends MobxLitElement {
     }
   `;
 
-  private buildFactContext(): FactContext {
+  private buildDataPoint(): FormattedDataPointRequest {
+    let ctx: FactContext;
     switch (this.operation) {
       case FactOperation.ENTITY_COUNT:
-        return { operation: FactOperation.ENTITY_COUNT, filter: this.filter };
+        ctx = { operation: FactOperation.ENTITY_COUNT, filter: this.filter };
+        break;
       case FactOperation.UNIQUE_TAG_COUNT:
-        return {
-          operation: FactOperation.UNIQUE_TAG_COUNT,
-          filter: this.filter,
-        };
+        ctx = { operation: FactOperation.UNIQUE_TAG_COUNT, filter: this.filter };
+        break;
       case FactOperation.MEDAL_COUNT: {
-        const ctx: MedalCountFactContext = {
+        const medalCtx: MedalCountFactContext = {
           operation: FactOperation.MEDAL_COUNT,
           medalConfigId: this.medalConfigId,
           series: this.series,
         };
         if (this.medalStart) {
-          ctx.start = this.medalStart;
+          medalCtx.start = this.medalStart;
         }
         if (this.medalEnd) {
-          ctx.end = this.medalEnd;
+          medalCtx.end = this.medalEnd;
         }
-        return ctx;
+        ctx = medalCtx;
+        break;
       }
       case FactOperation.ANALYSIS_CLASSIFICATION:
-        return {
+        ctx = {
           operation: FactOperation.ANALYSIS_CLASSIFICATION,
           filter: this.filter,
           analysisType: this.analysisType,
         };
+        break;
       case FactOperation.PROPERTY_SUM:
-        return {
+        ctx = {
           operation: FactOperation.PROPERTY_SUM,
           filter: this.filter,
           propertyConfigId: this.propertyConfigId,
         };
+        break;
     }
+    return { ...ctx, formatters: this.formatters };
   }
 
   private emitUpdate(): void {
-    this.dispatchEvent(new DataPointUpdatedEvent(this.buildFactContext()));
+    this.dispatchEvent(new DataPointUpdatedEvent(this.buildDataPoint()));
+  }
+
+  private handleFormattersChanged(e: FormattersChangedEvent): void {
+    this.formatters = e.detail.formatters;
+    this.emitUpdate();
   }
 
   private handleFilterUpdated(e: ListFilterUpdatedEvent): void {
@@ -291,19 +307,29 @@ export class DataPointBuilder extends MobxLitElement {
   render(): TemplateResult {
     return html`
       <div class="data-point-builder">
-        <div class="field">
-          <label>${translate('operation')}</label>
-          <ss-select
-            selected=${this.operation}
-            .options=${Object.values(FactOperation).map(v => ({
-              value: v,
-              label: translate(`factOperation.${v}`),
-            }))}
-            @select-changed=${(e: SelectChangedEvent<string>): void =>
-              this.handleOperationChanged(e)}
-          ></ss-select>
-        </div>
-        ${this.renderOperationFields()}
+        <tab-container>
+          <tab-pane title=${translate('dataPoint.tab.config')}>
+            <div class="field">
+              <label>${translate('operation')}</label>
+              <ss-select
+                selected=${this.operation}
+                .options=${Object.values(FactOperation).map(v => ({
+                  value: v,
+                  label: translate(`factOperation.${v}`),
+                }))}
+                @select-changed=${(e: SelectChangedEvent<string>): void =>
+                  this.handleOperationChanged(e)}
+              ></ss-select>
+            </div>
+            ${this.renderOperationFields()}
+          </tab-pane>
+          <tab-pane title=${translate('dataPoint.tab.formatters')}>
+            <property-config-formatters
+              .formatters=${this.formatters}
+              @formatters-changed=${this.handleFormattersChanged}
+            ></property-config-formatters>
+          </tab-pane>
+        </tab-container>
       </div>
     `;
   }

@@ -8,14 +8,16 @@ import {
   ChartConfig,
   ChartConfigType,
   ChartConfigV2,
+  ChartConfigV3,
   ChartRequest,
   ChartVersion,
   DataWindow,
   DataWindowType,
+  FormattedDataPointRequest,
   SegmentationType,
   SegmentationTimeUnit,
 } from 'api-spec/models/Statistic';
-import { FactContext, FactOperation } from 'api-spec/models/Fact';
+import { FactOperation } from 'api-spec/models/Fact';
 
 import { translate } from '@/lib/Localization';
 import { storage } from '@/lib/Storage';
@@ -46,8 +48,8 @@ export class ChartBuilder extends MobxLitElement {
   @state() private segmentationType: SegmentationType = SegmentationType.TIME;
   @state() private segmentationUnit: SegmentationTimeUnit =
     SegmentationTimeUnit.DAY;
-  @state() private dataPoints: FactContext[] = [
-    { operation: FactOperation.ENTITY_COUNT, filter: structuredClone(defaultListFilter) },
+  @state() private dataPoints: FormattedDataPointRequest[] = [
+    { operation: FactOperation.ENTITY_COUNT, filter: structuredClone(defaultListFilter), formatters: [] },
   ];
   @state() private isLoading = false;
   @state() private errorMessage = '';
@@ -65,12 +67,15 @@ export class ChartBuilder extends MobxLitElement {
 
   private initFromConfig(config: ChartConfig, name = ''): void {
     this.chartName = name;
-    if (config.version === ChartVersion.V2) {
-      this.chartType = (config as ChartConfigV2).type as ChartConfigType;
+    if (config.version === ChartVersion.V2 || config.version === ChartVersion.V3) {
+      this.chartType = (config as ChartConfigV2 | ChartConfigV3).type as ChartConfigType;
     }
     this.segmentationType = config.segmentation.type;
     this.segmentationUnit = config.segmentation.unit;
-    this.dataPoints = structuredClone(config.dataPoints) as FactContext[];
+    this.dataPoints = structuredClone(config.dataPoints).map(dp => ({
+      ...dp,
+      formatters: (dp as FormattedDataPointRequest).formatters ?? [],
+    }));
     if (config.dataWindow.type === DataWindowType.CUSTOM) {
       this.dataWindowType = DataWindowType.CUSTOM;
       this.rollingDataWindow = false;
@@ -236,7 +241,7 @@ export class ChartBuilder extends MobxLitElement {
   private addDataPoint(): void {
     this.dataPoints = [
       ...this.dataPoints,
-      { operation: FactOperation.ENTITY_COUNT, filter: structuredClone(defaultListFilter) },
+      { operation: FactOperation.ENTITY_COUNT, filter: structuredClone(defaultListFilter), formatters: [] },
     ];
   }
 
@@ -247,7 +252,7 @@ export class ChartBuilder extends MobxLitElement {
   private handleDataPointUpdated(index: number, e: DataPointUpdatedEvent): void {
     e.stopPropagation();
     const updated = [...this.dataPoints];
-    updated[index] = e.detail;
+    updated[index] = e.detail as FormattedDataPointRequest;
     this.dataPoints = updated;
   }
 
@@ -261,7 +266,7 @@ export class ChartBuilder extends MobxLitElement {
     this.dispatchEvent(new ChartGeneratingEvent());
 
     const config: ChartConfig = {
-      version: ChartVersion.V2,
+      version: ChartVersion.V3,
       type: this.chartType,
       dataWindow: this.getDataWindow(),
       segmentation: {
