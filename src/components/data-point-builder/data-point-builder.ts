@@ -170,7 +170,9 @@ export class DataPointBuilder extends MobxLitElement {
       const singleId = parseInt(options[0].value);
       if (this.propertyConfigId !== singleId) {
         this.propertyConfigId = singleId;
-        if (!this.isTextProperty(this.propertyConfigId)) {
+        if (this.isTextProperty(this.propertyConfigId)) {
+          this.parseStrategy = this.parseStrategy ?? Object.values(ParseStrategy)[0];
+        } else {
           this.parseStrategy = undefined;
         }
       }
@@ -205,7 +207,9 @@ export class DataPointBuilder extends MobxLitElement {
 
   private handlePropertyConfigIdChanged(e: SelectChangedEvent<string>): void {
     this.propertyConfigId = parseInt(e.detail.value) || 0;
-    if (!this.isTextProperty(this.propertyConfigId)) {
+    if (this.isTextProperty(this.propertyConfigId)) {
+      this.parseStrategy = this.parseStrategy ?? Object.values(ParseStrategy)[0];
+    } else {
       this.parseStrategy = undefined;
     }
     this.emitUpdate();

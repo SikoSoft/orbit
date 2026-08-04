@@ -225,7 +225,8 @@ export class FactForm extends MobxLitElement {
   ): void {
     const propertyConfigId = Number(e.detail.value);
     if (this.isTextProperty(propertyConfigId)) {
-      this.emit({ ...context, propertyConfigId });
+      const parseStrategy = context.parseStrategy ?? Object.values(ParseStrategy)[0];
+      this.emit({ ...context, propertyConfigId, parseStrategy });
     } else {
       const { parseStrategy: _removed, ...rest } = context;
       this.emit({ ...rest, propertyConfigId });
