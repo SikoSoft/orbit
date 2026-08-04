@@ -7,6 +7,7 @@ import {
   FactContext,
   FactOperation,
   MedalCountFactContext,
+  ParseStrategy,
   PropertySumFactContext,
 } from 'api-spec/models/Fact';
 import { FormattedDataPointRequest } from 'api-spec/models/Statistic';
@@ -49,6 +50,7 @@ export class DataPointBuilder extends MobxLitElement {
   @state() private analysisType: AnalysisClassificationType =
     AnalysisClassificationType.MORNING_FASTING;
   @state() private propertyConfigId = 0;
+  @state() private parseStrategy: ParseStrategy | undefined = undefined;
   @state() private formatters: string[] = [];
 
   updated(changedProperties: PropertyValues): void {
@@ -82,6 +84,7 @@ export class DataPointBuilder extends MobxLitElement {
       const ctx = dp as PropertySumFactContext;
       this.filter = structuredClone(ctx.filter);
       this.propertyConfigId = ctx.propertyConfigId;
+      this.parseStrategy = ctx.parseStrategy;
     }
   }
 
@@ -134,13 +137,18 @@ export class DataPointBuilder extends MobxLitElement {
           analysisType: this.analysisType,
         };
         break;
-      case FactOperation.PROPERTY_SUM:
-        ctx = {
+      case FactOperation.PROPERTY_SUM: {
+        const propertySumCtx: PropertySumFactContext = {
           operation: FactOperation.PROPERTY_SUM,
           filter: this.filter,
           propertyConfigId: this.propertyConfigId,
         };
+        if (this.parseStrategy !== undefined) {
+          propertySumCtx.parseStrategy = this.parseStrategy;
+        }
+        ctx = propertySumCtx;
         break;
+      }
     }
     return { ...ctx, formatters: this.formatters };
   }
@@ -187,6 +195,14 @@ export class DataPointBuilder extends MobxLitElement {
 
   private handlePropertyConfigIdChanged(e: SelectChangedEvent<string>): void {
     this.propertyConfigId = parseInt(e.detail.value) || 0;
+    if (!this.isTextProperty(this.propertyConfigId)) {
+      this.parseStrategy = undefined;
+    }
+    this.emitUpdate();
+  }
+
+  private handleParseStrategyChanged(e: SelectChangedEvent<string>): void {
+    this.parseStrategy = e.detail.value as ParseStrategy;
     this.emitUpdate();
   }
 
@@ -195,7 +211,7 @@ export class DataPointBuilder extends MobxLitElement {
     this.emitUpdate();
   }
 
-  private getIntPropertyOptions(): { value: string; label: string }[] {
+  private getNumericPropertyOptions(): { value: string; label: string }[] {
     const types = this.filter.includeTypes ?? [];
     const configs =
       types.length > 0
@@ -203,15 +219,27 @@ export class DataPointBuilder extends MobxLitElement {
         : appState.entityConfigs;
     const seen = new Set<number>();
     const options: { value: string; label: string }[] = [];
+    const numericTypes = new Set<DataType>([DataType.INT, DataType.SHORT_TEXT, DataType.LONG_TEXT]);
     for (const config of configs) {
       for (const property of config.properties) {
-        if (property.dataType === DataType.INT && !seen.has(property.id)) {
+        if (numericTypes.has(property.dataType) && !seen.has(property.id)) {
           seen.add(property.id);
           options.push({ value: String(property.id), label: property.name });
         }
       }
     }
     return options;
+  }
+
+  private isTextProperty(propertyConfigId: number): boolean {
+    for (const config of appState.entityConfigs) {
+      for (const property of config.properties) {
+        if (property.id === propertyConfigId) {
+          return property.dataType === DataType.SHORT_TEXT || property.dataType === DataType.LONG_TEXT;
+        }
+      }
+    }
+    return false;
   }
 
   private renderFilterField(): TemplateResult {
@@ -293,11 +321,27 @@ export class DataPointBuilder extends MobxLitElement {
             <label>${translate('propertyConfigId')}</label>
             <ss-select
               selected=${String(this.propertyConfigId)}
-              .options=${this.getIntPropertyOptions()}
+              .options=${this.getNumericPropertyOptions()}
               @select-changed=${(e: SelectChangedEvent<string>): void =>
                 this.handlePropertyConfigIdChanged(e)}
             ></ss-select>
           </div>
+          ${this.isTextProperty(this.propertyConfigId)
+            ? html`
+                <div class="field">
+                  <label>${translate('parseStrategy')}</label>
+                  <ss-select
+                    selected=${this.parseStrategy ?? ''}
+                    .options=${Object.values(ParseStrategy).map(v => ({
+                      value: v,
+                      label: translate(`parseStrategy.${v}`),
+                    }))}
+                    @select-changed=${(e: SelectChangedEvent<string>): void =>
+                      this.handleParseStrategyChanged(e)}
+                  ></ss-select>
+                </div>
+              `
+            : nothing}
         `;
       default:
         return html`${nothing}`;
