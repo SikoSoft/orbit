@@ -554,6 +554,8 @@
   "factOperation.analysisClassification": "Analysis Classification",
   "factOperation.propertySum": "Property Sum",
   "propertyConfigId": "Property",
+  "parseStrategy": "Parse Strategy",
+  "parseStrategy.leadingInteger": "Leading integer",
   "analysisType": "Analysis Type",
   "analysisType.morningFasting": "Morning Fasting",
   "analysisType.afternoonSnacking": "Afternoon Snacking",

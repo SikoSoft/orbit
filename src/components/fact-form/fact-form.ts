@@ -11,6 +11,7 @@ import {
   MedalCountFactContext,
   AnalysisClassificationFactContext,
   PropertySumFactContext,
+  ParseStrategy,
 } from 'api-spec/models/Fact';
 import { DataType } from 'api-spec/models/Entity';
 import { defaultListFilter } from 'api-spec/models/List';
@@ -126,18 +127,30 @@ export class FactForm extends MobxLitElement {
     this.emit(newContext);
   }
 
-  private getIntPropertyOptions(): { value: string; label: string }[] {
+  private getNumericPropertyOptions(): { value: string; label: string }[] {
     const seen = new Set<number>();
     const options: { value: string; label: string }[] = [];
+    const textTypes = new Set<DataType>([DataType.INT, DataType.SHORT_TEXT, DataType.LONG_TEXT]);
     for (const config of appState.entityConfigs) {
       for (const property of config.properties) {
-        if (property.dataType === DataType.INT && !seen.has(property.id)) {
+        if (textTypes.has(property.dataType) && !seen.has(property.id)) {
           seen.add(property.id);
           options.push({ value: String(property.id), label: property.name });
         }
       }
     }
     return options;
+  }
+
+  private isTextProperty(propertyConfigId: number): boolean {
+    for (const config of appState.entityConfigs) {
+      for (const property of config.properties) {
+        if (property.id === propertyConfigId) {
+          return property.dataType === DataType.SHORT_TEXT || property.dataType === DataType.LONG_TEXT;
+        }
+      }
+    }
+    return false;
   }
 
   private renderFilterSection(
@@ -206,20 +219,53 @@ export class FactForm extends MobxLitElement {
     `;
   }
 
+  private handlePropertySumPropertyChanged(
+    context: PropertySumFactContext,
+    e: SelectChangedEvent<string>,
+  ): void {
+    const propertyConfigId = Number(e.detail.value);
+    if (this.isTextProperty(propertyConfigId)) {
+      this.emit({ ...context, propertyConfigId });
+    } else {
+      const { parseStrategy: _removed, ...rest } = context;
+      this.emit({ ...rest, propertyConfigId });
+    }
+  }
+
   private renderPropertySumFields(context: PropertySumFactContext): TemplateResult {
+    const parseStrategyOptions = Object.values(ParseStrategy).map(v => ({
+      value: v,
+      label: translate(`parseStrategy.${v}`),
+    }));
+    const showParseStrategy = this.isTextProperty(context.propertyConfigId);
+
     return html`
       <div class="context-fields">
         <div class="row">
           <div class="field">
             <label>${translate('propertyConfigId')}</label>
             <ss-select
-              .options=${this.getIntPropertyOptions()}
+              .options=${this.getNumericPropertyOptions()}
               .selected=${String(context.propertyConfigId)}
               @select-changed=${(e: SelectChangedEvent<string>): void => {
-                this.emit({ ...context, propertyConfigId: Number(e.detail.value) });
+                this.handlePropertySumPropertyChanged(context, e);
               }}
             ></ss-select>
           </div>
+          ${showParseStrategy
+            ? html`
+                <div class="field">
+                  <label>${translate('parseStrategy')}</label>
+                  <ss-select
+                    .options=${parseStrategyOptions}
+                    .selected=${context.parseStrategy ?? ''}
+                    @select-changed=${(e: SelectChangedEvent<ParseStrategy>): void => {
+                      this.emit({ ...context, parseStrategy: e.detail.value });
+                    }}
+                  ></ss-select>
+                </div>
+              `
+            : nothing}
         </div>
       </div>
       ${this.renderFilterSection(context)}
