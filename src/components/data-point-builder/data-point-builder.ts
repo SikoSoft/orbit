@@ -165,6 +165,16 @@ export class DataPointBuilder extends MobxLitElement {
   private handleFilterUpdated(e: ListFilterUpdatedEvent): void {
     e.stopPropagation();
     this.filter = e.detail;
+    const options = this.getNumericPropertyOptions();
+    if (options.length === 1) {
+      const singleId = parseInt(options[0].value);
+      if (this.propertyConfigId !== singleId) {
+        this.propertyConfigId = singleId;
+        if (!this.isTextProperty(this.propertyConfigId)) {
+          this.parseStrategy = undefined;
+        }
+      }
+    }
     this.emitUpdate();
   }
 
