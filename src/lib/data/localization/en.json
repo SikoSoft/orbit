@@ -556,6 +556,7 @@
   "propertyConfigId": "Property",
   "parseStrategy": "Parse Strategy",
   "parseStrategy.leadingInteger": "Leading integer",
+  "parseStrategy.leadingNumber": "Leading number",
   "analysisType": "Analysis Type",
   "analysisType.morningFasting": "Morning Fasting",
   "analysisType.afternoonSnacking": "Afternoon Snacking",
