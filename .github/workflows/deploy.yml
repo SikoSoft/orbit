@@ -7,7 +7,7 @@ on:
 
 env:
   PACKAGE_PATH: '.'
-  NODE_VERSION: '20.x'
+  NODE_VERSION: '24.x'
   APP_BASE_API_URL: https://sikosoft2.azurewebsites.net/api/
   BASE_URL: /orbit/
 
@@ -19,12 +19,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Log into Azure
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Setup Node ${{ env.NODE_VERSION }} Environment
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -43,13 +43,13 @@ jobs:
           APP_VAPID_PUBLIC_KEY: ${{ vars.APP_VAPID_PUBLIC_KEY }}
 
       - name: Upload to blob storage
-        uses: azure/CLI@v1
+        uses: azure/CLI@v2
         with:
           inlineScript: |
             az storage blob upload-batch --account-name sikosoftstorage --auth-mode key -d '$web/orbit' -s '${{ env.PACKAGE_PATH }}/dist' --overwrite
 
       - name: Purge CDN endpoint
-        uses: azure/CLI@v1
+        uses: azure/CLI@v2
         with:
           inlineScript: |
             az cdn endpoint purge --content-paths  "/orbit/*" --profile-name "sikosoft" --name "sikosoft" --resource-group "SS"
