@@ -251,8 +251,10 @@ export class EntityListItem extends MobxLitElement {
     this.dispatchEvent(new EntitySuggestionAddedEvent({ id: this.entityId }));
   }
 
-  private handleEditRequested(_e: EntityActionBarEditEvent): void {
+  private async handleEditRequested(_e: EntityActionBarEditEvent): Promise<void> {
     this.mode = EntityListItemMode.EDIT;
+    await this.updateComplete;
+    this.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   private handleDeleteRequested(_e: EntityActionBarDeleteEvent): void {
