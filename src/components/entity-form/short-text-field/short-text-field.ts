@@ -177,14 +177,19 @@ export class ShortTextField extends MobxLitElement {
 
   handleInputBlurred(_: InputChangedEvent): void {
     setTimeout(() => {
+      const trimmedValue = this._value.trimEnd();
+      if (trimmedValue !== this._value) {
+        this.syncValue(trimmedValue);
+      }
+
       if (
         this.propertyConfig.optionsOnly &&
-        this._value.length > 0 &&
-        !this.propertyConfig.options.includes(this._value)
+        trimmedValue.length > 0 &&
+        !this.propertyConfig.options.includes(trimmedValue)
       ) {
         addToast(
           translate('propertyValueNotAllowed', {
-            value: this._value,
+            value: trimmedValue,
             name: this.propertyConfig.name,
           }),
           NotificationType.ERROR,
