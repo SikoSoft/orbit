@@ -76,7 +76,7 @@ export class EntityListItemProperty extends LitElement {
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.85);
-      z-index: 1000;
+      z-index: 6000;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -98,9 +98,9 @@ export class EntityListItemProperty extends LitElement {
     }
 
     .image-zoom-close {
-      position: absolute;
-      top: -2.5rem;
-      right: 0;
+      position: fixed;
+      top: max(1rem, env(safe-area-inset-top));
+      right: 1rem;
       background: none;
       border: none;
       color: #fff;
@@ -175,14 +175,14 @@ export class EntityListItemProperty extends LitElement {
     }
     return html`
       <div class="image-zoom-overlay" @click=${this.closeZoom}>
+        <button
+          class="image-zoom-close"
+          aria-label=${translate('close')}
+          @click=${this.closeZoom}
+        >
+          <svg-close></svg-close>
+        </button>
         <div class="image-zoom-modal" @click=${this.stopPropagation}>
-          <button
-            class="image-zoom-close"
-            aria-label=${translate('close')}
-            @click=${this.closeZoom}
-          >
-            <svg-close></svg-close>
-          </button>
           <img
             src=${this.zoomedImage.src}
             alt=${this.zoomedImage.alt}
