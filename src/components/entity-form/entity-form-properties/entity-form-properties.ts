@@ -326,7 +326,7 @@ export class EntityFormProperties extends MobxLitElement {
         let value = property.value;
         if (
           propConfig?.dataType === DataType.DATE &&
-          typeof value === 'number'
+          (typeof value === 'number' || typeof value === 'string')
         ) {
           value = Time.formatDateTime(new Date(value));
         }
