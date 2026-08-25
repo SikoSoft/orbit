@@ -233,7 +233,7 @@ export class DataPointBuilder extends MobxLitElement {
         : appState.entityConfigs;
     const seen = new Set<number>();
     const options: { value: string; label: string }[] = [];
-    const numericTypes = new Set<DataType>([DataType.INT, DataType.SHORT_TEXT, DataType.LONG_TEXT]);
+    const numericTypes = new Set<DataType>([DataType.FLOAT, DataType.INT, DataType.SHORT_TEXT, DataType.LONG_TEXT]);
     for (const config of configs) {
       for (const property of config.properties) {
         if (numericTypes.has(property.dataType) && !seen.has(property.id)) {

@@ -12,6 +12,7 @@ import {
   EntityPropertyCalculation,
   EntityPropertyCalculationReference,
   EntityPropertyConfig,
+  FloatDataValue,
   ImageDataValue,
   IntDataValue,
   PropertyDataValue,
@@ -31,6 +32,7 @@ import { appState } from '@/state';
 import '@ss/ui/components/ss-icon';
 import '@/components/entity-form/boolean-field/boolean-field';
 import '@/components/entity-form/date-field/date-field';
+import '@/components/entity-form/float-field/float-field';
 import '@/components/entity-form/int-field/int-field';
 import '@/components/entity-form/long-text-field/long-text-field';
 import '@/components/entity-form/short-text-field/short-text-field';
@@ -175,6 +177,7 @@ export class PropertyField extends MobxLitElement {
         return (
           imageValue !== undefined && imageValue !== null && !!imageValue.src
         );
+      case DataType.FLOAT:
       case DataType.INT:
         return (
           this.value !== undefined && this.value !== null && this.value !== 0
@@ -290,7 +293,7 @@ export class PropertyField extends MobxLitElement {
   async focus(): Promise<void> {
     await this.updateComplete;
     const input = this.renderRoot?.querySelector(
-      'boolean-field, date-field, image-field, short-text-field, long-text-field, int-field',
+      'boolean-field, date-field, float-field, image-field, short-text-field, long-text-field, int-field',
     );
     if (input) {
       (input as HTMLElement).focus();
@@ -350,6 +353,15 @@ export class PropertyField extends MobxLitElement {
           entityConfigId=${this.propertyConfig.entityConfigId}
           propertyConfigId=${this.propertyConfig.id}
         ></long-text-field>`;
+
+      case DataType.FLOAT:
+        value = this.value as FloatDataValue;
+        return html`<float-field
+          uiId=${this.uiId}
+          value=${this.value || this.propertyConfig.defaultValue}
+          entityConfigId=${this.propertyConfig.entityConfigId}
+          propertyConfigId=${this.propertyConfig.id}
+        ></float-field>`;
 
       case DataType.INT:
         value = this.value as IntDataValue;

@@ -48,6 +48,12 @@ export class PropertyConfigDefaultValue extends LitElement {
     );
   }
 
+  private handleFloatChanged(e: InputChangedEvent): void {
+    this.dispatchEvent(
+      new DefaultValueChangedEvent({ value: parseFloat(e.detail.value) }),
+    );
+  }
+
   private handleTextChanged(e: InputChangedEvent): void {
     this.dispatchEvent(new DefaultValueChangedEvent({ value: e.detail.value }));
   }
@@ -70,6 +76,12 @@ export class PropertyConfigDefaultValue extends LitElement {
           alt=${(this.defaultValue as ImageDataValue).alt}
           @property-changed=${this.handleImageChanged}
         ></image-field>`;
+      case DataType.FLOAT:
+        return html`<ss-input
+          type="number"
+          value=${this.defaultValue}
+          @input-changed=${this.handleFloatChanged}
+        ></ss-input>`;
       case DataType.INT:
         return html`<ss-input
           type="number"

@@ -207,6 +207,7 @@ export class EntityFormProperties extends MobxLitElement {
         return (
           typeof value === 'string' && value.length > 0 && value.length <= 255
         );
+      case DataType.FLOAT:
       case DataType.INT:
         return typeof value === 'number';
       case DataType.BOOLEAN:
@@ -229,7 +230,8 @@ export class EntityFormProperties extends MobxLitElement {
       'calculation' in propertyConfig ||
       propertyConfig.dataType === DataType.DATE ||
       propertyConfig.dataType === DataType.BOOLEAN ||
-      (propertyConfig.dataType === DataType.INT &&
+      ((propertyConfig.dataType === DataType.INT ||
+        propertyConfig.dataType === DataType.FLOAT) &&
         value !== propertyConfig.defaultValue)
     );
   }

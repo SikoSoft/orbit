@@ -15,6 +15,7 @@ import {
   DateDataValue,
   defaultEntityPropertyConfig,
   EntityPropertyConfig,
+  FloatDataValue,
   ImageDataValue,
   IntDataValue,
   LongTextDataValue,
@@ -234,7 +235,11 @@ export class PropertyConfigForm extends LitElement {
 
   get optionsFieldsVisible(): boolean {
     const dataType = this.propertyConfig[PropertyConfigFormProp.DATA_TYPE];
-    return dataType === DataType.SHORT_TEXT || dataType === DataType.INT;
+    return (
+      dataType === DataType.SHORT_TEXT ||
+      dataType === DataType.INT ||
+      dataType === DataType.FLOAT
+    );
   }
 
   handleDataTypeChange(dataType: DataType = this.dataType as DataType): void {
@@ -250,6 +255,7 @@ export class PropertyConfigForm extends LitElement {
       case DataType.IMAGE:
         typedValue = { dataType, defaultValue: { src: '', alt: '' } };
         break;
+      case DataType.FLOAT:
       case DataType.INT:
         typedValue = { dataType, defaultValue: 0 };
         break;
@@ -329,6 +335,14 @@ export class PropertyConfigForm extends LitElement {
           defaultValue: this[
             PropertyConfigFormProp.DEFAULT_VALUE
           ] as ImageDataValue,
+        };
+      case DataType.FLOAT:
+        return {
+          ...commonEntityPropertyConfig,
+          dataType: DataType.FLOAT,
+          defaultValue:
+            Number(this[PropertyConfigFormProp.DEFAULT_VALUE]) ||
+            (0 as FloatDataValue),
         };
       case DataType.INT:
         return {

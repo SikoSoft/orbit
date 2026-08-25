@@ -8,6 +8,7 @@ import {
   DateDataValue,
   EntityCalculatedPropertyConfig,
   EntityPropertyConfig,
+  FloatDataValue,
   ImageDataValue,
   IntDataValue,
   PropertyDataValue,
@@ -32,6 +33,7 @@ import '@ss/ui/components/ss-select';
 import '@ss/ui/components/ss-button';
 import '@/components/entity-form/boolean-field/boolean-field';
 import '@/components/entity-form/date-field/date-field';
+import '@/components/entity-form/float-field/float-field';
 import '@/components/entity-form/image-field/image-field';
 import '@/components/entity-form/int-field/int-field';
 import '@/components/entity-form/long-text-field/long-text-field';
@@ -156,6 +158,7 @@ export class FilterPropertyElement extends MobxLitElement {
         return false;
       case DataType.DATE:
         return '';
+      case DataType.FLOAT:
       case DataType.INT:
         return 0;
       case DataType.IMAGE:
@@ -257,6 +260,15 @@ export class FilterPropertyElement extends MobxLitElement {
           propertyConfigId=${config.id}
           @property-changed=${this.handleValueChanged}
         ></date-field>`;
+
+      case DataType.FLOAT:
+        return html`<float-field
+          uiId=${this.uiId}
+          value=${(this.value as FloatDataValue) ?? 0}
+          entityConfigId=${this.entityConfigId}
+          propertyConfigId=${config.id}
+          @property-changed=${this.handleValueChanged}
+        ></float-field>`;
 
       case DataType.INT:
         return html`<int-field

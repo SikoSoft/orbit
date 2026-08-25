@@ -98,7 +98,7 @@ export const calculatedPropertyConfigFormProps: PropConfigMap<CalculatedProperty
 
 export function isPickableProperty(p: EntityPropertyConfig): boolean {
   return (
-    (p.dataType === DataType.INT || p.dataType === DataType.DATE) && p.repeat === 1
+    (p.dataType === DataType.INT || p.dataType === DataType.FLOAT || p.dataType === DataType.DATE) && p.repeat === 1
   );
 }
 

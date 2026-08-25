@@ -143,7 +143,7 @@ export class StreakForm extends MobxLitElement {
     const options: { value: string; label: string }[] = [];
     for (const config of appState.entityConfigs) {
       for (const property of config.properties) {
-        if (property.dataType === DataType.INT && !seen.has(property.id)) {
+        if ((property.dataType === DataType.INT || property.dataType === DataType.FLOAT) && !seen.has(property.id)) {
           seen.add(property.id);
           options.push({ value: String(property.id), label: property.name });
         }

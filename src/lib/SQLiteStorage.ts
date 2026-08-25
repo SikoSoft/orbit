@@ -84,6 +84,9 @@ function deserializePropertyValue(
   if (dataType === DataType.BOOLEAN) {
     return raw === '1';
   }
+  if (dataType === DataType.FLOAT) {
+    return parseFloat(raw);
+  }
   if (dataType === DataType.INT) {
     return parseInt(raw, 10);
   }
