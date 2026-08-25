@@ -74,5 +74,8 @@
     "singleQuote": true,
     "arrowParens": "avoid"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "overrides": {
+    "@swc/core": "1.15.47"
+  }
 }
