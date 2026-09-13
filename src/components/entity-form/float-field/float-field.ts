@@ -40,7 +40,13 @@ export class FloatField extends LitElement {
     floatFieldProps[FloatFieldProp.UI_ID].default;
 
   protected handleInputChanged(e: InputChangedEvent): void {
-    const value = parseFloat(e.detail.value);
+    const raw = e.detail.value;
+
+    if (raw.endsWith('.')) {
+      return;
+    }
+
+    const value = parseFloat(raw);
 
     if (isNaN(value)) {
       return;
