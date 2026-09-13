@@ -109,6 +109,8 @@ export class EntityListItemProperty extends LitElement {
       display: flex;
       align-items: center;
       justify-content: center;
+      touch-action: manipulation;
+      z-index: 6001;
 
       svg-close {
         width: 2rem;
@@ -143,8 +145,19 @@ export class EntityListItemProperty extends LitElement {
     this.zoomedImage = null;
   }
 
+  private handleCloseZoom(e: Event): void {
+    e.stopPropagation();
+    e.preventDefault();
+    this.zoomedImage = null;
+  }
+
   private stopPropagation(e: Event): void {
     e.stopPropagation();
+  }
+
+  private stopEvent(e: Event): void {
+    e.stopPropagation();
+    e.preventDefault();
   }
 
   private renderImageProperty(
@@ -174,11 +187,18 @@ export class EntityListItemProperty extends LitElement {
       return nothing;
     }
     return html`
-      <div class="image-zoom-overlay" @click=${this.closeZoom}>
+      <div
+        class="image-zoom-overlay"
+        @click=${this.closeZoom}
+        @touchstart=${this.stopEvent}
+        @touchend=${this.stopEvent}
+      >
         <button
           class="image-zoom-close"
           aria-label=${translate('close')}
-          @click=${this.closeZoom}
+          @click=${this.handleCloseZoom}
+          @touchstart=${this.stopEvent}
+          @touchend=${this.handleCloseZoom}
         >
           <svg-close></svg-close>
         </button>
