@@ -12,6 +12,7 @@ import {
   EntityCalculatedPropertyConfig,
   EntityConfig,
   EntityConfigUniqueConstraint,
+  EntityProperty,
   EntityPropertyConfig,
 } from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
@@ -871,11 +872,14 @@ export class NetworkStorage implements StorageSchema {
     return [];
   }
 
-  async addEntitySuggestion(id: number): Promise<boolean> {
-    const result = await api.put<{ published: boolean }, Entity.Entity>(
-      `entity/${id}`,
-      { published: true },
-    );
+  async addEntitySuggestion(
+    id: number,
+    properties?: EntityProperty[],
+  ): Promise<boolean> {
+    const result = await api.put<
+      { published: boolean; properties?: EntityProperty[] },
+      Entity.Entity
+    >(`entity/${id}`, { published: true, properties });
 
     if (result && result.isOk) {
       return true;

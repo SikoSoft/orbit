@@ -14,6 +14,7 @@ import {
   EntityCalculatedPropertyConfig,
   EntityConfig,
   EntityConfigUniqueConstraint,
+  EntityProperty,
   EntityPropertyConfig,
 } from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
@@ -210,7 +211,10 @@ export interface StorageSchema {
     editAccessPolicyId: number,
   ): Promise<boolean>;
   getEntitySuggestions?(filter: ListFilter): Promise<Entity.Entity[]>;
-  addEntitySuggestion?(id: number): Promise<boolean>;
+  addEntitySuggestion?(
+    id: number,
+    properties?: EntityProperty[],
+  ): Promise<boolean>;
   getMfaSetup?(): Promise<StorageResult<MfaSetupResponseBody>>;
   verifyMfaSetup?(body: MfaVerifySetupRequestBody): Promise<StorageResult<void>>;
   getMedals?(): Promise<Medal[]>;

@@ -1,6 +1,11 @@
 import { ControlType } from '@/models/Control';
 import { PropConfigMap, PropTypes } from '@/models/Prop';
-import { EntityProperty } from 'api-spec/models/Entity';
+import {
+  DataType,
+  EntityCalculatedPropertyConfig,
+  EntityProperty,
+  EntityPropertyConfig,
+} from 'api-spec/models/Entity';
 
 export enum EntityListItemMode {
   PREVIEW = 'preview',
@@ -150,4 +155,23 @@ export const entityListItemProps: PropConfigMap<EntityListItemProps> = {
     },
     description: 'The user ID of the entity owner',
   },
+};
+
+export const setDatePropertiesToNow = (
+  properties: EntityProperty[],
+  propertyConfigs: (EntityPropertyConfig | EntityCalculatedPropertyConfig)[],
+): EntityProperty[] => {
+  const now = new Date().toISOString();
+
+  return properties.map(property => {
+    const config = propertyConfigs.find(
+      c => c.id === property.propertyConfigId,
+    );
+
+    if (!config || config.dataType !== DataType.DATE) {
+      return property;
+    }
+
+    return { ...property, value: now };
+  });
 };

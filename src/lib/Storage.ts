@@ -30,6 +30,7 @@ import {
   EntityCalculatedPropertyConfig,
   EntityConfig,
   EntityConfigUniqueConstraint,
+  EntityProperty,
   EntityPropertyConfig,
 } from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
@@ -908,7 +909,10 @@ export class Storage implements StorageSchema {
   }
 
   @delegateSource()
-  async addEntitySuggestion(_id: number): Promise<boolean> {
+  async addEntitySuggestion(
+    _id: number,
+    _properties?: EntityProperty[],
+  ): Promise<boolean> {
     return Promise.resolve(false);
   }
 

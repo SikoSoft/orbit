@@ -16,6 +16,7 @@ import {
   EntityListItemProp,
   entityListItemProps,
   EntityListItemProps,
+  setDatePropertiesToNow,
 } from './entity-list-item.models';
 import { appState } from '@/state';
 import { translate } from '@/lib/Localization';
@@ -222,13 +223,21 @@ export class EntityListItem extends MobxLitElement {
 
   @state()
   get propertyConfigs():
-    | (EntityPropertyConfig | EntityCalculatedPropertyConfig)[]
-    | undefined {
+    (EntityPropertyConfig | EntityCalculatedPropertyConfig)[] | undefined {
     if (!this.entityConfig) {
       return undefined;
     }
 
     return this.entityConfig.properties;
+  }
+
+  @state()
+  get displayProperties(): EntityProperty[] {
+    if (!this.suggestion || this.published) {
+      return this.properties;
+    }
+
+    return setDatePropertiesToNow(this.properties, this.propertyConfigs ?? []);
   }
 
   setMode(mode: EntityListItemMode): void {
@@ -245,13 +254,15 @@ export class EntityListItem extends MobxLitElement {
   }
 
   private async handleAddSuggestion(): Promise<void> {
-    await storage.addEntitySuggestion(this.entityId);
+    await storage.addEntitySuggestion(this.entityId, this.displayProperties);
     addToast(translate('itemHasBeenAdded'), NotificationType.INFO);
     this.mode = EntityListItemMode.PREVIEW;
     this.dispatchEvent(new EntitySuggestionAddedEvent({ id: this.entityId }));
   }
 
-  private async handleEditRequested(_e: EntityActionBarEditEvent): Promise<void> {
+  private async handleEditRequested(
+    _e: EntityActionBarEditEvent,
+  ): Promise<void> {
     this.mode = EntityListItemMode.EDIT;
     await this.updateComplete;
     this.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -421,54 +432,61 @@ export class EntityListItem extends MobxLitElement {
         @touchmove=${this.handleTouchMove}
         @touchend=${this.handleTouchEnd}
       >
-        ${this.suggestion && !this.published
-          ? html`<div class="suggestion-badge">${translate('auto')}</div>`
-          : nothing}
-        ${this.mode === EntityListItemMode.EDIT
-          ? html`
-              <entity-form
-                @entity-item-updated=${(): void => {
+        ${
+          this.suggestion && !this.published
+            ? html`<div class="suggestion-badge">${translate('auto')}</div>`
+            : nothing
+        }
+        ${
+          this.mode === EntityListItemMode.EDIT
+            ? html`
+                <entity-form
+                  @entity-item-updated=${(): void => {
                   this.mode = EntityListItemMode.PREVIEW;
                 }}
-                @entity-item-canceled=${(): void => {
+                  @entity-item-canceled=${(): void => {
                   this.mode = EntityListItemMode.PREVIEW;
                 }}
-                entityId=${this.entityId}
-                viewAccessPolicyId=${this.viewAccessPolicyId}
-                editAccessPolicyId=${this.editAccessPolicyId}
-                type=${this.type}
-                ?published=${this.published}
-                .tags=${this.tags}
-                .properties=${this.properties}
-                ?allowComments=${this.allowComments}
-                ownerId=${this.ownerId}
-              ></entity-form>
-            `
-          : html`
-              <div>
-                ${this.state.debugMode
-                  ? html` <div class="debug-entity-type">
-                      ${this.entityConfig?.name || this.type}
-                    </div>`
-                  : nothing}
-                ${!this.published && !this.suggestion
-                  ? html`<div class="unpublished-badge">
-                      ${translate('unpublished')}
-                    </div>`
-                  : nothing}
-                <div class="show-full">
-                  <ss-button @click=${this.showFull}
-                    >${translate('showFull')}</ss-button
-                  >
-                </div>
-                <div class="show-edit">
-                  <ss-button @click=${this.showEdit}
-                    >${translate('showEdit')}</ss-button
-                  >
-                </div>
-                <div class="properties item-properties">
-                  ${repeat(
-                    this.properties,
+                  entityId=${this.entityId}
+                  viewAccessPolicyId=${this.viewAccessPolicyId}
+                  editAccessPolicyId=${this.editAccessPolicyId}
+                  type=${this.type}
+                  ?published=${this.published}
+                  .tags=${this.tags}
+                  .properties=${this.properties}
+                  ?allowComments=${this.allowComments}
+                  ownerId=${this.ownerId}
+                ></entity-form>
+              `
+            : html`
+                <div>
+                  ${
+                  this.state.debugMode
+                    ? html` <div class="debug-entity-type">
+                        ${this.entityConfig?.name || this.type}
+                      </div>`
+                    : nothing
+                }
+                  ${
+                  !this.published && !this.suggestion
+                    ? html`<div class="unpublished-badge">
+                        ${translate('unpublished')}
+                      </div>`
+                    : nothing
+                }
+                  <div class="show-full">
+                    <ss-button @click=${this.showFull}
+                      >${translate('showFull')}</ss-button
+                    >
+                  </div>
+                  <div class="show-edit">
+                    <ss-button @click=${this.showEdit}
+                      >${translate('showEdit')}</ss-button
+                    >
+                  </div>
+                  <div class="properties item-properties">
+                    ${repeat(
+                    this.displayProperties,
                     (property: EntityProperty) => property.id,
                     (property: EntityProperty) =>
                       html`<entity-list-item-property
@@ -476,30 +494,33 @@ export class EntityListItem extends MobxLitElement {
                         .propertyConfigs=${this.propertyConfigs ?? []}
                       ></entity-list-item-property>`,
                   )}
+                  </div>
+
+                  <entity-list-item-tags
+                    .tags=${this.tags}
+                  ></entity-list-item-tags>
+
+                  <entity-list-item-time
+                    createdAt=${this.createdAt}
+                    updatedAt=${this.updatedAt}
+                  ></entity-list-item-time>
                 </div>
-
-                <entity-list-item-tags
-                  .tags=${this.tags}
-                ></entity-list-item-tags>
-
-                <entity-list-item-time
-                  createdAt=${this.createdAt}
-                  updatedAt=${this.updatedAt}
-                ></entity-list-item-time>
-              </div>
-              ${this.mode === EntityListItemMode.FULL
-                ? html`
-                    <div class="action-bar-container">
-                      <entity-action-bar
-                        ?suggestion=${this.suggestion}
-                        @entity-action-bar-add=${this.handleAddSuggestion}
-                        @entity-action-bar-edit=${this.handleEditRequested}
-                        @entity-action-bar-delete=${this.handleDeleteRequested}
-                      ></entity-action-bar>
-                    </div>
-                  `
-                : nothing}
-            `}
+                ${
+                this.mode === EntityListItemMode.FULL
+                  ? html`
+                      <div class="action-bar-container">
+                        <entity-action-bar
+                          ?suggestion=${this.suggestion}
+                          @entity-action-bar-add=${this.handleAddSuggestion}
+                          @entity-action-bar-edit=${this.handleEditRequested}
+                          @entity-action-bar-delete=${this.handleDeleteRequested}
+                        ></entity-action-bar>
+                      </div>
+                    `
+                  : nothing
+              }
+              `
+        }
       </div>
       <confirmation-modal
         @confirmation-accepted=${this.handleDeleteConfirmed}

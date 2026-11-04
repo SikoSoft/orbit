@@ -4,6 +4,7 @@ import {
   EntityCalculatedPropertyConfig,
   EntityConfig,
   EntityConfigUniqueConstraint,
+  EntityProperty,
   EntityPropertyConfig,
 } from 'api-spec/models/Entity';
 import { Entity } from 'api-spec/models';
@@ -1121,8 +1122,11 @@ export class OfflineCacheStorage implements StorageSchema {
     return networkStorage.getEntitySuggestions(filter);
   }
 
-  async addEntitySuggestion(id: number): Promise<boolean> {
-    return networkStorage.addEntitySuggestion(id);
+  async addEntitySuggestion(
+    id: number,
+    properties?: EntityProperty[],
+  ): Promise<boolean> {
+    return networkStorage.addEntitySuggestion(id, properties);
   }
 
   // ─── Offline Sync ─────────────────────────────────────────────────────────────
