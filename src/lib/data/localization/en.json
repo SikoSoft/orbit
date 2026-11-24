@@ -636,6 +636,7 @@
   "facts": "Facts",
   "debug": "Debug",
   "clearFactCache": "Clear fact cache",
+  "toggleOnlineMode": "Toggle Online Mode",
   "savedFacts": "Saved Facts",
   "noSavedFacts": "No saved facts.",
   "editFact": "Edit Fact",

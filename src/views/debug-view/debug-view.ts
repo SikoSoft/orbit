@@ -9,6 +9,7 @@ import { appState } from '@/state';
 import { storage } from '@/lib/Storage';
 import { translate } from '@/lib/Localization';
 import { Role } from 'api-spec/models/Identity';
+import { OnlineModeToggledEvent } from '@/events/online-mode-toggled';
 
 @customElement('debug-view')
 export class DebugView extends ViewElement {
@@ -31,6 +32,10 @@ export class DebugView extends ViewElement {
     this.clearing = false;
   }
 
+  private handleToggleOnlineMode(): void {
+    this.dispatchEvent(new OnlineModeToggledEvent({}));
+  }
+
   render(): TemplateResult {
     if (!this.appState.hasRole(Role.DEBUG)) {
       return html`<user-header></user-header><forbidden-notice></forbidden-notice>`;
@@ -45,6 +50,9 @@ export class DebugView extends ViewElement {
           @click=${this.handleClearFactCache}
         >
           ${translate('clearFactCache')}
+        </button>
+        <button @click=${this.handleToggleOnlineMode}>
+          ${translate('toggleOnlineMode')}
         </button>
       </div>
     `;

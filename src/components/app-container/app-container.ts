@@ -22,6 +22,7 @@ import {
   networkApiRequestFailedEventName,
 } from '@/events/network-api-request-failed';
 import { networkApiRequestSucceededEventName } from '@/events/network-api-request-succeeded';
+import { onlineModeToggledEventName } from '@/events/online-mode-toggled';
 import { AppReadyEvent } from '@/components/app-container/app-container.events';
 import { translate } from '@/lib/Localization';
 
@@ -113,6 +114,10 @@ export class AppContainer extends MobxLitElement {
       workspaceChangedEventName,
       this.handleWorkspaceChanged as EventListener,
     );
+    window.addEventListener(
+      onlineModeToggledEventName,
+      this.handleOnlineModeToggled,
+    );
 
     this.addEventListener('view-changed', (e: Event) => {
       this.handleViewChanged(e);
@@ -170,6 +175,10 @@ export class AppContainer extends MobxLitElement {
       workspaceChangedEventName,
       this.handleWorkspaceChanged as EventListener,
     );
+    window.removeEventListener(
+      onlineModeToggledEventName,
+      this.handleOnlineModeToggled,
+    );
   }
 
   private handleOnline = (): void => {
@@ -184,6 +193,10 @@ export class AppContainer extends MobxLitElement {
 
   private handleOffline = (): void => {
     this.state.setOnline(false);
+  };
+
+  private handleOnlineModeToggled = (): void => {
+    this.state.setOnline(!this.state.online);
   };
 
   private handleWorkspaceChanged = (e: WorkspaceChangedEvent): void => {
