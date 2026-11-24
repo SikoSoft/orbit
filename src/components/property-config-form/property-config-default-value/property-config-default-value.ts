@@ -49,8 +49,14 @@ export class PropertyConfigDefaultValue extends LitElement {
   }
 
   private handleFloatChanged(e: InputChangedEvent): void {
+    const raw = e.detail.value;
+
+    if (raw.endsWith('.')) {
+      return;
+    }
+
     this.dispatchEvent(
-      new DefaultValueChangedEvent({ value: parseFloat(e.detail.value) }),
+      new DefaultValueChangedEvent({ value: parseFloat(raw) }),
     );
   }
 
